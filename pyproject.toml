@@ -20,9 +20,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/raspopovaa/gpn-api-client"
-Repository = "https://github.com/raspopovaa/gpn-api-client"
-Issues = "https://github.com/raspopovaa/gpn-api-client/issues"
+Homepage = "https://github.com/raspopovaa/raspopovaa"
+Repository = "https://github.com/raspopovaa/raspopovaa"
+Issues = "https://github.com/raspopovaa/raspopovaa/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

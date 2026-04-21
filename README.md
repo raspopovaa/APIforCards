@@ -180,6 +180,29 @@ print(AuthUserResponse.describe())
 - transport
 - modeling layer
 
+## 🤖 GitHub Actions
+
+В репозитории настроен базовый CI workflow:
+
+- [ci.yml](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/.github/workflows/ci.yml)
+
+Он запускается:
+
+- на `push` в `main`
+- на `pull_request`
+
+Текущий pipeline:
+
+- поднимает `Python 3.14`
+- устанавливает зависимости через `pip install -e ".[dev]"`
+- запускает `pytest`
+
+Почему пока только тесты:
+
+- `pytest` уже стабильно зеленый
+- `ruff` и `mypy` пока требуют отдельной доработки проекта перед тем, как делать их блокирующими проверками
+- такой стартовый CI лучше, чем постоянно красный workflow без практической пользы
+
 ## ▶️ Demo-скрипт
 
 Файл:
@@ -226,6 +249,10 @@ api-pro-sdk/
 .venv/bin/black .
 .venv/bin/mypy src
 ```
+
+Примечание:
+
+- локально доступны `ruff`, `black` и `mypy`, но в GitHub Actions они пока не включены как обязательные проверки
 
 ## ⚠️ Ограничения
 
