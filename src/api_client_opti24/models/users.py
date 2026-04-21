@@ -1,0 +1,103 @@
+# api_client_opti24/models/users.py
+from typing import Optional
+
+from ..modeling import BaseModel, Field
+
+# ---------- Общие подмодели ----------
+
+
+class UserStatus(BaseModel):
+    id: str = Field(..., description="ID статуса договора, например Active")
+    name: str = Field(..., description="Название статуса договора, например Активен")
+
+
+class UserContractItem(BaseModel):
+    sid: str = Field(..., description="ID договора")
+    number: str = Field(..., description="Номер договора")
+    available: bool = Field(..., description="Доступен ли договор пользователю")
+    template_id: Optional[str] = Field(None, description="ID шаблона договора, если есть")
+    cards_count: Optional[int] = Field(None, description="Количество карт по договору")
+    status: Optional[UserStatus] = Field(None, description="Статус договора")
+
+
+class UserCardItem(BaseModel):
+    sid: str = Field(..., description="SID карты")
+    number: str = Field(..., description="Номер карты")
+    mpc: bool = Field(..., description="Признак мультикарты")
+    product: Optional[str] = Field(None, description="Тип продукта карты (wallet, limit и т.д.)")
+    comment: Optional[str] = Field(None, description="Комментарий к карте")
+    status: str = Field(..., description="Статус карты (Active, Blocked и т.п.)")
+    contract_id: str = Field(..., description="ID договора, к которому привязана карта")
+    contract_name: Optional[str] = Field(None, description="Название договора")
+    available: bool = Field(..., description="Доступна ли карта пользователю")
+
+
+class UserRole(BaseModel):
+    id: str = Field(..., description="ID роли пользователя (Driver, Manager и т.д.)")
+    name: str = Field(..., description="Название роли пользователя")
+
+
+class UserAccess(BaseModel):
+    web: bool = Field(..., description="Доступ через веб-интерфейс")
+    api: bool = Field(..., description="Доступ через API")
+    mobile: bool = Field(..., description="Доступ через мобильное приложение")
+
+
+# ---------- Основная модель пользователя ----------
+
+
+class UserItem(BaseModel):
+    id: str = Field(..., description="ID пользователя в системе")
+    login: str = Field(..., description="Логин пользователя (обычно номер телефона)")
+    first_name: str = Field(..., description="Имя пользователя")
+    last_name: str = Field(..., description="Фамилия пользователя")
+    middle_name: Optional[str] = Field(None, description="Отчество пользователя")
+    date: str = Field(..., description="Дата рождения")
+    position: Optional[str] = Field(None, description="Должность или UUID должности")
+    role: UserRole = Field(..., description="Роль пользователя")
+    active: bool = Field(..., description="Активен ли пользователь")
+    access: UserAccess = Field(..., description="Информация о доступах пользователя")
+    mobile_phone: Optional[str] = Field(None, description="Мобильный телефон пользователя")
+    email: Optional[str] = Field(None, description="Email пользователя")
+
+    contracts: list[UserContractItem] = Field(
+        default_factory=list, description="Список договоров пользователя"
+    )
+    cards: list[UserCardItem] = Field(default_factory=list, description="Список карт пользователя")
+
+
+# ---------- Ответы API ----------
+
+
+class UserList(BaseModel):
+    total_count: int = Field(..., description="Общее количество пользователей")
+    result: list[UserItem] = Field(..., description="Список пользователей")
+
+
+class UserListResponse(BaseModel):
+    status: dict = Field(..., description="Статус выполнения запроса (например {'code': 200})")
+    data: Optional[UserList] = Field(None, description="Основные данные ответа")
+    timestamp: Optional[int] = Field(None, description="Временная метка ответа")
+
+    @property
+    def total_count(self) -> int:
+        return self.data.total_count if self.data else 0
+
+    @property
+    def result(self) -> list[UserItem]:
+        return self.data.result if self.data else []
+
+
+class UserCreateResponse(BaseModel):
+    status: dict = Field(..., description="Статус выполнения запроса")
+    data: str = Field(..., description="ID созданного пользователя")
+    timestamp: Optional[int] = Field(None, description="Метка времени")
+
+
+class UserBoolResponse(BaseModel):
+    status: dict = Field(..., description="Статус выполнения запроса")
+    data: bool = Field(..., description="Результат операции (true/false)")
+    timestamp: Optional[int] = Field(None, description="Метка времени")
+
+
+UsersListResponse = UserListResponse
