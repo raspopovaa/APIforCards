@@ -144,7 +144,7 @@ Common base class for all non-exit exceptions.
 
 Описание отсутствует.
 
-Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x102a54990>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102db2270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
+Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x1050dc990>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x105476270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
 
 ### `ValidationError`
 
@@ -156,7 +156,7 @@ Inappropriate argument value (of correct type).
 
 Описание отсутствует.
 
-Сигнатура: `Field(default: 'Any' = <object object at 0x102a54990>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102db2270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
+Сигнатура: `Field(default: 'Any' = <object object at 0x1050dc990>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x105476270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
 
 ### `field_validator`
 

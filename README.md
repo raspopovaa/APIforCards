@@ -176,6 +176,20 @@ print(AuthUserResponse.describe())
 - собирает актуальные `docs/`
 - прикладывает их как artifact
 
+Для публикации документации как сайта добавлен отдельный workflow GitHub Pages:
+
+- [pages.yml](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/.github/workflows/pages.yml)
+
+Он:
+
+- генерирует `docs/api-reference.md`
+- собирает статический HTML-сайт
+- публикует его через GitHub Pages
+
+HTML-сборка выполняется скриптом:
+
+- [build_docs_site.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/scripts/build_docs_site.py)
+
 ## 📌 Политика по спецификации
 
 Спецификация API и реальные ответы DEMO-стенда местами расходятся. В проекте приняты такие правила:
