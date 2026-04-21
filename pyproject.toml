@@ -20,9 +20,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/raspopovaa/raspopovaa"
-Repository = "https://github.com/raspopovaa/raspopovaa"
-Issues = "https://github.com/raspopovaa/raspopovaa/issues"
+Homepage = "https://github.com/raspopovaa/APIforCards"
+Repository = "https://github.com/raspopovaa/APIforCards"
+Issues = "https://github.com/raspopovaa/APIforCards/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

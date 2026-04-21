@@ -311,4 +311,4 @@ api-pro-sdk/
 
 Текущий репозиторий:
 
-- [raspopovaa/raspopovaa](https://github.com/raspopovaa/raspopovaa)
+- [raspopovaa/APIforCards](https://github.com/raspopovaa/APIforCards)

@@ -202,8 +202,8 @@ def build_index_page() -> str:
 <p class="muted">Статическая документация SDK, публикуемая через GitHub Pages.</p>
 <ul>
   <li><a href="./api-reference.html">API Reference</a></li>
-  <li><a href="https://github.com/raspopovaa/raspopovaa">GitHub repository</a></li>
-  <li><a href="https://github.com/raspopovaa/raspopovaa/blob/main/README.md">README</a></li>
+  <li><a href="https://github.com/raspopovaa/APIforCards">GitHub repository</a></li>
+  <li><a href="https://github.com/raspopovaa/APIforCards/blob/main/README.md">README</a></li>
 </ul>
 <p>Сайт собирается автоматически из локальной документации и introspection-данных SDK.</p>
 """
