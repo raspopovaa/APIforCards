@@ -148,6 +148,34 @@ print(AuthUserResponse.describe())
 - обязательность
 - описание
 
+## 📚 Автоматическая документация
+
+В проект добавлена автоматическая генерация API-документации:
+
+- генератор: [scripts/generate_api_docs.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/scripts/generate_api_docs.py)
+- индекс документации: [docs/index.md](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/docs/index.md)
+- сгенерированный reference: [docs/api-reference.md](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/docs/api-reference.md)
+
+Что генерируется автоматически:
+
+- публичные модули SDK
+- публичные классы и функции
+- сигнатуры
+- docstring'и
+- описание полей моделей через `describe()`
+
+Локальный запуск:
+
+```bash
+.venv/bin/python scripts/generate_api_docs.py
+```
+
+В GitHub Actions есть отдельный workflow `Docs`, который:
+
+- запускает генерацию на `push` и `pull_request`
+- собирает актуальные `docs/`
+- прикладывает их как artifact
+
 ## 📌 Политика по спецификации
 
 Спецификация API и реальные ответы DEMO-стенда местами расходятся. В проекте приняты такие правила:
