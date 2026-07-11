@@ -4,7 +4,6 @@ from typing import Literal, Optional
 from .config import APISettings
 from .logger import logger
 from .registry import MethodSpec, build_default_registry
-from .session import SessionManager
 from .services.auth import AuthMixin
 from .services.card_group import CardGroupsMixin
 from .services.cards import CardsMixin
@@ -21,7 +20,9 @@ from .services.templates import TemplatesMixin
 from .services.transactions import TransactionsMixin
 from .services.users import UsersMixin
 from .services.virtual_cards import VirtualCardsMixin
+from .session import SessionManager
 from .transport import AsyncTransport
+from .utils import sanitize_for_logging
 
 
 class APIClient(
@@ -86,7 +87,7 @@ class APIClient(
             headers["session_id"] = self.session_id
         if self.contract_id:
             headers["contract_id"] = self.contract_id
-        logger.info(headers)
+        logger.debug("Prepared headers: %s", sanitize_for_logging(headers))
         return headers
 
     @property
@@ -112,7 +113,11 @@ class APIClient(
         return self.registry.find_by_endpoint(endpoint, api_version)
 
     async def _request(self, *args, **kwargs):
-        logger.debug("Sending request with args: %s, kwargs: %s", args, kwargs)
+        logger.debug(
+            "Sending request with args: %s, kwargs: %s",
+            sanitize_for_logging(args),
+            sanitize_for_logging(kwargs),
+        )
         endpoint = args[1] if len(args) > 1 else kwargs.get("endpoint")
         api_version = kwargs.get("api_version", "v1")
         spec = self._resolve_method_spec(endpoint, api_version) if endpoint else None
@@ -123,5 +128,5 @@ class APIClient(
             method_name=spec.name if spec is not None else None,
             **kwargs,
         )
-        logger.debug("Received response: %s", result)
+        logger.debug("Received response type: %s", type(result).__name__)
         return result

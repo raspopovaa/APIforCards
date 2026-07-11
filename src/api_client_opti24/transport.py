@@ -7,6 +7,7 @@ import httpx
 
 from .errors import NotAuthenticatedError, build_api_error
 from .logger import logger
+from .utils import sanitize_for_logging
 
 
 class AsyncTransport:
@@ -21,7 +22,6 @@ class AsyncTransport:
         self._network_backoff_max_seconds = 60.0
 
     def _build_url(self, api_version: str, endpoint: str) -> str:
-        logger.info(f"{self.base_url}{api_version}/{endpoint.lstrip('/')}")
         return f"{self.base_url}{api_version}/{endpoint.lstrip('/')}"
 
     async def aclose(self) -> None:
@@ -58,7 +58,12 @@ class AsyncTransport:
             )
             return body
 
-        logger.error("API error %s on %s: %s", resp.status_code, endpoint, body)
+        logger.error(
+            "API error %s on %s: %s",
+            resp.status_code,
+            endpoint,
+            sanitize_for_logging(body),
+        )
         raise build_api_error(
             status_code=resp.status_code,
             body=body,
@@ -90,7 +95,7 @@ class AsyncTransport:
                         timeout=timeout,
                         **kwargs,
                     )
-                    logger.info(f"HTTP {method} {url} → {resp.status_code}")
+                    logger.info("HTTP %s %s → %s", method.upper(), endpoint, resp.status_code)
 
                     if resp.status_code in {429, 509} and rate_attempt < self._rate_limit_attempts:
                         backoff_seconds = self._rate_limit_backoff_seconds * rate_attempt

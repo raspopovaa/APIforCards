@@ -2,6 +2,8 @@ import functools
 
 from .logger import logger
 from .session import SessionManager
+from .utils import sanitize_for_logging
+
 
 def api_method(require_session: bool = False, default_version: str = "v1"):
     def decorator(func):
@@ -35,16 +37,19 @@ def api_method(require_session: bool = False, default_version: str = "v1"):
                 elif session_manager.session_id is None:
                     raise RuntimeError(f"{method_name} requires session but auth_user is unavailable")
 
-            logger.info(f"➡ Вызов {method_name}, args={args}, kwargs={kwargs}")
+            logger.info(
+                "➡ Вызов %s, args=%s, kwargs=%s",
+                method_name,
+                sanitize_for_logging(args),
+                sanitize_for_logging(kwargs),
+            )
 
             try:
                 result = await func(self, *args, **kwargs)
-                # Логируем только первые 300 символов ответа
-                result_preview = str(result)[:300]
-                logger.info(f"✅ {method_name} завершён. Результат: {result_preview}")
+                logger.info("✅ %s завершён. Тип результата: %s", method_name, type(result).__name__)
                 return result
             except Exception as e:
-                logger.error(f"❌ Ошибка в {method_name}: {e}", exc_info=True)
+                logger.error("❌ Ошибка в %s: %s", method_name, e, exc_info=True)
                 raise
 
         return wrapper
