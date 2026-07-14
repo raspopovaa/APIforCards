@@ -5,6 +5,7 @@ from ..models.users import (
     UserCreateResponse,
     UserListResponse,
 )
+from ..payloads import with_method_override
 from ..utils import to_json_param
 
 
@@ -41,7 +42,7 @@ class UsersMixin:
         }
         params = {k: v for k, v in params.items() if v is not None}
 
-        logger.info(f"Вызов метода get_users с параметрами: {params}")
+        logger.info("Requesting users")
 
         raw = await self._request(
             "get",
@@ -74,7 +75,7 @@ class UsersMixin:
         """
         body = {"uuid": uuid, "mobile": mobile}
 
-        logger.info(f"Создание пользователя с тел. {mobile}")
+        logger.info("Creating user")
 
         raw = await self._request(
             "post",
@@ -104,7 +105,7 @@ class UsersMixin:
             {"sid": "1-380B94P", "template_id": "1-3BE470B", "use_mpc": True}
         ])
         """
-        logger.info(f"Прикрепление договоров к пользователю {user_id}")
+        logger.info("Attaching contracts to user")
 
         raw = await self._request(
             "post",
@@ -132,7 +133,7 @@ class UsersMixin:
         Пример:
         await client.detach_contracts(user_id="1-FK485FK", contracts=["1-380B94P", "1-37PYW2D"])
         """
-        logger.info(f"Открепление договоров от пользователя {user_id}")
+        logger.info("Detaching contracts from user")
 
         raw = await self._request(
             "post",
@@ -160,7 +161,7 @@ class UsersMixin:
         Пример:
         await client.attach_card(user_id="1-FK485FK", card_id="5050505")
         """
-        logger.info(f"Прикрепление карты {card_id} к пользователю {user_id}")
+        logger.info("Attaching card to user")
 
         raw = await self._request(
             "post",
@@ -188,7 +189,7 @@ class UsersMixin:
         Пример:
         await client.detach_card(user_id="1-FK485FK", card_id="5050505")
         """
-        logger.info(f"Открепление карты {card_id} от пользователя {user_id}")
+        logger.info("Detaching card from user")
 
         raw = await self._request(
             "post",
@@ -207,6 +208,7 @@ class UsersMixin:
         self,
         *,
         user_id: str,
+        use_post: bool = False,
         api_version: str = "v2",
     ) -> UserBoolResponse:
         """
@@ -215,13 +217,15 @@ class UsersMixin:
         Пример:
         await client.delete_user(user_id="1-FK485FK")
         """
-        logger.info(f"Удаление пользователя {user_id}")
+        logger.info("Deleting user")
 
+        method = "post" if use_post else "delete"
         raw = await self._request(
-            "delete",
+            method,
             f"users/{user_id}",
             api_version=api_version,
             headers=self._headers(include_session=True),
+            data=with_method_override(None, "DELETE") if use_post else None,
         )
 
         return UserBoolResponse(**raw)

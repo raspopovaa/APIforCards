@@ -1,181 +1,20 @@
 from __future__ import annotations
 
-import ast
-import importlib
-import inspect
-import pkgutil
-import re
-import textwrap
-from dataclasses import dataclass
+from .endpoints import ENDPOINT_SPECS, EndpointSpec, RouteVariant
 
-PACKAGE_NAME = "api_client_opti24.services"
-READ_HEAVY_PREFIXES = (
-    "get_",
-    "download_",
-)
-TIMEOUT_CLASS_OVERRIDES = {
-    "auth_user": "auth",
-}
-RETRY_CLASS_OVERRIDES = {
-    "auth_user": "network_only",
-}
-PRIMARY_DEMO_AVAILABILITY_OVERRIDES = {
-    "check_purchase": False,
-    "create_invite": False,
-    "create_virtual_card": False,
-    "delete_mpc": False,
-    "download_report_file": False,
-    "download_report_file_v1": False,
-    "generate_payment_qr": False,
-    "get_azs_filters": False,
-    "get_azs_list_v2": False,
-    "get_cards_by_group": False,
-    "get_documents": False,
-    "get_final_prices": False,
-    "get_mpc_qr_list": False,
-    "get_transactions_v1": False,
-    "init_mpc": False,
-    "confirm_mpc": False,
-    "order_cards": False,
-    "order_documents_email": False,
-    "order_invoice": False,
-    "order_report_v1": False,
-    "prolong_invite": False,
-    "release_virtual_card": False,
-    "resend_invite": False,
-    "reset_mpc": False,
-    "reset_pin": False,
-    "set_restriction": False,
-    "update_mpc": False,
-}
-
-
-@dataclass(frozen=True, slots=True)
-class RouteVariant:
-    http_method: str
-    endpoint: str
-    api_version: str
-    demo_available: bool
-
-    def supports(self, version: str) -> bool:
-        return self.api_version == version
-
-
-ROUTE_ALIAS_OVERRIDES = {
-    "create_invite": (
-        RouteVariant(
-            http_method="POST",
-            endpoint="invites_free",
-            api_version="v2",
-            demo_available=True,
-        ),
-    ),
-    "prolong_invite": (
-        RouteVariant(
-            http_method="POST",
-            endpoint="invites/{invite_id}/prolong_free",
-            api_version="v2",
-            demo_available=True,
-        ),
-    ),
-    "update_template": (
-        RouteVariant(
-            http_method="PUT",
-            endpoint="vc/templates/{template_id}",
-            api_version="v2",
-            demo_available=True,
-        ),
-    ),
-    "update_template_limit": (
-        RouteVariant(
-            http_method="PUT",
-            endpoint="vc/templates/{template_id}/limits/{limit_id}",
-            api_version="v2",
-            demo_available=True,
-        ),
-    ),
-    "update_template_restriction": (
-        RouteVariant(
-            http_method="PUT",
-            endpoint="vc/templates/{template_id}/restrictions/{restriction_id}",
-            api_version="v2",
-            demo_available=True,
-        ),
-        RouteVariant(
-            http_method="PUT",
-            endpoint="vc/templates/{template_id}/restrictions/{restrictions_id}",
-            api_version="v2",
-            demo_available=True,
-        ),
-    ),
-    "delete_template_restriction": (
-        RouteVariant(
-            http_method="DELETE",
-            endpoint="vc/templates/{template_id}/restrictions/{restrictions_id}",
-            api_version="v2",
-            demo_available=True,
-        ),
-    ),
-    "update_template_georestriction": (
-        RouteVariant(
-            http_method="PUT",
-            endpoint="vc/templates/{template_id}/georestrictions/{georestriction_id}",
-            api_version="v2",
-            demo_available=True,
-        ),
-        RouteVariant(
-            http_method="PUT",
-            endpoint="vc/templates/{template_id}/georestrictions/{georestrictions_id}",
-            api_version="v2",
-            demo_available=True,
-        ),
-    ),
-    "delete_template_georestriction": (
-        RouteVariant(
-            http_method="DELETE",
-            endpoint="vc/templates/{template_id}/georestrictions/{georestrictions_id}",
-            api_version="v2",
-            demo_available=True,
-        ),
-    ),
-}
-
-
-@dataclass(frozen=True, slots=True)
-class MethodSpec:
-    name: str
-    domain: str
-    http_method: str
-    endpoint: str
-    supported_versions: tuple[str, ...]
-    default_version: str
-    demo_available: bool
-    idempotent: bool
-    timeout_class: str = "default"
-    retry_class: str = "safe"
-    route_variants: tuple[RouteVariant, ...] = ()
-
-    def supports(self, version: str) -> bool:
-        return version in self.supported_versions
-
-    def iter_routes(self) -> tuple[RouteVariant, ...]:
-        primary_route = RouteVariant(
-            http_method=self.http_method,
-            endpoint=self.endpoint,
-            api_version=self.default_version,
-            demo_available=self.demo_available,
-        )
-        return (primary_route, *self.route_variants)
+MethodSpec = EndpointSpec
 
 
 class MethodRegistry:
-    def __init__(self, specs: dict[str, MethodSpec] | None = None) -> None:
-        self._specs: dict[str, MethodSpec] = specs or {}
+    def __init__(self, specs: dict[str, EndpointSpec] | None = None) -> None:
+        self._specs = dict(specs or {})
 
-    def register(self, spec: MethodSpec) -> None:
+    def register(self, spec: EndpointSpec) -> None:
+        if spec.name in self._specs:
+            raise ValueError(f"Method '{spec.name}' is already registered")
         self._specs[spec.name] = spec
 
-    def get(self, name: str) -> MethodSpec:
+    def get(self, name: str) -> EndpointSpec:
         try:
             return self._specs[name]
         except KeyError as exc:
@@ -186,18 +25,15 @@ class MethodRegistry:
         endpoint: str,
         version: str,
         http_method: str | None = None,
-    ) -> MethodSpec | None:
-        normalized_http_method = http_method.upper() if http_method is not None else None
+    ) -> EndpointSpec | None:
+        normalized_method = http_method.upper() if http_method is not None else None
         matches = [
             spec
             for spec in self._specs.values()
             if any(
                 route.endpoint == endpoint
                 and route.supports(version)
-                and (
-                    normalized_http_method is None
-                    or route.http_method == normalized_http_method
-                )
+                and (normalized_method is None or route.http_method == normalized_method)
                 for route in spec.iter_routes()
             )
         ]
@@ -212,203 +48,24 @@ class MethodRegistry:
             ),
         )[0]
 
-    def list_domain(self, domain: str) -> tuple[MethodSpec, ...]:
+    def list_domain(self, domain: str) -> tuple[EndpointSpec, ...]:
         return tuple(spec for spec in self._specs.values() if spec.domain == domain)
 
-    def list_all(self) -> tuple[MethodSpec, ...]:
+    def list_all(self) -> tuple[EndpointSpec, ...]:
         return tuple(self._specs.values())
-
-
-def _iter_service_modules() -> list[object]:
-    package = importlib.import_module(PACKAGE_NAME)
-    modules: list[object] = []
-    for module_info in pkgutil.walk_packages(package.__path__, prefix=f"{PACKAGE_NAME}."):
-        if module_info.name.endswith(".__init__"):
-            continue
-        modules.append(importlib.import_module(module_info.name))
-    return modules
-
-
-def _iter_service_methods() -> list[tuple[str, object]]:
-    methods: list[tuple[str, object]] = []
-    for module in _iter_service_modules():
-        for _, cls in inspect.getmembers(module, inspect.isclass):
-            if cls.__module__ != module.__name__ or not cls.__name__.endswith("Mixin"):
-                continue
-            for method_name, method in inspect.getmembers(cls, inspect.iscoroutinefunction):
-                if getattr(method, "__api_method_config__", None) is None:
-                    continue
-                methods.append((module.__name__, method))
-    return methods
-
-
-def _resolve_parameter_defaults(function_node: ast.AsyncFunctionDef | ast.FunctionDef) -> dict[str, object]:
-    positional = list(function_node.args.args) + list(function_node.args.kwonlyargs)
-    defaults = [None] * (len(positional) - len(function_node.args.defaults + function_node.args.kw_defaults))
-    defaults.extend(function_node.args.defaults + function_node.args.kw_defaults)
-
-    resolved: dict[str, object] = {}
-    for argument, default in zip(positional, defaults):
-        if isinstance(default, ast.Constant):
-            resolved[argument.arg] = default.value
-    return resolved
-
-
-def _render_template(
-    node: ast.AST,
-    *,
-    local_values: dict[str, str] | None = None,
-    parameter_defaults: dict[str, object] | None = None,
-) -> str:
-    local_values = local_values or {}
-    parameter_defaults = parameter_defaults or {}
-
-    if isinstance(node, ast.Constant) and isinstance(node.value, str):
-        return node.value
-    if isinstance(node, ast.Name):
-        if node.id in local_values:
-            return local_values[node.id]
-        raise ValueError(f"Unknown template variable: {node.id}")
-    if isinstance(node, ast.IfExp) and isinstance(node.test, ast.Name):
-        default = parameter_defaults.get(node.test.id)
-        if isinstance(default, bool):
-            branch = node.body if default else node.orelse
-            return _render_template(
-                branch,
-                local_values=local_values,
-                parameter_defaults=parameter_defaults,
-            )
-    if isinstance(node, ast.JoinedStr):
-        parts: list[str] = []
-        for value in node.values:
-            if isinstance(value, ast.Constant) and isinstance(value.value, str):
-                parts.append(value.value)
-            elif isinstance(value, ast.FormattedValue):
-                inner = value.value
-                if isinstance(inner, ast.Name):
-                    if inner.id in local_values:
-                        parts.append(local_values[inner.id])
-                    else:
-                        parts.append(f"{{{inner.id}}}")
-                else:
-                    parts.append(f"{{{ast.unparse(inner)}}}")
-        return "".join(parts)
-    raise ValueError(f"Unsupported endpoint node: {ast.dump(node)}")
-
-
-def _normalize_request_stream_endpoint(endpoint: str) -> str:
-    normalized = endpoint.lstrip("/")
-    return re.sub(r"^vip/(?:\{api_version\}|v\d+)/", "", normalized)
-
-
-def _extract_call_metadata(method: object) -> tuple[str, str]:
-    source = textwrap.dedent(inspect.getsource(getattr(method, "__wrapped__", method)))
-    tree = ast.parse(source)
-    function_node = next(
-        node for node in tree.body if isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef))
-    )
-    parameter_defaults = _resolve_parameter_defaults(function_node)
-    local_values: dict[str, str] = {}
-
-    for node in function_node.body:
-        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
-            continue
-        target = node.targets[0]
-        if not isinstance(target, ast.Name):
-            continue
-        try:
-            local_values[target.id] = _render_template(
-                node.value,
-                local_values=local_values,
-                parameter_defaults=parameter_defaults,
-            )
-        except ValueError:
-            continue
-
-    for node in ast.walk(function_node):
-        if not isinstance(node, ast.Await) or not isinstance(node.value, ast.Call):
-            continue
-
-        call = node.value
-        if isinstance(call.func, ast.Attribute) and call.func.attr == "_request":
-            method_node = call.args[0] if len(call.args) >= 1 else None
-            endpoint_node = call.args[1] if len(call.args) >= 2 else None
-            for keyword in call.keywords:
-                if keyword.arg == "method" and method_node is None:
-                    method_node = keyword.value
-                if keyword.arg == "endpoint" and endpoint_node is None:
-                    endpoint_node = keyword.value
-            if method_node is None or endpoint_node is None:
-                continue
-            http_method = _render_template(
-                method_node,
-                local_values=local_values,
-                parameter_defaults=parameter_defaults,
-            ).upper()
-            endpoint = _render_template(
-                endpoint_node,
-                local_values=local_values,
-                parameter_defaults=parameter_defaults,
-            )
-            return http_method, endpoint
-
-        if (
-            isinstance(call.func, ast.Attribute)
-            and call.func.attr == "request_stream"
-            and isinstance(call.func.value, ast.Attribute)
-            and call.func.value.attr == "transport"
-        ):
-            method_node = call.args[0] if len(call.args) >= 1 else None
-            endpoint_node = call.args[1] if len(call.args) >= 2 else None
-            if method_node is None or endpoint_node is None:
-                continue
-            http_method = _render_template(
-                method_node,
-                local_values=local_values,
-                parameter_defaults=parameter_defaults,
-            ).upper()
-            endpoint = _normalize_request_stream_endpoint(
-                _render_template(
-                    endpoint_node,
-                    local_values=local_values,
-                    parameter_defaults=parameter_defaults,
-                )
-            )
-            return http_method, endpoint
-
-    raise ValueError(f"Could not extract request metadata for {method.__qualname__}")
-
-
-def _infer_timeout_class(method_name: str, http_method: str) -> str:
-    if method_name in TIMEOUT_CLASS_OVERRIDES:
-        return TIMEOUT_CLASS_OVERRIDES[method_name]
-    if http_method == "GET" and method_name.startswith(READ_HEAVY_PREFIXES):
-        return "read_heavy"
-    return "default"
-
-
-def _build_method_spec(module_name: str, method: object) -> MethodSpec:
-    config = getattr(method, "__api_method_config__")
-    method_name = method.__name__
-    http_method, endpoint = _extract_call_metadata(method)
-    default_version = config["default_version"]
-    return MethodSpec(
-        name=method_name,
-        domain=module_name.rsplit(".", 1)[-1].lower(),
-        http_method=http_method,
-        endpoint=endpoint,
-        supported_versions=(default_version,),
-        default_version=default_version,
-        demo_available=PRIMARY_DEMO_AVAILABILITY_OVERRIDES.get(method_name, True),
-        idempotent=http_method == "GET",
-        timeout_class=_infer_timeout_class(method_name, http_method),
-        retry_class=RETRY_CLASS_OVERRIDES.get(method_name, "safe"),
-        route_variants=ROUTE_ALIAS_OVERRIDES.get(method_name, ()),
-    )
 
 
 def build_default_registry() -> MethodRegistry:
     registry = MethodRegistry()
-    for module_name, method in sorted(_iter_service_methods(), key=lambda item: item[1].__name__):
-        registry.register(_build_method_spec(module_name, method))
+    for spec in ENDPOINT_SPECS:
+        registry.register(spec)
     return registry
+
+
+__all__ = [
+    "EndpointSpec",
+    "MethodRegistry",
+    "MethodSpec",
+    "RouteVariant",
+    "build_default_registry",
+]

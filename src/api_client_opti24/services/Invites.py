@@ -6,6 +6,7 @@ from ..models.invites import (
     InviteList,
     InviteResponse,
 )
+from ..payloads import with_method_override
 
 
 class InviteMixin:
@@ -95,16 +96,19 @@ class InviteMixin:
         self,
         *,
         invite_id: str,
+        use_post: bool = False,
         api_version: str = "v2",
     ) -> InviteBoolResponse:
         """
         Удалить приглашение (v2).
         """
+        method = "post" if use_post else "delete"
         raw = await self._request(
-            "delete",
+            method,
             f"invites/{invite_id}",
             api_version=api_version,
             headers=self._headers(include_session=True),
+            data=with_method_override(None, "DELETE") if use_post else None,
         )
         return InviteBoolResponse(**raw)
 

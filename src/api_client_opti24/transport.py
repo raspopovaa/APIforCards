@@ -1,38 +1,160 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any
+import ipaddress
+import logging
+import time
+from collections.abc import Awaitable, Callable, Mapping
+from typing import Any, Protocol
+from urllib.parse import urlsplit
 
 import httpx
 
-from .errors import NotAuthenticatedError, build_api_error
-from .logger import logger
-from .utils import sanitize_for_logging
+from .errors import NotAuthenticatedError
+from .logger import logger as default_logger
+from .policies import (
+    IDEMPOTENT_HTTP_METHODS,
+    SAFE_HTTP_METHODS,
+    RateLimitPolicy,
+    RetryClass,
+    RetryPolicy,
+)
+from .response import DecodedPayload, ResponseDecoder
+from .runtime import Clock
+
+
+class AsyncHTTPClient(Protocol):
+    async def request(self, method: str, url: str, **kwargs: Any) -> httpx.Response: ...
+
+    def stream(self, method: str, url: str, **kwargs: Any): ...
+
+    async def aclose(self) -> None: ...
+
+
+AuthRecovery = Callable[[], Awaitable[Mapping[str, str]]]
+AsyncSleep = Callable[[float], Awaitable[None]]
 
 
 class AsyncTransport:
-    def __init__(self, base_url: str, client, default_timeout: float = 30.0):
-        self.base_url = base_url.rstrip("/") + "/"
-        self.client = httpx.AsyncClient(timeout=default_timeout)
-        self._parent = client
-        self._rate_limit_attempts = 3
-        self._rate_limit_backoff_seconds = 0.5
-        self._network_attempts = 5
-        self._network_backoff_min_seconds = 2.0
-        self._network_backoff_max_seconds = 60.0
+    def __init__(
+        self,
+        base_url: str,
+        default_timeout: float = 30.0,
+        *,
+        http_client: AsyncHTTPClient | None = None,
+        auth_recovery: AuthRecovery | None = None,
+        retry_policy: RetryPolicy | None = None,
+        rate_limit_policy: RateLimitPolicy | None = None,
+        allow_insecure_http: bool = False,
+        response_decoder: ResponseDecoder | None = None,
+        logger: logging.Logger | None = None,
+        clock: Clock | None = None,
+        sleep: AsyncSleep = asyncio.sleep,
+        monotonic: Callable[[], float] = time.monotonic,
+    ):
+        self.base_url = self._normalize_base_url(
+            base_url,
+            allow_insecure_http=allow_insecure_http,
+        )
+        self.client = http_client or httpx.AsyncClient(timeout=default_timeout)
+        self._owns_http_client = http_client is None
+        self._auth_recovery = auth_recovery
+        self.logger = logger or default_logger
+        self.response_decoder = response_decoder or ResponseDecoder(logger=self.logger)
+        self.retry_policy = retry_policy or RetryPolicy()
+        self.rate_limit_policy = rate_limit_policy or RateLimitPolicy()
+        self._sleep = clock.sleep if clock is not None else sleep
+        self._monotonic = clock.monotonic if clock is not None else monotonic
+        self._rate_limit_lock = asyncio.Lock()
+        self._auth_limit_lock = asyncio.Lock()
+        self._last_request_started_at: float | None = None
+        self._last_auth_request_started_at: float | None = None
+
+    def set_auth_recovery(self, auth_recovery: AuthRecovery) -> None:
+        self._auth_recovery = auth_recovery
+
+    @staticmethod
+    def _normalize_base_url(
+        base_url: str,
+        *,
+        allow_insecure_http: bool = False,
+    ) -> str:
+        normalized = base_url.strip()
+        if not normalized:
+            raise ValueError(
+                "base_url is empty; set API_BASE_URL in .env or pass base_url explicitly"
+            )
+
+        parsed = urlsplit(normalized)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise ValueError(
+                "base_url must be an absolute URL starting with http:// or https://; "
+                f"got {base_url!r}"
+            )
+
+        if (
+            parsed.scheme == "http"
+            and not allow_insecure_http
+            and not AsyncTransport._is_loopback_host(parsed.hostname)
+        ):
+            raise ValueError(
+                "base_url must use https:// for remote hosts; "
+                "set allow_insecure_http=True only for controlled test environments"
+            )
+
+        return normalized.rstrip("/") + "/"
+
+    @staticmethod
+    def _is_loopback_host(hostname: str | None) -> bool:
+        if hostname is None:
+            return False
+        if hostname.lower() == "localhost":
+            return True
+        try:
+            return ipaddress.ip_address(hostname).is_loopback
+        except ValueError:
+            return False
 
     def _build_url(self, api_version: str, endpoint: str) -> str:
         return f"{self.base_url}{api_version}/{endpoint.lstrip('/')}"
 
     async def aclose(self) -> None:
-        await self.client.aclose()
+        if self._owns_http_client:
+            await self.client.aclose()
 
-    def _safe_json(self, resp: httpx.Response) -> Any:
-        try:
-            return resp.json()
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Could not parse JSON for %s: %s", resp.request.url, exc)
-            return resp.text
+    async def _wait_for_rate_limit(self) -> None:
+        minimum_interval = self.rate_limit_policy.minimum_interval_seconds
+        if minimum_interval <= 0:
+            return
+
+        async with self._rate_limit_lock:
+            now = self._monotonic()
+            if self._last_request_started_at is not None:
+                wait_seconds = self._last_request_started_at + minimum_interval - now
+                if wait_seconds > 0:
+                    await self._sleep(wait_seconds)
+                    now = self._monotonic()
+            self._last_request_started_at = now
+
+    async def _wait_for_auth_limit(self, retry_class: str | RetryClass) -> None:
+        if RetryClass.normalize(retry_class) is not RetryClass.NETWORK_ONLY:
+            return
+
+        minimum_interval = self.retry_policy.auth_retry_min_interval_seconds
+        if minimum_interval <= 0:
+            return
+
+        async with self._auth_limit_lock:
+            now = self._monotonic()
+            if self._last_auth_request_started_at is not None:
+                wait_seconds = self._last_auth_request_started_at + minimum_interval - now
+                if wait_seconds > 0:
+                    await self._sleep(wait_seconds)
+                    now = self._monotonic()
+            self._last_auth_request_started_at = now
+
+    def _safe_json(self, resp: httpx.Response) -> DecodedPayload:
+        return self.response_decoder.parse(resp)
 
     def _handle_response(
         self,
@@ -40,45 +162,11 @@ class AsyncTransport:
         endpoint: str,
         *,
         method_name: str | None = None,
-    ) -> Any:
-        body = self._safe_json(resp)
-        payload_status_code = None
-        if isinstance(body, dict) and isinstance(body.get("status"), dict):
-            raw_payload_status = body["status"].get("code")
-            if isinstance(raw_payload_status, int):
-                payload_status_code = raw_payload_status
-
-        if 200 <= resp.status_code < 300 and (
-            payload_status_code is None or 200 <= payload_status_code < 300
-        ):
-            return body
-
-        if (
-            payload_status_code is not None
-            and not (200 <= resp.status_code < 300)
-            and 200 <= payload_status_code < 300
-        ):
-            logger.warning(
-                "API returned non-2xx HTTP status %s for %s, but payload status.code=%s; treating response as successful",
-                resp.status_code,
-                endpoint,
-                payload_status_code,
-            )
-            return body
-
-        logger.error(
-            "API error http=%s api=%s on %s: %s",
-            resp.status_code,
-            payload_status_code,
+    ) -> DecodedPayload:
+        return self.response_decoder.decode(
+            resp,
             endpoint,
-            sanitize_for_logging(body),
-        )
-        raise build_api_error(
-            status_code=payload_status_code if payload_status_code is not None else resp.status_code,
-            body=body,
-            endpoint=endpoint,
             method_name=method_name,
-            http_status_code=resp.status_code,
         )
 
     async def request(
@@ -90,14 +178,39 @@ class AsyncTransport:
         retry_auth: bool = True,
         timeout: float | None = None,
         method_name: str | None = None,
+        retry_class: str | RetryClass | None = None,
+        idempotent: bool | None = None,
         **kwargs,
-    ) -> Any:
+    ) -> DecodedPayload:
         url = self._build_url(api_version, endpoint)
-        network_backoff = self._network_backoff_min_seconds
+        normalized_method = method.upper()
+        resolved_retry_class = retry_class or (
+            RetryClass.SAFE.value
+            if normalized_method in SAFE_HTTP_METHODS
+            else RetryClass.NEVER.value
+        )
+        resolved_idempotent = (
+            normalized_method in IDEMPOTENT_HTTP_METHODS
+            if idempotent is None
+            else idempotent
+        )
+        network_attempts = self.retry_policy.network_attempt_count(
+            resolved_retry_class,
+            normalized_method,
+            idempotent=resolved_idempotent,
+        )
+        rate_limit_attempts = self.retry_policy.rate_limit_attempt_count(
+            resolved_retry_class,
+            normalized_method,
+            idempotent=resolved_idempotent,
+        )
+        network_backoff = self.retry_policy.initial_network_backoff(resolved_retry_class)
 
-        for network_attempt in range(1, self._network_attempts + 1):
+        for network_attempt in range(1, network_attempts + 1):
             try:
-                for rate_attempt in range(1, self._rate_limit_attempts + 1):
+                for rate_attempt in range(1, rate_limit_attempts + 1):
+                    await self._wait_for_rate_limit()
+                    await self._wait_for_auth_limit(resolved_retry_class)
                     resp = await self.client.request(
                         method,
                         url,
@@ -105,19 +218,26 @@ class AsyncTransport:
                         timeout=timeout,
                         **kwargs,
                     )
-                    logger.info("HTTP %s %s → %s", method.upper(), endpoint, resp.status_code)
+                    self.logger.info(
+                        "HTTP method=%s operation=%s status=%s",
+                        method.upper(),
+                        method_name or "unregistered",
+                        resp.status_code,
+                    )
 
-                    if resp.status_code in {429, 509} and rate_attempt < self._rate_limit_attempts:
-                        backoff_seconds = self._rate_limit_backoff_seconds * rate_attempt
-                        logger.warning(
-                            "Rate limit on %s %s, attempt %s/%s; backing off for %.2fs",
+                    if resp.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
+                        backoff_seconds = (
+                            self.retry_policy.rate_limit_backoff_seconds * rate_attempt
+                        )
+                        self.logger.warning(
+                            "Rate limit method=%s operation=%s attempt=%s/%s backoff=%.2fs",
                             method,
-                            url,
+                            method_name or "unregistered",
                             rate_attempt,
-                            self._rate_limit_attempts,
+                            rate_limit_attempts,
                             backoff_seconds,
                         )
-                        await asyncio.sleep(backoff_seconds)
+                        await self._sleep(backoff_seconds)
                         continue
 
                     try:
@@ -126,9 +246,10 @@ class AsyncTransport:
                         if not retry_auth:
                             raise
 
-                        self._parent.session_manager.invalidate()
-                        await self._parent.session_manager.ensure_authenticated(self._parent.auth_user)
-                        refreshed_headers = self._parent._headers(include_session=True)
+                        if self._auth_recovery is None:
+                            raise
+
+                        refreshed_headers = dict(await self._auth_recovery())
                         return await self.request(
                             method,
                             endpoint,
@@ -137,33 +258,49 @@ class AsyncTransport:
                             retry_auth=False,
                             timeout=timeout,
                             method_name=method_name,
+                            retry_class=resolved_retry_class,
+                            idempotent=resolved_idempotent,
                             **kwargs,
                         )
 
                 raise RuntimeError("Rate limit retry loop exhausted unexpectedly")
 
             except httpx.RequestError:
-                if network_attempt >= self._network_attempts:
+                if network_attempt >= network_attempts:
                     raise
 
-                logger.warning(
-                    "Network error on %s %s, attempt %s/%s; backing off for %.2fs",
+                self.logger.warning(
+                    "Network error method=%s operation=%s attempt=%s/%s backoff=%.2fs",
                     method,
-                    url,
+                    method_name or "unregistered",
                     network_attempt,
-                    self._network_attempts,
+                    network_attempts,
                     network_backoff,
                 )
-                await asyncio.sleep(network_backoff)
+                await self._sleep(network_backoff)
                 network_backoff = min(
                     network_backoff * 2,
-                    self._network_backoff_max_seconds,
+                    self.retry_policy.network_backoff_max_seconds,
                 )
 
-    async def request_stream(self, method: str, url: str, headers=None, **kwargs) -> bytes:
+    async def request_stream(
+        self,
+        method: str,
+        url: str,
+        headers=None,
+        *,
+        method_name: str | None = None,
+        **kwargs,
+    ) -> bytes:
         if not url.startswith("http://") and not url.startswith("https://"):
             url = url.lstrip("/")
             url = f"{self.base_url}{url}"
+        await self._wait_for_rate_limit()
         async with self.client.stream(method, url, headers=headers, **kwargs) as resp:
-            resp.raise_for_status()
-            return await resp.aread()
+            content = await resp.aread()
+            return self.response_decoder.decode_bytes(
+                resp,
+                content,
+                url,
+                method_name=method_name,
+            )

@@ -18,7 +18,7 @@ _Публичные классы и функции не обнаружены._
 
 Методы работы с топливными картами.
 
-Сигнатура: `APIClient(base_url: str, api_key: str, login: str, password: str)`
+Сигнатура: `APIClient(base_url: str | None = None, api_key: str | None = None, login: str | None = None, password: str | None = None, *, settings: api_client_opti24.config.APISettings | None = None, transport: api_client_opti24.transport.AsyncTransport | None = None, session_manager: api_client_opti24.session.SessionManager | None = None, registry: api_client_opti24.registry.MethodRegistry | None = None, logger: logging.Logger | None = None, clock: api_client_opti24.runtime.Clock | None = None)`
 
 Публичные методы:
 
@@ -30,13 +30,13 @@ _Публичные классы и функции не обнаружены._
 
 ### `APISettings`
 
-APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0))
+APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None))
 
-Сигнатура: `APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0)) -> None`
+Сигнатура: `APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None)) -> None`
 
 Публичные методы:
 
-- `from_env(*, load_dotenv: 'bool' = True) -> "'APISettings'"`
+- `from_env(*, load_dotenv: 'bool' = True, env_file: 'str | Path' = '.env') -> 'APISettings'`
 
 ### `TimeoutPolicy`
 
@@ -56,13 +56,50 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 Описание отсутствует.
 
-Сигнатура: `api_method(require_session: bool = False, default_version: str = 'v1')`
+Сигнатура: `api_method(require_session: bool = False, default_version: str = 'v1', *, http_method: str | None = None, endpoint: str | None = None, retry_class: str | None = None)`
 
 ### `get_current_api_method_name`
 
 Описание отсутствует.
 
 Сигнатура: `get_current_api_method_name() -> str | None`
+
+## `api_client_opti24.endpoints`
+
+Описание отсутствует.
+
+### `EndpointSpec`
+
+EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())
+
+Сигнатура: `EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -> None`
+
+Публичные методы:
+
+- `iter_routes(self) -> 'tuple[RouteVariant, ...]'`
+- `supports(self, version: 'str') -> 'bool'`
+
+### `RouteVariant`
+
+RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool')
+
+Сигнатура: `RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool') -> None`
+
+Публичные методы:
+
+- `supports(self, version: 'str') -> 'bool'`
+
+### `endpoint`
+
+Описание отсутствует.
+
+Сигнатура: `endpoint(name: 'str', domain: 'str', http_method: 'str', path: 'str', version: 'str', *, demo: 'bool' = True, timeout: 'str' = 'default', retry: 'str | None' = None, variants: 'tuple[RouteVariant, ...]' = ()) -> 'EndpointSpec'`
+
+### `route`
+
+Описание отсутствует.
+
+Сигнатура: `route(http_method: 'str', path: 'str', version: 'str', *, demo: 'bool') -> 'RouteVariant'`
 
 ## `api_client_opti24.env`
 
@@ -151,12 +188,14 @@ Common base class for all non-exit exceptions.
 Публичные методы:
 
 - `describe() -> 'dict[str, dict[str, Any]]'`
+- `model_dump(self, *, by_alias: 'bool' = False) -> 'dict[str, Any]'`
+- `model_validate(payload: 'dict[str, Any]') -> 'Self'`
 
 ### `FieldInfo`
 
 Описание отсутствует.
 
-Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x10294c700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102d16270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
+Сигнатура: `FieldInfo(default: 'Any' = <object object>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
 
 ### `ValidationError`
 
@@ -168,7 +207,13 @@ Inappropriate argument value (of correct type).
 
 Описание отсутствует.
 
-Сигнатура: `Field(default: 'Any' = <object object at 0x10294c700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102d16270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
+Сигнатура: `Field(default: 'Any' = <object object>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
+
+### `decode_model`
+
+Описание отсутствует.
+
+Сигнатура: `decode_model(model_type: 'type[ModelT]', payload: 'dict[str, Any]') -> 'ModelT'`
 
 ### `field_validator`
 
@@ -6934,6 +6979,44 @@ timestamp:
 
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
+## `api_client_opti24.payloads`
+
+Описание отсутствует.
+
+### `with_method_override`
+
+Описание отсутствует.
+
+Сигнатура: `with_method_override(payload: 'Mapping[str, Any] | Sequence[Mapping[str, Any]] | None', method: 'str') -> 'dict[str, Any] | list[dict[str, Any]]'`
+
+## `api_client_opti24.policies`
+
+Описание отсутствует.
+
+### `RateLimitPolicy`
+
+RateLimitPolicy(requests_per_second: 'float | None' = None)
+
+Сигнатура: `RateLimitPolicy(requests_per_second: 'float | None' = None) -> None`
+
+### `RetryClass`
+
+Enum where members are also (and must be) strings
+
+Сигнатура: `RetryClass(*values)`
+
+### `RetryPolicy`
+
+RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network_backoff_min_seconds: 'float' = 2.0, network_backoff_max_seconds: 'float' = 60.0, rate_limit_backoff_seconds: 'float' = 0.5, auth_retry_min_interval_seconds: 'float' = 5.0)
+
+Сигнатура: `RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network_backoff_min_seconds: 'float' = 2.0, network_backoff_max_seconds: 'float' = 60.0, rate_limit_backoff_seconds: 'float' = 0.5, auth_retry_min_interval_seconds: 'float' = 5.0) -> None`
+
+Публичные методы:
+
+- `initial_network_backoff(self, retry_class: 'str | RetryClass') -> 'float'`
+- `network_attempt_count(self, retry_class: 'str | RetryClass', http_method: 'str', *, idempotent: 'bool | None' = None) -> 'int'`
+- `rate_limit_attempt_count(self, retry_class: 'str | RetryClass', http_method: 'str', *, idempotent: 'bool | None' = None) -> 'int'`
+
 ## `api_client_opti24.registry`
 
 Описание отсутствует.
@@ -6942,42 +7025,176 @@ timestamp:
 
 Описание отсутствует.
 
-Сигнатура: `MethodRegistry(specs: 'dict[str, MethodSpec] | None' = None) -> 'None'`
+Сигнатура: `MethodRegistry(specs: 'dict[str, EndpointSpec] | None' = None) -> 'None'`
 
 Публичные методы:
 
-- `find_by_endpoint(self, endpoint: 'str', version: 'str', http_method: 'str | None' = None) -> 'MethodSpec | None'`
-- `get(self, name: 'str') -> 'MethodSpec'`
-- `list_all(self) -> 'tuple[MethodSpec, ...]'`
-- `list_domain(self, domain: 'str') -> 'tuple[MethodSpec, ...]'`
-- `register(self, spec: 'MethodSpec') -> 'None'`
-
-### `MethodSpec`
-
-MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())
-
-Сигнатура: `MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -> None`
-
-Публичные методы:
-
-- `iter_routes(self) -> 'tuple[RouteVariant, ...]'`
-- `supports(self, version: 'str') -> 'bool'`
-
-### `RouteVariant`
-
-RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool')
-
-Сигнатура: `RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool') -> None`
-
-Публичные методы:
-
-- `supports(self, version: 'str') -> 'bool'`
+- `find_by_endpoint(self, endpoint: 'str', version: 'str', http_method: 'str | None' = None) -> 'EndpointSpec | None'`
+- `get(self, name: 'str') -> 'EndpointSpec'`
+- `list_all(self) -> 'tuple[EndpointSpec, ...]'`
+- `list_domain(self, domain: 'str') -> 'tuple[EndpointSpec, ...]'`
+- `register(self, spec: 'EndpointSpec') -> 'None'`
 
 ### `build_default_registry`
 
 Описание отсутствует.
 
 Сигнатура: `build_default_registry() -> 'MethodRegistry'`
+
+## `api_client_opti24.response`
+
+Описание отсутствует.
+
+### `ResponseDecoder`
+
+Описание отсутствует.
+
+Сигнатура: `ResponseDecoder(*, logger: 'logging.Logger | None' = None) -> 'None'`
+
+Публичные методы:
+
+- `decode(self, response: 'httpx.Response', endpoint: 'str', *, method_name: 'str | None' = None) -> 'DecodedPayload'`
+- `decode_bytes(self, response: 'httpx.Response', content: 'bytes', endpoint: 'str', *, method_name: 'str | None' = None) -> 'bytes'`
+- `parse(self, response: 'httpx.Response') -> 'DecodedPayload'`
+
+## `api_client_opti24.runtime`
+
+Описание отсутствует.
+
+### `Clock`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `Clock(*args, **kwargs)`
+
+Публичные методы:
+
+- `monotonic(self) -> 'float'`
+- `now(self) -> 'datetime'`
+- `sleep(self, seconds: 'float') -> 'None'`
+
+### `SystemClock`
+
+Описание отсутствует.
+
+Сигнатура: `SystemClock()`
+
+Публичные методы:
+
+- `monotonic(self) -> 'float'`
+- `now(self) -> 'datetime'`
+- `sleep(self, seconds: 'float') -> 'None'`
+
+## `api_client_opti24.service_groups`
+
+Описание отсутствует.
+
+### `BoundService`
+
+Описание отсутствует.
+
+Сигнатура: `BoundService(client: 'ServiceClient') -> 'None'`
+
+Публичные методы:
+
+- `auth_user(self, **kwargs: 'Any') -> 'Any'`
+
+### `CardsService`
+
+Методы работы с топливными картами.
+
+Сигнатура: `CardsService(client: 'ServiceClient') -> 'None'`
+
+Публичные методы:
+
+- `auth_user(self, **kwargs: 'Any') -> 'Any'`
+
+### `ReportsService`
+
+Методы для работы с отчетами (v1 и v2)
+Будет возвращен транзакционный отчет, относящийся к указанному договору.
+Дата начала периода должна быть меньше или равна дате окончания периода.
+В противном случае сервер автоматически выставит дату окончания периода равной дате начала.
+Длина периода не должна превышать 3 календарных месяцев.
+Если длина периода будет превышена, то он автоматически будет сокращен до 3 календарных месяцев с указанной даты начала периода.
+Карты и группы карт, указанные в запросе, должны принадлежать указанному договору.
+Ограничения отправки отчетов на Email составляет 15мб.
+Длительность формирования отчетов за период 1 месяц составляет порядка 300 секунд, при выборе периода более 1 месяца, время формирования отчета может занять до 15 минут.
+Теперь отчет можно заказать и скачать по ссылке. Заказ производится стандартным образом, только не нужно указывать email, иначе прийдет на email..
+
+Сигнатура: `ReportsService(client: 'ServiceClient') -> 'None'`
+
+Публичные методы:
+
+- `auth_user(self, **kwargs: 'Any') -> 'Any'`
+
+### `ServiceClient`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `ServiceClient(*args, **kwargs)`
+
+Публичные методы:
+
+- `auth_user(self, **kwargs: 'Any') -> 'Any'`
 
 ## `api_client_opti24.services`
 
@@ -7003,8 +7220,8 @@ Invites – функционал регистрации пользователе
 Публичные методы:
 
 - `create_invite(self, *, data: dict[str, typing.Any], with_send: bool = True, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteResponse`
-- `delete_invite(self, *, invite_id: str, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
-- `get_invites(self, *, role: Optional[str] = None, user_id: Optional[str] = None, sort: Optional[str] = None, status: Optional[str] = None, q: Optional[str] = None, page: Optional[int] = None, on_page: Optional[int] = None, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteList`
+- `delete_invite(self, *, invite_id: str, use_post: bool = False, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
+- `get_invites(self, *, role: str | None = None, user_id: str | None = None, sort: str | None = None, status: str | None = None, q: str | None = None, page: int | None = None, on_page: int | None = None, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteList`
 - `prolong_invite(self, *, invite_id: str, with_send: bool = True, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
 - `resend_invite(self, *, invite_id: str, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteResponse`
 
@@ -7021,8 +7238,8 @@ Invites – функционал регистрации пользователе
 Публичные методы:
 
 - `auth_user(self, *, api_version: str = 'v1', contract_id: str | None = None, contract_number: str | None = None) -> api_client_opti24.models.auth.AuthUserResponse`
-- `get_info(self, api_version: str = 'v1', period: str | None = None) -> dict`
-- `logoff(self, api_version: str = 'v1') -> dict`
+- `get_info(self, api_version: str = 'v1', period: str | None = None) -> api_client_opti24.models.auth.GetInfoResponse`
+- `logoff(self, api_version: str = 'v1') -> dict[str, object]`
 
 ## `api_client_opti24.services.card_group`
 
@@ -7038,7 +7255,7 @@ Invites – функционал регистрации пользователе
 
 - `get_card_groups(self, *, contract_id: str, api_version: str = 'v1') -> api_client_opti24.models.card_group.CardGroupListResponse`
 - `remove_card_group(self, *, contract_id: str, group_id: str, api_version: str = 'v1') -> api_client_opti24.models.card_group.RemoveCardGroupResponse`
-- `set_card_group(self, *, contract_id: str, name: str, group_id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.card_group.SetCardGroupResponse`
+- `set_card_group(self, *, contract_id: str, name: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.card_group.SetCardGroupResponse`
 - `set_cards_to_group(self, *, contract_id: str, group_id: str, cards_list: list[dict], api_version: str = 'v1') -> api_client_opti24.models.card_group.SetCardsToGroupResponse`
 
 ## `api_client_opti24.services.cards`
@@ -7076,12 +7293,12 @@ Invites – функционал регистрации пользователе
 Публичные методы:
 
 - `get_contract_data(self, contract_id: str, api_version: str = 'v1') -> api_client_opti24.models.contracts.ContractResponse`
-- `get_documents(self, date_start: str, date_end: str, api_version: str = 'v2', page: int = 1, on_page: int = 10) -> dict`
-- `get_invoices(self, api_version: str = 'v2') -> dict`
-- `get_payments(self, contract_id: str, api_version: str = 'v1') -> dict`
-- `order_cards(self, count: int, office_id: str, api_version: str = 'v2') -> dict`
-- `order_documents_email(self, ids: list[str], fmt: str, emails: list[str], api_version: str = 'v2') -> dict`
-- `order_invoice(self, amount: float, email: str, api_version: str = 'v2') -> dict`
+- `get_documents(self, date_start: str, date_end: str, api_version: str = 'v2', page: int = 1, on_page: int = 10) -> api_client_opti24.models.contracts.DocumentsResponse`
+- `get_invoices(self, api_version: str = 'v2') -> api_client_opti24.models.contracts.InvoicesResponse`
+- `get_payments(self, contract_id: str, api_version: str = 'v1') -> api_client_opti24.models.contracts.PaymentsResponse`
+- `order_cards(self, count: int, office_id: str, api_version: str = 'v2') -> api_client_opti24.models.contracts.OrderCardsResponse`
+- `order_documents_email(self, ids: list[str], fmt: str, emails: list[str], api_version: str = 'v2') -> api_client_opti24.models.contracts.DocumentsOrderResponse`
+- `order_invoice(self, amount: float, email: str, api_version: str = 'v2') -> api_client_opti24.models.contracts.InvoiceOrderResponse`
 
 ## `api_client_opti24.services.dictionaries`
 
@@ -7096,8 +7313,8 @@ Invites – функционал регистрации пользователе
 Публичные методы:
 
 - `get_azs_filters(self, *, api_version: str = 'v2') -> api_client_opti24.models.dictionaries.AzsFiltersResponse`
-- `get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: Optional[dict] = None, id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.dictionaries.AzsListV1Response`
-- `get_azs_list_v2(self, filter: Optional[dict] = None, q: Optional[str] = None, api_version: str = 'v2') -> api_client_opti24.models.dictionaries.AzsListV2Response`
+- `get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: dict | None = None, id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.dictionaries.AzsListV1Response`
+- `get_azs_list_v2(self, filter: dict | None = None, q: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.dictionaries.AzsListV2Response`
 - `get_dictionary(self, *, name: str, api_version: str = 'v1') -> api_client_opti24.models.dictionaries.DictionaryResponse`
 
 ## `api_client_opti24.services.ewallet`
@@ -7154,8 +7371,8 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_limits(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.limits.LimitsResponse`
-- `remove_limit(self, *, contract_id: str, limit_id: str, group_id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.limits.RemoveLimitResponse`
+- `get_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.limits.LimitsResponse`
+- `remove_limit(self, *, contract_id: str, limit_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.limits.RemoveLimitResponse`
 - `set_limit(self, *, limits: list[dict], api_version: str = 'v1') -> api_client_opti24.models.limits.SetLimitResponse`
 
 ## `api_client_opti24.services.region_limits`
@@ -7170,9 +7387,9 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_region_limits(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RegionLimitResponse`
-- `remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: Optional[str] = None, api_version: str = 'v1') -> dict`
-- `set_region_limit(self, *, region_limits: list[dict], api_version: str = 'v1') -> dict`
+- `get_region_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RegionLimitResponse`
+- `remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RemoveRegionLimit`
+- `set_region_limit(self, *, region_limits: list[dict], api_version: str = 'v1') -> dict[str, typing.Any]`
 
 ## `api_client_opti24.services.reports`
 
@@ -7200,8 +7417,8 @@ Invites – функционал регистрации пользователе
 - `get_report_job_list_v1(self, *, api_version: str = 'v1') -> api_client_opti24.models.reports.ReportV1JobList`
 - `get_report_jobs(self, *, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportJobList`
 - `get_reports(self, *, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportList`
-- `order_report(self, *, report_id: str, format: str, params: dict, emails: Optional[str] = None, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportOrderResponse`
-- `order_report_v1(self, *, contract_id: str, start: str, end: str, report_format: str, email: str = None, cards_list: Optional[list[str]] = None, group_id: Optional[list[str]] = None, archive: bool = False, api_version: str = 'v1') -> api_client_opti24.models.reports.ReportV1OrderResponse`
+- `order_report(self, *, report_id: str, format: str, params: dict, emails: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportOrderResponse`
+- `order_report_v1(self, *, contract_id: str, start: str, end: str, report_format: str, email: str | None = None, cards_list: list[str] | None = None, group_id: list[str] | None = None, archive: bool = False, api_version: str = 'v1') -> api_client_opti24.models.reports.ReportV1OrderResponse`
 
 ## `api_client_opti24.services.restrictions`
 
@@ -7215,8 +7432,8 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_restrictions(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionGetResponse`
-- `remove_restriction(self, *, contract_id: str, restriction_id: str, group_id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionRemoveResponse`
+- `get_restrictions(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionGetResponse`
+- `remove_restriction(self, *, contract_id: str, restriction_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionRemoveResponse`
 - `set_restriction(self, *, restrictions: list[dict], api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionSetResponse`
 
 ## `api_client_opti24.services.templates`
@@ -7240,18 +7457,18 @@ Invites – функционал регистрации пользователе
 - `create_template_georestriction(self, template_id: str, payload: dict, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
 - `create_template_limit(self, template_id: str, payload: dict, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
 - `create_template_restriction(self, template_id: str, payload: dict, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
-- `delete_template(self, template_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateDeleteResponse`
-- `delete_template_georestriction(self, template_id: str, georestriction_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateGeoRestrictionDeleteResponse`
-- `delete_template_limit(self, template_id: str, limit_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitDeleteResponse`
-- `delete_template_restriction(self, template_id: str, restriction_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionDeleteResponse`
+- `delete_template(self, template_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateDeleteResponse`
+- `delete_template_georestriction(self, template_id: str, georestriction_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateGeoRestrictionDeleteResponse`
+- `delete_template_limit(self, template_id: str, limit_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateLimitDeleteResponse`
+- `delete_template_restriction(self, template_id: str, restriction_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateRestrictionDeleteResponse`
 - `get_template_georestrictions(self, template_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateGeoRestrictionListResponse`
 - `get_template_limits(self, template_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitListResponse`
 - `get_template_restrictions(self, template_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionListResponse`
 - `get_templates(self, contract_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplatesListResponse`
 - `update_template(self, template_id: str, contract_id: str, type_: str, name: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateCreateResponse`
-- `update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
+- `update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict, api_version: str = 'v2', use_post: bool = True) -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
 - `update_template_limit(self, *, template_id: str, limit_id: str, limits: list[dict], use_post: bool = True, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
-- `update_template_restriction(self, template_id: str, restriction_id: str, payload: dict, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
+- `update_template_restriction(self, template_id: str, restriction_id: str, payload: dict, api_version: str = 'v2', use_post: bool = True) -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
 
 ## `api_client_opti24.services.transactions`
 
@@ -7265,10 +7482,10 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_card_transactions_v2(self, *, card_id: str, contract_id: Optional[str] = None, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Optional[Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool]] = None, sort_by: Optional[str] = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
-- `get_transaction_detail(self, *, transaction_id: str, contract_id: Optional[str] = None, api_version: str = 'v2') -> api_client_opti24.models.transactions.TransactionDetailResponse`
-- `get_transactions_v1(self, *, contract_id: str, card_id: Optional[str] = None, count: int = 20, api_version: str = 'v1', filter_fn: Optional[Callable[[api_client_opti24.models.transactions.TransactionV1], bool]] = None, sort_by: Optional[str] = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV1Response`
-- `get_transactions_v2(self, *, contract_id: str, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Optional[Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool]] = None, sort_by: Optional[str] = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
+- `get_card_transactions_v2(self, *, card_id: str, contract_id: str | None = None, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
+- `get_transaction_detail(self, *, transaction_id: str, contract_id: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.transactions.TransactionDetailResponse`
+- `get_transactions_v1(self, *, contract_id: str, card_id: str | None = None, count: int = 20, api_version: str = 'v1', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionV1], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV1Response`
+- `get_transactions_v2(self, *, contract_id: str, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
 
 ## `api_client_opti24.services.users`
 
@@ -7285,7 +7502,7 @@ Invites – функционал регистрации пользователе
 - `attach_card(self, *, user_id: str, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
 - `attach_contracts(self, *, user_id: str, contracts: list[dict], api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
 - `create_user(self, *, uuid: str, mobile: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserCreateResponse`
-- `delete_user(self, *, user_id: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
+- `delete_user(self, *, user_id: str, use_post: bool = False, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
 - `detach_card(self, *, user_id: str, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
 - `detach_contracts(self, *, user_id: str, contracts: list[str], api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
 - `get_users(self, *, sort: str | None = None, page: int | None = None, on_page: int | None = None, q: str | None = None, filter: dict | None = None, api_version: str = 'v2') -> api_client_opti24.models.users.UserListResponse`
@@ -7302,15 +7519,15 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `confirm_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `confirm_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
 - `create_virtual_card(self, user_id: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
 - `delete_mpc(self, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.SimpleActionResponse`
-- `generate_payment_qr(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `generate_payment_qr(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
 - `get_mpc_qr_list(self, *, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCListResponse`
-- `init_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `init_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
 - `release_virtual_card(self, *, type_: str | None = None, template_id: str | None = None, user_id: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
 - `reset_mpc(self, card_id: str, type_: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.ResetMPCResponse`
-- `update_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `update_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
 
 ## `api_client_opti24.session`
 
@@ -7356,17 +7573,59 @@ errors defaults to 'strict'.
 
 Описание отсутствует.
 
-### `AsyncTransport`
+### `AsyncHTTPClient`
 
-Описание отсутствует.
+Base class for protocol classes.
 
-Сигнатура: `AsyncTransport(base_url: 'str', client, default_timeout: 'float' = 30.0)`
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `AsyncHTTPClient(*args, **kwargs)`
 
 Публичные методы:
 
 - `aclose(self) -> 'None'`
-- `request(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers=None, retry_auth: 'bool' = True, timeout: 'float | None' = None, method_name: 'str | None' = None, **kwargs) -> 'Any'`
-- `request_stream(self, method: 'str', url: 'str', headers=None, **kwargs) -> 'bytes'`
+- `request(self, method: 'str', url: 'str', **kwargs: 'Any') -> 'httpx.Response'`
+- `stream(self, method: 'str', url: 'str', **kwargs: 'Any')`
+
+### `AsyncTransport`
+
+Описание отсутствует.
+
+Сигнатура: `AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, auth_recovery: 'AuthRecovery | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'logging.Logger | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = <function sleep>, monotonic: 'Callable[[], float]' = <built-in function monotonic>)`
+
+Публичные методы:
+
+- `aclose(self) -> 'None'`
+- `request(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers=None, retry_auth: 'bool' = True, timeout: 'float | None' = None, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, **kwargs) -> 'DecodedPayload'`
+- `request_stream(self, method: 'str', url: 'str', headers=None, *, method_name: 'str | None' = None, **kwargs) -> 'bytes'`
+- `set_auth_recovery(self, auth_recovery: 'AuthRecovery') -> 'None'`
 
 ## `api_client_opti24.utils`
 

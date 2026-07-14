@@ -43,6 +43,12 @@ class DummyClient(UsersMixin):
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
         if method == "delete" and endpoint.startswith("users/"):
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
+        if (
+            method == "post"
+            and endpoint.startswith("users/")
+            and kwargs.get("data", {}).get("_method") == "DELETE"
+        ):
+            return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
         return {"status": {"code": 200}, "data": {}, "timestamp": 1710000000}
 
 
@@ -84,5 +90,15 @@ async def test_attach_and_detach_card():
 async def test_delete_user():
     client = DummyClient()
     result = await client.delete_user(user_id="1-USER")
+    assert isinstance(result, UserBoolResponse)
+    assert result.data is True
+
+
+@pytest.mark.asyncio
+async def test_delete_user_supports_post_method_override():
+    client = DummyClient()
+
+    result = await client.delete_user(user_id="1-USER", use_post=True)
+
     assert isinstance(result, UserBoolResponse)
     assert result.data is True

@@ -7,6 +7,7 @@ def test_sanitize_for_logging_redacts_sensitive_keys():
             "api_key": "super-secret",
             "nested": {"password": "very-secret", "plain": "ok"},
             "items": [{"session_id": "SESSION-1"}],
+            "card_id": "CARD-1",
         }
     )
 
@@ -14,6 +15,7 @@ def test_sanitize_for_logging_redacts_sensitive_keys():
     assert sanitized["nested"]["password"] == "***"
     assert sanitized["nested"]["plain"] == "ok"
     assert sanitized["items"][0]["session_id"] == "***"
+    assert sanitized["card_id"] == "***"
 
 
 def test_scrub_redacts_inline_sensitive_values():

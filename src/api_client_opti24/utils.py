@@ -23,18 +23,34 @@ SENSITIVE_LOG_KEYS = {
     "phone",
     "email",
     "login",
+    "id",
+    "uuid",
+    "card_id",
+    "client_id",
+    "contract_id",
+    "group_id",
+    "invite_id",
+    "job_id",
+    "office_id",
+    "poi_id",
+    "report_id",
+    "template_id",
+    "transaction_id",
+    "user_id",
 }
 
 _EMAIL_RE = re.compile(r"([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\.[A-Za-z]{2,})")
 _PHONE_RE = re.compile(r"(?<!\d)(\+?\d[\d\-\s()]{8,}\d)(?!\d)")
 _SENSITIVE_KEY_RE = re.compile(
     r"\b(api[_-]?key|authorization|password|session[_-]?id|token|secret|"
-    r"access[_-]?token|refresh[_-]?token|code|mobile(?:_phone)?|phone|email|login)\b",
+    r"access[_-]?token|refresh[_-]?token|code|mobile(?:_phone)?|phone|email|login|uuid|"
+    r"(?:card|client|contract|group|invite|job|office|poi|report|template|transaction|user)?[_-]?id)\b",
     flags=re.IGNORECASE,
 )
 _KEY_VALUE_RE = re.compile(
     r"(?P<prefix>(?P<key>api[_-]?key|authorization|password|session[_-]?id|token|secret|"
-    r"access[_-]?token|refresh[_-]?token|code|mobile(?:_phone)?|phone|email|login)"
+    r"access[_-]?token|refresh[_-]?token|code|mobile(?:_phone)?|phone|email|login|uuid|"
+    r"(?:card|client|contract|group|invite|job|office|poi|report|template|transaction|user)?[_-]?id)"
     r"['\"]?\s*[:=]\s*['\"]?)(?P<value>[^,'\"}\]\s]+)",
     flags=re.IGNORECASE,
 )

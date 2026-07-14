@@ -3,10 +3,10 @@ from __future__ import annotations
 import importlib
 import inspect
 import pkgutil
+import re
 import sys
 from dataclasses import is_dataclass
 from pathlib import Path
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_PATH = PROJECT_ROOT / "src"
@@ -17,7 +17,6 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from api_client_opti24.modeling import BaseModel
-
 
 PACKAGE_NAME = "api_client_opti24"
 EXCLUDED_MODULES = {
@@ -38,7 +37,8 @@ def iter_package_modules(package_name: str) -> list[str]:
 
 def format_signature(obj: object) -> str:
     try:
-        return str(inspect.signature(obj))
+        signature = str(inspect.signature(obj))
+        return re.sub(r" at 0x[0-9a-fA-F]+", "", signature)
     except (TypeError, ValueError):
         return "()"
 

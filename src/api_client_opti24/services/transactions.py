@@ -38,8 +38,8 @@ class TransactionsMixin:
         if sort_by:
             try:
                 result.sort(key=lambda x: getattr(x, sort_by, None), reverse=reverse)
-            except Exception as e:
-                logger.warning(f"Ошибка сортировки по '{sort_by}': {e}")
+            except Exception:
+                logger.warning("Transaction sorting failed")
 
         return result
 

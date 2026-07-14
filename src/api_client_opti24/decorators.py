@@ -1,9 +1,9 @@
 import functools
 from contextvars import ContextVar
 
-from .logger import logger
+from .logger import bind_logger, reset_logger
+from .logger import logger as default_logger
 from .session import SessionManager
-from .utils import sanitize_for_logging
 
 _current_api_method_name: ContextVar[str | None] = ContextVar(
     "current_api_method_name",
@@ -15,18 +15,27 @@ def get_current_api_method_name() -> str | None:
     return _current_api_method_name.get()
 
 
-def api_method(require_session: bool = False, default_version: str = "v1"):
+def api_method(
+    require_session: bool = False,
+    default_version: str = "v1",
+    *,
+    http_method: str | None = None,
+    endpoint: str | None = None,
+    retry_class: str | None = None,
+):
     def decorator(func):
         @functools.wraps(func)
         async def wrapper(self, *args, **kwargs):
             token = _current_api_method_name.set(func.__name__)
             method_name = f"{self.__class__.__name__}.{func.__name__}"
+            active_logger = getattr(self, "logger", default_logger)
+            logger_token = bind_logger(active_logger)
             if "api_version" not in kwargs:
                 kwargs["api_version"] = default_version
 
             try:
                 if require_session:
-                    logger.info("[%s] ensuring authenticated session", method_name)
+                    active_logger.info("[%s] ensuring authenticated session", method_name)
                     session_manager = getattr(self, "session_manager", None)
                     if session_manager is None:
                         session_manager = SessionManager()
@@ -51,25 +60,37 @@ def api_method(require_session: bool = False, default_version: str = "v1"):
                             f"{method_name} requires session but auth_user is unavailable"
                         )
 
-                logger.info(
-                    "➡ Вызов %s, args=%s, kwargs=%s",
+                active_logger.info(
+                    "Calling API method=%s version=%s",
                     method_name,
-                    sanitize_for_logging(args),
-                    sanitize_for_logging(kwargs),
+                    kwargs.get("api_version"),
                 )
 
                 result = await func(self, *args, **kwargs)
-                logger.info("✅ %s завершён. Тип результата: %s", method_name, type(result).__name__)
+                active_logger.info(
+                    "API method completed method=%s result_type=%s",
+                    method_name,
+                    type(result).__name__,
+                )
                 return result
-            except Exception as e:
-                logger.error("❌ Ошибка в %s: %s", method_name, e, exc_info=True)
+            except Exception as exc:
+                active_logger.error(
+                    "API method failed method=%s error_type=%s",
+                    method_name,
+                    type(exc).__name__,
+                    exc_info=True,
+                )
                 raise
             finally:
+                reset_logger(logger_token)
                 _current_api_method_name.reset(token)
 
         wrapper.__api_method_config__ = {
             "require_session": require_session,
             "default_version": default_version,
+            "http_method": http_method.upper() if http_method is not None else None,
+            "endpoint": endpoint,
+            "retry_class": retry_class,
         }
 
         return wrapper

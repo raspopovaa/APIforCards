@@ -1,7 +1,6 @@
-from typing import Optional
-
 from ..decorators import api_method
 from ..logger import logger
+from ..modeling import decode_model
 from ..models.reports import (
     ReportJobList,
     ReportList,
@@ -43,7 +42,7 @@ class ReportsMixin:
             api_version=api_version,
             headers=self._headers(include_session=True),
         )
-        return ReportList(**raw.get("data", {}))
+        return decode_model(ReportList, raw.get("data", {}))
 
     @api_method(require_session=True, default_version="v2")
     async def order_report(
@@ -52,7 +51,7 @@ class ReportsMixin:
         report_id: str,
         format: str,
         params: dict,
-        emails: Optional[str] = None,
+        emails: str | None = None,
         api_version: str = "v2",
     ) -> ReportOrderResponse:
         """
@@ -62,7 +61,7 @@ class ReportsMixin:
         if emails:
             body["emails"] = emails
 
-        logger.info(f"Заказ отчета (id={report_id}, format={format}, emails={emails})")
+        logger.info("Ordering report format=%s delivery=%s", format, bool(emails))
 
         raw = await self._request(
             "post",
@@ -71,7 +70,7 @@ class ReportsMixin:
             headers=self._headers(include_session=True),
             json=body,
         )
-        return ReportOrderResponse(**raw.get("data", {}))
+        return decode_model(ReportOrderResponse, raw.get("data", {}))
 
     @api_method(require_session=True, default_version="v2")
     async def get_report_jobs(
@@ -89,7 +88,7 @@ class ReportsMixin:
             api_version=api_version,
             headers=self._headers(include_session=True),
         )
-        return ReportJobList(**raw.get("data", {}))
+        return decode_model(ReportJobList, raw.get("data", {}))
 
     @api_method(require_session=True, default_version="v2")
     async def download_report_file(
@@ -104,7 +103,7 @@ class ReportsMixin:
         ⚠️ Важно: успешный запрос возможен только спустя ~300 секунд
         после заказа отчета.
         """
-        logger.info(f"Скачивание отчета (job_id={job_id}, api_version={api_version})")
+        logger.info("Downloading report version=%s", api_version)
 
         content = await self.transport.request_stream(
             "get",
@@ -112,7 +111,7 @@ class ReportsMixin:
             headers=self._headers(include_session=True),
         )
 
-        logger.info(f"Отчет (job_id={job_id}) успешно загружен ({len(content)} байт)")
+        logger.info("Report downloaded bytes=%s", len(content))
         return content
 
     # -------- v1 --------
@@ -124,9 +123,9 @@ class ReportsMixin:
         start: str,
         end: str,
         report_format: str,
-        email: str = None,
-        cards_list: Optional[list[str]] = None,
-        group_id: Optional[list[str]] = None,
+        email: str | None = None,
+        cards_list: list[str] | None = None,
+        group_id: list[str] | None = None,
         archive: bool = False,
         api_version: str = "v1",
     ) -> ReportV1OrderResponse:
@@ -149,7 +148,7 @@ class ReportsMixin:
         if archive:
             params["archive"] = "true"
 
-        logger.info(f"Заказ отчета (v1) для договора {contract_id}, формат={report_format}")
+        logger.info("Ordering report version=v1 format=%s", report_format)
 
         raw = await self._request(
             "get",
@@ -158,7 +157,7 @@ class ReportsMixin:
             headers=self._headers(include_session=True),
             params=params,
         )
-        return ReportV1OrderResponse(report_ids=raw.get("data", []))
+        return decode_model(ReportV1OrderResponse, {"report_ids": raw.get("data", [])})
 
     @api_method(require_session=True, default_version="v1")
     async def get_report_job_list_v1(
@@ -176,7 +175,7 @@ class ReportsMixin:
             api_version=api_version,
             headers=self._headers(include_session=True),
         )
-        return ReportV1JobList(jobs=raw.get("data", []))
+        return decode_model(ReportV1JobList, {"jobs": raw.get("data", [])})
 
     @api_method(require_session=True, default_version="v1")
     async def download_report_file_v1(
@@ -198,7 +197,7 @@ class ReportsMixin:
         if archive:
             params["archive"] = "true"
 
-        logger.info(f"Скачивание отчета (v1) job_id={job_id}, archive={archive}")
+        logger.info("Downloading report version=v1 archive=%s", archive)
 
         content = await self.transport.request_stream(
             "get",
@@ -207,5 +206,5 @@ class ReportsMixin:
             params=params,
         )
 
-        logger.info(f"Файл отчета (v1, job_id={job_id}) успешно загружен ({len(content)} байт)")
+        logger.info("Report downloaded version=v1 bytes=%s", len(content))
         return content

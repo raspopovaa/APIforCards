@@ -42,7 +42,7 @@ class RestrictionsMixin:
             params=params,
         )
 
-        logger.debug(f"GET /restriction response: {raw}")
+        logger.debug("Restriction list received")
         return RestrictionGetResponse(**raw)
 
     # ---------------- Установка ----------------
@@ -70,7 +70,7 @@ class RestrictionsMixin:
             data=body,
         )
 
-        logger.debug(f"POST /setRestriction response: {raw}")
+        logger.debug("Restriction updated")
         return RestrictionSetResponse(**raw)
 
     # ---------------- Удаление ----------------
@@ -101,5 +101,5 @@ class RestrictionsMixin:
             data=body,
         )
 
-        logger.debug(f"POST /removeRestriction response: {raw}")
+        logger.debug("Restriction removed")
         return RestrictionRemoveResponse(**raw)

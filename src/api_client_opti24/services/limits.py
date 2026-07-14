@@ -56,7 +56,7 @@ class LimitsMixin:
             params=params,
         )
 
-        logger.debug(f"GET /limit params={params} -> {raw}")
+        logger.debug("Limits received")
         return LimitsResponse(**raw)
 
     # ------------------- POST /setLimit -------------------
@@ -86,7 +86,7 @@ class LimitsMixin:
             data=body,
         )
 
-        logger.info(f"POST /setLimit body={body} -> {raw}")
+        logger.info("Limit updated")
         return SetLimitResponse(**raw)
 
     # ------------------- POST /removeLimit -------------------
@@ -125,5 +125,5 @@ class LimitsMixin:
             data=body,
         )
 
-        logger.info(f"POST /removeLimit body={body} -> {raw}")
+        logger.info("Limit removed")
         return RemoveLimitResponse(**raw)

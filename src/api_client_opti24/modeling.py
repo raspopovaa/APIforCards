@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import inspect
-from types import UnionType
-from dataclasses import MISSING, Field as DataclassField, dataclass, field, fields
+from collections.abc import Callable
+from dataclasses import MISSING, dataclass, field, fields, is_dataclass
+from dataclasses import Field as DataclassField
 from datetime import datetime
-from typing import Any, Callable, ClassVar, Union, get_args, get_origin, get_type_hints
-
+from types import UnionType
+from typing import Any, ClassVar, Self, Union, get_args, get_origin, get_type_hints
 
 REQUIRED = object()
 
@@ -50,14 +51,10 @@ def field_validator(
     **_: Any,
 ) -> Callable[[Callable[..., Any]], Any]:
     def decorator(func: Callable[..., Any]) -> Any:
-        setattr(
-            func,
-            "__field_validator_config__",
-            {
-                "fields": field_names,
-                "mode": mode,
-            },
-        )
+        func.__dict__["__field_validator_config__"] = {
+            "fields": field_names,
+            "mode": mode,
+        }
         return func
 
     return decorator
@@ -130,6 +127,33 @@ class BaseModel:
             setattr(self, model_field.name, value)
 
     @classmethod
+    def model_validate(cls, payload: dict[str, Any]) -> Self:
+        return cls(**payload)
+
+    def model_dump(self, *, by_alias: bool = False) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for model_field in fields(self):
+            key = (
+                model_field.metadata.get("alias") or model_field.name
+                if by_alias
+                else model_field.name
+            )
+            result[key] = self._dump_value(getattr(self, model_field.name))
+        return result
+
+    @classmethod
+    def _dump_value(cls, value: Any) -> Any:
+        if isinstance(value, BaseModel):
+            return value.model_dump()
+        if isinstance(value, list):
+            return [cls._dump_value(item) for item in value]
+        if isinstance(value, tuple):
+            return tuple(cls._dump_value(item) for item in value)
+        if isinstance(value, dict):
+            return {key: cls._dump_value(item) for key, item in value.items()}
+        return value
+
+    @classmethod
     def _extract_input_value(cls, model_field: DataclassField[Any], payload: dict[str, Any]) -> tuple[Any, bool]:
         if model_field.name in payload:
             return payload[model_field.name], True
@@ -150,7 +174,7 @@ class BaseModel:
 
     @staticmethod
     def _apply_validators(
-        model_cls: type["BaseModel"],
+        model_cls: type[BaseModel],
         validators: list[Callable[[Any], Any]],
         value: Any,
     ) -> Any:
@@ -339,3 +363,12 @@ class BaseModel:
             return annotation.__name__
 
         return str(annotation).replace("typing.", "")
+
+
+def decode_model[ModelT](model_type: type[ModelT], payload: dict[str, Any]) -> ModelT:
+    validator = getattr(model_type, "model_validate", None)
+    if callable(validator):
+        return validator(payload)
+    if is_dataclass(model_type):
+        return model_type(**payload)
+    raise TypeError(f"Unsupported response model: {model_type.__name__}")

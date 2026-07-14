@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Архитектура SDK</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f3;
+        --card: #ffffff;
+        --text: #182025;
+        --muted: #5f6b73;
+        --accent: #0e7490;
+        --border: #d7dde1;
+        --code-bg: #eef2f4;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(180deg, #eef3f1 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 12px 40px rgba(24, 32, 37, 0.06);
+        padding: 28px;
+      }
+      .nav {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .nav a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      h1, h2, h3 {
+        line-height: 1.2;
+      }
+      h1 { margin-top: 0; font-size: 2rem; }
+      h2 {
+        margin-top: 2.4rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+      }
+      p, li {
+        color: var(--text);
+        line-height: 1.65;
+      }
+      ul {
+        padding-left: 1.2rem;
+      }
+      code {
+        background: var(--code-bg);
+        padding: 0.15rem 0.35rem;
+        border-radius: 6px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      pre {
+        background: var(--code-bg);
+        padding: 16px;
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+      pre code {
+        background: transparent;
+        padding: 0;
+      }
+      .muted {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="nav">
+        <a href="./index.html">Главная</a>
+        <a href="./api-reference.html">API Reference</a>
+        <a href="./spec-compatibility.html">Совместимость</a>
+        <a href="./architecture.html">Архитектура</a>
+        <a href="./security.html">Безопасность</a>
+      </div>
+      <div class="card">
+        <h1>Архитектура SDK</h1>
+<h2>Request pipeline</h2>
+<p>1. Доменный метод устанавливает имя операции через <code>@api_method</code>. 2. <code>APIClient</code> получает декларативный <code>EndpointSpec</code> из registry. 3. Timeout, <code>retry_class</code> и <code>idempotent</code> передаются в <code>AsyncTransport</code>. 4. Transport применяет rate limit, retry и при необходимости единственный re-auth. 5. <code>ResponseDecoder</code> одинаково проверяет HTTP-код и <code>payload.status.code</code>. 6. Доменный сервис преобразует payload через <code>decode_model</code>.</p>
+<h2>Декларативные endpoints</h2>
+<p>Все маршруты находятся в <code>endpoints.py</code>. Registry не использует AST, <code>inspect</code>, динамический импорт сервисов или соглашения об именовании методов. <code>MethodSpec</code> сохранён как alias <code>EndpointSpec</code> для обратной совместимости.</p>
+<h2>Dependency injection</h2>
+<p><code>APIClient</code> принимает <code>transport</code>, <code>session_manager</code>, <code>registry</code>, <code>logger</code> и <code>clock</code>. <code>AsyncTransport</code> отдельно принимает HTTP client, response decoder, политики, logger и clock. Transport не знает об <code>APIClient</code>; re-auth подключается через callback.</p>
+<h2>Композиционные сервисы</h2>
+<p>Новый код рекомендуется писать через:</p>
+<pre><code>
+cards = await client.cards.get_cards_v2()
+jobs = await client.reports.get_report_jobs()
+</code></pre>
+<p>Прямые методы <code>client.get_cards_v2()</code> и <code>client.get_report_jobs()</code> пока сохранены для обратной совместимости. Остальные домены могут переноситься на композицию тем же способом.</p>
+<h2>Миграция моделей</h2>
+<p>Существующий <code>BaseModel</code> поддерживает <code>model_validate()</code> и <code>model_dump()</code>. Функция <code>decode_model()</code> отделяет сервисы от конкретного modeling framework и уже используется доменами cards/reports. Следующие домены следует переносить по одному, после чего внутренний framework можно заменить стандартными dataclass либо внешним валидатором без изменения сервисного API.</p>
+      </div>
+    </div>
+  </body>
+</html>

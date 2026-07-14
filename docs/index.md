@@ -6,6 +6,9 @@
 
 - [README проекта](https://github.com/raspopovaa/APIforCards/blob/main/README.md)
 - [Автоматически сгенерированный API Reference](https://github.com/raspopovaa/APIforCards/blob/main/docs/api-reference.md)
+- [Совместимость со спецификацией](https://github.com/raspopovaa/APIforCards/blob/main/docs/spec-compatibility.md)
+- [Архитектура SDK](https://github.com/raspopovaa/APIforCards/blob/main/docs/architecture.md)
+- [Информационная безопасность](https://github.com/raspopovaa/APIforCards/blob/main/docs/security.md)
 
 ## Как обновлять документацию
 

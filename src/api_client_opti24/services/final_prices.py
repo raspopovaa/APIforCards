@@ -21,7 +21,7 @@ class FinalPricesMixin:
         Получение финальных цен на АЗС по карте (POST /vip/v2/cards/{card_id}/calculatePrices)
         """
         payload = {"poi_id": poi_id, "goods": goods}
-        logger.info("Запрос финальных цен для карты %s: %s", card_id, payload)
+        logger.info("Requesting final prices")
 
         data = await self._request(
             "post",
@@ -47,7 +47,7 @@ class FinalPricesMixin:
         (POST /vip/v2/cards/{card_id}/checkPurchase)
         """
         payload = {"poi_id": poi_id, "goods": goods}
-        logger.info("Проверка возможности покупки для карты %s: %s", card_id, payload)
+        logger.info("Checking purchase availability")
 
         data = await self._request(
             "post",

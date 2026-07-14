@@ -7,7 +7,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 - единый `APIClient`
 - доменные сервисы для карт, транзакций, пользователей, шаблонов, лимитов и отчетов
 - типизированные модели ответов
-- retry и re-auth на транспортном уровне
+- безопасные retry, re-auth и ограничение частоты на транспортном уровне
 - demo-сценарий для DEMO-стенда
 
 Проект является независимой разработкой. Использование API должно соответствовать официальным правилам и ограничениям провайдера.
@@ -33,10 +33,16 @@ APIClient SDK — асинхронная Python-библиотека для ра
 Основные слои проекта:
 
 - [client.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/client.py)  
-  Главная точка входа. Собирает `settings`, `registry`, `session_manager` и `transport`.
+  Главная точка входа. Собирает зависимости и предоставляет композиционные сервисы `client.cards` и `client.reports`.
 
 - [transport.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/transport.py)  
-  Выполняет HTTP-запросы через `httpx`, делает retry для сетевых ошибок и `429/509`, а также повторную авторизацию.
+  Независимый HTTP-слой с внедряемыми client, decoder, logger, clock и policy.
+
+- [endpoints.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/endpoints.py)
+  Декларативный каталог `EndpointSpec` для всех маршрутов без AST и runtime-import сервисов.
+
+- [response.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/response.py)
+  Единое декодирование JSON, бинарных ответов и API-ошибок.
 
 - [session.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/session.py)  
   Управляет `session_id` и активным `contract_id`.
@@ -45,7 +51,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
   Хранит метаданные методов и timeout policy.
 
 - [modeling.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/modeling.py)  
-  Собственный stdlib-only слой моделей на `dataclasses` с ручной валидацией.
+  Совместимый stdlib-only слой моделей и адаптер `decode_model` для постепенной миграции.
 
 ## 📦 Установка
 
@@ -101,20 +107,15 @@ asyncio.run(smoke_check())
 
 ```python
 import asyncio
+from pathlib import Path
 
-from api_client_opti24 import APIClient
-from api_client_opti24.config import APISettings
+from api_client_opti24 import APIClient, APISettings
 
 
 async def main() -> None:
-    settings = APISettings.from_env()
+    settings = APISettings.from_env(env_file=Path(__file__).with_name(".env"))
 
-    async with APIClient(
-        base_url=settings.base_url,
-        api_key=settings.api_key,
-        login=settings.login,
-        password=settings.password,
-    ) as client:
+    async with APIClient(settings=settings) as client:
         auth_response = await client.auth_user()
         print("=== АВТОРИЗАЦИЯ ===")
         print(auth_response.data.contracts[0])
@@ -123,7 +124,7 @@ async def main() -> None:
         print("=== СТАТИСТИКА ===")
         print(info_response.data.client_info)
 
-        cards_response = await client.get_cards_v2()
+        cards_response = await client.cards.get_cards_v2()
         print("=== КАРТЫ V2 ===")
         print(cards_response.total_count)
 
@@ -134,7 +135,9 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Этот пример требует реального доступа к API и корректно заполненного `.env`.
+Этот пример требует реального доступа к API. Создайте файл `.env` рядом со
+скриптом: пример загружает его по пути `Path(__file__).with_name(".env")` и
+поэтому не зависит от рабочей директории IDE.
 
 ## 📖 Конфигурация
 
@@ -153,14 +156,27 @@ API_BASE_URL=https://api-demo.opti-24.ru/vip/
 API_KEY=your_api_key_here
 API_LOGIN=your_login
 API_PASSWORD=your_password
+API_REQUESTS_PER_SECOND=2
 REQUEST_LOG_FILE=./api_requests.jsonl
 LOGGER_FILE=./api.log
 LOG_LEVEL=INFO
 ```
 
+`API_BASE_URL` должен быть полным абсолютным адресом и начинаться с `https://`
+(либо с `http://` для локального тестового сервера). Пустой адрес и значение без
+протокола отклоняются при создании клиента с понятной ошибкой.
+
+`API_REQUESTS_PER_SECOND` включает упреждающее ограничение частоты. По
+предоставленной спецификации для DEMO рекомендуется `2`, для production — `5`.
+Если переменная не задана, SDK не вводит клиентский лимит и полагается на сервер.
+
+Удалённые адреса принимаются только по HTTPS. HTTP разрешён для loopback; для
+изолированных тестовых стендов его можно явно включить через
+`API_ALLOW_INSECURE_HTTP=true`.
+
 ## 🎯 Что важно в реализации
 
-- **♻️ Retry и backoff** для сетевых ошибок и rate limiting
+- **♻️ Policy-driven retry** для безопасных запросов и авторизации
 - **🔐 Re-auth** при потере сессии
 - **📚 Типизированные модели** на `dataclasses`
 - **🧾 Описание полей** через `Field(..., description=...)`
@@ -168,6 +184,34 @@ LOG_LEVEL=INFO
 - **⚖️ Policy “спека vs реальность”** в спорных местах
 - **🗂️ Полный registry** с demo-флагами и alias-маршрутами для веток API
 - **🚨 Устойчивый error handling** по HTTP-коду и `payload.status.code`
+
+### Безопасность повторов
+
+- `GET`, `HEAD` и `OPTIONS` повторяются после временных сетевых ошибок и `429/509`.
+- Запросы изменения данных не повторяются после сетевой ошибки: результат операции
+  мог сохраниться на сервере, поэтому автоматический retry создаёт риск дубля.
+- Авторизация имеет отдельный интервал не менее 5 секунд между попытками.
+- Политики можно заменить через `APISettings.retry_policy` и
+  `APISettings.rate_limit_policy`, а transport — внедрить в `APIClient` для тестов.
+- Решение о повторе учитывает одновременно `EndpointSpec.retry_class` и
+  `EndpointSpec.idempotent`.
+
+### Информационная безопасность
+
+- SDK не пишет request/response payload, URL с идентификаторами и текст исключения в лог.
+- Ключи, сессии, пароли, телефоны, email и идентификаторы очищаются logger-фильтром.
+- Внешний logger получает тот же фильтр автоматически через dependency injection.
+- Raw payload ошибки доступен в `APIError.context` и должен обрабатываться как
+  чувствительная информация; его не следует отправлять в общие журналы.
+- Секреты следует передавать через окружение или secret manager и никогда не
+  сохранять в репозитории.
+
+### POST-fallback для PUT и DELETE
+
+Спецификация допускает вызов части операций через `POST` с полем `_method`.
+Методы удаления пользователей, приглашений и элементов шаблонов принимают
+`use_post=True`; методы обновления шаблонов используют этот режим по умолчанию.
+SDK создаёт копию payload и не изменяет переданный вызывающим кодом объект.
 
 ## 🚨 Ошибки API
 
@@ -238,6 +282,9 @@ print(AuthUserResponse.describe())
 - генератор: [scripts/generate_api_docs.py](https://github.com/raspopovaa/APIforCards/blob/main/scripts/generate_api_docs.py)
 - индекс документации: [docs/index.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/index.md)
 - сгенерированный reference: [docs/api-reference.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/api-reference.md)
+- совместимость со спецификацией: [docs/spec-compatibility.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/spec-compatibility.md)
+- архитектура: [docs/architecture.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/architecture.md)
+- информационная безопасность: [docs/security.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/security.md)
 
 Что генерируется автоматически:
 

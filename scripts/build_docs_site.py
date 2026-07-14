@@ -4,12 +4,17 @@ import html
 import re
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DOCS_PATH = PROJECT_ROOT / "docs"
 SITE_PATH = DOCS_PATH / "site"
 REFERENCE_MD = DOCS_PATH / "api-reference.md"
 REFERENCE_HTML = SITE_PATH / "api-reference.html"
+SPEC_COMPATIBILITY_MD = DOCS_PATH / "spec-compatibility.md"
+SPEC_COMPATIBILITY_HTML = SITE_PATH / "spec-compatibility.html"
+ARCHITECTURE_MD = DOCS_PATH / "architecture.md"
+ARCHITECTURE_HTML = SITE_PATH / "architecture.html"
+SECURITY_MD = DOCS_PATH / "security.md"
+SECURITY_HTML = SITE_PATH / "security.html"
 INDEX_HTML = SITE_PATH / "index.html"
 
 
@@ -186,6 +191,9 @@ def build_page(title: str, body: str) -> str:
       <div class="nav">
         <a href="./index.html">Главная</a>
         <a href="./api-reference.html">API Reference</a>
+        <a href="./spec-compatibility.html">Совместимость</a>
+        <a href="./architecture.html">Архитектура</a>
+        <a href="./security.html">Безопасность</a>
       </div>
       <div class="card">
         {body}
@@ -202,6 +210,9 @@ def build_index_page() -> str:
 <p class="muted">Статическая документация SDK, публикуемая через GitHub Pages.</p>
 <ul>
   <li><a href="./api-reference.html">API Reference</a></li>
+  <li><a href="./spec-compatibility.html">Совместимость со спецификацией</a></li>
+  <li><a href="./architecture.html">Архитектура SDK</a></li>
+  <li><a href="./security.html">Информационная безопасность</a></li>
   <li><a href="https://github.com/raspopovaa/APIforCards">GitHub repository</a></li>
   <li><a href="https://github.com/raspopovaa/APIforCards/blob/main/README.md">README</a></li>
 </ul>
@@ -216,6 +227,22 @@ def main() -> None:
     reference_body = markdown_to_html(reference_markdown)
     REFERENCE_HTML.write_text(
         build_page("API Reference", reference_body),
+        encoding="utf-8",
+    )
+    compatibility_markdown = SPEC_COMPATIBILITY_MD.read_text(encoding="utf-8")
+    compatibility_body = markdown_to_html(compatibility_markdown)
+    SPEC_COMPATIBILITY_HTML.write_text(
+        build_page("Совместимость со спецификацией", compatibility_body),
+        encoding="utf-8",
+    )
+    architecture_body = markdown_to_html(ARCHITECTURE_MD.read_text(encoding="utf-8"))
+    ARCHITECTURE_HTML.write_text(
+        build_page("Архитектура SDK", architecture_body),
+        encoding="utf-8",
+    )
+    security_body = markdown_to_html(SECURITY_MD.read_text(encoding="utf-8"))
+    SECURITY_HTML.write_text(
+        build_page("Информационная безопасность", security_body),
         encoding="utf-8",
     )
     INDEX_HTML.write_text(build_index_page(), encoding="utf-8")

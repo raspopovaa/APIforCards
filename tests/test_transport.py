@@ -1,15 +1,17 @@
-import pytest
 import httpx
-from httpx import Response, Request
+import pytest
+from httpx import Request, Response
+
 from api_client_opti24 import AsyncTransport
 from api_client_opti24.errors import (
-    APIError,
     AccessDeniedError,
+    APIError,
     NotAuthenticatedError,
     NotFoundError,
     RateLimitError,
     ServerError,
 )
+from api_client_opti24.policies import RateLimitPolicy, RetryPolicy
 
 
 class DummyResp(Response):
@@ -31,22 +33,51 @@ class DummyResp(Response):
         return self._text or ""
 
 
+@pytest.mark.parametrize("base_url", ["", "   "])
+def test_transport_rejects_empty_base_url(base_url):
+    with pytest.raises(ValueError, match="base_url is empty"):
+        AsyncTransport(base_url=base_url)
+
+
+@pytest.mark.parametrize("base_url", ["api.example.com/vip", "/vip/"])
+def test_transport_rejects_base_url_without_protocol(base_url):
+    with pytest.raises(ValueError, match="starting with http:// or https://"):
+        AsyncTransport(base_url=base_url)
+
+
+def test_transport_normalizes_base_url():
+    transport = AsyncTransport(base_url="  https://api.example.com/vip/  ")
+
+    assert transport.base_url == "https://api.example.com/vip/"
+
+
+def test_transport_rejects_plain_http_for_remote_host():
+    with pytest.raises(ValueError, match="must use https"):
+        AsyncTransport(base_url="http://api.example.com/vip/")
+
+
+def test_transport_allows_plain_http_for_loopback():
+    transport = AsyncTransport(base_url="http://127.0.0.1:8080/vip/")
+
+    assert transport.base_url == "http://127.0.0.1:8080/vip/"
+
+
 def test_handle_response_success_json():
-    t = AsyncTransport(base_url="http://example.com", client=None)
+    t = AsyncTransport(base_url="https://example.com")
     resp = DummyResp(200, json_data={"ok": True})
     result = t._handle_response(resp, "test")
     assert result == {"ok": True}
 
 
 def test_handle_response_success_text_fallback():
-    t = AsyncTransport(base_url="http://example.com", client=None)
+    t = AsyncTransport(base_url="https://example.com")
     resp = DummyResp(200, text="plain text")
     result = t._handle_response(resp, "test")
     assert result == "plain text"
 
 
 def test_handle_response_raises_on_payload_error_inside_http_200():
-    t = AsyncTransport(base_url="http://example.com", client=None)
+    t = AsyncTransport(base_url="https://example.com")
     resp = DummyResp(
         200,
         json_data={
@@ -75,7 +106,7 @@ def test_handle_response_raises_on_payload_error_inside_http_200():
     ],
 )
 def test_handle_response_errors(status, exc_type):
-    t = AsyncTransport(base_url="http://example.com", client=None)
+    t = AsyncTransport(base_url="https://example.com")
     resp = DummyResp(status, text="error response")
     with pytest.raises(exc_type):
         t._handle_response(resp, "endpoint")
@@ -83,11 +114,10 @@ def test_handle_response_errors(status, exc_type):
 
 @pytest.mark.asyncio
 async def test_request_retries_rate_limit_then_succeeds(monkeypatch):
-    class DummyParent:
-        session_manager = None
-
-    transport = AsyncTransport(base_url="http://example.com", client=DummyParent())
-    transport._rate_limit_backoff_seconds = 0
+    transport = AsyncTransport(
+        base_url="https://example.com",
+        retry_policy=RetryPolicy(rate_limit_backoff_seconds=0),
+    )
     calls = 0
 
     async def fake_request(method, url, headers=None, timeout=None, **kwargs):
@@ -107,12 +137,13 @@ async def test_request_retries_rate_limit_then_succeeds(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_request_retries_network_errors_then_succeeds(monkeypatch):
-    class DummyParent:
-        session_manager = None
-
-    transport = AsyncTransport(base_url="http://example.com", client=DummyParent())
-    transport._network_backoff_min_seconds = 0
-    transport._network_backoff_max_seconds = 0
+    transport = AsyncTransport(
+        base_url="https://example.com",
+        retry_policy=RetryPolicy(
+            network_backoff_min_seconds=0,
+            network_backoff_max_seconds=0,
+        ),
+    )
     calls = 0
 
     async def fake_request(method, url, headers=None, timeout=None, **kwargs):
@@ -128,3 +159,175 @@ async def test_request_retries_network_errors_then_succeeds(monkeypatch):
 
     assert result == {"ok": True}
     assert calls == 3
+
+
+@pytest.mark.asyncio
+async def test_request_does_not_retry_unsafe_post_after_network_error(monkeypatch):
+    transport = AsyncTransport(
+        base_url="https://example.com",
+        retry_policy=RetryPolicy(
+            network_attempts=5,
+            network_backoff_min_seconds=0,
+            network_backoff_max_seconds=0,
+        ),
+    )
+    calls = 0
+
+    async def fake_request(method, url, headers=None, timeout=None, **kwargs):
+        nonlocal calls
+        calls += 1
+        raise httpx.RequestError("response state is unknown")
+
+    monkeypatch.setattr(transport.client, "request", fake_request)
+
+    with pytest.raises(httpx.RequestError):
+        await transport.request("post", "invoice", retry_class="never")
+
+    assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_request_retries_explicitly_idempotent_operation(monkeypatch):
+    transport = AsyncTransport(
+        base_url="https://example.com",
+        retry_policy=RetryPolicy(
+            network_attempts=2,
+            network_backoff_min_seconds=0,
+            network_backoff_max_seconds=0,
+        ),
+    )
+    calls = 0
+
+    async def fake_request(method, url, headers=None, timeout=None, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise httpx.RequestError("temporary network failure")
+        return DummyResp(200, json_data={"ok": True})
+
+    monkeypatch.setattr(transport.client, "request", fake_request)
+
+    result = await transport.request(
+        "post",
+        "idempotent-command",
+        retry_class="safe",
+        idempotent=True,
+    )
+
+    assert result == {"ok": True}
+    assert calls == 2
+
+
+@pytest.mark.asyncio
+async def test_request_uses_injected_auth_recovery(monkeypatch):
+    recovered = 0
+    seen_headers = []
+
+    async def recover_auth():
+        nonlocal recovered
+        recovered += 1
+        return {"session_id": "new-session"}
+
+    transport = AsyncTransport(
+        base_url="https://example.com",
+        auth_recovery=recover_auth,
+        retry_policy=RetryPolicy(network_attempts=1, rate_limit_attempts=1),
+    )
+    responses = iter(
+        [
+            DummyResp(
+                200,
+                json_data={
+                    "status": {
+                        "code": 401,
+                        "errors": [
+                            {"type": "notAuthenticated", "message": "Session expired"}
+                        ],
+                    }
+                },
+            ),
+            DummyResp(200, json_data={"status": {"code": 200}, "data": True}),
+        ]
+    )
+
+    async def fake_request(method, url, headers=None, timeout=None, **kwargs):
+        seen_headers.append(headers)
+        return next(responses)
+
+    monkeypatch.setattr(transport.client, "request", fake_request)
+
+    result = await transport.request("get", "info", headers={"session_id": "old-session"})
+
+    assert result["data"] is True
+    assert recovered == 1
+    assert seen_headers == [
+        {"session_id": "old-session"},
+        {"session_id": "new-session"},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_rate_limiter_spaces_requests_without_real_sleep(monkeypatch):
+    now = 0.0
+    sleep_calls = []
+
+    def monotonic():
+        return now
+
+    async def fake_sleep(delay):
+        nonlocal now
+        sleep_calls.append(delay)
+        now += delay
+
+    transport = AsyncTransport(
+        base_url="https://example.com",
+        retry_policy=RetryPolicy(network_attempts=1, rate_limit_attempts=1),
+        rate_limit_policy=RateLimitPolicy(requests_per_second=2),
+        sleep=fake_sleep,
+        monotonic=monotonic,
+    )
+
+    async def fake_request(method, url, headers=None, timeout=None, **kwargs):
+        return DummyResp(200, json_data={"ok": True})
+
+    monkeypatch.setattr(transport.client, "request", fake_request)
+
+    await transport.request("get", "first")
+    await transport.request("get", "second")
+
+    assert sleep_calls == [0.5]
+
+
+@pytest.mark.asyncio
+async def test_auth_limiter_spaces_repeated_authorizations(monkeypatch):
+    now = 0.0
+    sleep_calls = []
+
+    def monotonic():
+        return now
+
+    async def fake_sleep(delay):
+        nonlocal now
+        sleep_calls.append(delay)
+        now += delay
+
+    transport = AsyncTransport(
+        base_url="https://example.com",
+        retry_policy=RetryPolicy(
+            network_attempts=1,
+            rate_limit_attempts=1,
+            auth_retry_min_interval_seconds=5,
+        ),
+        sleep=fake_sleep,
+        monotonic=monotonic,
+    )
+
+    async def fake_request(method, url, headers=None, timeout=None, **kwargs):
+        return DummyResp(200, json_data={"ok": True})
+
+    monkeypatch.setattr(transport.client, "request", fake_request)
+
+    await transport.request("post", "authUser", retry_class="network_only")
+    await transport.request("post", "authUser", retry_class="network_only")
+
+    assert sleep_calls == [5]

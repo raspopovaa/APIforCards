@@ -7,8 +7,13 @@ from ..utils import hash_password
 
 
 class AuthMixin:
-    @api_method(require_session=True, default_version="v1")
-    async def logoff(self, api_version: str = "v1") -> dict:
+    @api_method(
+        require_session=True,
+        default_version="v1",
+        http_method="GET",
+        endpoint="logoff",
+    )
+    async def logoff(self, api_version: str = "v1") -> dict[str, object]:
         response = await self._request(
             "get",
             "logoff",
@@ -18,15 +23,22 @@ class AuthMixin:
         self.session_manager.reset()
         return response
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method(
+        require_session=True,
+        default_version="v1",
+        http_method="GET",
+        endpoint="info",
+    )
     async def get_info(
         self,
         api_version: str = "v1",
         period: str | None = None,
-    ) -> dict:
+    ) -> GetInfoResponse:
         """Получение статистических данных по вызовам всех методов."""
         if period is None:
-            period = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            clock = getattr(self, "clock", None)
+            now = clock.now() if clock is not None else datetime.now()
+            period = now.strftime("%Y-%m-%d %H:%M:%S")
         data = await self._request(
             "get",
             "info",
@@ -37,7 +49,13 @@ class AuthMixin:
 
         return GetInfoResponse(**data)
 
-    @api_method(require_session=False, default_version="v1")
+    @api_method(
+        require_session=False,
+        default_version="v1",
+        http_method="POST",
+        endpoint="authUser",
+        retry_class="network_only",
+    )
     async def auth_user(
         self,
         *,
@@ -75,7 +93,7 @@ class AuthMixin:
         )
 
         if selected:
-            logger.info(f"Выбран контракт: id={selected['id']}, number={selected['number']}")
+            logger.info("Contract selected")
         else:
             logger.warning("Контракт не найден — contract_id не установлен")
 

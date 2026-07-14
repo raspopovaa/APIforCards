@@ -1,5 +1,6 @@
 from ..decorators import api_method
 from ..logger import logger
+from ..modeling import decode_model
 from ..models.cards import (
     BoolResponse,
     CardDetailResponse,
@@ -26,7 +27,7 @@ class CardsMixin:
 
         """
         params = {"contract_id": contract_id, "cache": str(cache).lower()}
-        logger.info("Запрос списка карт (v1) с параметрами: %s", params)
+        logger.info("Requesting cards version=v1")
         data = await self._request(
             "get",
             "cards",
@@ -35,7 +36,7 @@ class CardsMixin:
             params=params,
         )
 
-        return CardsListResponse(**data)
+        return decode_model(CardsListResponse, data)
 
     @api_method(require_session=True, default_version="v2")
     async def get_cards_v2(
@@ -98,7 +99,7 @@ class CardsMixin:
         )
 
         # Возвращаем полный типизированный ответ API
-        return CardsV2Response(**response)
+        return decode_model(CardsV2Response, response)
 
     # --- Список карт по группе ---
     @api_method(require_session=True, default_version="v1")
@@ -107,7 +108,7 @@ class CardsMixin:
     ) -> CardGroupResponse:
         """Получение списка топливных карт по группе карт."""
         params = {"contract_id": contract_id, "group_id": group_id}
-        logger.info("Запрос списка карт по группе: %s", params)
+        logger.info("Requesting cards by group")
         data = await self._request(
             "get",
             "cards",
@@ -115,7 +116,7 @@ class CardsMixin:
             headers=self._headers(include_session=True),
             params=params,
         )
-        return CardGroupResponse(**data)
+        return decode_model(CardGroupResponse, data)
 
     # --- Водители по карте ---
     @api_method(require_session=True, default_version="v2")
@@ -123,7 +124,7 @@ class CardsMixin:
         self, card_id: str, contract_id: str, api_version: str = "v2"
     ) -> CardDriversResponse:
         """Получение списка водителей по карте."""
-        logger.info("Запрос водителей по карте %s для договора %s", card_id, contract_id)
+        logger.info("Requesting card drivers")
         data = await self._request(
             "get",
             f"cards/{card_id}/drivers",
@@ -131,7 +132,7 @@ class CardsMixin:
             headers=self._headers(include_session=True),
             params={"contract_id": contract_id},
         )
-        return CardDriversResponse(**data)
+        return decode_model(CardDriversResponse, data)
 
     # --- Детальная информация по карте ---
     @api_method(require_session=True, default_version="v1")
@@ -140,7 +141,7 @@ class CardsMixin:
     ) -> CardDetailResponse:
         """Получение детальной информации по карте."""
         params = {"contract_id": contract_id, "card_id": card_id}
-        logger.info("Запрос детальной информации по карте: %s", params)
+        logger.info("Requesting card details")
         data = await self._request(
             "get",
             "cards",
@@ -148,7 +149,7 @@ class CardsMixin:
             headers=self._headers(include_session=True),
             params=params,
         )
-        return CardDetailResponse(**data)
+        return decode_model(CardDetailResponse, data)
 
     # --- Блокировка / разблокировка карты ---
     @api_method(require_session=True, default_version="v1")
@@ -171,9 +172,9 @@ class CardsMixin:
             "block": str(block).lower(),
         }
         if block:
-            logger.info("Блокировка карт: %s", payload)
+            logger.info("Blocking cards")
         else:
-            logger.info("Разблокировка карт: %s", payload)
+            logger.info("Unblocking cards")
 
         data = await self._request(
             "post",
@@ -182,7 +183,7 @@ class CardsMixin:
             headers=self._headers(include_session=True),
             data=payload,
         )
-        return IDListResponse(**data)
+        return decode_model(IDListResponse, data)
 
     # --- Установка комментария ---
     @api_method(require_session=True, default_version="v1")
@@ -191,7 +192,7 @@ class CardsMixin:
     ) -> BoolResponse:
         """Установить комментарий на топливную карту."""
         payload = {"card_id": card_id, "contract_id": contract_id, "comment": comment}
-        logger.info("Установка комментария на карту: %s", payload)
+        logger.info("Updating card comment")
         data = await self._request(
             "post",
             "setCardComment",
@@ -199,7 +200,7 @@ class CardsMixin:
             headers=self._headers(include_session=True),
             data=payload,
         )
-        return BoolResponse(**data)
+        return decode_model(BoolResponse, data)
 
     # --- Запрос одноразового кода для сброса PIN ---
     @api_method(require_session=True, default_version="v2")
@@ -211,7 +212,7 @@ class CardsMixin:
         Вам будет отправлено письмо с кодом подтверждения на почту, которая привязана к вашей учетной записи.
         Данный код нужно ввести в метод resetPIN для завершения операции сброса попыток.
         """
-        logger.info("Запрос(verifyPIN) одноразового кода для сброса PIN карты %s", card_id)
+        logger.info("Requesting PIN reset verification")
         data = await self._request(
             "post",
             f"cards/{card_id}/verifyPIN",
@@ -219,7 +220,7 @@ class CardsMixin:
             headers=self._headers(include_session=True),
             params={"contract_id": contract_id},
         )
-        return BoolResponse(**data)
+        return decode_model(BoolResponse, data)
 
     # --- Подтверждение сброса PIN ---
     @api_method(require_session=True, default_version="v2")
@@ -231,7 +232,7 @@ class CardsMixin:
         Код подтверждения будет отправлен на почту, которая привязана к вашей учетной записи.
         """
         payload = {"contract_id": contract_id, "code": code}
-        logger.info("Запрос resetPIN для карты %s", card_id)
+        logger.info("Resetting card PIN")
         data = await self._request(
             "post",
             f"cards/{card_id}/resetPIN",
@@ -239,4 +240,4 @@ class CardsMixin:
             headers=self._headers(include_session=True),
             data=payload,
         )
-        return BoolResponse(**data)
+        return decode_model(BoolResponse, data)

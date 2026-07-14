@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any
 
 from ..decorators import api_method
 from ..models.region_limits import (
@@ -18,8 +18,8 @@ class RegionLimitsMixin:
         self,
         *,
         contract_id: str,
-        card_id: Optional[str] = None,
-        group_id: Optional[str] = None,
+        card_id: str | None = None,
+        group_id: str | None = None,
         api_version: str = "v1",
     ) -> RegionLimitResponse:
         """
@@ -46,7 +46,7 @@ class RegionLimitsMixin:
         *,
         region_limits: list[dict],
         api_version: str = "v1",
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Установка/изменение регионального лимита по карте или группе карт.
         Для изменения лимита необходимо передавать его ID.
@@ -67,9 +67,9 @@ class RegionLimitsMixin:
         *,
         contract_id: str,
         regionlimit_id: str,
-        group_id: Optional[str] = None,
+        group_id: str | None = None,
         api_version: str = "v1",
-    ) -> dict:
+    ) -> RemoveRegionLimit:
         """
         Удаление регионального лимита по карте или группе карт.
         """

@@ -88,6 +88,9 @@
       <div class="nav">
         <a href="./index.html">Главная</a>
         <a href="./api-reference.html">API Reference</a>
+        <a href="./spec-compatibility.html">Совместимость</a>
+        <a href="./architecture.html">Архитектура</a>
+        <a href="./security.html">Безопасность</a>
       </div>
       <div class="card">
         <h1>API Reference</h1>
@@ -100,7 +103,7 @@
 <p>Описание отсутствует.</p>
 <h3><code>APIClient</code></h3>
 <p>Методы работы с топливными картами.</p>
-<p>Сигнатура: <code>APIClient(base_url: str, api_key: str, login: str, password: str)</code></p>
+<p>Сигнатура: <code>APIClient(base_url: str | None = None, api_key: str | None = None, login: str | None = None, password: str | None = None, *, settings: api_client_opti24.config.APISettings | None = None, transport: api_client_opti24.transport.AsyncTransport | None = None, session_manager: api_client_opti24.session.SessionManager | None = None, registry: api_client_opti24.registry.MethodRegistry | None = None, logger: logging.Logger | None = None, clock: api_client_opti24.runtime.Clock | None = None)</code></p>
 <p>Публичные методы:</p>
 <ul>
 <li><code>aclose(self) -&gt; None</code></li>
@@ -108,11 +111,11 @@
 <h2><code>api_client_opti24.config</code></h2>
 <p>Описание отсутствует.</p>
 <h3><code>APISettings</code></h3>
-<p>APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0))</p>
-<p>Сигнатура: <code>APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0)) -&gt; None</code></p>
+<p>APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None))</p>
+<p>Сигнатура: <code>APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None)) -&gt; None</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>from_env(*, load_dotenv: 'bool' = True) -&gt; "'APISettings'"</code></li>
+<li><code>from_env(*, load_dotenv: 'bool' = True, env_file: 'str | Path' = '.env') -&gt; 'APISettings'</code></li>
 </ul>
 <h3><code>TimeoutPolicy</code></h3>
 <p>TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float' = 120.0)</p>
@@ -125,10 +128,33 @@
 <p>Описание отсутствует.</p>
 <h3><code>api_method</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>api_method(require_session: bool = False, default_version: str = 'v1')</code></p>
+<p>Сигнатура: <code>api_method(require_session: bool = False, default_version: str = 'v1', *, http_method: str | None = None, endpoint: str | None = None, retry_class: str | None = None)</code></p>
 <h3><code>get_current_api_method_name</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>get_current_api_method_name() -&gt; str | None</code></p>
+<h2><code>api_client_opti24.endpoints</code></h2>
+<p>Описание отсутствует.</p>
+<h3><code>EndpointSpec</code></h3>
+<p>EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())</p>
+<p>Сигнатура: <code>EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -&gt; None</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>iter_routes(self) -&gt; 'tuple[RouteVariant, ...]'</code></li>
+<li><code>supports(self, version: 'str') -&gt; 'bool'</code></li>
+</ul>
+<h3><code>RouteVariant</code></h3>
+<p>RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool')</p>
+<p>Сигнатура: <code>RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool') -&gt; None</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>supports(self, version: 'str') -&gt; 'bool'</code></li>
+</ul>
+<h3><code>endpoint</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>endpoint(name: 'str', domain: 'str', http_method: 'str', path: 'str', version: 'str', *, demo: 'bool' = True, timeout: 'str' = 'default', retry: 'str | None' = None, variants: 'tuple[RouteVariant, ...]' = ()) -&gt; 'EndpointSpec'</code></p>
+<h3><code>route</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>route(http_method: 'str', path: 'str', version: 'str', *, demo: 'bool') -&gt; 'RouteVariant'</code></p>
 <h2><code>api_client_opti24.env</code></h2>
 <p>Описание отсутствует.</p>
 <h3><code>load_env_file</code></h3>
@@ -174,16 +200,21 @@
 <p>Публичные методы:</p>
 <ul>
 <li><code>describe() -&gt; 'dict[str, dict[str, Any]]'</code></li>
+<li><code>model_dump(self, *, by_alias: 'bool' = False) -&gt; 'dict[str, Any]'</code></li>
+<li><code>model_validate(payload: 'dict[str, Any]') -&gt; 'Self'</code></li>
 </ul>
 <h3><code>FieldInfo</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>FieldInfo(default: 'Any' = &lt;object object at 0x10294c700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x102d16270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>FieldInfo(default: 'Any' = &lt;object object&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'None'</code></p>
 <h3><code>ValidationError</code></h3>
 <p>Inappropriate argument value (of correct type).</p>
 <p>Сигнатура: <code>ValidationError()</code></p>
 <h3><code>Field</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>Field(default: 'Any' = &lt;object object at 0x10294c700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x102d16270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'FieldInfo'</code></p>
+<p>Сигнатура: <code>Field(default: 'Any' = &lt;object object&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'FieldInfo'</code></p>
+<h3><code>decode_model</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>decode_model(model_type: 'type[ModelT]', payload: 'dict[str, Any]') -&gt; 'ModelT'</code></p>
 <h3><code>field_validator</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>field_validator(*field_names: 'str', mode: 'str' = 'after', **_: 'Any') -&gt; 'Callable[[Callable[..., Any]], Any]'</code></p>
@@ -5906,37 +5937,123 @@ timestamp:
 <ul>
 <li><code>describe() -&gt; 'dict[str, dict[str, Any]]'</code></li>
 </ul>
+<h2><code>api_client_opti24.payloads</code></h2>
+<p>Описание отсутствует.</p>
+<h3><code>with_method_override</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>with_method_override(payload: 'Mapping[str, Any] | Sequence[Mapping[str, Any]] | None', method: 'str') -&gt; 'dict[str, Any] | list[dict[str, Any]]'</code></p>
+<h2><code>api_client_opti24.policies</code></h2>
+<p>Описание отсутствует.</p>
+<h3><code>RateLimitPolicy</code></h3>
+<p>RateLimitPolicy(requests_per_second: 'float | None' = None)</p>
+<p>Сигнатура: <code>RateLimitPolicy(requests_per_second: 'float | None' = None) -&gt; None</code></p>
+<h3><code>RetryClass</code></h3>
+<p>Enum where members are also (and must be) strings</p>
+<p>Сигнатура: <code>RetryClass(*values)</code></p>
+<h3><code>RetryPolicy</code></h3>
+<p>RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network_backoff_min_seconds: 'float' = 2.0, network_backoff_max_seconds: 'float' = 60.0, rate_limit_backoff_seconds: 'float' = 0.5, auth_retry_min_interval_seconds: 'float' = 5.0)</p>
+<p>Сигнатура: <code>RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network_backoff_min_seconds: 'float' = 2.0, network_backoff_max_seconds: 'float' = 60.0, rate_limit_backoff_seconds: 'float' = 0.5, auth_retry_min_interval_seconds: 'float' = 5.0) -&gt; None</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>initial_network_backoff(self, retry_class: 'str | RetryClass') -&gt; 'float'</code></li>
+<li><code>network_attempt_count(self, retry_class: 'str | RetryClass', http_method: 'str', *, idempotent: 'bool | None' = None) -&gt; 'int'</code></li>
+<li><code>rate_limit_attempt_count(self, retry_class: 'str | RetryClass', http_method: 'str', *, idempotent: 'bool | None' = None) -&gt; 'int'</code></li>
+</ul>
 <h2><code>api_client_opti24.registry</code></h2>
 <p>Описание отсутствует.</p>
 <h3><code>MethodRegistry</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>MethodRegistry(specs: 'dict[str, MethodSpec] | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>MethodRegistry(specs: 'dict[str, EndpointSpec] | None' = None) -&gt; 'None'</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>find_by_endpoint(self, endpoint: 'str', version: 'str', http_method: 'str | None' = None) -&gt; 'MethodSpec | None'</code></li>
-<li><code>get(self, name: 'str') -&gt; 'MethodSpec'</code></li>
-<li><code>list_all(self) -&gt; 'tuple[MethodSpec, ...]'</code></li>
-<li><code>list_domain(self, domain: 'str') -&gt; 'tuple[MethodSpec, ...]'</code></li>
-<li><code>register(self, spec: 'MethodSpec') -&gt; 'None'</code></li>
-</ul>
-<h3><code>MethodSpec</code></h3>
-<p>MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())</p>
-<p>Сигнатура: <code>MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -&gt; None</code></p>
-<p>Публичные методы:</p>
-<ul>
-<li><code>iter_routes(self) -&gt; 'tuple[RouteVariant, ...]'</code></li>
-<li><code>supports(self, version: 'str') -&gt; 'bool'</code></li>
-</ul>
-<h3><code>RouteVariant</code></h3>
-<p>RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool')</p>
-<p>Сигнатура: <code>RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool') -&gt; None</code></p>
-<p>Публичные методы:</p>
-<ul>
-<li><code>supports(self, version: 'str') -&gt; 'bool'</code></li>
+<li><code>find_by_endpoint(self, endpoint: 'str', version: 'str', http_method: 'str | None' = None) -&gt; 'EndpointSpec | None'</code></li>
+<li><code>get(self, name: 'str') -&gt; 'EndpointSpec'</code></li>
+<li><code>list_all(self) -&gt; 'tuple[EndpointSpec, ...]'</code></li>
+<li><code>list_domain(self, domain: 'str') -&gt; 'tuple[EndpointSpec, ...]'</code></li>
+<li><code>register(self, spec: 'EndpointSpec') -&gt; 'None'</code></li>
 </ul>
 <h3><code>build_default_registry</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>build_default_registry() -&gt; 'MethodRegistry'</code></p>
+<h2><code>api_client_opti24.response</code></h2>
+<p>Описание отсутствует.</p>
+<h3><code>ResponseDecoder</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>ResponseDecoder(*, logger: 'logging.Logger | None' = None) -&gt; 'None'</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>decode(self, response: 'httpx.Response', endpoint: 'str', *, method_name: 'str | None' = None) -&gt; 'DecodedPayload'</code></li>
+<li><code>decode_bytes(self, response: 'httpx.Response', content: 'bytes', endpoint: 'str', *, method_name: 'str | None' = None) -&gt; 'bytes'</code></li>
+<li><code>parse(self, response: 'httpx.Response') -&gt; 'DecodedPayload'</code></li>
+</ul>
+<h2><code>api_client_opti24.runtime</code></h2>
+<p>Описание отсутствует.</p>
+<h3><code>Clock</code></h3>
+<p>Base class for protocol classes.</p>
+<p>Protocol classes are defined as::</p>
+<p>class Proto(Protocol): def meth(self) -&gt; int: ...</p>
+<p>Such classes are primarily used with static type checkers that recognize structural subtyping (static duck-typing).</p>
+<p>For example::</p>
+<p>class C: def meth(self) -&gt; int: return 0</p>
+<p>def func(x: Proto) -&gt; int: return x.meth()</p>
+<p>func(C())  # Passes static type check</p>
+<p>See PEP 544 for details. Protocol classes decorated with @typing.runtime_checkable act as simple-minded runtime protocols that check only the presence of given attributes, ignoring their type signatures. Protocol classes can be generic, they are defined as::</p>
+<p>class GenProto<a href="Protocol">T</a>: def meth(self) -&gt; T: ...</p>
+<p>Сигнатура: <code>Clock(*args, **kwargs)</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>monotonic(self) -&gt; 'float'</code></li>
+<li><code>now(self) -&gt; 'datetime'</code></li>
+<li><code>sleep(self, seconds: 'float') -&gt; 'None'</code></li>
+</ul>
+<h3><code>SystemClock</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>SystemClock()</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>monotonic(self) -&gt; 'float'</code></li>
+<li><code>now(self) -&gt; 'datetime'</code></li>
+<li><code>sleep(self, seconds: 'float') -&gt; 'None'</code></li>
+</ul>
+<h2><code>api_client_opti24.service_groups</code></h2>
+<p>Описание отсутствует.</p>
+<h3><code>BoundService</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>BoundService(client: 'ServiceClient') -&gt; 'None'</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>auth_user(self, **kwargs: 'Any') -&gt; 'Any'</code></li>
+</ul>
+<h3><code>CardsService</code></h3>
+<p>Методы работы с топливными картами.</p>
+<p>Сигнатура: <code>CardsService(client: 'ServiceClient') -&gt; 'None'</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>auth_user(self, **kwargs: 'Any') -&gt; 'Any'</code></li>
+</ul>
+<h3><code>ReportsService</code></h3>
+<p>Методы для работы с отчетами (v1 и v2) Будет возвращен транзакционный отчет, относящийся к указанному договору. Дата начала периода должна быть меньше или равна дате окончания периода. В противном случае сервер автоматически выставит дату окончания периода равной дате начала. Длина периода не должна превышать 3 календарных месяцев. Если длина периода будет превышена, то он автоматически будет сокращен до 3 календарных месяцев с указанной даты начала периода. Карты и группы карт, указанные в запросе, должны принадлежать указанному договору. Ограничения отправки отчетов на Email составляет 15мб. Длительность формирования отчетов за период 1 месяц составляет порядка 300 секунд, при выборе периода более 1 месяца, время формирования отчета может занять до 15 минут. Теперь отчет можно заказать и скачать по ссылке. Заказ производится стандартным образом, только не нужно указывать email, иначе прийдет на email..</p>
+<p>Сигнатура: <code>ReportsService(client: 'ServiceClient') -&gt; 'None'</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>auth_user(self, **kwargs: 'Any') -&gt; 'Any'</code></li>
+</ul>
+<h3><code>ServiceClient</code></h3>
+<p>Base class for protocol classes.</p>
+<p>Protocol classes are defined as::</p>
+<p>class Proto(Protocol): def meth(self) -&gt; int: ...</p>
+<p>Such classes are primarily used with static type checkers that recognize structural subtyping (static duck-typing).</p>
+<p>For example::</p>
+<p>class C: def meth(self) -&gt; int: return 0</p>
+<p>def func(x: Proto) -&gt; int: return x.meth()</p>
+<p>func(C())  # Passes static type check</p>
+<p>See PEP 544 for details. Protocol classes decorated with @typing.runtime_checkable act as simple-minded runtime protocols that check only the presence of given attributes, ignoring their type signatures. Protocol classes can be generic, they are defined as::</p>
+<p>class GenProto<a href="Protocol">T</a>: def meth(self) -&gt; T: ...</p>
+<p>Сигнатура: <code>ServiceClient(*args, **kwargs)</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>auth_user(self, **kwargs: 'Any') -&gt; 'Any'</code></li>
+</ul>
 <h2><code>api_client_opti24.services</code></h2>
 <p>Описание отсутствует.</p>
 <p>_Публичные классы и функции не обнаружены._</p>
@@ -5948,8 +6065,8 @@ timestamp:
 <p>Публичные методы:</p>
 <ul>
 <li><code>create_invite(self, *, data: dict[str, typing.Any], with_send: bool = True, api_version: str = 'v2') -&gt; api_client_opti24.models.invites.InviteResponse</code></li>
-<li><code>delete_invite(self, *, invite_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.invites.InviteBoolResponse</code></li>
-<li><code>get_invites(self, *, role: Optional[str] = None, user_id: Optional[str] = None, sort: Optional[str] = None, status: Optional[str] = None, q: Optional[str] = None, page: Optional[int] = None, on_page: Optional[int] = None, api_version: str = 'v2') -&gt; api_client_opti24.models.invites.InviteList</code></li>
+<li><code>delete_invite(self, *, invite_id: str, use_post: bool = False, api_version: str = 'v2') -&gt; api_client_opti24.models.invites.InviteBoolResponse</code></li>
+<li><code>get_invites(self, *, role: str | None = None, user_id: str | None = None, sort: str | None = None, status: str | None = None, q: str | None = None, page: int | None = None, on_page: int | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.invites.InviteList</code></li>
 <li><code>prolong_invite(self, *, invite_id: str, with_send: bool = True, api_version: str = 'v2') -&gt; api_client_opti24.models.invites.InviteBoolResponse</code></li>
 <li><code>resend_invite(self, *, invite_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.invites.InviteResponse</code></li>
 </ul>
@@ -5961,8 +6078,8 @@ timestamp:
 <p>Публичные методы:</p>
 <ul>
 <li><code>auth_user(self, *, api_version: str = 'v1', contract_id: str | None = None, contract_number: str | None = None) -&gt; api_client_opti24.models.auth.AuthUserResponse</code></li>
-<li><code>get_info(self, api_version: str = 'v1', period: str | None = None) -&gt; dict</code></li>
-<li><code>logoff(self, api_version: str = 'v1') -&gt; dict</code></li>
+<li><code>get_info(self, api_version: str = 'v1', period: str | None = None) -&gt; api_client_opti24.models.auth.GetInfoResponse</code></li>
+<li><code>logoff(self, api_version: str = 'v1') -&gt; dict[str, object]</code></li>
 </ul>
 <h2><code>api_client_opti24.services.card_group</code></h2>
 <p>Описание отсутствует.</p>
@@ -5973,7 +6090,7 @@ timestamp:
 <ul>
 <li><code>get_card_groups(self, *, contract_id: str, api_version: str = 'v1') -&gt; api_client_opti24.models.card_group.CardGroupListResponse</code></li>
 <li><code>remove_card_group(self, *, contract_id: str, group_id: str, api_version: str = 'v1') -&gt; api_client_opti24.models.card_group.RemoveCardGroupResponse</code></li>
-<li><code>set_card_group(self, *, contract_id: str, name: str, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.card_group.SetCardGroupResponse</code></li>
+<li><code>set_card_group(self, *, contract_id: str, name: str, group_id: str | None = None, api_version: str = 'v1') -&gt; api_client_opti24.models.card_group.SetCardGroupResponse</code></li>
 <li><code>set_cards_to_group(self, *, contract_id: str, group_id: str, cards_list: list[dict], api_version: str = 'v1') -&gt; api_client_opti24.models.card_group.SetCardsToGroupResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.services.cards</code></h2>
@@ -6001,12 +6118,12 @@ timestamp:
 <p>Публичные методы:</p>
 <ul>
 <li><code>get_contract_data(self, contract_id: str, api_version: str = 'v1') -&gt; api_client_opti24.models.contracts.ContractResponse</code></li>
-<li><code>get_documents(self, date_start: str, date_end: str, api_version: str = 'v2', page: int = 1, on_page: int = 10) -&gt; dict</code></li>
-<li><code>get_invoices(self, api_version: str = 'v2') -&gt; dict</code></li>
-<li><code>get_payments(self, contract_id: str, api_version: str = 'v1') -&gt; dict</code></li>
-<li><code>order_cards(self, count: int, office_id: str, api_version: str = 'v2') -&gt; dict</code></li>
-<li><code>order_documents_email(self, ids: list[str], fmt: str, emails: list[str], api_version: str = 'v2') -&gt; dict</code></li>
-<li><code>order_invoice(self, amount: float, email: str, api_version: str = 'v2') -&gt; dict</code></li>
+<li><code>get_documents(self, date_start: str, date_end: str, api_version: str = 'v2', page: int = 1, on_page: int = 10) -&gt; api_client_opti24.models.contracts.DocumentsResponse</code></li>
+<li><code>get_invoices(self, api_version: str = 'v2') -&gt; api_client_opti24.models.contracts.InvoicesResponse</code></li>
+<li><code>get_payments(self, contract_id: str, api_version: str = 'v1') -&gt; api_client_opti24.models.contracts.PaymentsResponse</code></li>
+<li><code>order_cards(self, count: int, office_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.contracts.OrderCardsResponse</code></li>
+<li><code>order_documents_email(self, ids: list[str], fmt: str, emails: list[str], api_version: str = 'v2') -&gt; api_client_opti24.models.contracts.DocumentsOrderResponse</code></li>
+<li><code>order_invoice(self, amount: float, email: str, api_version: str = 'v2') -&gt; api_client_opti24.models.contracts.InvoiceOrderResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.services.dictionaries</code></h2>
 <p>Описание отсутствует.</p>
@@ -6016,8 +6133,8 @@ timestamp:
 <p>Публичные методы:</p>
 <ul>
 <li><code>get_azs_filters(self, *, api_version: str = 'v2') -&gt; api_client_opti24.models.dictionaries.AzsFiltersResponse</code></li>
-<li><code>get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: Optional[dict] = None, id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.dictionaries.AzsListV1Response</code></li>
-<li><code>get_azs_list_v2(self, filter: Optional[dict] = None, q: Optional[str] = None, api_version: str = 'v2') -&gt; api_client_opti24.models.dictionaries.AzsListV2Response</code></li>
+<li><code>get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: dict | None = None, id: str | None = None, api_version: str = 'v1') -&gt; api_client_opti24.models.dictionaries.AzsListV1Response</code></li>
+<li><code>get_azs_list_v2(self, filter: dict | None = None, q: str | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.dictionaries.AzsListV2Response</code></li>
 <li><code>get_dictionary(self, *, name: str, api_version: str = 'v1') -&gt; api_client_opti24.models.dictionaries.DictionaryResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.services.ewallet</code></h2>
@@ -6050,8 +6167,8 @@ timestamp:
 <p>Сигнатура: <code>LimitsMixin()</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>get_limits(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.limits.LimitsResponse</code></li>
-<li><code>remove_limit(self, *, contract_id: str, limit_id: str, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.limits.RemoveLimitResponse</code></li>
+<li><code>get_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -&gt; api_client_opti24.models.limits.LimitsResponse</code></li>
+<li><code>remove_limit(self, *, contract_id: str, limit_id: str, group_id: str | None = None, api_version: str = 'v1') -&gt; api_client_opti24.models.limits.RemoveLimitResponse</code></li>
 <li><code>set_limit(self, *, limits: list[dict], api_version: str = 'v1') -&gt; api_client_opti24.models.limits.SetLimitResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.services.region_limits</code></h2>
@@ -6061,9 +6178,9 @@ timestamp:
 <p>Сигнатура: <code>RegionLimitsMixin()</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>get_region_limits(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.region_limits.RegionLimitResponse</code></li>
-<li><code>remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; dict</code></li>
-<li><code>set_region_limit(self, *, region_limits: list[dict], api_version: str = 'v1') -&gt; dict</code></li>
+<li><code>get_region_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -&gt; api_client_opti24.models.region_limits.RegionLimitResponse</code></li>
+<li><code>remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: str | None = None, api_version: str = 'v1') -&gt; api_client_opti24.models.region_limits.RemoveRegionLimit</code></li>
+<li><code>set_region_limit(self, *, region_limits: list[dict], api_version: str = 'v1') -&gt; dict[str, typing.Any]</code></li>
 </ul>
 <h2><code>api_client_opti24.services.reports</code></h2>
 <p>Описание отсутствует.</p>
@@ -6077,8 +6194,8 @@ timestamp:
 <li><code>get_report_job_list_v1(self, *, api_version: str = 'v1') -&gt; api_client_opti24.models.reports.ReportV1JobList</code></li>
 <li><code>get_report_jobs(self, *, api_version: str = 'v2') -&gt; api_client_opti24.models.reports.ReportJobList</code></li>
 <li><code>get_reports(self, *, api_version: str = 'v2') -&gt; api_client_opti24.models.reports.ReportList</code></li>
-<li><code>order_report(self, *, report_id: str, format: str, params: dict, emails: Optional[str] = None, api_version: str = 'v2') -&gt; api_client_opti24.models.reports.ReportOrderResponse</code></li>
-<li><code>order_report_v1(self, *, contract_id: str, start: str, end: str, report_format: str, email: str = None, cards_list: Optional[list[str]] = None, group_id: Optional[list[str]] = None, archive: bool = False, api_version: str = 'v1') -&gt; api_client_opti24.models.reports.ReportV1OrderResponse</code></li>
+<li><code>order_report(self, *, report_id: str, format: str, params: dict, emails: str | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.reports.ReportOrderResponse</code></li>
+<li><code>order_report_v1(self, *, contract_id: str, start: str, end: str, report_format: str, email: str | None = None, cards_list: list[str] | None = None, group_id: list[str] | None = None, archive: bool = False, api_version: str = 'v1') -&gt; api_client_opti24.models.reports.ReportV1OrderResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.services.restrictions</code></h2>
 <p>Описание отсутствует.</p>
@@ -6087,8 +6204,8 @@ timestamp:
 <p>Сигнатура: <code>RestrictionsMixin()</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>get_restrictions(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.restrictions.RestrictionGetResponse</code></li>
-<li><code>remove_restriction(self, *, contract_id: str, restriction_id: str, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.restrictions.RestrictionRemoveResponse</code></li>
+<li><code>get_restrictions(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -&gt; api_client_opti24.models.restrictions.RestrictionGetResponse</code></li>
+<li><code>remove_restriction(self, *, contract_id: str, restriction_id: str, group_id: str | None = None, api_version: str = 'v1') -&gt; api_client_opti24.models.restrictions.RestrictionRemoveResponse</code></li>
 <li><code>set_restriction(self, *, restrictions: list[dict], api_version: str = 'v1') -&gt; api_client_opti24.models.restrictions.RestrictionSetResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.services.templates</code></h2>
@@ -6102,18 +6219,18 @@ timestamp:
 <li><code>create_template_georestriction(self, template_id: str, payload: dict, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse</code></li>
 <li><code>create_template_limit(self, template_id: str, payload: dict, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateLimitCreateResponse</code></li>
 <li><code>create_template_restriction(self, template_id: str, payload: dict, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateRestrictionCreateResponse</code></li>
-<li><code>delete_template(self, template_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateDeleteResponse</code></li>
-<li><code>delete_template_georestriction(self, template_id: str, georestriction_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateGeoRestrictionDeleteResponse</code></li>
-<li><code>delete_template_limit(self, template_id: str, limit_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateLimitDeleteResponse</code></li>
-<li><code>delete_template_restriction(self, template_id: str, restriction_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateRestrictionDeleteResponse</code></li>
+<li><code>delete_template(self, template_id: str, api_version: str = 'v2', use_post: bool = False) -&gt; api_client_opti24.models.templates.TemplateDeleteResponse</code></li>
+<li><code>delete_template_georestriction(self, template_id: str, georestriction_id: str, api_version: str = 'v2', use_post: bool = False) -&gt; api_client_opti24.models.templates.TemplateGeoRestrictionDeleteResponse</code></li>
+<li><code>delete_template_limit(self, template_id: str, limit_id: str, api_version: str = 'v2', use_post: bool = False) -&gt; api_client_opti24.models.templates.TemplateLimitDeleteResponse</code></li>
+<li><code>delete_template_restriction(self, template_id: str, restriction_id: str, api_version: str = 'v2', use_post: bool = False) -&gt; api_client_opti24.models.templates.TemplateRestrictionDeleteResponse</code></li>
 <li><code>get_template_georestrictions(self, template_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateGeoRestrictionListResponse</code></li>
 <li><code>get_template_limits(self, template_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateLimitListResponse</code></li>
 <li><code>get_template_restrictions(self, template_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateRestrictionListResponse</code></li>
 <li><code>get_templates(self, contract_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplatesListResponse</code></li>
 <li><code>update_template(self, template_id: str, contract_id: str, type_: str, name: str, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateCreateResponse</code></li>
-<li><code>update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse</code></li>
+<li><code>update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict, api_version: str = 'v2', use_post: bool = True) -&gt; api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse</code></li>
 <li><code>update_template_limit(self, *, template_id: str, limit_id: str, limits: list[dict], use_post: bool = True, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateLimitCreateResponse</code></li>
-<li><code>update_template_restriction(self, template_id: str, restriction_id: str, payload: dict, api_version: str = 'v2') -&gt; api_client_opti24.models.templates.TemplateRestrictionCreateResponse</code></li>
+<li><code>update_template_restriction(self, template_id: str, restriction_id: str, payload: dict, api_version: str = 'v2', use_post: bool = True) -&gt; api_client_opti24.models.templates.TemplateRestrictionCreateResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.services.transactions</code></h2>
 <p>Описание отсутствует.</p>
@@ -6122,10 +6239,10 @@ timestamp:
 <p>Сигнатура: <code>TransactionsMixin()</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>get_card_transactions_v2(self, *, card_id: str, contract_id: Optional[str] = None, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Optional[Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool]] = None, sort_by: Optional[str] = None, reverse: bool = False) -&gt; api_client_opti24.models.transactions.TransactionsV2Response</code></li>
-<li><code>get_transaction_detail(self, *, transaction_id: str, contract_id: Optional[str] = None, api_version: str = 'v2') -&gt; api_client_opti24.models.transactions.TransactionDetailResponse</code></li>
-<li><code>get_transactions_v1(self, *, contract_id: str, card_id: Optional[str] = None, count: int = 20, api_version: str = 'v1', filter_fn: Optional[Callable[[api_client_opti24.models.transactions.TransactionV1], bool]] = None, sort_by: Optional[str] = None, reverse: bool = False) -&gt; api_client_opti24.models.transactions.TransactionsV1Response</code></li>
-<li><code>get_transactions_v2(self, *, contract_id: str, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Optional[Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool]] = None, sort_by: Optional[str] = None, reverse: bool = False) -&gt; api_client_opti24.models.transactions.TransactionsV2Response</code></li>
+<li><code>get_card_transactions_v2(self, *, card_id: str, contract_id: str | None = None, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -&gt; api_client_opti24.models.transactions.TransactionsV2Response</code></li>
+<li><code>get_transaction_detail(self, *, transaction_id: str, contract_id: str | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.transactions.TransactionDetailResponse</code></li>
+<li><code>get_transactions_v1(self, *, contract_id: str, card_id: str | None = None, count: int = 20, api_version: str = 'v1', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionV1], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -&gt; api_client_opti24.models.transactions.TransactionsV1Response</code></li>
+<li><code>get_transactions_v2(self, *, contract_id: str, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -&gt; api_client_opti24.models.transactions.TransactionsV2Response</code></li>
 </ul>
 <h2><code>api_client_opti24.services.users</code></h2>
 <p>Описание отсутствует.</p>
@@ -6137,7 +6254,7 @@ timestamp:
 <li><code>attach_card(self, *, user_id: str, card_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.users.UserBoolResponse</code></li>
 <li><code>attach_contracts(self, *, user_id: str, contracts: list[dict], api_version: str = 'v2') -&gt; api_client_opti24.models.users.UserBoolResponse</code></li>
 <li><code>create_user(self, *, uuid: str, mobile: str, api_version: str = 'v2') -&gt; api_client_opti24.models.users.UserCreateResponse</code></li>
-<li><code>delete_user(self, *, user_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.users.UserBoolResponse</code></li>
+<li><code>delete_user(self, *, user_id: str, use_post: bool = False, api_version: str = 'v2') -&gt; api_client_opti24.models.users.UserBoolResponse</code></li>
 <li><code>detach_card(self, *, user_id: str, card_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.users.UserBoolResponse</code></li>
 <li><code>detach_contracts(self, *, user_id: str, contracts: list[str], api_version: str = 'v2') -&gt; api_client_opti24.models.users.UserBoolResponse</code></li>
 <li><code>get_users(self, *, sort: str | None = None, page: int | None = None, on_page: int | None = None, q: str | None = None, filter: dict | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.users.UserListResponse</code></li>
@@ -6149,15 +6266,15 @@ timestamp:
 <p>Сигнатура: <code>VirtualCardsMixin()</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>confirm_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
+<li><code>confirm_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
 <li><code>create_virtual_card(self, user_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.VirtualCardResponse</code></li>
 <li><code>delete_mpc(self, card_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.SimpleActionResponse</code></li>
-<li><code>generate_payment_qr(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
+<li><code>generate_payment_qr(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
 <li><code>get_mpc_qr_list(self, *, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCListResponse</code></li>
-<li><code>init_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
+<li><code>init_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
 <li><code>release_virtual_card(self, *, type_: str | None = None, template_id: str | None = None, user_id: str | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.VirtualCardResponse</code></li>
 <li><code>reset_mpc(self, card_id: str, type_: str, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.ResetMPCResponse</code></li>
-<li><code>update_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
+<li><code>update_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.session</code></h2>
 <p>Описание отсутствует.</p>
@@ -6182,14 +6299,33 @@ timestamp:
 <p>Сигнатура: <code>SessionState(*values)</code></p>
 <h2><code>api_client_opti24.transport</code></h2>
 <p>Описание отсутствует.</p>
-<h3><code>AsyncTransport</code></h3>
-<p>Описание отсутствует.</p>
-<p>Сигнатура: <code>AsyncTransport(base_url: 'str', client, default_timeout: 'float' = 30.0)</code></p>
+<h3><code>AsyncHTTPClient</code></h3>
+<p>Base class for protocol classes.</p>
+<p>Protocol classes are defined as::</p>
+<p>class Proto(Protocol): def meth(self) -&gt; int: ...</p>
+<p>Such classes are primarily used with static type checkers that recognize structural subtyping (static duck-typing).</p>
+<p>For example::</p>
+<p>class C: def meth(self) -&gt; int: return 0</p>
+<p>def func(x: Proto) -&gt; int: return x.meth()</p>
+<p>func(C())  # Passes static type check</p>
+<p>See PEP 544 for details. Protocol classes decorated with @typing.runtime_checkable act as simple-minded runtime protocols that check only the presence of given attributes, ignoring their type signatures. Protocol classes can be generic, they are defined as::</p>
+<p>class GenProto<a href="Protocol">T</a>: def meth(self) -&gt; T: ...</p>
+<p>Сигнатура: <code>AsyncHTTPClient(*args, **kwargs)</code></p>
 <p>Публичные методы:</p>
 <ul>
 <li><code>aclose(self) -&gt; 'None'</code></li>
-<li><code>request(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers=None, retry_auth: 'bool' = True, timeout: 'float | None' = None, method_name: 'str | None' = None, **kwargs) -&gt; 'Any'</code></li>
-<li><code>request_stream(self, method: 'str', url: 'str', headers=None, **kwargs) -&gt; 'bytes'</code></li>
+<li><code>request(self, method: 'str', url: 'str', **kwargs: 'Any') -&gt; 'httpx.Response'</code></li>
+<li><code>stream(self, method: 'str', url: 'str', **kwargs: 'Any')</code></li>
+</ul>
+<h3><code>AsyncTransport</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, auth_recovery: 'AuthRecovery | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'logging.Logger | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = &lt;function sleep&gt;, monotonic: 'Callable[[], float]' = &lt;built-in function monotonic&gt;)</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>aclose(self) -&gt; 'None'</code></li>
+<li><code>request(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers=None, retry_auth: 'bool' = True, timeout: 'float | None' = None, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, **kwargs) -&gt; 'DecodedPayload'</code></li>
+<li><code>request_stream(self, method: 'str', url: 'str', headers=None, *, method_name: 'str | None' = None, **kwargs) -&gt; 'bytes'</code></li>
+<li><code>set_auth_recovery(self, auth_recovery: 'AuthRecovery') -&gt; 'None'</code></li>
 </ul>
 <h2><code>api_client_opti24.utils</code></h2>
 <p>Описание отсутствует.</p>

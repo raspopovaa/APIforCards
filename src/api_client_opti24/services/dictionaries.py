@@ -102,7 +102,7 @@ class DictionariesMixin:
         )
 
         # У метода data — это словарь с результатом фильтров
-        logger.info("Получен список фильтров: %s", data)
+        logger.info("Dictionary filters received")
         return AzsFiltersResponse(**data)
 
     # ==========================================================

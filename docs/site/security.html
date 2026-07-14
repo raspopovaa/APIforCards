@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>APIClient Docs</title>
+    <title>Информационная безопасность</title>
     <style>
       :root {
         color-scheme: light;
@@ -93,19 +93,31 @@
         <a href="./security.html">Безопасность</a>
       </div>
       <div class="card">
-        
-<h1>APIClient Docs</h1>
-<p class="muted">Статическая документация SDK, публикуемая через GitHub Pages.</p>
+        <h1>Информационная безопасность</h1>
+<h2>Передача данных</h2>
 <ul>
-  <li><a href="./api-reference.html">API Reference</a></li>
-  <li><a href="./spec-compatibility.html">Совместимость со спецификацией</a></li>
-  <li><a href="./architecture.html">Архитектура SDK</a></li>
-  <li><a href="./security.html">Информационная безопасность</a></li>
-  <li><a href="https://github.com/raspopovaa/APIforCards">GitHub repository</a></li>
-  <li><a href="https://github.com/raspopovaa/APIforCards/blob/main/README.md">README</a></li>
+<li>Удалённые API-адреса должны использовать HTTPS.</li>
+<li>HTTP разрешён для loopback; небезопасный режим требует явного флага.</li>
+<li>SDK не обходит географические, ролевые, IP-ограничения и серверные квоты.</li>
 </ul>
-<p>Сайт собирается автоматически из локальной документации и introspection-данных SDK.</p>
-
+<h2>Секреты</h2>
+<ul>
+<li>API key, логин и пароль передаются через окружение или secret manager.</li>
+<li><code>.env</code>, токены публикации и реальные session ID не должны попадать в Git.</li>
+<li>После случайной публикации секрет необходимо отозвать, а не только удалить</li>
+<p>из последнего коммита.</p>
+</ul>
+<h2>Журналирование</h2>
+<ul>
+<li>Request/response payload и URL с идентификаторами не журналируются.</li>
+<li>Logger-фильтр очищает credentials, session ID, телефоны, email и объектные ID.</li>
+<li>Фильтр применяется и к logger, внедрённому пользователем.</li>
+<li>В логах остаются имя операции, версия, HTTP/API-коды, тип ошибки и размер файла.</li>
+</ul>
+<h2>Ошибки</h2>
+<p><code>APIError.context.raw_payload</code> сохраняется для диагностики, но может содержать персональные или договорные данные. Его нельзя без дополнительной очистки передавать в telemetry, общие логи или внешние системы обработки ошибок.</p>
+<h2>Retry</h2>
+<p>Автоматический повтор разрешается только политикой endpoint: операция должна быть помечена подходящим <code>retry_class</code> и быть idempotent. Неопределённый сетевой результат операции изменения данных не повторяется автоматически.</p>
       </div>
     </div>
   </body>

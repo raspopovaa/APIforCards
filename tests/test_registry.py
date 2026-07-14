@@ -1,11 +1,19 @@
-from api_client_opti24.registry import build_default_registry
+import pytest
+
+from api_client_opti24.registry import (
+    EndpointSpec,
+    MethodRegistry,
+    MethodSpec,
+    build_default_registry,
+)
 
 
-def test_registry_covers_all_decorated_service_methods():
+def test_registry_covers_all_declared_endpoints():
     registry = build_default_registry()
 
     assert len(registry.list_all()) == 89
     assert all(spec.name != "list_qr_mpc" for spec in registry.list_all())
+    assert MethodSpec is EndpointSpec
 
 
 def test_registry_contains_default_versions_for_supported_methods():
@@ -30,7 +38,7 @@ def test_registry_can_resolve_method_by_endpoint_and_version():
     assert spec.domain == "cards"
 
 
-def test_registry_extracts_dynamic_endpoints_and_stream_methods():
+def test_registry_contains_parameterized_and_stream_endpoints():
     registry = build_default_registry()
 
     card_drivers = registry.get("get_card_drivers")
@@ -72,3 +80,38 @@ def test_registry_contains_demo_flags_for_demo_restricted_methods():
     assert registry.get("get_cards_by_group").demo_available is False
     assert registry.get("create_invite").demo_available is False
     assert registry.get("get_mpc_qr_list").demo_available is False
+
+
+def test_registry_disables_network_retry_for_write_methods():
+    registry = build_default_registry()
+
+    assert registry.get("get_cards_v2").retry_class == "safe"
+    assert registry.get("order_invoice").retry_class == "never"
+    assert registry.get("auth_user").retry_class == "network_only"
+
+
+def test_registry_contains_explicit_auth_metadata():
+    registry = build_default_registry()
+
+    auth = registry.get("auth_user")
+
+    assert auth.http_method == "POST"
+    assert auth.endpoint == "authUser"
+
+
+def test_registry_rejects_duplicate_method_names():
+    spec = MethodSpec(
+        name="duplicate",
+        domain="test",
+        http_method="GET",
+        endpoint="first",
+        supported_versions=("v1",),
+        default_version="v1",
+        demo_available=True,
+        idempotent=True,
+    )
+    registry = MethodRegistry()
+    registry.register(spec)
+
+    with pytest.raises(ValueError, match="already registered"):
+        registry.register(spec)

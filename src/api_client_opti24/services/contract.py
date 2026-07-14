@@ -28,7 +28,9 @@ class ContractMixin:
         return ContractResponse(**data["data"])
 
     @api_method(require_session=True, default_version="v1")
-    async def get_payments(self, contract_id: str, api_version: str = "v1") -> dict:
+    async def get_payments(
+        self, contract_id: str, api_version: str = "v1"
+    ) -> PaymentsResponse:
         """Получение данных о платежах по контракту."""
         params = {"contract_id": contract_id}
         data = await self._request(
@@ -48,7 +50,7 @@ class ContractMixin:
         api_version: str = "v2",
         page: int = 1,
         on_page: int = 10,
-    ) -> dict:
+    ) -> DocumentsResponse:
         """Получение списка первичных документов (номер документа, дата, сумма, НДС, номер договора и пр.)."""
         params = {
             "date_start": date_start,
@@ -68,10 +70,10 @@ class ContractMixin:
     @api_method(require_session=True, default_version="v2")
     async def order_documents_email(
         self, ids: list[str], fmt: str, emails: list[str], api_version: str = "v2"
-    ) -> dict:
+    ) -> DocumentsOrderResponse:
         """Заказ первичных документов по ID документа на указанные email – адреса (до 5 адресов)."""
         payload = {"id": ids, "format": fmt, "emails": emails}
-        logger.debug(f"Заказ документов: {payload}")
+        logger.debug("Ordering documents")
         data = await self._request(
             "post",
             "documents",
@@ -82,10 +84,12 @@ class ContractMixin:
         return DocumentsOrderResponse(**data)
 
     @api_method(require_session=True, default_version="v2")
-    async def order_cards(self, count: int, office_id: str, api_version: str = "v2") -> dict:
+    async def order_cards(
+        self, count: int, office_id: str, api_version: str = "v2"
+    ) -> OrderCardsResponse:
         """Заказ необходимого количества топливных карт в определенном офисе продаж."""
         payload = {"count": count, "office_id": office_id}
-        logger.debug(f"Заказ карт: {payload}")
+        logger.debug("Ordering cards")
         data = await self._request(
             "post",
             "orderCards",
@@ -96,10 +100,12 @@ class ContractMixin:
         return OrderCardsResponse(**data)
 
     @api_method(require_session=True, default_version="v2")
-    async def order_invoice(self, amount: float, email: str, api_version: str = "v2") -> dict:
+    async def order_invoice(
+        self, amount: float, email: str, api_version: str = "v2"
+    ) -> InvoiceOrderResponse:
         """Заказ счёта на оплату."""
         payload = {"sum": amount, "email": email}
-        logger.debug(f"Заказ счёта: {payload}")
+        logger.debug("Ordering invoice")
         data = await self._request(
             "post",
             "invoice",
@@ -110,7 +116,7 @@ class ContractMixin:
         return InvoiceOrderResponse(**data)
 
     @api_method(require_session=True, default_version="v2")
-    async def get_invoices(self, api_version: str = "v2") -> dict:
+    async def get_invoices(self, api_version: str = "v2") -> InvoicesResponse:
         """Получение списка счетов на оплату."""
         data = await self._request(
             "get",
