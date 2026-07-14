@@ -82,55 +82,61 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 Common base class for all non-exit exceptions.
 
-Сигнатура: `APIError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -> 'None'`
+Сигнатура: `APIError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `AccessDeniedError`
 
 Common base class for all non-exit exceptions.
 
-Сигнатура: `AccessDeniedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -> 'None'`
+Сигнатура: `AccessDeniedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `DuplicateConflictError`
 
 Common base class for all non-exit exceptions.
 
-Сигнатура: `DuplicateConflictError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -> 'None'`
+Сигнатура: `DuplicateConflictError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `ErrorContext`
 
-ErrorContext(error_type: 'str | None', messages: 'tuple[str, ...]', raw_payload: 'Any', endpoint: 'str | None', method_name: 'str | None')
+ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type: 'str | None', messages: 'tuple[str, ...]', raw_payload: 'Any', endpoint: 'str | None', method_name: 'str | None', hint: 'str | None', retryable: 'bool')
 
-Сигнатура: `ErrorContext(error_type: 'str | None', messages: 'tuple[str, ...]', raw_payload: 'Any', endpoint: 'str | None', method_name: 'str | None') -> None`
+Сигнатура: `ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type: 'str | None', messages: 'tuple[str, ...]', raw_payload: 'Any', endpoint: 'str | None', method_name: 'str | None', hint: 'str | None', retryable: 'bool') -> None`
 
 ### `NotAuthenticatedError`
 
 Common base class for all non-exit exceptions.
 
-Сигнатура: `NotAuthenticatedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -> 'None'`
+Сигнатура: `NotAuthenticatedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `NotFoundError`
 
 Common base class for all non-exit exceptions.
 
-Сигнатура: `NotFoundError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -> 'None'`
+Сигнатура: `NotFoundError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
+
+### `RateLimitError`
+
+Common base class for all non-exit exceptions.
+
+Сигнатура: `RateLimitError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `ServerError`
 
 Common base class for all non-exit exceptions.
 
-Сигнатура: `ServerError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -> 'None'`
+Сигнатура: `ServerError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `ValidationError`
 
 Common base class for all non-exit exceptions.
 
-Сигнатура: `ValidationError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -> 'None'`
+Сигнатура: `ValidationError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `build_api_error`
 
 Описание отсутствует.
 
-Сигнатура: `build_api_error(*, status_code: 'int', body: 'Any', endpoint: 'str | None', method_name: 'str | None' = None) -> 'APIError'`
+Сигнатура: `build_api_error(*, status_code: 'int', body: 'Any', endpoint: 'str | None', method_name: 'str | None' = None, http_status_code: 'int | None' = None) -> 'APIError'`
 
 ## `api_client_opti24.modeling`
 
@@ -150,7 +156,7 @@ Common base class for all non-exit exceptions.
 
 Описание отсутствует.
 
-Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x102a30700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102d4e270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
+Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x10294c700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102d16270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
 
 ### `ValidationError`
 
@@ -162,7 +168,7 @@ Inappropriate argument value (of correct type).
 
 Описание отсутствует.
 
-Сигнатура: `Field(default: 'Any' = <object object at 0x102a30700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102d4e270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
+Сигнатура: `Field(default: 'Any' = <object object at 0x10294c700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102d16270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
 
 ### `field_validator`
 

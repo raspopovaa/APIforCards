@@ -42,33 +42,43 @@ class AsyncTransport:
         method_name: str | None = None,
     ) -> Any:
         body = self._safe_json(resp)
-        if 200 <= resp.status_code < 300:
+        payload_status_code = None
+        if isinstance(body, dict) and isinstance(body.get("status"), dict):
+            raw_payload_status = body["status"].get("code")
+            if isinstance(raw_payload_status, int):
+                payload_status_code = raw_payload_status
+
+        if 200 <= resp.status_code < 300 and (
+            payload_status_code is None or 200 <= payload_status_code < 300
+        ):
             return body
 
         if (
-            isinstance(body, dict)
-            and isinstance(body.get("status"), dict)
-            and 200 <= body["status"].get("code", 0) < 300
+            payload_status_code is not None
+            and not (200 <= resp.status_code < 300)
+            and 200 <= payload_status_code < 300
         ):
             logger.warning(
                 "API returned non-2xx HTTP status %s for %s, but payload status.code=%s; treating response as successful",
                 resp.status_code,
                 endpoint,
-                body["status"].get("code"),
+                payload_status_code,
             )
             return body
 
         logger.error(
-            "API error %s on %s: %s",
+            "API error http=%s api=%s on %s: %s",
             resp.status_code,
+            payload_status_code,
             endpoint,
             sanitize_for_logging(body),
         )
         raise build_api_error(
-            status_code=resp.status_code,
+            status_code=payload_status_code if payload_status_code is not None else resp.status_code,
             body=body,
             endpoint=endpoint,
             method_name=method_name,
+            http_status_code=resp.status_code,
         )
 
     async def request(

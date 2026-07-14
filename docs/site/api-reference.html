@@ -138,31 +138,34 @@
 <p>Описание отсутствует.</p>
 <h3><code>APIError</code></h3>
 <p>Common base class for all non-exit exceptions.</p>
-<p>Сигнатура: <code>APIError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>APIError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -&gt; 'None'</code></p>
 <h3><code>AccessDeniedError</code></h3>
 <p>Common base class for all non-exit exceptions.</p>
-<p>Сигнатура: <code>AccessDeniedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>AccessDeniedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -&gt; 'None'</code></p>
 <h3><code>DuplicateConflictError</code></h3>
 <p>Common base class for all non-exit exceptions.</p>
-<p>Сигнатура: <code>DuplicateConflictError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>DuplicateConflictError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -&gt; 'None'</code></p>
 <h3><code>ErrorContext</code></h3>
-<p>ErrorContext(error_type: 'str | None', messages: 'tuple[str, ...]', raw_payload: 'Any', endpoint: 'str | None', method_name: 'str | None')</p>
-<p>Сигнатура: <code>ErrorContext(error_type: 'str | None', messages: 'tuple[str, ...]', raw_payload: 'Any', endpoint: 'str | None', method_name: 'str | None') -&gt; None</code></p>
+<p>ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type: 'str | None', messages: 'tuple[str, ...]', raw_payload: 'Any', endpoint: 'str | None', method_name: 'str | None', hint: 'str | None', retryable: 'bool')</p>
+<p>Сигнатура: <code>ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type: 'str | None', messages: 'tuple[str, ...]', raw_payload: 'Any', endpoint: 'str | None', method_name: 'str | None', hint: 'str | None', retryable: 'bool') -&gt; None</code></p>
 <h3><code>NotAuthenticatedError</code></h3>
 <p>Common base class for all non-exit exceptions.</p>
-<p>Сигнатура: <code>NotAuthenticatedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>NotAuthenticatedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -&gt; 'None'</code></p>
 <h3><code>NotFoundError</code></h3>
 <p>Common base class for all non-exit exceptions.</p>
-<p>Сигнатура: <code>NotFoundError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>NotFoundError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -&gt; 'None'</code></p>
+<h3><code>RateLimitError</code></h3>
+<p>Common base class for all non-exit exceptions.</p>
+<p>Сигнатура: <code>RateLimitError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -&gt; 'None'</code></p>
 <h3><code>ServerError</code></h3>
 <p>Common base class for all non-exit exceptions.</p>
-<p>Сигнатура: <code>ServerError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>ServerError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -&gt; 'None'</code></p>
 <h3><code>ValidationError</code></h3>
 <p>Common base class for all non-exit exceptions.</p>
-<p>Сигнатура: <code>ValidationError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>ValidationError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -&gt; 'None'</code></p>
 <h3><code>build_api_error</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>build_api_error(*, status_code: 'int', body: 'Any', endpoint: 'str | None', method_name: 'str | None' = None) -&gt; 'APIError'</code></p>
+<p>Сигнатура: <code>build_api_error(*, status_code: 'int', body: 'Any', endpoint: 'str | None', method_name: 'str | None' = None, http_status_code: 'int | None' = None) -&gt; 'APIError'</code></p>
 <h2><code>api_client_opti24.modeling</code></h2>
 <p>Описание отсутствует.</p>
 <h3><code>BaseModel</code></h3>
@@ -174,13 +177,13 @@
 </ul>
 <h3><code>FieldInfo</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>FieldInfo(default: 'Any' = &lt;object object at 0x102a30700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x102d4e270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>FieldInfo(default: 'Any' = &lt;object object at 0x10294c700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x102d16270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'None'</code></p>
 <h3><code>ValidationError</code></h3>
 <p>Inappropriate argument value (of correct type).</p>
 <p>Сигнатура: <code>ValidationError()</code></p>
 <h3><code>Field</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>Field(default: 'Any' = &lt;object object at 0x102a30700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x102d4e270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'FieldInfo'</code></p>
+<p>Сигнатура: <code>Field(default: 'Any' = &lt;object object at 0x10294c700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x102d16270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'FieldInfo'</code></p>
 <h3><code>field_validator</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>field_validator(*field_names: 'str', mode: 'str' = 'after', **_: 'Any') -&gt; 'Callable[[Callable[..., Any]], Any]'</code></p>

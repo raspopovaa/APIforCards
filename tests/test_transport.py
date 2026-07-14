@@ -2,7 +2,14 @@ import pytest
 import httpx
 from httpx import Response, Request
 from api_client_opti24 import AsyncTransport
-from api_client_opti24.errors import AccessDeniedError, NotFoundError, ServerError, APIError
+from api_client_opti24.errors import (
+    APIError,
+    AccessDeniedError,
+    NotAuthenticatedError,
+    NotFoundError,
+    RateLimitError,
+    ServerError,
+)
 
 
 class DummyResp(Response):
@@ -38,11 +45,31 @@ def test_handle_response_success_text_fallback():
     assert result == "plain text"
 
 
+def test_handle_response_raises_on_payload_error_inside_http_200():
+    t = AsyncTransport(base_url="http://example.com", client=None)
+    resp = DummyResp(
+        200,
+        json_data={
+            "status": {
+                "code": 401,
+                "errors": [{"type": "notAuthenticated", "message": "Session expired"}],
+            }
+        },
+    )
+
+    with pytest.raises(NotAuthenticatedError) as exc_info:
+        t._handle_response(resp, "info")
+
+    assert exc_info.value.http_status_code == 200
+    assert exc_info.value.api_status_code == 401
+
+
 @pytest.mark.parametrize(
     "status,exc_type",
     [
         (403, AccessDeniedError),
         (404, NotFoundError),
+        (429, RateLimitError),
         (500, ServerError),
         (418, APIError),  # I'm a teapot :)
     ],
