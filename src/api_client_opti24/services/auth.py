@@ -32,9 +32,7 @@ class AuthMixin:
             "info",
             api_version=api_version,
             headers=self._headers(include_session=True),
-            params={
-                "period": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            },  # можно указать день "2018-10-20"
+            params={"period": period},
         )
 
         return GetInfoResponse(**data)

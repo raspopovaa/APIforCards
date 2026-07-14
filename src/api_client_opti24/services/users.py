@@ -5,6 +5,7 @@ from ..models.users import (
     UserCreateResponse,
     UserListResponse,
 )
+from ..utils import to_json_param
 
 
 class UsersMixin:
@@ -36,7 +37,7 @@ class UsersMixin:
             "page": page,
             "on_page": on_page,
             "q": q,
-            "filter": str(filter).replace("'", '"') if filter else None,
+            "filter": to_json_param(filter) if filter else None,
         }
         params = {k: v for k, v in params.items() if v is not None}
 

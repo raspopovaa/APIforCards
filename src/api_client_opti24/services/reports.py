@@ -1,5 +1,7 @@
 from typing import Optional
 
+from ..decorators import api_method
+from ..logger import logger
 from ..models.reports import (
     ReportJobList,
     ReportList,
@@ -7,9 +9,7 @@ from ..models.reports import (
     ReportV1JobList,
     ReportV1OrderResponse,
 )
-
-from ..decorators import api_method
-from ..logger import logger
+from ..utils import to_json_param
 
 
 class ReportsMixin:
@@ -143,9 +143,9 @@ class ReportsMixin:
         if email:
             params["email"] = email
         if cards_list:
-            params["cards_list"] = str(cards_list).replace("'", '"')
+            params["cards_list"] = to_json_param(cards_list)
         if group_id:
-            params["group_id"] = str(group_id).replace("'", '"')
+            params["group_id"] = to_json_param(group_id)
         if archive:
             params["archive"] = "true"
 

@@ -1,9 +1,43 @@
 import calendar
 import hashlib
 import json
+import re
 from datetime import date, datetime
+from typing import Any
 
 from .errors import APIError
+
+REDACTED = "***"
+SENSITIVE_LOG_KEYS = {
+    "api_key",
+    "authorization",
+    "password",
+    "session_id",
+    "token",
+    "secret",
+    "access_token",
+    "refresh_token",
+    "code",
+    "mobile",
+    "mobile_phone",
+    "phone",
+    "email",
+    "login",
+}
+
+_EMAIL_RE = re.compile(r"([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\.[A-Za-z]{2,})")
+_PHONE_RE = re.compile(r"(?<!\d)(\+?\d[\d\-\s()]{8,}\d)(?!\d)")
+_SENSITIVE_KEY_RE = re.compile(
+    r"\b(api[_-]?key|authorization|password|session[_-]?id|token|secret|"
+    r"access[_-]?token|refresh[_-]?token|code|mobile(?:_phone)?|phone|email|login)\b",
+    flags=re.IGNORECASE,
+)
+_KEY_VALUE_RE = re.compile(
+    r"(?P<prefix>(?P<key>api[_-]?key|authorization|password|session[_-]?id|token|secret|"
+    r"access[_-]?token|refresh[_-]?token|code|mobile(?:_phone)?|phone|email|login)"
+    r"['\"]?\s*[:=]\s*['\"]?)(?P<value>[^,'\"}\]\s]+)",
+    flags=re.IGNORECASE,
+)
 
 
 def hash_password(password: str) -> str:
@@ -12,7 +46,44 @@ def hash_password(password: str) -> str:
 
 
 def scrub(text: str) -> str:
-    return text.replace("password", "***")
+    redacted = _KEY_VALUE_RE.sub(lambda match: f"{match.group('prefix')}{REDACTED}", text)
+    redacted = _EMAIL_RE.sub(REDACTED, redacted)
+    return _PHONE_RE.sub(REDACTED, redacted)
+
+
+def is_sensitive_log_key(key: str) -> bool:
+    normalized = key.strip().lower().replace("-", "_")
+    return normalized in SENSITIVE_LOG_KEYS
+
+
+def message_mentions_sensitive_key(text: str) -> bool:
+    return bool(_SENSITIVE_KEY_RE.search(text))
+
+
+def sanitize_for_logging(value: Any) -> Any:
+    if isinstance(value, dict):
+        sanitized: dict[Any, Any] = {}
+        for key, item in value.items():
+            key_str = str(key)
+            sanitized[key] = REDACTED if is_sensitive_log_key(key_str) else sanitize_for_logging(item)
+        return sanitized
+
+    if isinstance(value, (list, tuple, set)):
+        sanitized_items = [sanitize_for_logging(item) for item in value]
+        if isinstance(value, tuple):
+            return tuple(sanitized_items)
+        if isinstance(value, set):
+            return set(sanitized_items)
+        return sanitized_items
+
+    if isinstance(value, str):
+        return scrub(value)
+
+    return value
+
+
+def to_json_param(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
 def validate_month_span(date_from: str, date_to: str):

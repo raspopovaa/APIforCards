@@ -5,6 +5,7 @@ from ..models.ewallet import (
     MoveToContractResponse,
     SetCardProductResponse,
 )
+from ..utils import to_json_param
 
 
 class EwalletMixin:
@@ -50,7 +51,7 @@ class EwalletMixin:
 
         body = {
             "contract_id": cid,
-            "card_id": str(card_ids).replace("'", '"'),  # API ожидает JSON-список в строке
+            "card_id": to_json_param(card_ids),
             "product": product,
         }
 

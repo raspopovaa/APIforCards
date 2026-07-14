@@ -1,12 +1,11 @@
 from typing import Optional
 
+from ..decorators import api_method
 from ..models.region_limits import (
-    RegionLimitList,
     RegionLimitResponse,
     RemoveRegionLimit,
 )
-
-from ..decorators import api_method
+from ..utils import to_json_param
 
 
 class RegionLimitsMixin:
@@ -22,7 +21,7 @@ class RegionLimitsMixin:
         card_id: Optional[str] = None,
         group_id: Optional[str] = None,
         api_version: str = "v1",
-    ) -> RegionLimitList:
+    ) -> RegionLimitResponse:
         """
         Получение списка региональных лимитов по договору, карте или группе карт.
         """
@@ -52,7 +51,7 @@ class RegionLimitsMixin:
         Установка/изменение регионального лимита по карте или группе карт.
         Для изменения лимита необходимо передавать его ID.
         """
-        body = {"region_limit": str(region_limits).replace("'", '"')}
+        body = {"region_limit": to_json_param(region_limits)}
 
         return await self._request(
             "post",

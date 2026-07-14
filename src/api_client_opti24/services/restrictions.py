@@ -1,14 +1,13 @@
-import json
 from typing import Optional
 
+from ..decorators import api_method
+from ..logger import logger
 from ..models.restrictions import (
     RestrictionGetResponse,
     RestrictionRemoveResponse,
     RestrictionSetResponse,
 )
-
-from ..decorators import api_method
-from ..logger import logger
+from ..utils import to_json_param
 
 
 class RestrictionsMixin:
@@ -61,7 +60,7 @@ class RestrictionsMixin:
         if not restrictions:
             raise ValueError("Список restrictions не может быть пустым")
 
-        body = {"restriction": json.dumps(restrictions, ensure_ascii=False)}
+        body = {"restriction": to_json_param(restrictions)}
 
         raw = await self._request(
             "post",

@@ -5,8 +5,6 @@ from dataclasses import dataclass
 
 from .env import load_env_file
 
-load_env_file()
-
 
 @dataclass(frozen=True, slots=True)
 class TimeoutPolicy:
@@ -30,7 +28,9 @@ class APISettings:
     timeouts: TimeoutPolicy = TimeoutPolicy()
 
     @classmethod
-    def from_env(cls) -> "APISettings":
+    def from_env(cls, *, load_dotenv: bool = True) -> "APISettings":
+        if load_dotenv:
+            load_env_file()
         return cls(
             base_url=os.getenv("API_BASE_URL", ""),
             api_key=os.getenv("API_KEY", ""),
@@ -41,8 +41,7 @@ class APISettings:
             log_level=os.getenv("LOG_LEVEL", "INFO"),
         )
 
-
-SETTINGS = APISettings.from_env()
+SETTINGS = APISettings.from_env(load_dotenv=False)
 BASE_URL = SETTINGS.base_url
 API_KEY = SETTINGS.api_key
 LOGIN = SETTINGS.login

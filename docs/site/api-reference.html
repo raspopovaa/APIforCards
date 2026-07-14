@@ -112,7 +112,7 @@
 <p>Сигнатура: <code>APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0)) -&gt; None</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>from_env() -&gt; "'APISettings'"</code></li>
+<li><code>from_env(*, load_dotenv: 'bool' = True) -&gt; "'APISettings'"</code></li>
 </ul>
 <h3><code>TimeoutPolicy</code></h3>
 <p>TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float' = 120.0)</p>
@@ -171,13 +171,13 @@
 </ul>
 <h3><code>FieldInfo</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>FieldInfo(default: 'Any' = &lt;object object at 0x1050dc990&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x105476270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>FieldInfo(default: 'Any' = &lt;object object at 0x10077c700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x100ac6270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'None'</code></p>
 <h3><code>ValidationError</code></h3>
 <p>Inappropriate argument value (of correct type).</p>
 <p>Сигнатура: <code>ValidationError()</code></p>
 <h3><code>Field</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>Field(default: 'Any' = &lt;object object at 0x1050dc990&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x105476270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'FieldInfo'</code></p>
+<p>Сигнатура: <code>Field(default: 'Any' = &lt;object object at 0x10077c700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x100ac6270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'FieldInfo'</code></p>
 <h3><code>field_validator</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>field_validator(*field_names: 'str', mode: 'str' = 'after', **_: 'Any') -&gt; 'Callable[[Callable[..., Any]], Any]'</code></p>
@@ -6002,7 +6002,7 @@ timestamp:
 <p>Сигнатура: <code>RegionLimitsMixin()</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>get_region_limits(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.region_limits.RegionLimitList</code></li>
+<li><code>get_region_limits(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; api_client_opti24.models.region_limits.RegionLimitResponse</code></li>
 <li><code>remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: Optional[str] = None, api_version: str = 'v1') -&gt; dict</code></li>
 <li><code>set_region_limit(self, *, region_limits: list[dict], api_version: str = 'v1') -&gt; dict</code></li>
 </ul>
@@ -6138,12 +6138,24 @@ timestamp:
 <h3><code>hash_password</code></h3>
 <p>SHA-512 хэш пароля в нижнем регистре.</p>
 <p>Сигнатура: <code>hash_password(password: str) -&gt; str</code></p>
+<h3><code>is_sensitive_log_key</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>is_sensitive_log_key(key: str) -&gt; bool</code></p>
+<h3><code>message_mentions_sensitive_key</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>message_mentions_sensitive_key(text: str) -&gt; bool</code></p>
 <h3><code>print_json</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>print_json(data)</code></p>
+<h3><code>sanitize_for_logging</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>sanitize_for_logging(value: Any) -&gt; Any</code></p>
 <h3><code>scrub</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>scrub(text: str) -&gt; str</code></p>
+<h3><code>to_json_param</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>to_json_param(value: Any) -&gt; str</code></p>
 <h3><code>validate_month_span</code></h3>
 <p>Проверка, что разница между датами не больше месяца.</p>
 <p>Сигнатура: <code>validate_month_span(date_from: str, date_to: str)</code></p>

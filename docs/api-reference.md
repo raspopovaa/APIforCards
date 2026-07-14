@@ -36,7 +36,7 @@ APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', requ
 
 Публичные методы:
 
-- `from_env() -> "'APISettings'"`
+- `from_env(*, load_dotenv: 'bool' = True) -> "'APISettings'"`
 
 ### `TimeoutPolicy`
 
@@ -144,7 +144,7 @@ Common base class for all non-exit exceptions.
 
 Описание отсутствует.
 
-Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x1050dc990>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x105476270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
+Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x10077c700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x100ac6270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
 
 ### `ValidationError`
 
@@ -156,7 +156,7 @@ Inappropriate argument value (of correct type).
 
 Описание отсутствует.
 
-Сигнатура: `Field(default: 'Any' = <object object at 0x1050dc990>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x105476270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
+Сигнатура: `Field(default: 'Any' = <object object at 0x10077c700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x100ac6270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
 
 ### `field_validator`
 
@@ -7092,7 +7092,7 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_region_limits(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RegionLimitList`
+- `get_region_limits(self, *, contract_id: str, card_id: Optional[str] = None, group_id: Optional[str] = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RegionLimitResponse`
 - `remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: Optional[str] = None, api_version: str = 'v1') -> dict`
 - `set_region_limit(self, *, region_limits: list[dict], api_version: str = 'v1') -> dict`
 
@@ -7307,17 +7307,41 @@ SHA-512 хэш пароля в нижнем регистре.
 
 Сигнатура: `hash_password(password: str) -> str`
 
+### `is_sensitive_log_key`
+
+Описание отсутствует.
+
+Сигнатура: `is_sensitive_log_key(key: str) -> bool`
+
+### `message_mentions_sensitive_key`
+
+Описание отсутствует.
+
+Сигнатура: `message_mentions_sensitive_key(text: str) -> bool`
+
 ### `print_json`
 
 Описание отсутствует.
 
 Сигнатура: `print_json(data)`
 
+### `sanitize_for_logging`
+
+Описание отсутствует.
+
+Сигнатура: `sanitize_for_logging(value: Any) -> Any`
+
 ### `scrub`
 
 Описание отсутствует.
 
 Сигнатура: `scrub(text: str) -> str`
+
+### `to_json_param`
+
+Описание отсутствует.
+
+Сигнатура: `to_json_param(value: Any) -> str`
 
 ### `validate_month_span`
 
