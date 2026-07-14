@@ -27,6 +27,11 @@ SENSITIVE_LOG_KEYS = {
 
 _EMAIL_RE = re.compile(r"([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\.[A-Za-z]{2,})")
 _PHONE_RE = re.compile(r"(?<!\d)(\+?\d[\d\-\s()]{8,}\d)(?!\d)")
+_SENSITIVE_KEY_RE = re.compile(
+    r"\b(api[_-]?key|authorization|password|session[_-]?id|token|secret|"
+    r"access[_-]?token|refresh[_-]?token|code|mobile(?:_phone)?|phone|email|login)\b",
+    flags=re.IGNORECASE,
+)
 _KEY_VALUE_RE = re.compile(
     r"(?P<prefix>(?P<key>api[_-]?key|authorization|password|session[_-]?id|token|secret|"
     r"access[_-]?token|refresh[_-]?token|code|mobile(?:_phone)?|phone|email|login)"
@@ -49,6 +54,10 @@ def scrub(text: str) -> str:
 def is_sensitive_log_key(key: str) -> bool:
     normalized = key.strip().lower().replace("-", "_")
     return normalized in SENSITIVE_LOG_KEYS
+
+
+def message_mentions_sensitive_key(text: str) -> bool:
+    return bool(_SENSITIVE_KEY_RE.search(text))
 
 
 def sanitize_for_logging(value: Any) -> Any:

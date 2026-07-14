@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal, Optional
 
 from .config import APISettings
-from .logger import logger
+from .logger import configure_logger, logger
 from .registry import MethodSpec, build_default_registry
 from .services.auth import AuthMixin
 from .services.card_group import CardGroupsMixin
@@ -55,6 +55,10 @@ class APIClient(
         self.password = password
         self.session_manager = SessionManager()
         self.registry = build_default_registry()
+        configure_logger(
+            log_level=self.settings.log_level,
+            logger_file=self.settings.logger_file,
+        )
         self.transport = AsyncTransport(
             self.settings.base_url,
             client=self,

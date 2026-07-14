@@ -198,7 +198,7 @@ def build_page(title: str, body: str) -> str:
 
 def build_index_page() -> str:
     body = """
-<h1>APIClient OPTI24 Docs</h1>
+<h1>APIClient Docs</h1>
 <p class="muted">Статическая документация SDK, публикуемая через GitHub Pages.</p>
 <ul>
   <li><a href="./api-reference.html">API Reference</a></li>
@@ -207,7 +207,7 @@ def build_index_page() -> str:
 </ul>
 <p>Сайт собирается автоматически из локальной документации и introspection-данных SDK.</p>
 """
-    return build_page("APIClient OPTI24 Docs", body)
+    return build_page("APIClient Docs", body)
 
 
 def main() -> None:
