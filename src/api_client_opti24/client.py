@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Literal, Optional
 
 from .config import APISettings
+from .decorators import get_current_api_method_name
 from .logger import configure_logger, logger
 from .registry import MethodSpec, build_default_registry
 from .services.auth import AuthMixin
@@ -122,9 +123,17 @@ class APIClient(
             sanitize_for_logging(args),
             sanitize_for_logging(kwargs),
         )
+        method_name = get_current_api_method_name()
         endpoint = args[1] if len(args) > 1 else kwargs.get("endpoint")
         api_version = kwargs.get("api_version", "v1")
-        spec = self._resolve_method_spec(endpoint, api_version) if endpoint else None
+        spec = None
+        if method_name is not None:
+            try:
+                spec = self.registry.get(method_name)
+            except KeyError:
+                spec = None
+        if spec is None and endpoint:
+            spec = self._resolve_method_spec(endpoint, api_version)
         timeout_class = spec.timeout_class if spec is not None else "default"
         result = await self.transport.request(
             *args,
