@@ -58,6 +58,12 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 Сигнатура: `api_method(require_session: bool = False, default_version: str = 'v1')`
 
+### `get_current_api_method_name`
+
+Описание отсутствует.
+
+Сигнатура: `get_current_api_method_name() -> str | None`
+
 ## `api_client_opti24.env`
 
 Описание отсутствует.
@@ -144,7 +150,7 @@ Common base class for all non-exit exceptions.
 
 Описание отсутствует.
 
-Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x10077c700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x100ac6270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
+Сигнатура: `FieldInfo(default: 'Any' = <object object at 0x102a30700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102d4e270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
 
 ### `ValidationError`
 
@@ -156,7 +162,7 @@ Inappropriate argument value (of correct type).
 
 Описание отсутствует.
 
-Сигнатура: `Field(default: 'Any' = <object object at 0x10077c700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x100ac6270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
+Сигнатура: `Field(default: 'Any' = <object object at 0x102a30700>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object at 0x102d4e270>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
 
 ### `field_validator`
 
@@ -6618,6 +6624,60 @@ timestamp:
 
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
+### `MPCListResponse`
+
+MPCListResponse(**kwargs: 'Any') -> 'None'
+
+Сигнатура: `MPCListResponse(**kwargs: 'Any') -> 'None'`
+
+Описание полей:
+
+```text
+status:
+  type: StatusModel
+  required: True
+  description: Статус получения списка МПК
+data:
+  type: Any
+  required: True
+  description: Список или контейнер с опубликованными МПК/QR
+timestamp:
+  type: int
+  required: True
+  description: Время выполнения запроса (Unix Timestamp)
+```
+
+Публичные методы:
+
+- `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `MPCPayloadResponse`
+
+MPCPayloadResponse(**kwargs: 'Any') -> 'None'
+
+Сигнатура: `MPCPayloadResponse(**kwargs: 'Any') -> 'None'`
+
+Описание полей:
+
+```text
+status:
+  type: StatusModel
+  required: True
+  description: Статус выполнения операции с МПК
+data:
+  type: Any
+  required: True
+  description: Полезная нагрузка операции с МПК
+timestamp:
+  type: int
+  required: True
+  description: Время выполнения запроса (Unix Timestamp)
+```
+
+Публичные методы:
+
+- `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `RerunVirtualCardReleaseRequest`
 
 RerunVirtualCardReleaseRequest(**kwargs: 'Any') -> 'None'
@@ -6880,16 +6940,28 @@ timestamp:
 
 Публичные методы:
 
-- `find_by_endpoint(self, endpoint: 'str', version: 'str') -> 'MethodSpec | None'`
+- `find_by_endpoint(self, endpoint: 'str', version: 'str', http_method: 'str | None' = None) -> 'MethodSpec | None'`
 - `get(self, name: 'str') -> 'MethodSpec'`
+- `list_all(self) -> 'tuple[MethodSpec, ...]'`
 - `list_domain(self, domain: 'str') -> 'tuple[MethodSpec, ...]'`
 - `register(self, spec: 'MethodSpec') -> 'None'`
 
 ### `MethodSpec`
 
-MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe')
+MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())
 
-Сигнатура: `MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe') -> None`
+Сигнатура: `MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -> None`
+
+Публичные методы:
+
+- `iter_routes(self) -> 'tuple[RouteVariant, ...]'`
+- `supports(self, version: 'str') -> 'bool'`
+
+### `RouteVariant`
+
+RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool')
+
+Сигнатура: `RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool') -> None`
 
 Публичные методы:
 
@@ -7224,10 +7296,15 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
+- `confirm_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
 - `create_virtual_card(self, user_id: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
 - `delete_mpc(self, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.SimpleActionResponse`
+- `generate_payment_qr(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `get_mpc_qr_list(self, *, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCListResponse`
+- `init_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
 - `release_virtual_card(self, *, type_: str | None = None, template_id: str | None = None, user_id: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
 - `reset_mpc(self, card_id: str, type_: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.ResetMPCResponse`
+- `update_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
 
 ## `api_client_opti24.session`
 

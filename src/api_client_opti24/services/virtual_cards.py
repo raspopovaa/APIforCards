@@ -1,6 +1,10 @@
+from typing import Any
+
 from ..decorators import api_method
 from ..logger import logger
 from ..models.virtual_cards import (
+    MPCListResponse,
+    MPCPayloadResponse,
     ResetMPCResponse,
     SimpleActionResponse,
     VirtualCardResponse,
@@ -11,6 +15,22 @@ class VirtualCardsMixin:
     """
     Методы для работы с виртуальными картами (ВК) и мобильными профилями карт (МПК)
     """
+
+    @api_method(require_session=True, default_version="v2")
+    async def get_mpc_qr_list(
+        self,
+        *,
+        api_version: str = "v2",
+    ) -> MPCListResponse:
+        """Получить список выпущенных МПК/QR (GET /vip/v2/MPC)."""
+        logger.info("Получение списка выпущенных МПК/QR")
+        data = await self._request(
+            "get",
+            "MPC",
+            api_version=api_version,
+            headers=self._headers(include_session=True),
+        )
+        return MPCListResponse(**data)
 
     # === Выпуск виртуальной карты (старый метод) ===
     @api_method(require_session=True, default_version="v2")
@@ -106,3 +126,83 @@ class VirtualCardsMixin:
             data=payload,
         )
         return ResetMPCResponse(**data)
+
+    @api_method(require_session=True, default_version="v2")
+    async def generate_payment_qr(
+        self,
+        *,
+        card_id: str,
+        payload: dict[str, Any] | None = None,
+        api_version: str = "v2",
+    ) -> MPCPayloadResponse:
+        """Сгенерировать QR-код оплаты (POST /vip/v2/cards/{card_id}/pay)."""
+        request_payload = payload or {}
+        logger.info("Генерация QR-кода оплаты для карты %s: %s", card_id, request_payload)
+        data = await self._request(
+            "post",
+            f"cards/{card_id}/pay",
+            api_version=api_version,
+            headers=self._headers(include_session=True),
+            data=request_payload,
+        )
+        return MPCPayloadResponse(**data)
+
+    @api_method(require_session=True, default_version="v2")
+    async def init_mpc(
+        self,
+        *,
+        card_id: str,
+        payload: dict[str, Any] | None = None,
+        api_version: str = "v2",
+    ) -> MPCPayloadResponse:
+        """Инициализировать выпуск МПК (POST /vip/v2/cards/{card_id}/initMPC)."""
+        request_payload = payload or {}
+        logger.info("Инициализация МПК для карты %s: %s", card_id, request_payload)
+        data = await self._request(
+            "post",
+            f"cards/{card_id}/initMPC",
+            api_version=api_version,
+            headers=self._headers(include_session=True),
+            data=request_payload,
+        )
+        return MPCPayloadResponse(**data)
+
+    @api_method(require_session=True, default_version="v2")
+    async def confirm_mpc(
+        self,
+        *,
+        card_id: str,
+        payload: dict[str, Any] | None = None,
+        api_version: str = "v2",
+    ) -> MPCPayloadResponse:
+        """Подтвердить выпуск МПК (POST /vip/v2/cards/{card_id}/confirmMPC)."""
+        request_payload = payload or {}
+        logger.info("Подтверждение МПК для карты %s: %s", card_id, request_payload)
+        data = await self._request(
+            "post",
+            f"cards/{card_id}/confirmMPC",
+            api_version=api_version,
+            headers=self._headers(include_session=True),
+            data=request_payload,
+        )
+        return MPCPayloadResponse(**data)
+
+    @api_method(require_session=True, default_version="v2")
+    async def update_mpc(
+        self,
+        *,
+        card_id: str,
+        payload: dict[str, Any] | None = None,
+        api_version: str = "v2",
+    ) -> MPCPayloadResponse:
+        """Обновить МПК (POST /vip/v2/cards/{card_id}/updateMPC)."""
+        request_payload = payload or {}
+        logger.info("Обновление МПК для карты %s: %s", card_id, request_payload)
+        data = await self._request(
+            "post",
+            f"cards/{card_id}/updateMPC",
+            api_version=api_version,
+            headers=self._headers(include_session=True),
+            data=request_payload,
+        )
+        return MPCPayloadResponse(**data)

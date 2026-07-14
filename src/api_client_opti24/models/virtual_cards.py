@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ..modeling import BaseModel, Field
 
@@ -116,4 +116,16 @@ class DeleteVirtualCardResponse(BaseModel):
 class MPCActionResponse(BaseModel):
     status: StatusModel = Field(..., description="Статус выполнения операции с МПК")
     data: bool = Field(..., description="Результат выполнения операции (True — успешно)")
+    timestamp: int = Field(..., description="Время выполнения запроса (Unix Timestamp)")
+
+
+class MPCListResponse(BaseModel):
+    status: StatusModel = Field(..., description="Статус получения списка МПК")
+    data: Any = Field(..., description="Список или контейнер с опубликованными МПК/QR")
+    timestamp: int = Field(..., description="Время выполнения запроса (Unix Timestamp)")
+
+
+class MPCPayloadResponse(BaseModel):
+    status: StatusModel = Field(..., description="Статус выполнения операции с МПК")
+    data: Any = Field(..., description="Полезная нагрузка операции с МПК")
     timestamp: int = Field(..., description="Время выполнения запроса (Unix Timestamp)")

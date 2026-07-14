@@ -126,6 +126,9 @@
 <h3><code>api_method</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>api_method(require_session: bool = False, default_version: str = 'v1')</code></p>
+<h3><code>get_current_api_method_name</code></h3>
+<p>Описание отсутствует.</p>
+<p>Сигнатура: <code>get_current_api_method_name() -&gt; str | None</code></p>
 <h2><code>api_client_opti24.env</code></h2>
 <p>Описание отсутствует.</p>
 <h3><code>load_env_file</code></h3>
@@ -171,13 +174,13 @@
 </ul>
 <h3><code>FieldInfo</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>FieldInfo(default: 'Any' = &lt;object object at 0x10077c700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x100ac6270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'None'</code></p>
+<p>Сигнатура: <code>FieldInfo(default: 'Any' = &lt;object object at 0x102a30700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x102d4e270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'None'</code></p>
 <h3><code>ValidationError</code></h3>
 <p>Inappropriate argument value (of correct type).</p>
 <p>Сигнатура: <code>ValidationError()</code></p>
 <h3><code>Field</code></h3>
 <p>Описание отсутствует.</p>
-<p>Сигнатура: <code>Field(default: 'Any' = &lt;object object at 0x10077c700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x100ac6270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'FieldInfo'</code></p>
+<p>Сигнатура: <code>Field(default: 'Any' = &lt;object object at 0x102a30700&gt;, *, default_factory: 'Callable[[], Any] | Any' = &lt;dataclasses._MISSING_TYPE object at 0x102d4e270&gt;, alias: 'str | None' = None, description: 'str | None' = None) -&gt; 'FieldInfo'</code></p>
 <h3><code>field_validator</code></h3>
 <p>Описание отсутствует.</p>
 <p>Сигнатура: <code>field_validator(*field_names: 'str', mode: 'str' = 'after', **_: 'Any') -&gt; 'Callable[[Callable[..., Any]], Any]'</code></p>
@@ -5656,6 +5659,50 @@ timestamp:
 <ul>
 <li><code>describe() -&gt; 'dict[str, dict[str, Any]]'</code></li>
 </ul>
+<h3><code>MPCListResponse</code></h3>
+<p>MPCListResponse(**kwargs: 'Any') -&gt; 'None'</p>
+<p>Сигнатура: <code>MPCListResponse(**kwargs: 'Any') -&gt; 'None'</code></p>
+<p>Описание полей:</p>
+<pre><code>
+status:
+  type: StatusModel
+  required: True
+  description: Статус получения списка МПК
+data:
+  type: Any
+  required: True
+  description: Список или контейнер с опубликованными МПК/QR
+timestamp:
+  type: int
+  required: True
+  description: Время выполнения запроса (Unix Timestamp)
+</code></pre>
+<p>Публичные методы:</p>
+<ul>
+<li><code>describe() -&gt; 'dict[str, dict[str, Any]]'</code></li>
+</ul>
+<h3><code>MPCPayloadResponse</code></h3>
+<p>MPCPayloadResponse(**kwargs: 'Any') -&gt; 'None'</p>
+<p>Сигнатура: <code>MPCPayloadResponse(**kwargs: 'Any') -&gt; 'None'</code></p>
+<p>Описание полей:</p>
+<pre><code>
+status:
+  type: StatusModel
+  required: True
+  description: Статус выполнения операции с МПК
+data:
+  type: Any
+  required: True
+  description: Полезная нагрузка операции с МПК
+timestamp:
+  type: int
+  required: True
+  description: Время выполнения запроса (Unix Timestamp)
+</code></pre>
+<p>Публичные методы:</p>
+<ul>
+<li><code>describe() -&gt; 'dict[str, dict[str, Any]]'</code></li>
+</ul>
 <h3><code>RerunVirtualCardReleaseRequest</code></h3>
 <p>RerunVirtualCardReleaseRequest(**kwargs: 'Any') -&gt; 'None'</p>
 <p>Сигнатура: <code>RerunVirtualCardReleaseRequest(**kwargs: 'Any') -&gt; 'None'</code></p>
@@ -5863,14 +5910,23 @@ timestamp:
 <p>Сигнатура: <code>MethodRegistry(specs: 'dict[str, MethodSpec] | None' = None) -&gt; 'None'</code></p>
 <p>Публичные методы:</p>
 <ul>
-<li><code>find_by_endpoint(self, endpoint: 'str', version: 'str') -&gt; 'MethodSpec | None'</code></li>
+<li><code>find_by_endpoint(self, endpoint: 'str', version: 'str', http_method: 'str | None' = None) -&gt; 'MethodSpec | None'</code></li>
 <li><code>get(self, name: 'str') -&gt; 'MethodSpec'</code></li>
+<li><code>list_all(self) -&gt; 'tuple[MethodSpec, ...]'</code></li>
 <li><code>list_domain(self, domain: 'str') -&gt; 'tuple[MethodSpec, ...]'</code></li>
 <li><code>register(self, spec: 'MethodSpec') -&gt; 'None'</code></li>
 </ul>
 <h3><code>MethodSpec</code></h3>
-<p>MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe')</p>
-<p>Сигнатура: <code>MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe') -&gt; None</code></p>
+<p>MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())</p>
+<p>Сигнатура: <code>MethodSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -&gt; None</code></p>
+<p>Публичные методы:</p>
+<ul>
+<li><code>iter_routes(self) -&gt; 'tuple[RouteVariant, ...]'</code></li>
+<li><code>supports(self, version: 'str') -&gt; 'bool'</code></li>
+</ul>
+<h3><code>RouteVariant</code></h3>
+<p>RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool')</p>
+<p>Сигнатура: <code>RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool') -&gt; None</code></p>
 <p>Публичные методы:</p>
 <ul>
 <li><code>supports(self, version: 'str') -&gt; 'bool'</code></li>
@@ -6090,10 +6146,15 @@ timestamp:
 <p>Сигнатура: <code>VirtualCardsMixin()</code></p>
 <p>Публичные методы:</p>
 <ul>
+<li><code>confirm_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
 <li><code>create_virtual_card(self, user_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.VirtualCardResponse</code></li>
 <li><code>delete_mpc(self, card_id: str, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.SimpleActionResponse</code></li>
+<li><code>generate_payment_qr(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
+<li><code>get_mpc_qr_list(self, *, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCListResponse</code></li>
+<li><code>init_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
 <li><code>release_virtual_card(self, *, type_: str | None = None, template_id: str | None = None, user_id: str | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.VirtualCardResponse</code></li>
 <li><code>reset_mpc(self, card_id: str, type_: str, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.ResetMPCResponse</code></li>
+<li><code>update_mpc(self, *, card_id: str, payload: dict[str, typing.Any] | None = None, api_version: str = 'v2') -&gt; api_client_opti24.models.virtual_cards.MPCPayloadResponse</code></li>
 </ul>
 <h2><code>api_client_opti24.session</code></h2>
 <p>Описание отсутствует.</p>

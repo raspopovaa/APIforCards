@@ -114,8 +114,13 @@ class APIClient(
     def contract_id(self, value: Optional[str]) -> None:
         self.session_manager.set_contract(value)
 
-    def _resolve_method_spec(self, endpoint: str, api_version: str) -> MethodSpec | None:
-        return self.registry.find_by_endpoint(endpoint, api_version)
+    def _resolve_method_spec(
+        self,
+        endpoint: str,
+        api_version: str,
+        http_method: str | None = None,
+    ) -> MethodSpec | None:
+        return self.registry.find_by_endpoint(endpoint, api_version, http_method=http_method)
 
     async def _request(self, *args, **kwargs):
         logger.debug(
@@ -124,6 +129,7 @@ class APIClient(
             sanitize_for_logging(kwargs),
         )
         method_name = get_current_api_method_name()
+        http_method = args[0] if len(args) > 0 else kwargs.get("method")
         endpoint = args[1] if len(args) > 1 else kwargs.get("endpoint")
         api_version = kwargs.get("api_version", "v1")
         spec = None
@@ -133,7 +139,7 @@ class APIClient(
             except KeyError:
                 spec = None
         if spec is None and endpoint:
-            spec = self._resolve_method_spec(endpoint, api_version)
+            spec = self._resolve_method_spec(endpoint, api_version, http_method=http_method)
         timeout_class = spec.timeout_class if spec is not None else "default"
         result = await self.transport.request(
             *args,

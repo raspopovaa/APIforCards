@@ -25,7 +25,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 | 👥 Пользователи | список, создание, привязка | Управление пользователями |
 | 📊 Отчеты | список отчетов и jobs | Работа с отчетными методами |
 | 🚦 Лимиты и ограничения | лимиты, restrictions, region limits | Ограничения по продуктам и географии |
-| 🧾 Шаблоны и ВК | templates, virtual cards | Работа с шаблонами виртуальных карт |
+| 🧾 Шаблоны и ВК | templates, virtual cards, MPC QR | Работа с шаблонами виртуальных карт и операциями МПК/QR |
 | 📚 Справочники | dictionaries, AZS, related data | Поддержка общих справочников |
 
 ## 🏗️ Архитектура
@@ -166,6 +166,17 @@ LOG_LEVEL=INFO
 - **🧾 Описание полей** через `Field(..., description=...)`
 - **🧪 Покрытие тестами** для моделей, transport, session и registry
 - **⚖️ Policy “спека vs реальность”** в спорных местах
+- **🗂️ Полный registry** с demo-флагами и alias-маршрутами для веток API
+
+## 🧭 Registry и DEMO
+
+`registry` теперь хранит не только основной маршрут метода, но и:
+
+- demo-доступность метода на основании сводной API-таблицы
+- alias-маршруты для альтернативных веток (`invites_free`, `prolong_free`)
+- alias-маршруты для `PUT`-вариантов обновления шаблонов ВК
+
+Это особенно важно для методов, где один Python-метод поддерживает несколько HTTP-маршрутов.
 
 ## 🧠 Модели и описание данных
 
@@ -335,6 +346,18 @@ pip install -i https://test.pypi.org/simple/ api-client-opti24
 ```bash
 DEMO_MIN_REQUEST_INTERVAL=0.35 .venv/bin/python examples/demo_async.py
 ```
+
+## 📲 MPC и QR
+
+SDK теперь покрывает дополнительные операции по мобильному профилю карты:
+
+- `get_mpc_qr_list`
+- `generate_payment_qr`
+- `init_mpc`
+- `confirm_mpc`
+- `update_mpc`
+- `delete_mpc`
+- `reset_mpc`
 
 ## 📁 Структура проекта
 

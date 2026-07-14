@@ -19,6 +19,126 @@ TIMEOUT_CLASS_OVERRIDES = {
 RETRY_CLASS_OVERRIDES = {
     "auth_user": "network_only",
 }
+PRIMARY_DEMO_AVAILABILITY_OVERRIDES = {
+    "check_purchase": False,
+    "create_invite": False,
+    "create_virtual_card": False,
+    "delete_mpc": False,
+    "download_report_file": False,
+    "download_report_file_v1": False,
+    "generate_payment_qr": False,
+    "get_azs_filters": False,
+    "get_azs_list_v2": False,
+    "get_cards_by_group": False,
+    "get_documents": False,
+    "get_final_prices": False,
+    "get_mpc_qr_list": False,
+    "get_transactions_v1": False,
+    "init_mpc": False,
+    "confirm_mpc": False,
+    "order_cards": False,
+    "order_documents_email": False,
+    "order_invoice": False,
+    "order_report_v1": False,
+    "prolong_invite": False,
+    "release_virtual_card": False,
+    "resend_invite": False,
+    "reset_mpc": False,
+    "reset_pin": False,
+    "set_restriction": False,
+    "update_mpc": False,
+}
+
+
+@dataclass(frozen=True, slots=True)
+class RouteVariant:
+    http_method: str
+    endpoint: str
+    api_version: str
+    demo_available: bool
+
+    def supports(self, version: str) -> bool:
+        return self.api_version == version
+
+
+ROUTE_ALIAS_OVERRIDES = {
+    "create_invite": (
+        RouteVariant(
+            http_method="POST",
+            endpoint="invites_free",
+            api_version="v2",
+            demo_available=True,
+        ),
+    ),
+    "prolong_invite": (
+        RouteVariant(
+            http_method="POST",
+            endpoint="invites/{invite_id}/prolong_free",
+            api_version="v2",
+            demo_available=True,
+        ),
+    ),
+    "update_template": (
+        RouteVariant(
+            http_method="PUT",
+            endpoint="vc/templates/{template_id}",
+            api_version="v2",
+            demo_available=True,
+        ),
+    ),
+    "update_template_limit": (
+        RouteVariant(
+            http_method="PUT",
+            endpoint="vc/templates/{template_id}/limits/{limit_id}",
+            api_version="v2",
+            demo_available=True,
+        ),
+    ),
+    "update_template_restriction": (
+        RouteVariant(
+            http_method="PUT",
+            endpoint="vc/templates/{template_id}/restrictions/{restriction_id}",
+            api_version="v2",
+            demo_available=True,
+        ),
+        RouteVariant(
+            http_method="PUT",
+            endpoint="vc/templates/{template_id}/restrictions/{restrictions_id}",
+            api_version="v2",
+            demo_available=True,
+        ),
+    ),
+    "delete_template_restriction": (
+        RouteVariant(
+            http_method="DELETE",
+            endpoint="vc/templates/{template_id}/restrictions/{restrictions_id}",
+            api_version="v2",
+            demo_available=True,
+        ),
+    ),
+    "update_template_georestriction": (
+        RouteVariant(
+            http_method="PUT",
+            endpoint="vc/templates/{template_id}/georestrictions/{georestriction_id}",
+            api_version="v2",
+            demo_available=True,
+        ),
+        RouteVariant(
+            http_method="PUT",
+            endpoint="vc/templates/{template_id}/georestrictions/{georestrictions_id}",
+            api_version="v2",
+            demo_available=True,
+        ),
+    ),
+    "delete_template_georestriction": (
+        RouteVariant(
+            http_method="DELETE",
+            endpoint="vc/templates/{template_id}/georestrictions/{georestrictions_id}",
+            api_version="v2",
+            demo_available=True,
+        ),
+    ),
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,9 +153,19 @@ class MethodSpec:
     idempotent: bool
     timeout_class: str = "default"
     retry_class: str = "safe"
+    route_variants: tuple[RouteVariant, ...] = ()
 
     def supports(self, version: str) -> bool:
         return version in self.supported_versions
+
+    def iter_routes(self) -> tuple[RouteVariant, ...]:
+        primary_route = RouteVariant(
+            http_method=self.http_method,
+            endpoint=self.endpoint,
+            api_version=self.default_version,
+            demo_available=self.demo_available,
+        )
+        return (primary_route, *self.route_variants)
 
 
 class MethodRegistry:
@@ -51,11 +181,25 @@ class MethodRegistry:
         except KeyError as exc:
             raise KeyError(f"Method '{name}' is not registered") from exc
 
-    def find_by_endpoint(self, endpoint: str, version: str) -> MethodSpec | None:
+    def find_by_endpoint(
+        self,
+        endpoint: str,
+        version: str,
+        http_method: str | None = None,
+    ) -> MethodSpec | None:
+        normalized_http_method = http_method.upper() if http_method is not None else None
         matches = [
             spec
             for spec in self._specs.values()
-            if spec.endpoint == endpoint and spec.supports(version)
+            if any(
+                route.endpoint == endpoint
+                and route.supports(version)
+                and (
+                    normalized_http_method is None
+                    or route.http_method == normalized_http_method
+                )
+                for route in spec.iter_routes()
+            )
         ]
         if not matches:
             return None
@@ -255,10 +399,11 @@ def _build_method_spec(module_name: str, method: object) -> MethodSpec:
         endpoint=endpoint,
         supported_versions=(default_version,),
         default_version=default_version,
-        demo_available=True,
+        demo_available=PRIMARY_DEMO_AVAILABILITY_OVERRIDES.get(method_name, True),
         idempotent=http_method == "GET",
         timeout_class=_infer_timeout_class(method_name, http_method),
         retry_class=RETRY_CLASS_OVERRIDES.get(method_name, "safe"),
+        route_variants=ROUTE_ALIAS_OVERRIDES.get(method_name, ()),
     )
 
 
