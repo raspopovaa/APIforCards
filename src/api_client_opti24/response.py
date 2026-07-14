@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, TypeAlias
 
 import httpx
 
 from .errors import build_api_error
 from .logger import logger as default_logger
 
-type DecodedPayload = dict[str, Any] | list[Any] | str | int | float | bool | None
+DecodedPayload: TypeAlias = dict[str, Any] | list[Any] | str | int | float | bool | None
 
 
 class ResponseDecoder:

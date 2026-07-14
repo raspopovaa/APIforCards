@@ -5,14 +5,14 @@ APIClient SDK — асинхронная Python-библиотека для ра
 Проект упрощает интеграцию с API и предоставляет:
 
 - единый `APIClient`
-- доменные сервисы для карт, транзакций, пользователей, шаблонов, лимитов и отчетов
+- прямые доменные методы и композиционные сервисы `client.cards`, `client.reports`
 - типизированные модели ответов
 - безопасные retry, re-auth и ограничение частоты на транспортном уровне
 - demo-сценарий для DEMO-стенда
 
 Проект является независимой разработкой. Использование API должно соответствовать официальным правилам и ограничениям провайдера.
 
-![Python Version](https://img.shields.io/badge/python-3.13%2B-blue)
+![Python Version](https://img.shields.io/badge/python-3.11--3.14-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 🚀 Возможности
@@ -48,96 +48,147 @@ APIClient SDK — асинхронная Python-библиотека для ра
   Управляет `session_id` и активным `contract_id`.
 
 - [registry.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/registry.py)  
-  Хранит метаданные методов и timeout policy.
+  Предоставляет поиск и группировку декларативных endpoint-спецификаций.
 
 - [modeling.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/modeling.py)  
   Совместимый stdlib-only слой моделей и адаптер `decode_model` для постепенной миграции.
 
 ## 📦 Установка
 
-Установка из TestPyPI:
+Пакет `api-client-opti24==1.2.1` опубликован на TestPyPI и поддерживает
+`Python >=3.11,<3.15`. Зависимости лучше устанавливать из основного PyPI
+отдельно: это исключает случайную подмену зависимостей пакетами из тестового
+индекса.
+
+### Вариант 1: uv
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -i https://test.pypi.org/simple/ \
-  --extra-index-url https://pypi.org/simple/ \
-  api-client-opti24
+uv venv --python 3.11
+uv pip install "httpx>=0.27.0,<1.0"
+uv pip install --index-url https://test.pypi.org/simple/ \
+  --no-deps api-client-opti24==1.2.1
 ```
 
-Проверка импорта:
+### Вариант 2: pip
 
 ```bash
-.venv/bin/python -c "from api_client_opti24 import APIClient; print(APIClient.__name__)"
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install "httpx>=0.27.0,<1.0"
+python -m pip install --index-url https://test.pypi.org/simple/ \
+  --no-deps api-client-opti24==1.2.1
 ```
 
-Локальная установка для разработки:
+Проверка версии и публичных импортов:
 
 ```bash
-cd path/to/api-pro-sdk
-python3 -m venv .venv
-.venv/bin/pip install -e ".[dev]"
+.venv/bin/python -c \
+  "from api_client_opti24 import APIClient, APISettings, __version__; print(__version__, APIClient.__name__, APISettings.__name__)"
+```
+
+Локальная установка репозитория для разработки:
+
+```bash
+# uv
+uv sync --extra dev
+
+# либо pip в активированном virtualenv
+python -m pip install -e ".[dev]"
 ```
 
 ## ⚡ Быстрый старт
 
 Перед запуском настройте `.env` или переменные окружения `API_BASE_URL`, `API_KEY`, `API_LOGIN`, `API_PASSWORD`.
 
-Проверка, что клиент создается корректно:
+Пример использует только стандартные ANSI-коды, поэтому дополнительные пакеты
+для цвета не нужны. Секреты и полные идентификаторы в терминал не выводятся.
 
 ```python
 import asyncio
-
-from api_client_opti24 import APIClient
-
-
-async def smoke_check() -> None:
-    async with APIClient(
-        base_url="https://example.invalid/vip/",
-        api_key="demo-key",
-        login="demo-login",
-        password="demo-password",
-    ) as client:
-        print(type(client).__name__)
-
-
-asyncio.run(smoke_check())
-```
-
-Полный пример с авторизацией и запросами:
-
-```python
-import asyncio
+import os
+import sys
 from pathlib import Path
 
-from api_client_opti24 import APIClient, APISettings
+from api_client_opti24 import APIClient, APISettings, __version__
+
+
+USE_COLOR = "NO_COLOR" not in os.environ and (
+    sys.stdout.isatty() or os.getenv("FORCE_COLOR") == "1"
+)
+
+
+class Color:
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    CYAN = "\033[36m"
+
+
+def paint(value: object, *styles: str) -> str:
+    text = str(value)
+    if not USE_COLOR:
+        return text
+    return f"{''.join(styles)}{text}{Color.RESET}"
+
+
+def show(label: str, value: object, color: str = Color.GREEN) -> None:
+    print(f"{paint(label + ':', Color.BOLD, Color.CYAN)} {paint(value, color)}")
+
+
+def mask(value: str, visible: int = 4) -> str:
+    if len(value) <= visible:
+        return "*" * len(value)
+    return f"{'*' * (len(value) - visible)}{value[-visible:]}"
 
 
 async def main() -> None:
     settings = APISettings.from_env(env_file=Path(__file__).with_name(".env"))
 
     async with APIClient(settings=settings) as client:
-        auth_response = await client.auth_user()
-        print("=== АВТОРИЗАЦИЯ ===")
-        print(auth_response.data.contracts[0])
+        authenticated = False
+        try:
+            show("SDK", __version__, Color.YELLOW)
 
-        info_response = await client.get_info()
-        print("=== СТАТИСТИКА ===")
-        print(info_response.data.client_info)
+            auth = await client.auth_user()
+            authenticated = True
+            contracts = auth.data.contracts
+            show("Авторизация", "успешна")
+            show("Доступно договоров", len(contracts), Color.YELLOW)
 
-        cards_response = await client.cards.get_cards_v2()
-        print("=== КАРТЫ V2 ===")
-        print(cards_response.total_count)
+            if not contracts:
+                show("Результат", "договоры не найдены", Color.RED)
+                return
 
-        await client.logoff()
+            contract = contracts[0]
+            client.contract_id = contract.id
+            show("Выбран договор", mask(contract.number), Color.YELLOW)
+
+            info = await client.get_info()
+            show("Запросов по тарифу", info.data.client_info.Queries)
+
+            cards = await client.cards.get_cards_v2(page=1, onpage=5)
+            show("Карт найдено", cards.total_count)
+            statuses = [item.status_name or item.status for item in cards.result[:3]]
+            show("Статусы первых карт", statuses or "нет данных")
+        except Exception as exc:
+            show("Ошибка", f"{type(exc).__name__}: {exc}", Color.RED)
+            raise
+        finally:
+            if authenticated:
+                await client.logoff()
 
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Этот пример требует реального доступа к API. Создайте файл `.env` рядом со
-скриптом: пример загружает его по пути `Path(__file__).with_name(".env")` и
-поэтому не зависит от рабочей директории IDE.
+Этот пример требует реального доступа к API. Сохраните его как `test.py`, а
+`.env` разместите рядом: путь определяется через
+`Path(__file__).with_name(".env")` и не зависит от рабочей директории IDE.
+Цвет можно отключить переменной `NO_COLOR=1` или принудительно включить в IDE
+через `FORCE_COLOR=1`.
 
 ## 📖 Конфигурация
 
@@ -157,6 +208,7 @@ API_KEY=your_api_key_here
 API_LOGIN=your_login
 API_PASSWORD=your_password
 API_REQUESTS_PER_SECOND=2
+API_ALLOW_INSECURE_HTTP=false
 REQUEST_LOG_FILE=./api_requests.jsonl
 LOGGER_FILE=./api.log
 LOG_LEVEL=INFO
@@ -178,7 +230,7 @@ LOG_LEVEL=INFO
 
 - **♻️ Policy-driven retry** для безопасных запросов и авторизации
 - **🔐 Re-auth** при потере сессии
-- **📚 Типизированные модели** на `dataclasses`
+- **📚 Типизированные модели** на stdlib-совместимом modeling layer
 - **🧾 Описание полей** через `Field(..., description=...)`
 - **🧪 Покрытие тестами** для моделей, transport, session и registry
 - **⚖️ Policy “спека vs реальность”** в спорных местах
@@ -249,15 +301,20 @@ SDK теперь обрабатывает ошибки в двух слоях:
 - alias-маршруты для `PUT`-вариантов обновления шаблонов ВК
 
 Это особенно важно для методов, где один Python-метод поддерживает несколько HTTP-маршрутов.
+В текущем каталоге описано `89` уникальных `EndpointSpec`; registry не читает
+исходники через AST и не импортирует сервисы динамически.
 
 ## 🧠 Модели и описание данных
 
-Вместо `pydantic` используется собственный слой моделей на стандартной библиотеке:
+Вместо обязательной зависимости от `pydantic` используется собственный слой
+моделей поверх `dataclasses` стандартной библиотеки:
 
 - `BaseModel`
 - `Field`
 - `field_validator`
 - nested parsing
+- `model_validate()` и `model_dump()`
+- адаптер `decode_model()` для постепенной замены modeling framework
 - `describe()`
 
 Пример интроспекции:
@@ -297,7 +354,7 @@ print(AuthUserResponse.describe())
 Локальный запуск:
 
 ```bash
-.venv/bin/python scripts/generate_api_docs.py
+uv run python scripts/generate_api_docs.py
 ```
 
 В GitHub Actions есть отдельный workflow `Docs`, который:
@@ -337,10 +394,13 @@ HTML-сборка выполняется скриптом:
 ## 🧪 Тестирование
 
 ```bash
-.venv/bin/pytest
+uv run pytest
+
+# либо в активированном pip-окружении
+python -m pytest
 ```
 
-Сейчас тесты покрывают:
+Сейчас набор из `95` тестов покрывает:
 
 - auth
 - cards
@@ -358,8 +418,7 @@ HTML-сборка выполняется скриптом:
 
 ```bash
 cd path/to/api-pro-sdk
-rm -rf dist/ build/ *.egg-info
-uv build
+uv build --clear
 ```
 
 Проверка артефактов:
@@ -379,7 +438,8 @@ uv publish --publish-url https://test.pypi.org/legacy/
 После этого пакет будет доступен на странице проекта в TestPyPI, а установить его можно так:
 
 ```bash
-pip install -i https://test.pypi.org/simple/ api-client-opti24
+pip install --index-url https://test.pypi.org/simple/ \
+  --no-deps api-client-opti24==1.2.1
 ```
 
 ## 🤖 GitHub Actions
@@ -395,7 +455,7 @@ pip install -i https://test.pypi.org/simple/ api-client-opti24
 
 Текущий pipeline:
 
-- поднимает `Python 3.14`
+- запускает матрицу `Python 3.11` и `Python 3.14`
 - устанавливает зависимости через `pip install -e ".[dev]"`
 - запускает `pytest`
 
@@ -413,13 +473,13 @@ pip install -i https://test.pypi.org/simple/ api-client-opti24
 Запуск:
 
 ```bash
-.venv/bin/python examples/demo_async.py
+uv run python examples/demo_async.py
 ```
 
 Если DEMO-стенд начинает ограничивать запросы:
 
 ```bash
-DEMO_MIN_REQUEST_INTERVAL=0.35 .venv/bin/python examples/demo_async.py
+DEMO_MIN_REQUEST_INTERVAL=0.35 uv run python examples/demo_async.py
 ```
 
 ## 📲 MPC и QR
@@ -446,11 +506,19 @@ api-pro-sdk/
 │   ├── config.py
 │   ├── env.py
 │   ├── errors.py
+│   ├── endpoints.py
 │   ├── modeling.py
+│   ├── policies.py
 │   ├── registry.py
+│   ├── response.py
+│   ├── runtime.py
+│   ├── service_groups.py
 │   ├── session.py
 │   └── transport.py
+├── docs/
+├── scripts/
 ├── tests/
+├── uv.lock
 ├── pyproject.toml
 └── README.md
 ```
@@ -458,10 +526,10 @@ api-pro-sdk/
 ## 🛠️ Разработка
 
 ```bash
-.venv/bin/pytest
-.venv/bin/ruff check .
-.venv/bin/black .
-.venv/bin/mypy src
+uv run pytest
+uv run ruff check .
+uv run black .
+uv run mypy src
 ```
 
 Примечание:
@@ -470,10 +538,33 @@ api-pro-sdk/
 
 ## ⚠️ Ограничения
 
-- SDK рассчитан на Python `3.14`
+- SDK требует Python не ниже `3.11` и поддерживает диапазон `>=3.11,<3.15`
 - transport использует `httpx`
 - точность моделей зависит от качества внешней спецификации
 - DEMO-стенд ограничивает интенсивность запросов
+
+## ✅ Соответствие README коду
+
+| Раздел README | Источник истины в репозитории | Проверено |
+|---------------|-------------------------------|-----------|
+| Возможности | `client.py`, `services/`, `service_groups.py` | Домены и публичные методы существуют; композиция пока добавлена для cards/reports |
+| Архитектура | `client.py`, `transport.py`, `response.py`, `registry.py` | Transport не зависит от `APIClient`, endpoint-каталог декларативный |
+| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `1.2.1`, диапазон Python и публичные импорты совпадают |
+| Быстрый старт | `config.py`, `auth.py`, `cards.py`, модели auth/cards | Сигнатуры и используемые поля ответа проверены |
+| Конфигурация | `config.py`, `.env.example`, `env.py` | Все перечисленные переменные поддерживаются |
+| Retry и безопасность | `policies.py`, `transport.py`, `logger.py`, `utils.py` | Retry зависит от idempotency; удалённый HTTP запрещён; логи очищаются |
+| Ошибки API | `errors.py`, `response.py` | HTTP/API-коды и перечисленные классы ошибок обрабатываются |
+| Registry и DEMO | `endpoints.py`, `registry.py` | Зарегистрировано 89 уникальных спецификаций и route aliases |
+| Модели | `modeling.py`, `models/` | Поддерживаются Field, validators, nested parsing, dump/validate/describe |
+| Документация | `scripts/generate_api_docs.py`, `scripts/build_docs_site.py`, `docs/` | Генераторы и статический сайт присутствуют |
+| Политика спецификации | `docs/spec-compatibility.md`, модели и тесты | Зафиксированы известные расхождения и принятые решения |
+| Тестирование | `tests/`, настройки pytest в `pyproject.toml` | Полный набор содержит 95 тестов |
+| Публикация | `pyproject.toml`, `uv.lock` | Сборка выполняется через `uv build`, публикация — `uv publish` |
+| GitHub Actions | `.github/workflows/` | CI, Docs и Pages соответствуют описанию |
+| Demo-скрипт | `examples/demo_async.py` | Асинхронный цветной сценарий существует и учитывает rate limit |
+| MPC и QR | `services/virtual_cards.py` | Все перечисленные методы реализованы |
+| Структура и разработка | дерево репозитория, dev dependencies | Пути и команды актуализированы |
+| Ограничения, лицензия, репозиторий | `pyproject.toml` | Python range, HTTP dependency, MIT metadata и URL совпадают |
 
 ## 📄 Лицензия
 

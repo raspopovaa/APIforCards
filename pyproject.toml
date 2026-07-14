@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "api-client-opti24"
-version = "1.2.0"
+version = "1.2.1"
 description = "Асинхронный Python-клиент для сервиса API топливных карт"
 readme = "README.md"
 license = "MIT"
 authors = [
     { name = "Andrey Raspopov", email = "andrey.raspopov@gmail.com" },
 ]
-requires-python = ">=3.13,<3.15"
+requires-python = ">=3.11,<3.15"
 keywords = ["api-client", "asyncio", "httpx", "dataclasses", "fuel-cards", "sdk"]
 
 dependencies = [
@@ -44,12 +44,12 @@ dev = [
 
 [tool.black]
 line-length = 100
-target-version = ["py313"]
+target-version = ["py311"]
 skip-string-normalization = true
 
 [tool.ruff]
 # Общие настройки (например, target-version, line-length)
-target-version = "py313"
+target-version = "py311"
 line-length = 88
 indent-width = 4
 
@@ -60,7 +60,7 @@ ignore = ["E501"]
 fixable = ["ALL"]
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.11"
 strict = true
 disallow_untyped_defs = true
 warn_unused_ignores = true

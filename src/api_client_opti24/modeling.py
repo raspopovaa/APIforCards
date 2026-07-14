@@ -6,9 +6,19 @@ from dataclasses import MISSING, dataclass, field, fields, is_dataclass
 from dataclasses import Field as DataclassField
 from datetime import datetime
 from types import UnionType
-from typing import Any, ClassVar, Self, Union, get_args, get_origin, get_type_hints
+from typing import (
+    Any,
+    ClassVar,
+    Self,
+    TypeVar,
+    Union,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 REQUIRED = object()
+ModelT = TypeVar("ModelT")
 
 
 class ValidationError(ValueError):
@@ -365,7 +375,7 @@ class BaseModel:
         return str(annotation).replace("typing.", "")
 
 
-def decode_model[ModelT](model_type: type[ModelT], payload: dict[str, Any]) -> ModelT:
+def decode_model(model_type: type[ModelT], payload: dict[str, Any]) -> ModelT:
     validator = getattr(model_type, "model_validate", None)
     if callable(validator):
         return validator(payload)
