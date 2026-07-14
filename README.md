@@ -49,6 +49,23 @@ APIClient SDK — асинхронная Python-библиотека для ра
 
 ## 📦 Установка
 
+Установка из TestPyPI:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -i https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  api-client-opti24
+```
+
+Проверка импорта:
+
+```bash
+.venv/bin/python -c "from api_client_opti24 import APIClient; print(APIClient.__name__)"
+```
+
+Локальная установка для разработки:
+
 ```bash
 cd path/to/api-pro-sdk
 python3 -m venv .venv
@@ -57,10 +74,35 @@ python3 -m venv .venv
 
 ## ⚡ Быстрый старт
 
+Перед запуском настройте `.env` или переменные окружения `API_BASE_URL`, `API_KEY`, `API_LOGIN`, `API_PASSWORD`.
+
+Проверка, что клиент создается корректно:
+
 ```python
 import asyncio
 
-from api_client_opti24.client import APIClient
+from api_client_opti24 import APIClient
+
+
+async def smoke_check() -> None:
+    async with APIClient(
+        base_url="https://example.invalid/vip/",
+        api_key="demo-key",
+        login="demo-login",
+        password="demo-password",
+    ) as client:
+        print(type(client).__name__)
+
+
+asyncio.run(smoke_check())
+```
+
+Полный пример с авторизацией и запросами:
+
+```python
+import asyncio
+
+from api_client_opti24 import APIClient
 from api_client_opti24.config import APISettings
 
 
@@ -91,6 +133,8 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
+Этот пример требует реального доступа к API и корректно заполненного `.env`.
 
 ## 📖 Конфигурация
 
