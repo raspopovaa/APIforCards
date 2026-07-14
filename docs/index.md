@@ -4,21 +4,21 @@
 
 Основные разделы:
 
-- [README проекта](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/README.md)
-- [Автоматически сгенерированный API Reference](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/docs/api-reference.md)
+- [README проекта](https://github.com/raspopovaa/APIforCards/blob/main/README.md)
+- [Автоматически сгенерированный API Reference](https://github.com/raspopovaa/APIforCards/blob/main/docs/api-reference.md)
 
 ## Как обновлять документацию
 
 Локально:
 
 ```bash
-cd "/Users/andrejraspopov/Documents/New project/api-pro-sdk"
+cd path/to/api-pro-sdk
 .venv/bin/python scripts/generate_api_docs.py
 ```
 
 После запуска будет обновлен файл:
 
-- [api-reference.md](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/docs/api-reference.md)
+- [api-reference.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/api-reference.md)
 
 ## Что попадает в автодокументацию
 
@@ -27,3 +27,19 @@ cd "/Users/andrejraspopov/Documents/New project/api-pro-sdk"
 - сигнатуры
 - docstring'и
 - описание полей моделей через `BaseModel.describe()`
+
+## Публикация пакета
+
+Локальная сборка:
+
+```bash
+cd path/to/api-pro-sdk
+uv build
+```
+
+Публикация в TestPyPI:
+
+```bash
+export UV_PUBLISH_TOKEN="<testpypi-token>"
+uv publish --publish-url https://test.pypi.org/legacy/
+```

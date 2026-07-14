@@ -32,25 +32,25 @@ APIClient SDK — асинхронная Python-библиотека для ра
 
 Основные слои проекта:
 
-- [client.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/src/api_client_opti24/client.py)  
+- [client.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/client.py)  
   Главная точка входа. Собирает `settings`, `registry`, `session_manager` и `transport`.
 
-- [transport.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/src/api_client_opti24/transport.py)  
+- [transport.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/transport.py)  
   Выполняет HTTP-запросы через `httpx`, делает retry для сетевых ошибок и `429/509`, а также повторную авторизацию.
 
-- [session.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/src/api_client_opti24/session.py)  
+- [session.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/session.py)  
   Управляет `session_id` и активным `contract_id`.
 
-- [registry.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/src/api_client_opti24/registry.py)  
+- [registry.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/registry.py)  
   Хранит метаданные методов и timeout policy.
 
-- [modeling.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/src/api_client_opti24/modeling.py)  
+- [modeling.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/modeling.py)  
   Собственный stdlib-only слой моделей на `dataclasses` с ручной валидацией.
 
 ## 📦 Установка
 
 ```bash
-cd "/Users/andrejraspopov/Documents/New project/api-pro-sdk"
+cd path/to/api-pro-sdk
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 ```
@@ -96,11 +96,11 @@ if __name__ == "__main__":
 
 SDK читает настройки из `.env` через встроенный загрузчик:
 
-- [env.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/src/api_client_opti24/env.py)
-- [config.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/src/api_client_opti24/config.py)
+- [env.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/env.py)
+- [config.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/config.py)
 
 Шаблон файла:
-- [`.env.example`](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/.env.example)
+- [`.env.example`](https://github.com/raspopovaa/APIforCards/blob/main/.env.example)
 
 Пример:
 
@@ -152,9 +152,9 @@ print(AuthUserResponse.describe())
 
 В проект добавлена автоматическая генерация API-документации:
 
-- генератор: [scripts/generate_api_docs.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/scripts/generate_api_docs.py)
-- индекс документации: [docs/index.md](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/docs/index.md)
-- сгенерированный reference: [docs/api-reference.md](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/docs/api-reference.md)
+- генератор: [scripts/generate_api_docs.py](https://github.com/raspopovaa/APIforCards/blob/main/scripts/generate_api_docs.py)
+- индекс документации: [docs/index.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/index.md)
+- сгенерированный reference: [docs/api-reference.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/api-reference.md)
 
 Что генерируется автоматически:
 
@@ -178,7 +178,7 @@ print(AuthUserResponse.describe())
 
 Для публикации документации как сайта добавлен отдельный workflow GitHub Pages:
 
-- [pages.yml](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/.github/workflows/pages.yml)
+- [pages.yml](https://github.com/raspopovaa/APIforCards/blob/main/.github/workflows/pages.yml)
 
 Он:
 
@@ -188,7 +188,7 @@ print(AuthUserResponse.describe())
 
 HTML-сборка выполняется скриптом:
 
-- [build_docs_site.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/scripts/build_docs_site.py)
+- [build_docs_site.py](https://github.com/raspopovaa/APIforCards/blob/main/scripts/build_docs_site.py)
 
 ## 📌 Политика по спецификации
 
@@ -222,11 +222,41 @@ HTML-сборка выполняется скриптом:
 - transport
 - modeling layer
 
+## 🚀 Публикация пакета
+
+Подготовка релиза:
+
+```bash
+cd path/to/api-pro-sdk
+rm -rf dist/ build/ *.egg-info
+uv build
+```
+
+Проверка артефактов:
+
+```bash
+python -m zipfile -l dist/*.whl
+python -m tarfile -l dist/*.tar.gz
+```
+
+Публикация в TestPyPI:
+
+```bash
+export UV_PUBLISH_TOKEN="<testpypi-token>"
+uv publish --publish-url https://test.pypi.org/legacy/
+```
+
+После этого пакет будет доступен на странице проекта в TestPyPI, а установить его можно так:
+
+```bash
+pip install -i https://test.pypi.org/simple/ api-client-opti24
+```
+
 ## 🤖 GitHub Actions
 
 В репозитории настроен базовый CI workflow:
 
-- [ci.yml](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/.github/workflows/ci.yml)
+- [ci.yml](https://github.com/raspopovaa/APIforCards/blob/main/.github/workflows/ci.yml)
 
 Он запускается:
 
@@ -248,7 +278,7 @@ HTML-сборка выполняется скриптом:
 ## ▶️ Demo-скрипт
 
 Файл:
-- [examples/demo_async.py](/Users/andrejraspopov/Documents/New%20project/api-pro-sdk/examples/demo_async.py)
+- [examples/demo_async.py](https://github.com/raspopovaa/APIforCards/blob/main/examples/demo_async.py)
 
 Запуск:
 
