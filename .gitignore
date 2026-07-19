@@ -12,3 +12,4 @@ api_requests.jsonl
 .gigaide/
 *.egg-info/
 PKG-INFO
+site/

@@ -327,50 +327,27 @@ print(AuthUserResponse.describe())
 - обязательность
 - описание
 
-## 📚 Автоматическая документация
+## 📚 Документация
 
-В проект добавлена автоматическая генерация API-документации:
+Документация публикуется как сайт на MkDocs Material:
 
-- генератор: [scripts/generate_api_docs.py](https://github.com/raspopovaa/APIforCards/blob/main/scripts/generate_api_docs.py)
-- индекс документации: [docs/index.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/index.md)
-- сгенерированный reference: [docs/api-reference.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/api-reference.md)
-- совместимость со спецификацией: [docs/spec-compatibility.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/spec-compatibility.md)
-- архитектура: [docs/architecture.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/architecture.md)
-- информационная безопасность: [docs/security.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/security.md)
+- [сайт документации](https://raspopovaa.github.io/APIforCards/)
+- [установка и быстрый запуск](https://raspopovaa.github.io/APIforCards/getting-started/)
+- [каталог методов, DEMO-доступность и тарификация](https://raspopovaa.github.io/APIforCards/methods/)
+- [API Reference](https://raspopovaa.github.io/APIforCards/api-reference/)
+- [архитектура и безопасность](https://raspopovaa.github.io/APIforCards/architecture/)
 
-Что генерируется автоматически:
-
-- публичные модули SDK
-- публичные классы и функции
-- сигнатуры
-- docstring'и
-- описание полей моделей через `describe()`
-
-Локальный запуск:
+API Reference и каталог методов генерируются из кода и runtime registry. Для
+локальной проверки выполните:
 
 ```bash
 uv run python scripts/generate_api_docs.py
+uv run python scripts/generate_method_catalog.py
+uv run python scripts/build_docs_site.py
 ```
 
-В GitHub Actions есть отдельный workflow `Docs`, который:
-
-- запускает генерацию на `push` и `pull_request`
-- собирает актуальные `docs/`
-- прикладывает их как artifact
-
-Для публикации документации как сайта добавлен отдельный workflow GitHub Pages:
-
-- [pages.yml](https://github.com/raspopovaa/APIforCards/blob/main/.github/workflows/pages.yml)
-
-Он:
-
-- генерирует `docs/api-reference.md`
-- собирает статический HTML-сайт
-- публикует его через GitHub Pages
-
-HTML-сборка выполняется скриптом:
-
-- [build_docs_site.py](https://github.com/raspopovaa/APIforCards/blob/main/scripts/build_docs_site.py)
+Строгая сборка создаётся в `site/`. Workflow `Docs` проверяет её в pull request,
+а workflow `Pages` собирает и публикует сайт после push в `main`.
 
 ## 📌 Политика по спецификации
 

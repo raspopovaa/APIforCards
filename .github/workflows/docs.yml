@@ -1,10 +1,8 @@
 name: Docs
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
+  workflow_dispatch:
 
 jobs:
   docs:
@@ -27,8 +25,17 @@ jobs:
       - name: Generate API documentation
         run: python scripts/generate_api_docs.py
 
-      - name: Upload generated docs artifact
+      - name: Generate method catalog
+        run: python scripts/generate_method_catalog.py
+
+      - name: Verify generated Markdown is committed
+        run: git diff --exit-code -- docs/api-reference.md docs/methods.md
+
+      - name: Build documentation site
+        run: python scripts/build_docs_site.py
+
+      - name: Upload documentation site
         uses: actions/upload-artifact@v4
         with:
-          name: api-docs
-          path: docs/
+          name: documentation-site
+          path: site/

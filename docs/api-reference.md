@@ -6,17 +6,11 @@
 
 ## `api_client_opti24`
 
-Описание отсутствует.
-
 _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.authentication`
 
-Описание отсутствует.
-
 ### `AuthenticationCoordinator`
-
-Описание отсутствует.
 
 Сигнатура: `AuthenticationCoordinator(session: 'SessionManager', authenticator: 'Authenticator') -> 'None'`
 
@@ -28,8 +22,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `Authenticator`
 
-Описание отсутствует.
-
 Сигнатура: `Authenticator(*args, **kwargs)`
 
 Публичные методы:
@@ -37,8 +29,6 @@ _Публичные классы и функции не обнаружены._
 - `authenticate(self, *, api_version: 'str | None' = None, contract_id: 'str | None' = None, contract_number: 'str | None' = None) -> 'AuthUserResponse'`
 
 ### `DefaultAuthenticator`
-
-Описание отсутствует.
 
 Сигнатура: `DefaultAuthenticator(request_executor: 'RequestExecutor', session_mutator: 'SessionMutator', credentials_provider: 'CredentialsProvider', logger: 'LoggerLike') -> 'None'`
 
@@ -48,11 +38,7 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.client`
 
-Описание отсутствует.
-
 ### `APIClient`
-
-Описание отсутствует.
 
 Сигнатура: `APIClient(base_url: str | None = None, api_key: str | None = None, login: str | None = None, password: str | None = None, *, settings: api_client_opti24.config.ConnectionSettings | api_client_opti24.config.APISettings | None = None, transport: api_client_opti24.executor.Transport | None = None, session_manager: api_client_opti24.session.SessionManager | None = None, registry: api_client_opti24.registry.MethodRegistry | None = None, logger: logging.Logger | None = None, clock: api_client_opti24.runtime.Clock | None = None, credentials_provider: api_client_opti24.service_base.CredentialsProvider | None = None, api_key_provider: api_client_opti24.service_base.APIKeyProvider | None = None) -> None`
 
@@ -62,8 +48,6 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.composition`
 
-Описание отсутствует.
-
 ### `ClientRuntime`
 
 ClientRuntime(authentication: 'AuthenticationCoordinator', request_executor: 'DefaultRequestExecutor', services: 'ServiceContainer')
@@ -72,13 +56,9 @@ ClientRuntime(authentication: 'AuthenticationCoordinator', request_executor: 'De
 
 ### `compose_client_runtime`
 
-Описание отсутствует.
-
 Сигнатура: `compose_client_runtime(*, api_key_provider: 'APIKeyProvider', credentials_provider: 'CredentialsProvider', transport: 'Transport', session_manager: 'SessionManager', registry: 'MethodRegistry', timeouts: 'TimeoutPolicy', logger: 'LoggerLike', clock: 'Clock') -> 'ClientRuntime'`
 
 ## `api_client_opti24.config`
-
-Описание отсутствует.
 
 ### `APISettings`
 
@@ -113,21 +93,13 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 ## `api_client_opti24.contracts`
 
-Описание отсутствует.
-
 ### `serialize_registry_contract`
-
-Описание отсутствует.
 
 Сигнатура: `serialize_registry_contract(registry: 'MethodRegistry') -> 'list[dict[str, object]]'`
 
 ## `api_client_opti24.credentials`
 
-Описание отсутствует.
-
 ### `EnvironmentCredentialsProvider`
-
-Описание отсутствует.
 
 Сигнатура: `EnvironmentCredentialsProvider(*, api_key: 'str', login: 'str', password: 'str') -> 'None'`
 
@@ -139,8 +111,6 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 ### `StaticAPIKeyProvider`
 
-Описание отсутствует.
-
 Сигнатура: `StaticAPIKeyProvider(api_key: 'str') -> 'None'`
 
 Публичные методы:
@@ -148,8 +118,6 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 - `get_api_key(self) -> 'str'`
 
 ### `StaticCredentialsProvider`
-
-Описание отсутствует.
 
 Сигнатура: `StaticCredentialsProvider(*, api_key: 'str', login: 'str', password: 'str') -> 'None'`
 
@@ -160,8 +128,6 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 ### `StaticLoginPasswordProvider`
 
-Описание отсутствует.
-
 Сигнатура: `StaticLoginPasswordProvider(*, login: 'str', password: 'str') -> 'None'`
 
 Публичные методы:
@@ -170,17 +136,11 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 ## `api_client_opti24.decorators`
 
-Описание отсутствует.
-
 ### `api_method`
-
-Описание отсутствует.
 
 Сигнатура: `api_method(func: collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]) -> collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]`
 
 ## `api_client_opti24.endpoints`
-
-Описание отсутствует.
 
 ### `EndpointSpec`
 
@@ -207,45 +167,29 @@ RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_avail
 
 ### `endpoint`
 
-Описание отсутствует.
-
 Сигнатура: `endpoint(name: 'str', domain: 'str', http_method: 'str', path: 'str', version: 'str', *, demo: 'bool' = True, timeout: 'str' = 'default', retry: 'str | None' = None, requires_session: 'bool' = True, variants: 'tuple[RouteVariant, ...]' = (), external_code: 'str | None' = None, billable: 'bool | None' = None) -> 'EndpointSpec'`
 
 ### `route`
-
-Описание отсутствует.
 
 Сигнатура: `route(http_method: 'str', path: 'str', version: 'str', *, demo: 'bool', name: 'str', external_code: 'str | None' = None, billable: 'bool | None' = None) -> 'RouteVariant'`
 
 ## `api_client_opti24.env`
 
-Описание отсутствует.
-
 ### `load_env_file`
-
-Описание отсутствует.
 
 Сигнатура: `load_env_file(path: 'str | Path' = '.env', *, override: 'bool' = False) -> 'None'`
 
 ## `api_client_opti24.errors`
 
-Описание отсутствует.
-
 ### `APIError`
-
-Описание отсутствует.
 
 Сигнатура: `APIError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `AccessDeniedError`
 
-Описание отсутствует.
-
 Сигнатура: `AccessDeniedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `DuplicateConflictError`
-
-Описание отсутствует.
 
 Сигнатура: `DuplicateConflictError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
@@ -257,47 +201,31 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 ### `NotAuthenticatedError`
 
-Описание отсутствует.
-
 Сигнатура: `NotAuthenticatedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `NotFoundError`
-
-Описание отсутствует.
 
 Сигнатура: `NotFoundError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `RateLimitError`
 
-Описание отсутствует.
-
 Сигнатура: `RateLimitError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `ServerError`
-
-Описание отсутствует.
 
 Сигнатура: `ServerError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `ValidationError`
 
-Описание отсутствует.
-
 Сигнатура: `ValidationError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `build_api_error`
-
-Описание отсутствует.
 
 Сигнатура: `build_api_error(*, status_code: 'int', body: 'Any', endpoint: 'str | None', method_name: 'str | None' = None, http_status_code: 'int | None' = None) -> 'APIError'`
 
 ## `api_client_opti24.executor`
 
-Описание отсутствует.
-
 ### `DefaultRequestExecutor`
-
-Описание отсутствует.
 
 Сигнатура: `DefaultRequestExecutor(*, operation_executor: 'OperationExecutor', session_gate: 'SessionGate', session_recovery: 'SessionRecovery', registry: 'MethodRegistry', logger: 'LoggerLike') -> 'None'`
 
@@ -309,8 +237,6 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 ### `OperationExecutor`
 
-Описание отсутствует.
-
 Сигнатура: `OperationExecutor(*, api_key_provider: 'APIKeyProvider', transport: 'Transport', session_context: 'SessionContext', registry: 'MethodRegistry', timeouts: 'TimeoutPolicy', logger: 'LoggerLike', clock: 'Clock') -> 'None'`
 
 Публичные методы:
@@ -320,8 +246,6 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 - `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False) -> 'dict[str, str]'`
 
 ### `Transport`
-
-Описание отсутствует.
 
 Сигнатура: `Transport(*args, **kwargs)`
 
@@ -333,11 +257,7 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 ## `api_client_opti24.modeling`
 
-Описание отсутствует.
-
 ### `BaseModel`
-
-Описание отсутствует.
 
 Сигнатура: `BaseModel(**extra_data: Any) -> None`
 
@@ -347,8 +267,6 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 ### `StrictRequestModel`
 
-Описание отсутствует.
-
 Сигнатура: `StrictRequestModel() -> None`
 
 Публичные методы:
@@ -357,29 +275,19 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 ### `decode_model`
 
-Описание отсутствует.
-
 Сигнатура: `decode_model(model_type: 'type[ModelT]', payload: 'dict[str, Any]') -> 'ModelT'`
 
 ### `validator`
-
-Описание отсутствует.
 
 Сигнатура: `validator(*field_names: 'str', pre: 'bool' = False) -> 'Any'`
 
 ## `api_client_opti24.models`
 
-Описание отсутствует.
-
 _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.auth`
 
-Описание отсутствует.
-
 ### `AccessRights`
-
-Описание отсутствует.
 
 Сигнатура: `AccessRights(*, web: bool = False, api: bool = False, mobile: bool = False, **extra_data: Any) -> None`
 
@@ -389,8 +297,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `AuthError`
 
-Описание отсутствует.
-
 Сигнатура: `AuthError(*, code: str, message: str, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -398,8 +304,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `AuthErrorResponse`
-
-Описание отсутствует.
 
 Сигнатура: `AuthErrorResponse(*, error: api_client_opti24.models.auth.AuthError, **extra_data: Any) -> None`
 
@@ -409,8 +313,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `AuthUserData`
 
-Описание отсутствует.
-
 Сигнатура: `AuthUserData(*, client_id: str, client_status: str, org_name: str | None = None, session_id: str, user_id: str, contracts: list[api_client_opti24.models.auth.ContractInfo] = <factory>, role_id: str | None = None, role_name: str | None = None, read_only: bool = False, user_name: str | None = None, user_patronymic: str | None = None, user_surname: str | None = None, last_contract: str | None = None, access: api_client_opti24.models.auth.AccessRights | None = None, email: str | None = None, phone: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -418,8 +320,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `AuthUserResponse`
-
-Описание отсутствует.
 
 Сигнатура: `AuthUserResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: api_client_opti24.models.auth.AuthUserData, timestamp: int | None = None, **extra_data: Any) -> None`
 
@@ -429,8 +329,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `ClientInfo`
 
-Описание отсутствует.
-
 Сигнатура: `ClientInfo(*, Client: str, ClientType: str, Contract: str, ContractName: str, PricePlan: str | None = None, Cost: float | None = None, Queries: int | None = None, Additional: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -438,8 +336,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `ContractInfo`
-
-Описание отсутствует.
 
 Сигнатура: `ContractInfo(*, id: str, number: str, mpc: bool = False, template_id: str | None = None, cards_count: int = 0, one_price: bool = False, **extra_data: Any) -> None`
 
@@ -449,8 +345,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `GetInfoResponse`
 
-Описание отсутствует.
-
 Сигнатура: `GetInfoResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: api_client_opti24.models.auth.InfoData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -458,8 +352,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `InfoData`
-
-Описание отсутствует.
 
 Сигнатура: `InfoData(*, from_: datetime.datetime, to: datetime.datetime, client_info: api_client_opti24.models.auth.ClientInfo, methods: api_client_opti24.models.auth.MethodsCount, methods_info: api_client_opti24.models.auth.MethodsInfo, **extra_data: Any) -> None`
 
@@ -469,8 +361,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `LogoffResponse`
 
-Описание отсутствует.
-
 Сигнатура: `LogoffResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -478,8 +368,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `MethodsCount`
-
-Описание отсутствует.
 
 Сигнатура: `MethodsCount(*, all: int = 0, cards: int | None = 0, cardgroups: int | None = 0, card: int | None = 0, **extra_data: Any) -> None`
 
@@ -489,8 +377,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `MethodsInfo`
 
-Описание отсутствует.
-
 Сигнатура: `MethodsInfo(*, actions_bill: dict[str, str], actions_not_bill: dict[str, str], **extra_data: Any) -> None`
 
 Публичные методы:
@@ -499,8 +385,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `StatusResponse`
 
-Описание отсутствует.
-
 Сигнатура: `StatusResponse(*, code: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -508,8 +392,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ## `api_client_opti24.models.card_group`
-
-Описание отсутствует.
 
 ### `CardGroupItem`
 
@@ -583,11 +465,7 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.cards`
 
-Описание отсутствует.
-
 ### `BoolResponse`
-
-Описание отсутствует.
 
 Сигнатура: `BoolResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
@@ -596,8 +474,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `CardDetail`
-
-Описание отсутствует.
 
 Сигнатура: `CardDetail(*, id: str, contract_id: str, number: str, status: str, can_work_offline: bool | None = None, card_auth_type: str | None = None, comment: str | None = None, date_last_usage: datetime.datetime | str | None = None, date_released: datetime.datetime | str | None = None, servicecenter_last_usage_name: str | None = None, transaction_timeout: api_client_opti24.models.cards.TransactionTimeout | None = None, product: str | None = None, carrier: str | None = None, available: str | None = None, currency: str | None = None, payment_of_tolls: str | None = None, previous: str | None = None, next: str | None = None, **extra_data: Any) -> None`
 
@@ -608,8 +484,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardDetailData`
 
-Описание отсутствует.
-
 Сигнатура: `CardDetailData(*, total_count: int, result: list[api_client_opti24.models.cards.CardDetail], **extra_data: Any) -> None`
 
 Публичные методы:
@@ -617,8 +491,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `CardDetailResponse`
-
-Описание отсутствует.
 
 Сигнатура: `CardDetailResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardDetailData, timestamp: int, **extra_data: Any) -> None`
 
@@ -628,8 +500,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardDriverInfo`
 
-Описание отсутствует.
-
 Сигнатура: `CardDriverInfo(*, id: str, login: str, first_name: str, last_name: str, middle_name: str | None = None, date: str | None = None, position: str | None = None, role: str | None = None, mobile_phone: str, email: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -637,8 +507,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `CardDriversData`
-
-Описание отсутствует.
 
 Сигнатура: `CardDriversData(*, total_count: int, result: list[api_client_opti24.models.cards.CardDriverInfo], **extra_data: Any) -> None`
 
@@ -648,8 +516,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardDriversResponse`
 
-Описание отсутствует.
-
 Сигнатура: `CardDriversResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardDriversData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -657,8 +523,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `CardGroupData`
-
-Описание отсутствует.
 
 Сигнатура: `CardGroupData(*, total_count: int, result: list[api_client_opti24.models.cards.CardGroupInfo], **extra_data: Any) -> None`
 
@@ -668,8 +532,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardGroupInfo`
 
-Описание отсутствует.
-
 Сигнатура: `CardGroupInfo(*, id: str, group: str, contract_id: str, number: str, status: str, comment: str | None = None, product: str | None = None, payment_of_tolls: str | None = None, sync_group_state: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -678,8 +540,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardGroupResponse`
 
-Описание отсутствует.
-
 Сигнатура: `CardGroupResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardGroupData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -687,8 +547,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `CardInfo`
-
-Описание отсутствует.
 
 Сигнатура: `CardInfo(*, id: str, contract_id: str, number: str, status: str, can_work_offline: bool | None = None, card_auth_type: str | None = None, comment: str | None = None, date_expired: datetime.datetime | None = None, date_last_usage: datetime.datetime | None = None, date_released: datetime.datetime | None = None, servicecenter_last_usage_name: str | None = None, transaction_last_detail: str | None = None, transaction_timeout: api_client_opti24.models.cards.TransactionTimeout | None = None, product: str | None = None, payment_of_tolls: str | None = None, **extra_data: Any) -> None`
 
@@ -708,8 +566,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardsListData`
 
-Описание отсутствует.
-
 Сигнатура: `CardsListData(*, total_count: int, result: list[api_client_opti24.models.cards.CardInfo], **extra_data: Any) -> None`
 
 Публичные методы:
@@ -717,18 +573,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `CardsListResponse`
-
-Описание отсутствует.
-
-Сигнатура: `CardsListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardsListData, timestamp: int, **extra_data: Any) -> None`
-
-Публичные методы:
-
-- `describe() -> 'dict[str, dict[str, Any]]'`
-
-### `CardsListResponse`
-
-Описание отсутствует.
 
 Сигнатура: `CardsListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardsListData, timestamp: int, **extra_data: Any) -> None`
 
@@ -758,8 +602,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `IDListResponse`
 
-Описание отсутствует.
-
 Сигнатура: `IDListResponse(*, status: dict[str, typing.Any], data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -768,8 +610,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TransactionTimeout`
 
-Описание отсутствует.
-
 Сигнатура: `TransactionTimeout(*, type: str | int, value: str | int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -777,8 +617,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ## `api_client_opti24.models.contracts`
-
-Описание отсутствует.
 
 ### `BalanceData`
 
@@ -951,8 +789,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ## `api_client_opti24.models.dictionaries`
-
-Описание отсутствует.
 
 ### `AddressV1`
 
@@ -1187,8 +1023,6 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.ewallet`
 
-Описание отсутствует.
-
 ### `MoveToCardResponse`
 
 Ответ на запрос перевода денег с договора на карту-кошелёк (moveToCard).
@@ -1248,8 +1082,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ## `api_client_opti24.models.final_prices`
-
-Описание отсутствует.
 
 ### `CheckPurchaseRequest`
 
@@ -1312,8 +1144,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ## `api_client_opti24.models.invites`
-
-Описание отсутствует.
 
 ### `InviteActionResult`
 
@@ -1386,8 +1216,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ## `api_client_opti24.models.limits`
-
-Описание отсутствует.
 
 ### `LimitAmount`
 
@@ -1501,8 +1329,6 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.region_limits`
 
-Описание отсутствует.
-
 ### `RegionLimit`
 
 Региональный лимит по договору, карте или группе карт.
@@ -1544,8 +1370,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ## `api_client_opti24.models.reports`
-
-Описание отсутствует.
 
 ### `ReportFileResponse`
 
@@ -1679,8 +1503,6 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.restrictions`
 
-Описание отсутствует.
-
 ### `RestrictionGetResponse`
 
 Ответ на запрос списка ограничителей (GET /restriction).
@@ -1733,11 +1555,7 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.templates`
 
-Описание отсутствует.
-
 ### `LimitAmount`
-
-Описание отсутствует.
 
 Сигнатура: `LimitAmount(*, unit: str | None = None, value: float | None = None, **extra_data: Any) -> None`
 
@@ -1747,8 +1565,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `LimitSum`
 
-Описание отсутствует.
-
 Сигнатура: `LimitSum(*, currency: str | None = None, currencyName: str | None = None, value: float | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1756,8 +1572,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `LimitTerm`
-
-Описание отсутствует.
 
 Сигнатура: `LimitTerm(*, days: str | None = None, type: int | None = None, time: api_client_opti24.models.templates.LimitTermTime | None = None, **extra_data: Any) -> None`
 
@@ -1767,8 +1581,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `LimitTermTime`
 
-Описание отсутствует.
-
 Сигнатура: `LimitTermTime(*, from_: str | None = None, to: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1776,8 +1588,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `LimitTime`
-
-Описание отсутствует.
 
 Сигнатура: `LimitTime(*, type: int | None = None, number: int | None = None, **extra_data: Any) -> None`
 
@@ -1787,8 +1597,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `LimitTransactions`
 
-Описание отсутствует.
-
 Сигнатура: `LimitTransactions(*, count: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1796,8 +1604,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateCreateRequest`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateCreateRequest(*, contract_id: str, type: str, name: str) -> None`
 
@@ -1807,8 +1613,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateCreateResponse`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1816,8 +1620,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateDeleteResponse`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
@@ -1827,8 +1629,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestriction`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateGeoRestriction(*, id: str, template_id: str, contract_id: str, date: str | None = None, country: str | None = None, countryName: str | None = None, region: str | None = None, regionName: str | None = None, partner: str | None = None, partnerName: str | None = None, service_center: str | None = None, service_centerName: str | None = None, restriction_type: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1836,8 +1636,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateGeoRestrictionCreateRequest`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateGeoRestrictionCreateRequest(*, contract_id: str, country: str, region: str | None = None, partner: str | None = None, service_center: str | None = None, restriction_type: int) -> None`
 
@@ -1847,8 +1645,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestrictionCreateResponse`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateGeoRestrictionCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1856,8 +1652,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateGeoRestrictionDeleteResponse`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateGeoRestrictionDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
@@ -1867,8 +1661,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestrictionListData`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateGeoRestrictionListData(*, total_count: int, result: list[api_client_opti24.models.templates.TemplateGeoRestriction], **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1876,8 +1668,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateGeoRestrictionListResponse`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateGeoRestrictionListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateGeoRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
@@ -1887,8 +1677,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateItem`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateItem(*, id: str, name: str, type: str, contract_id: str, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1896,8 +1684,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateLimit`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateLimit(*, id: str, template_id: str, contract_id: str, amount: api_client_opti24.models.templates.LimitAmount | None = None, sum: api_client_opti24.models.templates.LimitSum | None = None, time: api_client_opti24.models.templates.LimitTime | None = None, term: api_client_opti24.models.templates.LimitTerm | None = None, transactions: api_client_opti24.models.templates.LimitTransactions | None = None, date: str | None = None, productType: str | None = None, productGroup: str | None = None, productTypeName: str | None = None, productGroupName: str | None = None, **extra_data: Any) -> None`
 
@@ -1907,8 +1693,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitCreateRequest`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateLimitCreateRequest(*, contract_id: str, product_type: str, product_group: str | None = None, sum: api_client_opti24.models.templates.LimitSum | None = None, amount: api_client_opti24.models.templates.LimitAmount | None = None, time: api_client_opti24.models.templates.LimitTime, term: api_client_opti24.models.templates.LimitTerm | None = None, create_restriction: bool | None = None) -> None`
 
 Публичные методы:
@@ -1916,8 +1700,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateLimitCreateResponse`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateLimitCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
@@ -1927,8 +1709,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitDeleteResponse`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateLimitDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1936,8 +1716,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateLimitListData`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateLimitListData(*, total_count: int, result: list[api_client_opti24.models.templates.TemplateLimit], **extra_data: Any) -> None`
 
@@ -1947,8 +1725,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitListResponse`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateLimitListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateLimitListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1956,8 +1732,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateRestriction`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateRestriction(*, id: str, template_id: str, contract_id: str, date: str | None = None, productType: str | None = None, productGroup: str | None = None, productTypeName: str | None = None, productGroupName: str | None = None, restriction_type: int, **extra_data: Any) -> None`
 
@@ -1967,8 +1741,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionCreateRequest`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateRestrictionCreateRequest(*, contract_id: str, product_type: str, product_group: str | None = None, restriction_type: int) -> None`
 
 Публичные методы:
@@ -1976,8 +1748,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateRestrictionCreateResponse`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateRestrictionCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
@@ -1987,8 +1757,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionDeleteResponse`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateRestrictionDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -1996,8 +1764,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplateRestrictionListData`
-
-Описание отсутствует.
 
 Сигнатура: `TemplateRestrictionListData(*, total_count: int, result: list[api_client_opti24.models.templates.TemplateRestriction], **extra_data: Any) -> None`
 
@@ -2007,8 +1773,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionListResponse`
 
-Описание отсутствует.
-
 Сигнатура: `TemplateRestrictionListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2016,8 +1780,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TemplatesListData`
-
-Описание отсутствует.
 
 Сигнатура: `TemplatesListData(*, total_count: int, result: list[api_client_opti24.models.templates.TemplateItem], **extra_data: Any) -> None`
 
@@ -2027,8 +1789,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplatesListResponse`
 
-Описание отсутствует.
-
 Сигнатура: `TemplatesListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplatesListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2036,8 +1796,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ## `api_client_opti24.models.transactions`
-
-Описание отсутствует.
 
 ### `RequestInfo`
 
@@ -2095,8 +1853,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TransactionsV1Data`
 
-Описание отсутствует.
-
 Сигнатура: `TransactionsV1Data(*, total_count: int, result: list[api_client_opti24.models.transactions.TransactionV1], **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2104,8 +1860,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TransactionsV1Response`
-
-Описание отсутствует.
 
 Сигнатура: `TransactionsV1Response(*, status: dict[str, typing.Any], data: api_client_opti24.models.transactions.TransactionsV1Data, timestamp: int, **extra_data: Any) -> None`
 
@@ -2115,8 +1869,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `TransactionsV2Data`
 
-Описание отсутствует.
-
 Сигнатура: `TransactionsV2Data(*, total_count: int, result: list[api_client_opti24.models.transactions.TransactionItemV2], **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2124,8 +1876,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `TransactionsV2Response`
-
-Описание отсутствует.
 
 Сигнатура: `TransactionsV2Response(*, status: dict[str, typing.Any], data: api_client_opti24.models.transactions.TransactionsV2Data, timestamp: int, **extra_data: Any) -> None`
 
@@ -2135,11 +1885,7 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.users`
 
-Описание отсутствует.
-
 ### `UserAccess`
-
-Описание отсутствует.
 
 Сигнатура: `UserAccess(*, web: bool, api: bool, mobile: bool, **extra_data: Any) -> None`
 
@@ -2149,8 +1895,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `UserBoolResponse`
 
-Описание отсутствует.
-
 Сигнатура: `UserBoolResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2158,8 +1902,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `UserCardItem`
-
-Описание отсутствует.
 
 Сигнатура: `UserCardItem(*, sid: str, number: str, mpc: bool, product: str | None = None, comment: str | None = None, status: str, contract_id: str, contract_name: str | None = None, available: bool, **extra_data: Any) -> None`
 
@@ -2169,8 +1911,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `UserContractItem`
 
-Описание отсутствует.
-
 Сигнатура: `UserContractItem(*, sid: str, number: str, available: bool, template_id: str | None = None, cards_count: int | None = None, status: api_client_opti24.models.users.UserStatus | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2178,8 +1918,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `UserCreateResponse`
-
-Описание отсутствует.
 
 Сигнатура: `UserCreateResponse(*, status: dict[str, typing.Any], data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
@@ -2189,8 +1927,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `UserItem`
 
-Описание отсутствует.
-
 Сигнатура: `UserItem(*, id: str, login: str, first_name: str, last_name: str, middle_name: str | None = None, date: str, position: str | None = None, role: api_client_opti24.models.users.UserRole, active: bool, access: api_client_opti24.models.users.UserAccess, mobile_phone: str | None = None, email: str | None = None, contracts: list[api_client_opti24.models.users.UserContractItem] = <factory>, cards: list[api_client_opti24.models.users.UserCardItem] = <factory>, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2198,8 +1934,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `UserList`
-
-Описание отсутствует.
 
 Сигнатура: `UserList(*, total_count: int, result: list[api_client_opti24.models.users.UserItem], **extra_data: Any) -> None`
 
@@ -2209,8 +1943,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `UserListResponse`
 
-Описание отсутствует.
-
 Сигнатура: `UserListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.users.UserList | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2218,8 +1950,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `UserRole`
-
-Описание отсутствует.
 
 Сигнатура: `UserRole(*, id: str, name: str, **extra_data: Any) -> None`
 
@@ -2229,19 +1959,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `UserStatus`
 
-Описание отсутствует.
-
 Сигнатура: `UserStatus(*, id: str, name: str, **extra_data: Any) -> None`
-
-Публичные методы:
-
-- `describe() -> 'dict[str, dict[str, Any]]'`
-
-### `UserListResponse`
-
-Описание отсутствует.
-
-Сигнатура: `UserListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.users.UserList | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2249,11 +1967,7 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.virtual_cards`
 
-Описание отсутствует.
-
 ### `ConfirmVirtualCardRequest`
-
-Описание отсутствует.
 
 Сигнатура: `ConfirmVirtualCardRequest(*, card_id: str, code: str) -> None`
 
@@ -2263,8 +1977,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `ConfirmVirtualCardResponse`
 
-Описание отсутствует.
-
 Сигнатура: `ConfirmVirtualCardResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2272,8 +1984,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `DeleteMPCResponse`
-
-Описание отсутствует.
 
 Сигнатура: `DeleteMPCResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
@@ -2283,8 +1993,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `DeleteVirtualCardResponse`
 
-Описание отсутствует.
-
 Сигнатура: `DeleteVirtualCardResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2292,8 +2000,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `MPCActionResponse`
-
-Описание отсутствует.
 
 Сигнатура: `MPCActionResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
@@ -2303,8 +2009,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `MPCListResponse`
 
-Описание отсутствует.
-
 Сигнатура: `MPCListResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: Any, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2312,8 +2016,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `MPCPayloadResponse`
-
-Описание отсутствует.
 
 Сигнатура: `MPCPayloadResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: Any, timestamp: int, **extra_data: Any) -> None`
 
@@ -2323,8 +2025,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `RerunVirtualCardReleaseRequest`
 
-Описание отсутствует.
-
 Сигнатура: `RerunVirtualCardReleaseRequest(*, card_id: str, reason: str | None = None) -> None`
 
 Публичные методы:
@@ -2332,8 +2032,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `RerunVirtualCardReleaseResponse`
-
-Описание отсутствует.
 
 Сигнатура: `RerunVirtualCardReleaseResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: api_client_opti24.models.virtual_cards.VirtualCardData, timestamp: int, **extra_data: Any) -> None`
 
@@ -2343,8 +2041,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `ResendSMSRequest`
 
-Описание отсутствует.
-
 Сигнатура: `ResendSMSRequest(*, card_id: str) -> None`
 
 Публичные методы:
@@ -2352,8 +2048,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `ResendSMSResponse`
-
-Описание отсутствует.
 
 Сигнатура: `ResendSMSResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
@@ -2363,8 +2057,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `ResetMPCRequest`
 
-Описание отсутствует.
-
 Сигнатура: `ResetMPCRequest(*, type: str) -> None`
 
 Публичные методы:
@@ -2372,8 +2064,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `ResetMPCResponse`
-
-Описание отсутствует.
 
 Сигнатура: `ResetMPCResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
@@ -2383,8 +2073,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `SimpleActionResponse`
 
-Описание отсутствует.
-
 Сигнатура: `SimpleActionResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2392,8 +2080,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `StatusModel`
-
-Описание отсутствует.
 
 Сигнатура: `StatusModel(*, code: int, **extra_data: Any) -> None`
 
@@ -2403,8 +2089,6 @@ _Публичные классы и функции не обнаружены._
 
 ### `VirtualCardData`
 
-Описание отсутствует.
-
 Сигнатура: `VirtualCardData(*, id: str, number: str, carrier: str, product: str, status: str, **extra_data: Any) -> None`
 
 Публичные методы:
@@ -2412,8 +2096,6 @@ _Публичные классы и функции не обнаружены._
 - `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `VirtualCardResponse`
-
-Описание отсутствует.
 
 Сигнатура: `VirtualCardResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: api_client_opti24.models.virtual_cards.VirtualCardData, timestamp: int, **extra_data: Any) -> None`
 
@@ -2423,17 +2105,11 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.payloads`
 
-Описание отсутствует.
-
 ### `with_method_override`
-
-Описание отсутствует.
 
 Сигнатура: `with_method_override(payload: 'Mapping[str, Any] | Sequence[Mapping[str, Any]] | None', method: 'str') -> 'dict[str, Any] | list[dict[str, Any]]'`
 
 ## `api_client_opti24.policies`
-
-Описание отсутствует.
 
 ### `RateLimitPolicy`
 
@@ -2442,8 +2118,6 @@ RateLimitPolicy(requests_per_second: 'float | None' = None)
 Сигнатура: `RateLimitPolicy(requests_per_second: 'float | None' = None) -> None`
 
 ### `RetryClass`
-
-Описание отсутствует.
 
 Сигнатура: `RetryClass(*values)`
 
@@ -2461,11 +2135,7 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ## `api_client_opti24.registry`
 
-Описание отсутствует.
-
 ### `MethodRegistry`
-
-Описание отсутствует.
 
 Сигнатура: `MethodRegistry(specs: 'dict[str, EndpointSpec] | None' = None) -> 'None'`
 
@@ -2479,17 +2149,11 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ### `build_default_registry`
 
-Описание отсутствует.
-
 Сигнатура: `build_default_registry() -> 'MethodRegistry'`
 
 ## `api_client_opti24.response`
 
-Описание отсутствует.
-
 ### `ResponseDecoder`
-
-Описание отсутствует.
 
 Сигнатура: `ResponseDecoder(*, logger: 'LoggerLike | None' = None) -> 'None'`
 
@@ -2501,11 +2165,7 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ## `api_client_opti24.runtime`
 
-Описание отсутствует.
-
 ### `Clock`
-
-Описание отсутствует.
 
 Сигнатура: `Clock(*args, **kwargs)`
 
@@ -2517,8 +2177,6 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ### `SystemClock`
 
-Описание отсутствует.
-
 Сигнатура: `SystemClock()`
 
 Публичные методы:
@@ -2529,11 +2187,7 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ## `api_client_opti24.service_base`
 
-Описание отсутствует.
-
 ### `APIKeyProvider`
-
-Описание отсутствует.
 
 Сигнатура: `APIKeyProvider(*args, **kwargs)`
 
@@ -2543,8 +2197,6 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ### `CredentialsProvider`
 
-Описание отсутствует.
-
 Сигнатура: `CredentialsProvider(*args, **kwargs)`
 
 Публичные методы:
@@ -2552,8 +2204,6 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 - `get_credentials(self) -> 'tuple[str, str]'`
 
 ### `RequestExecutor`
-
-Описание отсутствует.
 
 Сигнатура: `RequestExecutor(*args, **kwargs)`
 
@@ -2564,19 +2214,13 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ### `ServiceMethodContext`
 
-Описание отсутствует.
-
 Сигнатура: `ServiceMethodContext(*args, **kwargs)`
 
 ### `SessionContext`
 
-Описание отсутствует.
-
 Сигнатура: `SessionContext(*args, **kwargs)`
 
 ### `SessionGate`
-
-Описание отсутствует.
 
 Сигнатура: `SessionGate(*args, **kwargs)`
 
@@ -2585,8 +2229,6 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 - `ensure_authenticated(self) -> 'str'`
 
 ### `SessionMutator`
-
-Описание отсутствует.
 
 Сигнатура: `SessionMutator(*args, **kwargs)`
 
@@ -2599,8 +2241,6 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ### `SessionRecovery`
 
-Описание отсутствует.
-
 Сигнатура: `SessionRecovery(*args, **kwargs)`
 
 Публичные методы:
@@ -2608,8 +2248,6 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 - `recover(self) -> 'str'`
 
 ## `api_client_opti24.service_groups`
-
-Описание отсутствует.
 
 ### `ServiceContainer`
 
@@ -2623,17 +2261,11 @@ ServiceContainer(auth: 'AuthService', card_groups: 'CardGroupsService', cards: '
 
 ## `api_client_opti24.services`
 
-Описание отсутствует.
-
 _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.services.auth`
 
-Описание отсутствует.
-
 ### `AuthService`
-
-Описание отсутствует.
 
 Сигнатура: `AuthService(request_executor: api_client_opti24.service_base.RequestExecutor, session_context: api_client_opti24.service_base.SessionContext, session_gate: api_client_opti24.service_base.SessionGate, session_mutator: api_client_opti24.service_base.SessionMutator, authenticator: api_client_opti24.authentication.Authenticator, clock: api_client_opti24.runtime.Clock, logger: logging.Logger) -> None`
 
@@ -2644,8 +2276,6 @@ _Публичные классы и функции не обнаружены._
 - `logoff(self, api_version: str | None = None) -> dict[str, object]`
 
 ## `api_client_opti24.services.card_group`
-
-Описание отсутствует.
 
 ### `CardGroupsService`
 
@@ -2661,8 +2291,6 @@ _Публичные классы и функции не обнаружены._
 - `set_cards_to_group(self, *, contract_id: str, group_id: str, cards_list: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.card_group.SetCardsToGroupResponse`
 
 ## `api_client_opti24.services.cards`
-
-Описание отсутствует.
 
 ### `CardsService`
 
@@ -2684,11 +2312,7 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.services.contract`
 
-Описание отсутствует.
-
 ### `ContractsService`
-
-Описание отсутствует.
 
 Сигнатура: `ContractsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
@@ -2704,8 +2328,6 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.services.dictionaries`
 
-Описание отсутствует.
-
 ### `DictionariesService`
 
 Методы для работы со справочниками и торговыми точками
@@ -2720,8 +2342,6 @@ _Публичные классы и функции не обнаружены._
 - `get_dictionary(self, *, name: str, api_version: str | None = None) -> api_client_opti24.models.dictionaries.DictionaryResponse`
 
 ## `api_client_opti24.services.ewallet`
-
-Описание отсутствует.
 
 ### `EwalletService`
 
@@ -2743,8 +2363,6 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.services.final_prices`
 
-Описание отсутствует.
-
 ### `FinalPricesService`
 
 Методы для получения финальных цен и проверки покупок по карте.
@@ -2757,8 +2375,6 @@ _Публичные классы и функции не обнаружены._
 - `get_final_prices(self, *, card_id: str, poi_id: str, goods: list[str], api_version: str | None = None) -> api_client_opti24.models.final_prices.FinalPricesResponse`
 
 ## `api_client_opti24.services.invites`
-
-Описание отсутствует.
 
 ### `InvitesService`
 
@@ -2781,8 +2397,6 @@ Invites – функционал регистрации пользователе
 
 ## `api_client_opti24.services.limits`
 
-Описание отсутствует.
-
 ### `LimitsService`
 
 Методы для работы с продуктовыми лимитами (v1).
@@ -2802,8 +2416,6 @@ Invites – функционал регистрации пользователе
 
 ## `api_client_opti24.services.region_limits`
 
-Описание отсутствует.
-
 ### `RegionLimitsService`
 
 Методы для работы с региональными лимитами (v1).
@@ -2817,8 +2429,6 @@ Invites – функционал регистрации пользователе
 - `set_region_limit(self, *, region_limits: list[dict[str, typing.Any]], api_version: str | None = None) -> dict[str, typing.Any]`
 
 ## `api_client_opti24.services.reports`
-
-Описание отсутствует.
 
 ### `ReportsService`
 
@@ -2847,8 +2457,6 @@ Invites – функционал регистрации пользователе
 
 ## `api_client_opti24.services.restrictions`
 
-Описание отсутствует.
-
 ### `RestrictionsService`
 
 Методы для работы с товарными ограничителями (v1).
@@ -2862,8 +2470,6 @@ Invites – функционал регистрации пользователе
 - `set_restriction(self, *, restrictions: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionSetResponse`
 
 ## `api_client_opti24.services.templates`
-
-Описание отсутствует.
 
 ### `TemplatesService`
 
@@ -2897,8 +2503,6 @@ Invites – функционал регистрации пользователе
 
 ## `api_client_opti24.services.transactions`
 
-Описание отсутствует.
-
 ### `TransactionsService`
 
 Методы для работы с транзакциями (v1 и v2).
@@ -2913,8 +2517,6 @@ Invites – функционал регистрации пользователе
 - `get_transactions_v2(self, *, contract_id: str, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str | None = None, filter_fn: collections.abc.Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
 
 ## `api_client_opti24.services.users`
-
-Описание отсутствует.
 
 ### `UsersService`
 
@@ -2933,8 +2535,6 @@ Invites – функционал регистрации пользователе
 - `get_users(self, *, sort: str | None = None, page: int | None = None, on_page: int | None = None, q: str | None = None, filter: dict[str, Any] | None = None, api_version: str | None = None) -> api_client_opti24.models.users.UserListResponse`
 
 ## `api_client_opti24.services.virtual_cards`
-
-Описание отсутствует.
 
 ### `VirtualCardsService`
 
@@ -2956,11 +2556,7 @@ Invites – функционал регистрации пользователе
 
 ## `api_client_opti24.session`
 
-Описание отсутствует.
-
 ### `SessionManager`
-
-Описание отсутствует.
 
 Сигнатура: `SessionManager() -> 'None'`
 
@@ -2981,17 +2577,11 @@ SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 's
 
 ### `SessionState`
 
-Описание отсутствует.
-
 Сигнатура: `SessionState(*values)`
 
 ## `api_client_opti24.transport`
 
-Описание отсутствует.
-
 ### `AsyncHTTPClient`
-
-Описание отсутствует.
 
 Сигнатура: `AsyncHTTPClient(*args, **kwargs)`
 
@@ -3003,8 +2593,6 @@ SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 's
 
 ### `AsyncTransport`
 
-Описание отсутствует.
-
 Сигнатура: `AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'LoggerLike | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = <function sleep>, monotonic: 'Callable[[], float]' = <built-in function monotonic>)`
 
 Публичные методы:
@@ -3015,17 +2603,11 @@ SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 's
 
 ## `api_client_opti24.utils`
 
-Описание отсутствует.
-
 ### `format_date_russian`
-
-Описание отсутствует.
 
 Сигнатура: `format_date_russian(date_str: str) -> str`
 
 ### `format_number`
-
-Описание отсутствует.
 
 Сигнатура: `format_number(number: float | int | None) -> str`
 
@@ -3037,37 +2619,25 @@ SHA-512 хэш пароля в нижнем регистре.
 
 ### `is_sensitive_log_key`
 
-Описание отсутствует.
-
 Сигнатура: `is_sensitive_log_key(key: str) -> bool`
 
 ### `message_mentions_sensitive_key`
-
-Описание отсутствует.
 
 Сигнатура: `message_mentions_sensitive_key(text: str) -> bool`
 
 ### `print_json`
 
-Описание отсутствует.
-
 Сигнатура: `print_json(data: Any) -> None`
 
 ### `sanitize_for_logging`
-
-Описание отсутствует.
 
 Сигнатура: `sanitize_for_logging(value: Any) -> Any`
 
 ### `scrub`
 
-Описание отсутствует.
-
 Сигнатура: `scrub(text: str) -> str`
 
 ### `to_json_param`
-
-Описание отсутствует.
 
 Сигнатура: `to_json_param(value: Any) -> str`
 

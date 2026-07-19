@@ -43,31 +43,39 @@ def format_signature(obj: object) -> str:
         return "()"
 
 
-def clean_docstring(obj: object) -> str:
+def clean_docstring(obj: object) -> str | None:
     if inspect.isclass(obj):
         own_docstring = vars(obj).get("__doc__")
-        return inspect.cleandoc(own_docstring) if own_docstring else "Описание отсутствует."
-    return inspect.getdoc(obj) or "Описание отсутствует."
+        return inspect.cleandoc(own_docstring) if own_docstring else None
+    return inspect.getdoc(obj)
 
 
 def iter_public_classes(module) -> list[type]:
     classes: list[type] = []
+    seen: set[int] = set()
     for name, obj in inspect.getmembers(module, inspect.isclass):
         if name.startswith("_"):
             continue
         if obj.__module__ != module.__name__:
             continue
+        if id(obj) in seen:
+            continue
+        seen.add(id(obj))
         classes.append(obj)
     return classes
 
 
 def iter_public_functions(module) -> list[object]:
     functions: list[object] = []
+    seen: set[int] = set()
     for name, obj in inspect.getmembers(module, inspect.isfunction):
         if name.startswith("_"):
             continue
         if obj.__module__ != module.__name__:
             continue
+        if id(obj) in seen:
+            continue
+        seen.add(id(obj))
         functions.append(obj)
     return functions
 
@@ -105,8 +113,9 @@ def render_model_block(cls: type[BaseModel]) -> str:
 
 def render_class(cls: type) -> list[str]:
     lines = [f"### `{cls.__name__}`", ""]
-    lines.append(clean_docstring(cls))
-    lines.append("")
+    description = clean_docstring(cls)
+    if description:
+        lines.extend((description, ""))
     lines.append(f"Сигнатура: `{cls.__name__}{format_signature(cls)}`")
     lines.append("")
 
@@ -129,8 +138,9 @@ def render_class(cls: type) -> list[str]:
 
 def render_function(func: object) -> list[str]:
     lines = [f"### `{func.__name__}`", ""]
-    lines.append(clean_docstring(func))
-    lines.append("")
+    description = clean_docstring(func)
+    if description:
+        lines.extend((description, ""))
     lines.append(f"Сигнатура: `{func.__name__}{format_signature(func)}`")
     lines.append("")
     return lines
@@ -139,8 +149,9 @@ def render_function(func: object) -> list[str]:
 def render_module(module_name: str) -> list[str]:
     module = importlib.import_module(module_name)
     lines = [f"## `{module_name}`", ""]
-    lines.append(clean_docstring(module))
-    lines.append("")
+    description = clean_docstring(module)
+    if description:
+        lines.extend((description, ""))
 
     classes = iter_public_classes(module)
     functions = iter_public_functions(module)

@@ -1,54 +1,52 @@
-# Документация APIClient
+# API Client SDK
 
-Этот каталог содержит документацию проекта.
+Асинхронная Python-библиотека для авторизации, управления картами, договорами,
+транзакциями, отчётами, пользователями и виртуальными картами.
 
-Основные разделы:
+!!! info "Текущая версия"
+    Документация соответствует `api-client-opti24 2.2.0` и Python
+    `>=3.11,<3.15`.
 
-- [README проекта](https://github.com/raspopovaa/APIforCards/blob/main/README.md)
-- [Автоматически сгенерированный API Reference](https://github.com/raspopovaa/APIforCards/blob/main/docs/api-reference.md)
-- [Совместимость со спецификацией](https://github.com/raspopovaa/APIforCards/blob/main/docs/spec-compatibility.md)
-- [Архитектура SDK](https://github.com/raspopovaa/APIforCards/blob/main/docs/architecture.md)
-- [Информационная безопасность](https://github.com/raspopovaa/APIforCards/blob/main/docs/security.md)
+## Начните отсюда
 
-## Как обновлять документацию
+| Раздел | Для чего нужен |
+|---|---|
+| [Установка и быстрый запуск](getting-started.md) | Установить пакет и выполнить первый запрос |
+| [Конфигурация](configuration.md) | Настроить URL, credentials, timeout, retry и rate limit |
+| [Методы API](methods.md) | Найти вызов SDK, маршрут, DEMO-доступность и тарификацию |
+| [Ошибки и retry](errors.md) | Обработать HTTP/API-ошибки и безопасные повторы |
+| [API Reference](api-reference.md) | Посмотреть сигнатуры сервисов и модели данных |
 
-Локально:
+## Основной стиль использования
 
-```bash
-cd path/to/api-pro-sdk
-.venv/bin/python scripts/generate_api_docs.py
+SDK предоставляет типизированные композиционные сервисы:
+
+```python
+auth = await client.auth.auth_user()
+cards = await client.cards.get_cards_v2(page=1, onpage=20)
+reports = await client.reports.get_reports()
+transactions = await client.transactions.get_transactions_v2()
 ```
 
-После запуска будет обновлен файл:
+Прямых методов вида `client.get_cards_v2()` нет. Каждый метод находится в
+своём доменном пространстве: `client.cards`, `client.reports`, `client.users` и
+других.
 
-- [api-reference.md](https://github.com/raspopovaa/APIforCards/blob/main/docs/api-reference.md)
+## Гарантии SDK
 
-## Что попадает в автодокументацию
+- единый декларативный registry маршрутов;
+- проверка HTTP-кода и API-кода ответа;
+- re-auth без рекурсивного захвата session lock;
+- retry только в соответствии с idempotency policy;
+- percent-encoding параметров пути и запрет небезопасных сегментов;
+- изоляция credentials от доменных сервисов;
+- типизированные response/request модели на Pydantic v2;
+- автоматическая сверка 91 внешнего метода с независимым YAML-контрактом.
 
-- публичные модули пакета `api_client_opti24`
-- публичные классы и функции
-- сигнатуры
-- docstring'и
-- описание полей моделей через `BaseModel.describe()`
+## Дополнительные материалы
 
-Отдельно стоит учитывать, что `registry` отражает:
-
-- demo-доступность методов
-- alias-маршруты для альтернативных веток API
-- дополнительные MPC/QR-методы, покрытые SDK
-
-## Публикация пакета
-
-Локальная сборка:
-
-```bash
-cd path/to/api-pro-sdk
-uv build
-```
-
-Публикация в TestPyPI:
-
-```bash
-export UV_PUBLISH_TOKEN="<testpypi-token>"
-uv publish --publish-url https://test.pypi.org/legacy/
-```
+- [Архитектура SDK](architecture.md)
+- [Информационная безопасность](security.md)
+- [Совместимость со спецификацией](spec-compatibility.md)
+- [Исходный код на GitHub](https://github.com/raspopovaa/APIforCards)
+- [Пакет 2.2.0 на TestPyPI](https://test.pypi.org/project/api-client-opti24/2.2.0/)

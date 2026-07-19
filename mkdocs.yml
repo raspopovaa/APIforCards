@@ -1,0 +1,68 @@
+site_name: API Client SDK
+site_description: Асинхронный Python SDK для API топливных карт
+site_url: https://raspopovaa.github.io/APIforCards/
+repo_url: https://github.com/raspopovaa/APIforCards
+repo_name: raspopovaa/APIforCards
+edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+strict: true
+
+theme:
+  name: material
+  language: ru
+  features:
+    - content.code.copy
+    - navigation.footer
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Включить тёмную тему
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Включить светлую тему
+
+plugins:
+  - search:
+      lang:
+        - ru
+        - en
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+
+nav:
+  - Главная: index.md
+  - Начало работы:
+      - Установка и запуск: getting-started.md
+      - Конфигурация: configuration.md
+      - Ошибки и retry: errors.md
+  - Методы API: methods.md
+  - API Reference: api-reference.md
+  - Устройство SDK:
+      - Архитектура: architecture.md
+      - Безопасность: security.md
+      - Совместимость: spec-compatibility.md
