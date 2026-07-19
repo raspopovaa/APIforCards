@@ -30,6 +30,9 @@ jobs:
       - name: Run pytest
         run: pytest
 
+      - name: Verify external API contract
+        run: python scripts/verify_external_contract.py specifications/api-methods.yaml
+
       - name: Run full lint checks
         run: ruff check src tests scripts
 

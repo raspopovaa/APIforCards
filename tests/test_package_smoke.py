@@ -9,7 +9,10 @@ import pytest
 import api_client_opti24 as sdk
 from api_client_opti24 import APIClient, __version__
 from api_client_opti24.config import APISettings, ConnectionSettings
-from api_client_opti24.credentials import StaticCredentialsProvider
+from api_client_opti24.credentials import (
+    StaticCredentialsProvider,
+    StaticLoginPasswordProvider,
+)
 from api_client_opti24.registry import build_default_registry
 
 SERVICE_TYPES = {
@@ -56,7 +59,7 @@ def test_package_root_exports_client() -> None:
 
 
 def test_package_root_exports_version() -> None:
-    assert __version__ == "2.1.0"
+    assert __version__ == "2.2.0"
 
 
 def test_settings_factory_is_available() -> None:
@@ -114,7 +117,12 @@ async def test_credentials_provider_is_injected_only_into_auth_service(tmp_path)
     for name in SERVICE_TYPES:
         if name != "auth":
             assert provider not in vars(getattr(client, name)).values()
-    assert provider in vars(client.auth).values()
+    authenticator = next(
+        value
+        for value in vars(client.auth).values()
+        if type(value).__name__ == "DefaultAuthenticator"
+    )
+    assert provider in vars(authenticator).values()
     assert provider.calls == 0
 
     await client.aclose()
@@ -156,6 +164,35 @@ async def test_client_accepts_safe_settings_and_combined_credentials_provider(tm
 
     assert client.settings is settings
     assert not hasattr(client.settings, "api_key")
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_client_keeps_dynamic_api_key_provider_live(tmp_path) -> None:
+    class DynamicAPIKeyProvider:
+        def __init__(self) -> None:
+            self.value = "initial-key"
+
+        def get_api_key(self) -> str:
+            return self.value
+
+    provider = DynamicAPIKeyProvider()
+    client = APIClient(
+        settings=ConnectionSettings(
+            base_url="https://example.invalid/vip/",
+            logger_file=str(tmp_path / "sdk.log"),
+        ),
+        api_key_provider=provider,
+        credentials_provider=StaticLoginPasswordProvider(
+            login="demo-login",
+            password="demo-password",
+        ),
+    )
+
+    assert client.request_executor.headers()["api_key"] == "initial-key"
+    provider.value = "rotated-key"
+    assert client.request_executor.headers()["api_key"] == "rotated-key"
+    assert not hasattr(client.authentication, "bind")
     await client.aclose()
 
 

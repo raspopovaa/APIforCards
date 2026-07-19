@@ -96,7 +96,7 @@
         <h1>Информационная безопасность</h1>
 <h2>Изоляция credentials</h2>
 <p>Пароль передаётся только в <code>CredentialsProvider</code>, который используется исключительно <code>AuthService</code>. Остальные доменные сервисы получают только <code>RequestExecutor</code>, read-only <code>SessionContext</code> и <code>SessionGate</code>, не хранят ссылку на <code>APIClient</code> и не имеют доступа к его настройкам или transport.</p>
-<p>API key отделён интерфейсом <code>APIKeyProvider</code>. <code>APIClient.settings</code> содержит только <code>ConnectionSettings</code>; в нём отсутствуют API key, логин и пароль. Совмещённый provider внедряется в composition root узкими интерфейсами и не передаётся доменным сервисам.</p>
+<p>API key отделён интерфейсом <code>APIKeyProvider</code>. <code>APIClient.settings</code> содержит только <code>ConnectionSettings</code>; в нём отсутствуют API key, логин и пароль. <code>OperationExecutor</code> хранит provider, а не разрешённое значение, и вызывает <code>get_api_key()</code> перед каждым запросом. Это позволяет secret manager ротировать ключ без пересоздания клиента. Provider не передаётся доменным сервисам.</p>
 <h2>Передача данных</h2>
 <ul>
 <li>Удалённые API-адреса должны использовать HTTPS.</li>
@@ -133,7 +133,7 @@
 <h2>Ошибки</h2>
 <p><code>APIError.context.raw_payload</code> сохраняется для диагностики, но может содержать персональные или договорные данные. Его нельзя без дополнительной очистки передавать в telemetry, общие логи или внешние системы обработки ошибок.</p>
 <h2>Retry</h2>
-<p>Автоматический повтор разрешается только политикой endpoint: операция должна быть помечена подходящим <code>retry_class</code> и быть idempotent. Неопределённый сетевой результат операции изменения данных не повторяется автоматически. Re-auth выполняется в operation executor только для endpoint с <code>requires_session=True</code>. Ошибка самой операции <code>auth_user</code> не запускает recovery, поэтому повторный захват session lock исключён.</p>
+<p>Автоматический повтор разрешается только политикой endpoint: операция должна быть помечена подходящим <code>retry_class</code> и быть idempotent. Неопределённый сетевой результат операции изменения данных не повторяется автоматически. Re-auth выполняется во внешнем orchestration executor только для endpoint с <code>requires_session=True</code>. Ошибка самой операции <code>auth_user</code> не запускает recovery, поэтому повторный захват session lock исключён.</p>
       </div>
     </div>
   </body>

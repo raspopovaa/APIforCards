@@ -3,10 +3,10 @@
 ## Request pipeline
 
 1. Доменный метод явно передаёт executor имя операции и параметры пути.
-2. `DefaultRequestExecutor` получает декларативный `EndpointSpec` из registry,
-   выбирает route variant и безопасно кодирует path-параметры.
-3. Executor обеспечивает сессию, передаёт timeout, `retry_class` и `idempotent`
-   в transport и выполняет не более одного re-auth для защищённой операции.
+2. `DefaultRequestExecutor` применяет session/recovery policy операции.
+3. `OperationExecutor` получает декларативный `EndpointSpec` из registry,
+   выбирает route variant, безопасно кодирует path-параметры и передаёт timeout,
+   `retry_class` и `idempotent` в transport.
 4. Transport независимо применяет rate limit и сетевой retry.
 5. `ResponseDecoder` требует успешные HTTP-код и `payload.status.code`.
 6. Executor проверяет, что JSON-ответ является объектом, а доменный сервис
@@ -19,31 +19,39 @@
 `MethodSpec` сохранён как alias `EndpointSpec` для обратной совместимости.
 Сервисы не содержат HTTP-методов и endpoint-строк: operation-centric executor
 является единственной точкой разрешения маршрута.
+Внешний код и признак тарификации объявляются непосредственно в соответствующем
+вызове `endpoint()` или `route()`, поэтому отдельного внутреннего metadata-overlay
+нет.
 
 ## Dependency injection
 
 `APIClient` принимает `transport`, `session_manager`, `registry`, `logger` и
-`clock`. `AsyncTransport` отдельно принимает HTTP client, response decoder,
+`clock`. Функция `compose_client_runtime()` статически собирает authenticator,
+coordinator, оба executor и сервисы; двухфазной настройки через `bind()` нет.
+`AsyncTransport` отдельно принимает HTTP client, response decoder,
 политики, logger и clock. Transport не знает об `APIClient`, session manager или
 re-auth.
 
 Публичный `client.settings` имеет тип `ConnectionSettings` и не содержит API key,
 логин или пароль. Секреты находятся в отдельных `APIKeyProvider` и
 `CredentialsProvider`; единый `StaticCredentialsProvider` реализует оба узких
-контракта, но executor получает только значение API key, а `AuthService` — только
-логин и пароль. Legacy `APISettings` преобразуется в безопасные настройки в
-composition root и не сохраняется клиентом.
+контракта. `OperationExecutor` хранит только `APIKeyProvider` и запрашивает ключ
+непосредственно перед каждым запросом, поэтому ротация в secret manager не требует
+пересоздания клиента. `DefaultAuthenticator` — единственный компонент, который
+получает логин и пароль. Legacy `APISettings` преобразуется в безопасные настройки
+в composition root и не сохраняется клиентом.
 
 Сервисы зависят только от узких протоколов `RequestExecutor`, read-only
 `SessionContext`, `SessionGate` и logger. Они не могут изменять состояние сессии.
 `SessionGate` также используется асинхронным resolver договора, если вызывающий
 код не передал `contract_id` явно.
-Только `AuthService` дополнительно получает `SessionMutator`, `CredentialsProvider`
-и `Clock`. Ни один доменный сервис не хранит ссылку на `APIClient`, его настройки
-или transport.
+Только `DefaultAuthenticator` получает `SessionMutator` и `CredentialsProvider`,
+а `AuthService` делегирует ему `auth_user`. Ни один доменный сервис не хранит
+ссылку на `APIClient`, его настройки или transport.
 
-`AuthenticationCoordinator` связывает `AuthService` с `SessionManager` и реализует
-`SessionGate` и `SessionRecovery`. Auth-операция помечена в registry как не
+`AuthenticationCoordinator` получает готовый authenticator в конструкторе и
+реализует `SessionGate` и `SessionRecovery`. Auth-операция выполняется через
+низкоуровневый `OperationExecutor` и помечена в registry как не
 требующая сессии, поэтому её `401` возвращается вызывающему коду без рекурсивного
 re-auth. Пароль не передаётся остальным сервисам.
 
@@ -73,8 +81,8 @@ users = await client.users.get_users()
 
 Каждый доменный метод объявлен непосредственно в конкретном сервисе. В SDK нет
 доменных mixin-классов и прямых методов вида `client.get_cards_v2()`.
-`AuthService` создаётся отдельно в composition root и является единственным сервисом,
-получающим `CredentialsProvider`. `ServiceContainer` не зависит от учётных данных и
+`AuthService` создаётся отдельно в composition root и делегирует работу с
+credentials изолированному authenticator. `ServiceContainer` не зависит от учётных данных и
 собирает остальные сервисы в одном типизированном composition root,
 а внутренний `_ServiceFacade` предоставляет явные свойства без динамического
 `__getattr__`.
@@ -100,3 +108,11 @@ users = await client.users.get_users()
 маршруты, demo-доступность, idempotency, session policy, timeout и retry class.
 Изменение registry поэтому требует явного изменения контракта, а не проходит
 незаметно вместе с реализацией.
+
+Snapshot дополняется независимым текстовым контрактом
+`specifications/api-methods.yaml`, однократно преобразованным из внешней таблицы.
+Скрипт `scripts/verify_external_contract.py` выполняет строгое сопоставление
+`external_code → EndpointSpec/RouteVariant` и проверяет operation, route name,
+HTTP-метод, версию, путь, DEMO-доступность и тарификацию. Исходный Excel не
+хранится в репозитории. Известные противоречия сводной и детальной спецификаций
+перечислены непосредственно в YAML и не исправляются неявно.

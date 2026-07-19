@@ -21,6 +21,8 @@ def serialize_registry_contract(registry: MethodRegistry) -> list[dict[str, obje
                     "endpoint": route.endpoint,
                     "api_version": route.api_version,
                     "demo_available": route.demo_available,
+                    "external_code": route.external_code,
+                    "billable": route.billable,
                 }
                 for route in spec.iter_routes()
             ],

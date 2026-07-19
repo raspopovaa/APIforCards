@@ -48,6 +48,15 @@ endpoint, версию API, demo-доступность, timeout, idempotency и
 Исходники сервисов не импортируются и не разбираются через AST при построении
 клиента.
 
+Независимый контракт, однократно преобразованный из свода методов, находится в
+`specifications/api-methods.yaml`. Команда
+`python scripts/verify_external_contract.py specifications/api-methods.yaml`
+строго сверяет `external_code`, operation, route name, HTTP-метод, версию, путь,
+DEMO-доступность и тарификацию с registry. Исходный Excel остаётся вне
+репозитория. Для `calculate_prices` и `check_purchase` в YAML явно зафиксировано
+расхождение: сводная таблица указывает `GET`, но наличие request body в детальной
+спецификации требует `POST`.
+
 ## Границы ответственности
 
 Географические ограничения, срок жизни сессии и серверные квоты контролируются

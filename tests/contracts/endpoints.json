@@ -16,7 +16,9 @@
         "http_method": "POST",
         "endpoint": "users/{user_id}/attachCard",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "users_attach_card",
+        "billable": true
       }
     ]
   },
@@ -37,7 +39,9 @@
         "http_method": "POST",
         "endpoint": "users/{user_id}/attachContracts",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "users_attach_contracts",
+        "billable": true
       }
     ]
   },
@@ -58,7 +62,9 @@
         "http_method": "POST",
         "endpoint": "authUser",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "authuser",
+        "billable": false
       }
     ]
   },
@@ -79,7 +85,9 @@
         "http_method": "POST",
         "endpoint": "blockCard",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "blockcard",
+        "billable": true
       }
     ]
   },
@@ -100,7 +108,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/checkPurchase",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "check_purchase",
+        "billable": false
       }
     ]
   },
@@ -121,7 +131,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/confirmMPC",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "confirm_mpc",
+        "billable": false
       }
     ]
   },
@@ -142,14 +154,18 @@
         "http_method": "POST",
         "endpoint": "invites",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "invites_post",
+        "billable": true
       },
       {
         "name": "without_send",
         "http_method": "POST",
         "endpoint": "invites_free",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "invites_post_free",
+        "billable": false
       }
     ]
   },
@@ -170,7 +186,9 @@
         "http_method": "POST",
         "endpoint": "vc/templates",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_post",
+        "billable": true
       }
     ]
   },
@@ -191,7 +209,9 @@
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/georestrictions",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_georestrictions_post",
+        "billable": true
       }
     ]
   },
@@ -212,7 +232,9 @@
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/limits",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_limits_post",
+        "billable": true
       }
     ]
   },
@@ -233,7 +255,9 @@
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/restrictions",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_restrictions_post",
+        "billable": true
       }
     ]
   },
@@ -254,7 +278,9 @@
         "http_method": "POST",
         "endpoint": "users",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "users_post",
+        "billable": true
       }
     ]
   },
@@ -275,7 +301,9 @@
         "http_method": "POST",
         "endpoint": "cards",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "cards_post",
+        "billable": true
       }
     ]
   },
@@ -296,14 +324,18 @@
         "http_method": "DELETE",
         "endpoint": "invites/{invite_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "invites_delete",
+        "billable": false
       },
       {
         "name": "post_override",
         "http_method": "POST",
         "endpoint": "invites/{invite_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       }
     ]
   },
@@ -324,7 +356,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/deleteMPC",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "delete_mpc",
+        "billable": false
       }
     ]
   },
@@ -345,14 +379,18 @@
         "http_method": "DELETE",
         "endpoint": "vc/templates/{template_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_delete",
+        "billable": true
       },
       {
         "name": "post_override",
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       }
     ]
   },
@@ -373,21 +411,27 @@
         "http_method": "DELETE",
         "endpoint": "vc/templates/{template_id}/georestrictions/{georestriction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       },
       {
         "name": "plural_id",
         "http_method": "DELETE",
         "endpoint": "vc/templates/{template_id}/georestrictions/{georestrictions_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_georestrictions_delete",
+        "billable": true
       },
       {
         "name": "post_override",
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/georestrictions/{georestriction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       }
     ]
   },
@@ -408,14 +452,18 @@
         "http_method": "DELETE",
         "endpoint": "vc/templates/{template_id}/limits/{limit_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_limits_delete",
+        "billable": true
       },
       {
         "name": "post_override",
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/limits/{limit_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       }
     ]
   },
@@ -436,21 +484,27 @@
         "http_method": "DELETE",
         "endpoint": "vc/templates/{template_id}/restrictions/{restriction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       },
       {
         "name": "plural_id",
         "http_method": "DELETE",
         "endpoint": "vc/templates/{template_id}/restrictions/{restrictions_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_restrictions_delete",
+        "billable": true
       },
       {
         "name": "post_override",
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/restrictions/{restriction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       }
     ]
   },
@@ -471,14 +525,18 @@
         "http_method": "DELETE",
         "endpoint": "users/{user_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "users_delete",
+        "billable": true
       },
       {
         "name": "post_override",
         "http_method": "POST",
         "endpoint": "users/{user_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       }
     ]
   },
@@ -499,7 +557,9 @@
         "http_method": "POST",
         "endpoint": "users/{user_id}/detachCard",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "users_detach_card",
+        "billable": true
       }
     ]
   },
@@ -520,7 +580,9 @@
         "http_method": "POST",
         "endpoint": "users/{user_id}/detachContracts",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "users_detach_contracts",
+        "billable": true
       }
     ]
   },
@@ -541,7 +603,9 @@
         "http_method": "GET",
         "endpoint": "reports/jobs/{job_id}",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "reports_jobs_file",
+        "billable": true
       }
     ]
   },
@@ -562,7 +626,9 @@
         "http_method": "GET",
         "endpoint": "getReportFile",
         "api_version": "v1",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "getreportfile",
+        "billable": true
       }
     ]
   },
@@ -583,7 +649,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/pay",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "pay",
+        "billable": false
       }
     ]
   },
@@ -604,7 +672,9 @@
         "http_method": "GET",
         "endpoint": "azs/filters",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "filters",
+        "billable": false
       }
     ]
   },
@@ -625,7 +695,9 @@
         "http_method": "GET",
         "endpoint": "AZS",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "azs",
+        "billable": false
       }
     ]
   },
@@ -646,7 +718,9 @@
         "http_method": "GET",
         "endpoint": "azs",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "poi",
+        "billable": false
       }
     ]
   },
@@ -667,7 +741,9 @@
         "http_method": "GET",
         "endpoint": "cards",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "cards_detail",
+        "billable": true
       }
     ]
   },
@@ -688,7 +764,9 @@
         "http_method": "GET",
         "endpoint": "cards/{card_id}/drivers",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "cards_drivers",
+        "billable": true
       }
     ]
   },
@@ -709,7 +787,9 @@
         "http_method": "GET",
         "endpoint": "cardGroups",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "cardgroups",
+        "billable": false
       }
     ]
   },
@@ -730,7 +810,9 @@
         "http_method": "GET",
         "endpoint": "cards/{card_id}/transactions",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "card_transactions",
+        "billable": true
       }
     ]
   },
@@ -751,7 +833,9 @@
         "http_method": "GET",
         "endpoint": "cards",
         "api_version": "v1",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "cards_group",
+        "billable": false
       }
     ]
   },
@@ -772,7 +856,9 @@
         "http_method": "GET",
         "endpoint": "cards",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "cards",
+        "billable": true
       }
     ]
   },
@@ -793,7 +879,9 @@
         "http_method": "GET",
         "endpoint": "cards",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "cards_cache",
+        "billable": false
       }
     ]
   },
@@ -814,7 +902,9 @@
         "http_method": "GET",
         "endpoint": "getPartContractData",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "getpartcontractdata",
+        "billable": true
       }
     ]
   },
@@ -835,7 +925,9 @@
         "http_method": "GET",
         "endpoint": "getDictionary",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "getdictionary",
+        "billable": false
       }
     ]
   },
@@ -856,7 +948,9 @@
         "http_method": "GET",
         "endpoint": "documents",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "documents_get",
+        "billable": false
       }
     ]
   },
@@ -877,7 +971,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/calculatePrices",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "calculate_prices",
+        "billable": false
       }
     ]
   },
@@ -898,7 +994,9 @@
         "http_method": "GET",
         "endpoint": "info",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "info",
+        "billable": false
       }
     ]
   },
@@ -919,7 +1017,9 @@
         "http_method": "GET",
         "endpoint": "invites",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "invites_get",
+        "billable": false
       }
     ]
   },
@@ -940,7 +1040,9 @@
         "http_method": "GET",
         "endpoint": "invoices",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "invoices",
+        "billable": false
       }
     ]
   },
@@ -961,7 +1063,9 @@
         "http_method": "GET",
         "endpoint": "limit",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "limit",
+        "billable": false
       }
     ]
   },
@@ -982,7 +1086,9 @@
         "http_method": "GET",
         "endpoint": "MPC",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "mpc",
+        "billable": false
       }
     ]
   },
@@ -1003,7 +1109,9 @@
         "http_method": "GET",
         "endpoint": "getPayments",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "getpayments",
+        "billable": true
       }
     ]
   },
@@ -1024,7 +1132,9 @@
         "http_method": "GET",
         "endpoint": "regionLimit",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "regionlimit",
+        "billable": true
       }
     ]
   },
@@ -1045,7 +1155,9 @@
         "http_method": "GET",
         "endpoint": "getReportJobList",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "getreportjoblist",
+        "billable": false
       }
     ]
   },
@@ -1066,7 +1178,9 @@
         "http_method": "GET",
         "endpoint": "reports/jobs",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "reports_jobs",
+        "billable": false
       }
     ]
   },
@@ -1087,7 +1201,9 @@
         "http_method": "GET",
         "endpoint": "reports",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "reports_get",
+        "billable": false
       }
     ]
   },
@@ -1108,7 +1224,9 @@
         "http_method": "GET",
         "endpoint": "restriction",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "restriction",
+        "billable": true
       }
     ]
   },
@@ -1129,7 +1247,9 @@
         "http_method": "GET",
         "endpoint": "vc/templates/{template_id}/georestrictions",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_georestrictions_get",
+        "billable": false
       }
     ]
   },
@@ -1150,7 +1270,9 @@
         "http_method": "GET",
         "endpoint": "vc/templates/{template_id}/limits",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_limits_get",
+        "billable": false
       }
     ]
   },
@@ -1171,7 +1293,9 @@
         "http_method": "GET",
         "endpoint": "vc/templates/{template_id}/restrictions",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_restrictions_get",
+        "billable": false
       }
     ]
   },
@@ -1192,7 +1316,9 @@
         "http_method": "GET",
         "endpoint": "vc/templates",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_get",
+        "billable": false
       }
     ]
   },
@@ -1213,7 +1339,9 @@
         "http_method": "GET",
         "endpoint": "transactions/{transaction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "transaction_detail",
+        "billable": false
       }
     ]
   },
@@ -1234,7 +1362,9 @@
         "http_method": "GET",
         "endpoint": "transactions",
         "api_version": "v1",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "transactions",
+        "billable": true
       }
     ]
   },
@@ -1255,7 +1385,9 @@
         "http_method": "GET",
         "endpoint": "transactions",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "contract_transactions",
+        "billable": true
       }
     ]
   },
@@ -1276,7 +1408,9 @@
         "http_method": "GET",
         "endpoint": "users",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "users_get",
+        "billable": false
       }
     ]
   },
@@ -1297,7 +1431,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/initMPC",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "init_mpc",
+        "billable": false
       }
     ]
   },
@@ -1318,7 +1454,9 @@
         "http_method": "GET",
         "endpoint": "logoff",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "logoff",
+        "billable": false
       }
     ]
   },
@@ -1339,7 +1477,9 @@
         "http_method": "POST",
         "endpoint": "moveToCard",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "movetocard",
+        "billable": true
       }
     ]
   },
@@ -1360,7 +1500,9 @@
         "http_method": "POST",
         "endpoint": "moveToContract",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "movetocontract",
+        "billable": true
       }
     ]
   },
@@ -1381,7 +1523,9 @@
         "http_method": "POST",
         "endpoint": "orderCards",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "order_cards",
+        "billable": true
       }
     ]
   },
@@ -1402,7 +1546,9 @@
         "http_method": "POST",
         "endpoint": "documents",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "documents_post",
+        "billable": true
       }
     ]
   },
@@ -1423,7 +1569,9 @@
         "http_method": "POST",
         "endpoint": "invoice",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "invoice",
+        "billable": false
       }
     ]
   },
@@ -1444,7 +1592,9 @@
         "http_method": "POST",
         "endpoint": "reports",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "reports_post",
+        "billable": true
       }
     ]
   },
@@ -1465,7 +1615,9 @@
         "http_method": "GET",
         "endpoint": "reports",
         "api_version": "v1",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "reports",
+        "billable": true
       }
     ]
   },
@@ -1486,14 +1638,18 @@
         "http_method": "POST",
         "endpoint": "invites/{invite_id}/prolong",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "invites_prolong",
+        "billable": true
       },
       {
         "name": "without_send",
         "http_method": "POST",
         "endpoint": "invites/{invite_id}/prolong_free",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "invites_prolong_free",
+        "billable": false
       }
     ]
   },
@@ -1514,7 +1670,9 @@
         "http_method": "POST",
         "endpoint": "cards/release",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "release",
+        "billable": true
       }
     ]
   },
@@ -1535,7 +1693,9 @@
         "http_method": "POST",
         "endpoint": "removeCardGroup",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "removecardgroup",
+        "billable": true
       }
     ]
   },
@@ -1556,7 +1716,9 @@
         "http_method": "POST",
         "endpoint": "removeLimit",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "removelimit",
+        "billable": true
       }
     ]
   },
@@ -1577,7 +1739,9 @@
         "http_method": "POST",
         "endpoint": "removeRegionLimit",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "removeregionlimit",
+        "billable": true
       }
     ]
   },
@@ -1598,7 +1762,9 @@
         "http_method": "POST",
         "endpoint": "removeRestriction",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "removerestriction",
+        "billable": true
       }
     ]
   },
@@ -1619,7 +1785,9 @@
         "http_method": "GET",
         "endpoint": "invites/{invite_id}/send",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "invites_send",
+        "billable": true
       }
     ]
   },
@@ -1640,7 +1808,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/resetMPC",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "reset_mpc",
+        "billable": false
       }
     ]
   },
@@ -1661,7 +1831,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/resetPIN",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "cards_reset_pin",
+        "billable": true
       }
     ]
   },
@@ -1682,7 +1854,9 @@
         "http_method": "POST",
         "endpoint": "setCardComment",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "setcardcomment",
+        "billable": true
       }
     ]
   },
@@ -1703,7 +1877,9 @@
         "http_method": "POST",
         "endpoint": "setCardGroup",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "setcardgroup",
+        "billable": true
       }
     ]
   },
@@ -1724,7 +1900,9 @@
         "http_method": "POST",
         "endpoint": "setCardProduct",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "setcardproduct",
+        "billable": true
       }
     ]
   },
@@ -1745,7 +1923,9 @@
         "http_method": "POST",
         "endpoint": "setCardsToGroup",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "setcardstogroup",
+        "billable": true
       }
     ]
   },
@@ -1766,7 +1946,9 @@
         "http_method": "POST",
         "endpoint": "setLimit",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "setlimit",
+        "billable": true
       }
     ]
   },
@@ -1787,7 +1969,9 @@
         "http_method": "POST",
         "endpoint": "setRegionLimit",
         "api_version": "v1",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "setregionlimit",
+        "billable": true
       }
     ]
   },
@@ -1808,7 +1992,9 @@
         "http_method": "POST",
         "endpoint": "setRestriction",
         "api_version": "v1",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "setrestriction",
+        "billable": true
       }
     ]
   },
@@ -1829,7 +2015,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/updateMPC",
         "api_version": "v2",
-        "demo_available": false
+        "demo_available": false,
+        "external_code": "update_mpc",
+        "billable": false
       }
     ]
   },
@@ -1850,14 +2038,18 @@
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       },
       {
         "name": "put",
         "http_method": "PUT",
         "endpoint": "vc/templates/{template_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_put",
+        "billable": true
       }
     ]
   },
@@ -1878,21 +2070,27 @@
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/georestrictions/{georestriction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       },
       {
         "name": "put",
         "http_method": "PUT",
         "endpoint": "vc/templates/{template_id}/georestrictions/{georestriction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       },
       {
         "name": "put_plural_id",
         "http_method": "PUT",
         "endpoint": "vc/templates/{template_id}/georestrictions/{georestrictions_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_georestrictions_put",
+        "billable": true
       }
     ]
   },
@@ -1913,14 +2111,18 @@
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/limits/{limit_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       },
       {
         "name": "put",
         "http_method": "PUT",
         "endpoint": "vc/templates/{template_id}/limits/{limit_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_limits_put",
+        "billable": true
       }
     ]
   },
@@ -1941,21 +2143,27 @@
         "http_method": "POST",
         "endpoint": "vc/templates/{template_id}/restrictions/{restriction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       },
       {
         "name": "put",
         "http_method": "PUT",
         "endpoint": "vc/templates/{template_id}/restrictions/{restriction_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": null,
+        "billable": null
       },
       {
         "name": "put_plural_id",
         "http_method": "PUT",
         "endpoint": "vc/templates/{template_id}/restrictions/{restrictions_id}",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "vc_templates_restrictions_put",
+        "billable": true
       }
     ]
   },
@@ -1976,7 +2184,9 @@
         "http_method": "POST",
         "endpoint": "cards/{card_id}/verifyPIN",
         "api_version": "v2",
-        "demo_available": true
+        "demo_available": true,
+        "external_code": "cards_verify_pin",
+        "billable": false
       }
     ]
   }

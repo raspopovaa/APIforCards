@@ -149,7 +149,70 @@ def test_services_call_their_explicit_registry_operation() -> None:
             assert all(keyword.arg != "headers" for keyword in calls[0].keywords)
             operations.add(function.name)
 
+    authentication_tree = ast.parse(
+        Path("src/api_client_opti24/authentication.py").read_text(encoding="utf-8")
+    )
+    authenticator = next(
+        node
+        for node in ast.walk(authentication_tree)
+        if isinstance(node, ast.ClassDef) and node.name == "DefaultAuthenticator"
+    )
+    authenticate = next(
+        node
+        for node in authenticator.body
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "authenticate"
+    )
+    auth_calls = [
+        node
+        for node in ast.walk(authenticate)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "execute"
+    ]
+    assert len(auth_calls) == 1
+    assert isinstance(auth_calls[0].args[0], ast.Constant)
+    assert auth_calls[0].args[0].value == "auth_user"
+    operations.add("auth_user")
+
     assert operations == {spec.name for spec in build_default_registry().list_all()}
+
+
+def test_external_metadata_is_declared_inline_with_endpoint_routes() -> None:
+    endpoint_source = Path("src/api_client_opti24/endpoints.py").read_text(encoding="utf-8")
+    tree = ast.parse(endpoint_source)
+    endpoint_catalog = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "ENDPOINT_SPECS"
+            for target in node.targets
+        )
+    )
+    assert isinstance(endpoint_catalog.value, ast.Tuple)
+
+    external_codes: set[str] = set()
+    for endpoint_call in endpoint_catalog.value.elts:
+        assert isinstance(endpoint_call, ast.Call)
+        metadata_calls = [
+            node
+            for node in ast.walk(endpoint_call)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in {"endpoint", "route"}
+            and {keyword.arg for keyword in node.keywords} >= {"external_code", "billable"}
+        ]
+        assert metadata_calls, "Each operation must declare external metadata inline"
+        for call in metadata_calls:
+            external_code = next(
+                keyword.value for keyword in call.keywords if keyword.arg == "external_code"
+            )
+            assert isinstance(external_code, ast.Constant)
+            external_codes.add(external_code.value)
+
+    assert len(external_codes) == 91
+    assert "_EXTERNAL_BINDINGS" not in endpoint_source
+    assert "_apply_external_bindings" not in endpoint_source
 
 
 def test_registry_rejects_duplicate_method_names():
@@ -168,6 +231,29 @@ def test_registry_rejects_duplicate_method_names():
 
     with pytest.raises(ValueError, match="already registered"):
         registry.register(spec)
+
+
+def test_endpoint_spec_preserves_legacy_optional_positional_order() -> None:
+    spec = MethodSpec(
+        "legacy-constructor",
+        "test",
+        "GET",
+        "items",
+        ("v1",),
+        "v1",
+        True,
+        True,
+        False,
+        "bulk",
+        "never",
+        (),
+    )
+
+    assert spec.requires_session is False
+    assert spec.timeout_class == "bulk"
+    assert spec.retry_class == "never"
+    assert spec.external_code is None
+    assert spec.billable is None
 
 
 def test_registry_rejects_duplicate_named_routes():

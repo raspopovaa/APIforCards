@@ -5,10 +5,14 @@ from typing import Any
 
 import pytest
 
-from api_client_opti24.authentication import AuthenticationCoordinator
+from api_client_opti24.authentication import (
+    AuthenticationCoordinator,
+    DefaultAuthenticator,
+)
 from api_client_opti24.config import TimeoutPolicy
+from api_client_opti24.credentials import StaticAPIKeyProvider
 from api_client_opti24.errors import NotAuthenticatedError
-from api_client_opti24.executor import DefaultRequestExecutor
+from api_client_opti24.executor import DefaultRequestExecutor, OperationExecutor
 from api_client_opti24.registry import build_default_registry
 from api_client_opti24.response import DecodedPayload
 from api_client_opti24.session import SessionManager
@@ -90,17 +94,24 @@ def build_executor(
 ) -> tuple[DefaultRequestExecutor, SessionController]:
     active_session = session or SessionManager()
     controller = SessionController(active_session)
+    registry = build_default_registry()
+    active_logger = logger or logging.getLogger("test-executor")
+    operation_executor = OperationExecutor(
+        api_key_provider=StaticAPIKeyProvider("secret-key"),
+        transport=transport,
+        session_context=active_session,
+        registry=registry,
+        timeouts=TimeoutPolicy(),
+        logger=active_logger,
+        clock=FrozenClock(),
+    )
     return (
         DefaultRequestExecutor(
-            api_key="secret-key",
-            transport=transport,
-            session_context=active_session,
+            operation_executor=operation_executor,
             session_gate=controller,
             session_recovery=controller,
-            registry=build_default_registry(),
-            timeouts=TimeoutPolicy(),
-            logger=logger or logging.getLogger("test-executor"),
-            clock=FrozenClock(),
+            registry=registry,
+            logger=active_logger,
         ),
         controller,
     )
@@ -209,24 +220,61 @@ async def test_auth_operation_never_starts_recursive_recovery() -> None:
 @pytest.mark.asyncio
 async def test_failed_authentication_releases_real_session_lock() -> None:
     session = SessionManager()
-    coordinator = AuthenticationCoordinator(session)
     transport = StubTransport(NotAuthenticatedError(401, "invalid credentials"))
-    executor = DefaultRequestExecutor(
-        api_key="secret-key",
+    registry = build_default_registry()
+    operation_executor = OperationExecutor(
+        api_key_provider=StaticAPIKeyProvider("secret-key"),
         transport=transport,
         session_context=session,
-        session_gate=coordinator,
-        session_recovery=coordinator,
-        registry=build_default_registry(),
+        registry=registry,
         timeouts=TimeoutPolicy(),
         logger=logging.getLogger("test-auth-deadlock"),
         clock=FrozenClock(),
     )
 
-    async def authenticate():
-        return await executor.execute("auth_user")
+    class Credentials:
+        def get_credentials(self) -> tuple[str, str]:
+            return "invalid-login", "invalid-password"
 
-    coordinator.bind(authenticate)
+    authenticator = DefaultAuthenticator(
+        operation_executor,
+        session,
+        Credentials(),
+        logging.getLogger("test-auth-deadlock"),
+    )
+    coordinator = AuthenticationCoordinator(session, authenticator)
+    executor = DefaultRequestExecutor(
+        operation_executor=operation_executor,
+        session_gate=coordinator,
+        session_recovery=coordinator,
+        registry=registry,
+        logger=logging.getLogger("test-auth-deadlock"),
+    )
 
     with pytest.raises(NotAuthenticatedError):
         await asyncio.wait_for(executor.execute("get_cards_v2"), timeout=0.1)
+
+
+def test_executor_resolves_api_key_for_every_request() -> None:
+    class RotatingAPIKeyProvider:
+        def __init__(self) -> None:
+            self.value = "first-key"
+
+        def get_api_key(self) -> str:
+            return self.value
+
+    provider = RotatingAPIKeyProvider()
+    operation_executor = OperationExecutor(
+        api_key_provider=provider,
+        transport=StubTransport(),
+        session_context=SessionManager(),
+        registry=build_default_registry(),
+        timeouts=TimeoutPolicy(),
+        logger=logging.getLogger("test-dynamic-api-key"),
+        clock=FrozenClock(),
+    )
+
+    assert operation_executor.headers()["api_key"] == "first-key"
+    provider.value = "rotated-key"
+    assert operation_executor.headers()["api_key"] == "rotated-key"
+    assert "first-key" not in repr(vars(operation_executor))

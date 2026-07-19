@@ -18,14 +18,33 @@ _Публичные классы и функции не обнаружены._
 
 Описание отсутствует.
 
-Сигнатура: `AuthenticationCoordinator(session: 'SessionManager') -> 'None'`
+Сигнатура: `AuthenticationCoordinator(session: 'SessionManager', authenticator: 'Authenticator') -> 'None'`
 
 Публичные методы:
 
 - `authenticate(self) -> 'AuthUserResponse'`
-- `bind(self, authenticate: 'Callable[[], Awaitable[AuthUserResponse]]') -> 'None'`
 - `ensure_authenticated(self) -> 'str'`
 - `recover(self) -> 'str'`
+
+### `Authenticator`
+
+Описание отсутствует.
+
+Сигнатура: `Authenticator(*args, **kwargs)`
+
+Публичные методы:
+
+- `authenticate(self, *, api_version: 'str | None' = None, contract_id: 'str | None' = None, contract_number: 'str | None' = None) -> 'AuthUserResponse'`
+
+### `DefaultAuthenticator`
+
+Описание отсутствует.
+
+Сигнатура: `DefaultAuthenticator(request_executor: 'RequestExecutor', session_mutator: 'SessionMutator', credentials_provider: 'CredentialsProvider', logger: 'LoggerLike') -> 'None'`
+
+Публичные методы:
+
+- `authenticate(self, *, api_version: 'str | None' = None, contract_id: 'str | None' = None, contract_number: 'str | None' = None) -> 'AuthUserResponse'`
 
 ## `api_client_opti24.client`
 
@@ -40,6 +59,22 @@ _Публичные классы и функции не обнаружены._
 Публичные методы:
 
 - `aclose(self) -> None`
+
+## `api_client_opti24.composition`
+
+Описание отсутствует.
+
+### `ClientRuntime`
+
+ClientRuntime(authentication: 'AuthenticationCoordinator', request_executor: 'DefaultRequestExecutor', services: 'ServiceContainer')
+
+Сигнатура: `ClientRuntime(authentication: 'AuthenticationCoordinator', request_executor: 'DefaultRequestExecutor', services: 'ServiceContainer') -> None`
+
+### `compose_client_runtime`
+
+Описание отсутствует.
+
+Сигнатура: `compose_client_runtime(*, api_key_provider: 'APIKeyProvider', credentials_provider: 'CredentialsProvider', transport: 'Transport', session_manager: 'SessionManager', registry: 'MethodRegistry', timeouts: 'TimeoutPolicy', logger: 'LoggerLike', clock: 'Clock') -> 'ClientRuntime'`
 
 ## `api_client_opti24.config`
 
@@ -102,6 +137,16 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 - `get_api_key(self) -> 'str'`
 - `get_credentials(self) -> 'tuple[str, str]'`
 
+### `StaticAPIKeyProvider`
+
+Описание отсутствует.
+
+Сигнатура: `StaticAPIKeyProvider(api_key: 'str') -> 'None'`
+
+Публичные методы:
+
+- `get_api_key(self) -> 'str'`
+
 ### `StaticCredentialsProvider`
 
 Описание отсутствует.
@@ -111,6 +156,16 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 Публичные методы:
 
 - `get_api_key(self) -> 'str'`
+- `get_credentials(self) -> 'tuple[str, str]'`
+
+### `StaticLoginPasswordProvider`
+
+Описание отсутствует.
+
+Сигнатура: `StaticLoginPasswordProvider(*, login: 'str', password: 'str') -> 'None'`
+
+Публичные методы:
+
 - `get_credentials(self) -> 'tuple[str, str]'`
 
 ## `api_client_opti24.decorators`
@@ -129,9 +184,9 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 ### `EndpointSpec`
 
-EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', requires_session: 'bool' = True, timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())
+EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', requires_session: 'bool' = True, timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = (), external_code: 'str | None' = None, billable: 'bool | None' = None)
 
-Сигнатура: `EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', requires_session: 'bool' = True, timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -> None`
+Сигнатура: `EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', requires_session: 'bool' = True, timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = (), external_code: 'str | None' = None, billable: 'bool | None' = None) -> None`
 
 Публичные методы:
 
@@ -141,9 +196,9 @@ EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', su
 
 ### `RouteVariant`
 
-RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool', name: 'str' = 'default')
+RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool', name: 'str' = 'default', external_code: 'str | None' = None, billable: 'bool | None' = None)
 
-Сигнатура: `RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool', name: 'str' = 'default') -> None`
+Сигнатура: `RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool', name: 'str' = 'default', external_code: 'str | None' = None, billable: 'bool | None' = None) -> None`
 
 Публичные методы:
 
@@ -154,13 +209,13 @@ RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_avail
 
 Описание отсутствует.
 
-Сигнатура: `endpoint(name: 'str', domain: 'str', http_method: 'str', path: 'str', version: 'str', *, demo: 'bool' = True, timeout: 'str' = 'default', retry: 'str | None' = None, requires_session: 'bool' = True, variants: 'tuple[RouteVariant, ...]' = ()) -> 'EndpointSpec'`
+Сигнатура: `endpoint(name: 'str', domain: 'str', http_method: 'str', path: 'str', version: 'str', *, demo: 'bool' = True, timeout: 'str' = 'default', retry: 'str | None' = None, requires_session: 'bool' = True, variants: 'tuple[RouteVariant, ...]' = (), external_code: 'str | None' = None, billable: 'bool | None' = None) -> 'EndpointSpec'`
 
 ### `route`
 
 Описание отсутствует.
 
-Сигнатура: `route(http_method: 'str', path: 'str', version: 'str', *, demo: 'bool', name: 'str') -> 'RouteVariant'`
+Сигнатура: `route(http_method: 'str', path: 'str', version: 'str', *, demo: 'bool', name: 'str', external_code: 'str | None' = None, billable: 'bool | None' = None) -> 'RouteVariant'`
 
 ## `api_client_opti24.env`
 
@@ -244,7 +299,19 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 Описание отсутствует.
 
-Сигнатура: `DefaultRequestExecutor(*, api_key: 'str', transport: 'Transport', session_context: 'SessionContext', session_gate: 'SessionGate', session_recovery: 'SessionRecovery', registry: 'MethodRegistry', timeouts: 'TimeoutPolicy', logger: 'LoggerLike', clock: 'Clock') -> 'None'`
+Сигнатура: `DefaultRequestExecutor(*, operation_executor: 'OperationExecutor', session_gate: 'SessionGate', session_recovery: 'SessionRecovery', registry: 'MethodRegistry', logger: 'LoggerLike') -> 'None'`
+
+Публичные методы:
+
+- `execute(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'JSONPayload'`
+- `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
+- `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False) -> 'dict[str, str]'`
+
+### `OperationExecutor`
+
+Описание отсутствует.
+
+Сигнатура: `OperationExecutor(*, api_key_provider: 'APIKeyProvider', transport: 'Transport', session_context: 'SessionContext', registry: 'MethodRegistry', timeouts: 'TimeoutPolicy', logger: 'LoggerLike', clock: 'Clock') -> 'None'`
 
 Публичные методы:
 
@@ -2568,7 +2635,7 @@ _Публичные классы и функции не обнаружены._
 
 Описание отсутствует.
 
-Сигнатура: `AuthService(request_executor: api_client_opti24.service_base.RequestExecutor, session_context: api_client_opti24.service_base.SessionContext, session_gate: api_client_opti24.service_base.SessionGate, session_mutator: api_client_opti24.service_base.SessionMutator, credentials_provider: api_client_opti24.service_base.CredentialsProvider, clock: api_client_opti24.runtime.Clock, logger: logging.Logger) -> None`
+Сигнатура: `AuthService(request_executor: api_client_opti24.service_base.RequestExecutor, session_context: api_client_opti24.service_base.SessionContext, session_gate: api_client_opti24.service_base.SessionGate, session_mutator: api_client_opti24.service_base.SessionMutator, authenticator: api_client_opti24.authentication.Authenticator, clock: api_client_opti24.runtime.Clock, logger: logging.Logger) -> None`
 
 Публичные методы:
 

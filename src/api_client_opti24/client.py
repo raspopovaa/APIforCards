@@ -1,9 +1,15 @@
 import logging
 from types import TracebackType
+from typing import cast
 
 from .authentication import AuthenticationCoordinator
+from .composition import compose_client_runtime
 from .config import APISettings, ConnectionSettings
-from .credentials import StaticCredentialsProvider
+from .credentials import (
+    StaticAPIKeyProvider,
+    StaticCredentialsProvider,
+    StaticLoginPasswordProvider,
+)
 from .executor import DefaultRequestExecutor, Transport
 from .logger import (
     LoggerLike,
@@ -15,7 +21,6 @@ from .registry import MethodRegistry, build_default_registry
 from .runtime import Clock, SystemClock
 from .service_base import APIKeyProvider, CredentialsProvider
 from .service_groups import ServiceContainer, _ServiceFacade
-from .services.auth import AuthService
 from .session import SessionManager
 from .transport import AsyncTransport
 
@@ -88,65 +93,50 @@ class APIClient(_ServiceFacade):
                     "Missing authentication settings: login, password; "
                     "pass credentials_provider or legacy credentials"
                 )
-            provider_api_key = legacy_api_key
-            if provider_api_key is None and api_key_provider is not None:
-                provider_api_key = api_key_provider.get_api_key()
-            if not provider_api_key:
-                raise ValueError("Missing API key; pass api_key_provider or legacy api_key")
-            auth_credentials = StaticCredentialsProvider(
-                api_key=provider_api_key,
-                login=legacy_login,
-                password=legacy_password,
-            )
-        resolved_api_key = self._resolve_api_key(
+            if legacy_api_key:
+                auth_credentials = StaticCredentialsProvider(
+                    api_key=legacy_api_key,
+                    login=legacy_login,
+                    password=legacy_password,
+                )
+            else:
+                auth_credentials = StaticLoginPasswordProvider(
+                    login=legacy_login,
+                    password=legacy_password,
+                )
+        resolved_api_key_provider = self._resolve_api_key_provider(
             api_key_provider=api_key_provider,
             credentials_provider=auth_credentials,
             legacy_api_key=legacy_api_key,
         )
-        self.authentication = AuthenticationCoordinator(self.session_manager)
-        self.request_executor = DefaultRequestExecutor(
-            api_key=resolved_api_key,
+        runtime = compose_client_runtime(
+            api_key_provider=resolved_api_key_provider,
+            credentials_provider=auth_credentials,
             transport=self.transport,
-            session_context=self.session_manager,
-            session_gate=self.authentication,
-            session_recovery=self.authentication,
+            session_manager=self.session_manager,
             registry=self.registry,
             timeouts=self.settings.timeouts,
             logger=self.logger,
             clock=self.clock,
         )
-        auth_service = AuthService(
-            self.request_executor,
-            self.session_manager,
-            self.authentication,
-            self.session_manager,
-            auth_credentials,
-            self.clock,
-            self.logger,
-        )
-        self.services = ServiceContainer.create(
-            request_executor=self.request_executor,
-            session_context=self.session_manager,
-            session_gate=self.authentication,
-            logger=self.logger,
-            auth=auth_service,
-        )
-        self.authentication.bind(self.services.auth.auth_user)
+        self.authentication: AuthenticationCoordinator = runtime.authentication
+        self.request_executor: DefaultRequestExecutor = runtime.request_executor
+        self.services: ServiceContainer = runtime.services
 
     @staticmethod
-    def _resolve_api_key(
+    def _resolve_api_key_provider(
         *,
         api_key_provider: APIKeyProvider | None,
         credentials_provider: CredentialsProvider,
         legacy_api_key: str | None,
-    ) -> str:
+    ) -> APIKeyProvider:
         if api_key_provider is not None:
-            return api_key_provider.get_api_key()
+            return api_key_provider
         provider_method = getattr(credentials_provider, "get_api_key", None)
         if callable(provider_method):
-            return str(provider_method())
+            return cast(APIKeyProvider, credentials_provider)
         if legacy_api_key:
-            return legacy_api_key
+            return StaticAPIKeyProvider(legacy_api_key)
         raise ValueError(
             "Missing API key; pass api_key_provider or a combined credentials provider"
         )

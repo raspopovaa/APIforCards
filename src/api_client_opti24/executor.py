@@ -11,6 +11,7 @@ from .registry import MethodRegistry
 from .response import DecodedPayload
 from .runtime import Clock
 from .service_base import (
+    APIKeyProvider,
     JSONPayload,
     PathParams,
     SessionContext,
@@ -45,25 +46,21 @@ class Transport(Protocol):
     async def aclose(self) -> None: ...
 
 
-class DefaultRequestExecutor:
+class OperationExecutor:
     def __init__(
         self,
         *,
-        api_key: str,
+        api_key_provider: APIKeyProvider,
         transport: Transport,
         session_context: SessionContext,
-        session_gate: SessionGate,
-        session_recovery: SessionRecovery,
         registry: MethodRegistry,
         timeouts: TimeoutPolicy,
         logger: LoggerLike,
         clock: Clock,
     ) -> None:
-        self.__api_key = api_key
+        self.__api_key_provider = api_key_provider
         self.__transport = transport
         self.__session_context = session_context
-        self.__session_gate = session_gate
-        self.__session_recovery = session_recovery
         self.__registry = registry
         self.__timeouts = timeouts
         self.__logger = logger
@@ -74,8 +71,11 @@ class DefaultRequestExecutor:
         include_session: bool = False,
         content_type_json: bool = False,
     ) -> dict[str, str]:
+        api_key = self.__api_key_provider.get_api_key()
+        if not api_key:
+            raise ValueError("API key provider returned an empty value")
         headers = {
-            "api_key": self.__api_key,
+            "api_key": api_key,
             "date_time": self.__clock.now().strftime("%Y-%m-%d %H:%M:%S"),
             "User-Agent": "apiclientopti24",
             "Content-Type": (
@@ -117,59 +117,6 @@ class DefaultRequestExecutor:
             )
         )
         return headers
-
-    async def _ensure_session(self, spec: EndpointSpec) -> None:
-        if spec.requires_session:
-            await self.__session_gate.ensure_authenticated()
-
-    def _audit(
-        self,
-        event: str,
-        spec: EndpointSpec,
-        route: RouteVariant,
-        *,
-        recovered: bool = False,
-    ) -> None:
-        self.__logger.info(
-            "API request audit",
-            extra={
-                "request_audit": True,
-                "event": event,
-                "operation": spec.name,
-                "api_version": route.api_version,
-                "route_name": route.name,
-                "http_method": route.http_method,
-                "recovered": recovered,
-            },
-        )
-
-    async def _run_with_recovery(
-        self,
-        spec: EndpointSpec,
-        route: RouteVariant,
-        request: Callable[[bool], Awaitable[ResultT]],
-    ) -> ResultT:
-        self._audit("started", spec, route)
-        try:
-            result = await request(False)
-        except NotAuthenticatedError:
-            if not spec.requires_session:
-                self._audit("failed", spec, route)
-                raise
-            self._audit("session_recovery", spec, route)
-            await self.__session_recovery.recover()
-            try:
-                result = await request(True)
-            except Exception:
-                self._audit("failed", spec, route, recovered=True)
-                raise
-            self._audit("completed", spec, route, recovered=True)
-            return result
-        except Exception:
-            self._audit("failed", spec, route)
-            raise
-        self._audit("completed", spec, route)
-        return result
 
     async def _request_json(
         self,
@@ -214,18 +161,13 @@ class DefaultRequestExecutor:
             route_name=route_name,
             path_params=path_params,
         )
-        await self._ensure_session(spec)
         self.__logger.debug(
             "Preparing API request operation=%s version=%s route=%s",
             spec.name,
             route.api_version,
             route.name,
         )
-        return await self._run_with_recovery(
-            spec,
-            route,
-            lambda _recovered: self._request_json(spec, route, endpoint, dict(kwargs)),
-        )
+        return await self._request_json(spec, route, endpoint, dict(kwargs))
 
     async def _request_bytes(
         self,
@@ -259,9 +201,130 @@ class DefaultRequestExecutor:
             route_name=route_name,
             path_params=path_params,
         )
-        await self._ensure_session(spec)
+        return await self._request_bytes(spec, route, endpoint, dict(kwargs))
+
+
+class DefaultRequestExecutor:
+    def __init__(
+        self,
+        *,
+        operation_executor: OperationExecutor,
+        session_gate: SessionGate,
+        session_recovery: SessionRecovery,
+        registry: MethodRegistry,
+        logger: LoggerLike,
+    ) -> None:
+        self.__operation_executor = operation_executor
+        self.__session_gate = session_gate
+        self.__session_recovery = session_recovery
+        self.__registry = registry
+        self.__logger = logger
+
+    def headers(
+        self,
+        include_session: bool = False,
+        content_type_json: bool = False,
+    ) -> dict[str, str]:
+        return self.__operation_executor.headers(
+            include_session=include_session,
+            content_type_json=content_type_json,
+        )
+
+    def _audit(
+        self,
+        event: str,
+        spec: EndpointSpec,
+        route: RouteVariant,
+        *,
+        recovered: bool = False,
+    ) -> None:
+        self.__logger.info(
+            "API request audit",
+            extra={
+                "request_audit": True,
+                "event": event,
+                "operation": spec.name,
+                "api_version": route.api_version,
+                "route_name": route.name,
+                "http_method": route.http_method,
+                "recovered": recovered,
+            },
+        )
+
+    async def _run_with_recovery(
+        self,
+        spec: EndpointSpec,
+        route: RouteVariant,
+        request: Callable[[], Awaitable[ResultT]],
+    ) -> ResultT:
+        self._audit("started", spec, route)
+        try:
+            result = await request()
+        except NotAuthenticatedError:
+            if not spec.requires_session:
+                self._audit("failed", spec, route)
+                raise
+            self._audit("session_recovery", spec, route)
+            await self.__session_recovery.recover()
+            try:
+                result = await request()
+            except Exception:
+                self._audit("failed", spec, route, recovered=True)
+                raise
+            self._audit("completed", spec, route, recovered=True)
+            return result
+        except Exception:
+            self._audit("failed", spec, route)
+            raise
+        self._audit("completed", spec, route)
+        return result
+
+    async def execute(
+        self,
+        operation: str,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        **kwargs: Any,
+    ) -> JSONPayload:
+        spec = self.__registry.get(operation)
+        route = spec.resolve_route(api_version=api_version, route_name=route_name)
+        if spec.requires_session:
+            await self.__session_gate.ensure_authenticated()
         return await self._run_with_recovery(
             spec,
             route,
-            lambda _recovered: self._request_bytes(spec, route, endpoint, dict(kwargs)),
+            lambda: self.__operation_executor.execute(
+                operation,
+                api_version=api_version,
+                route_name=route_name,
+                path_params=path_params,
+                **kwargs,
+            ),
+        )
+
+    async def execute_stream(
+        self,
+        operation: str,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        **kwargs: Any,
+    ) -> bytes:
+        spec = self.__registry.get(operation)
+        route = spec.resolve_route(api_version=api_version, route_name=route_name)
+        if spec.requires_session:
+            await self.__session_gate.ensure_authenticated()
+        return await self._run_with_recovery(
+            spec,
+            route,
+            lambda: self.__operation_executor.execute_stream(
+                operation,
+                api_version=api_version,
+                route_name=route_name,
+                path_params=path_params,
+                **kwargs,
+            ),
         )

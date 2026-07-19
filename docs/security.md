@@ -8,9 +8,10 @@
 на `APIClient` и не имеют доступа к его настройкам или transport.
 
 API key отделён интерфейсом `APIKeyProvider`. `APIClient.settings` содержит только
-`ConnectionSettings`; в нём отсутствуют API key, логин и пароль. Совмещённый
-provider внедряется в composition root узкими интерфейсами и не передаётся
-доменным сервисам.
+`ConnectionSettings`; в нём отсутствуют API key, логин и пароль. `OperationExecutor`
+хранит provider, а не разрешённое значение, и вызывает `get_api_key()` перед каждым
+запросом. Это позволяет secret manager ротировать ключ без пересоздания клиента.
+Provider не передаётся доменным сервисам.
 
 ## Передача данных
 
@@ -61,6 +62,6 @@ Pydantic v2 проверяет вложенные контейнеры и fixed 
 Автоматический повтор разрешается только политикой endpoint: операция должна
 быть помечена подходящим `retry_class` и быть idempotent. Неопределённый сетевой
 результат операции изменения данных не повторяется автоматически.
-Re-auth выполняется в operation executor только для endpoint с
+Re-auth выполняется во внешнем orchestration executor только для endpoint с
 `requires_session=True`. Ошибка самой операции `auth_user` не запускает recovery,
 поэтому повторный захват session lock исключён.

@@ -8,7 +8,6 @@ from api_client_opti24.session import SessionManager, SessionState
 from tests.service_support import (
     FrozenClock,
     NoopRequestExecutor,
-    StubCredentialsProvider,
     StubSessionGate,
 )
 
@@ -17,33 +16,65 @@ class DummyClient(AuthService):
     def __init__(self):
         self.session_manager = SessionManager()
         self.calls = []
+
+        class StubAuthenticator:
+            async def authenticate(
+                inner_self,
+                *,
+                api_version=None,
+                contract_id=None,
+                contract_number=None,
+            ):
+                del inner_self, api_version
+                response = AuthUserResponse(**self._auth_payload())
+                contracts = response.data.contracts
+                selected = None
+                if contract_id:
+                    selected = next((item for item in contracts if item.id == contract_id), None)
+                elif contract_number:
+                    selected = next(
+                        (item for item in contracts if item.number == contract_number),
+                        None,
+                    )
+                elif contracts:
+                    selected = contracts[0]
+                self.session_manager.mark_authenticated(
+                    response.data.session_id,
+                    selected.id if selected else None,
+                )
+                return response
+
         super().__init__(
             NoopRequestExecutor(),
             self.session_manager,
             StubSessionGate(),
             self.session_manager,
-            StubCredentialsProvider(),
+            StubAuthenticator(),
             FrozenClock(),
             logging.getLogger("auth-service-test"),
         )
 
+    @staticmethod
+    def _auth_payload():
+        return {
+            "status": {"code": 200},
+            "data": {
+                "session_id": "SESSION123",
+                "client_id": "client-1",
+                "client_status": "active",
+                "user_id": "user-1",
+                "contracts": [
+                    {"id": "1-AAA", "number": "NV0001"},
+                    {"id": "1-BBB", "number": "NV0002"},
+                ],
+            },
+            "timestamp": 1710000000,
+        }
+
     async def _request(self, operation, **kwargs):
         self.calls.append((operation, kwargs))
         if operation == "auth_user":
-            return {
-                "status": {"code": 200},
-                "data": {
-                    "session_id": "SESSION123",
-                    "client_id": "client-1",
-                    "client_status": "active",
-                    "user_id": "user-1",
-                    "contracts": [
-                        {"id": "1-AAA", "number": "NV0001"},
-                        {"id": "1-BBB", "number": "NV0002"},
-                    ],
-                },
-                "timestamp": 1710000000,
-            }
+            return self._auth_payload()
         elif operation == "logoff":
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
         elif operation == "get_info":

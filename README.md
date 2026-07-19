@@ -36,8 +36,11 @@ APIClient SDK — асинхронная Python-библиотека для ра
   Главная точка входа. Собирает инфраструктуру и типизированный `ServiceContainer`.
 
 - [executor.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/executor.py)
-  Выполняет операции по имени, выбирает маршрут из registry, управляет сессией,
-  применяет metadata и проверяет тип ответа.
+  Разделяет session/recovery orchestration и низкоуровневое выполнение операции;
+  динамически получает API key из provider перед каждым запросом.
+
+- [composition.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/composition.py)
+  Статически собирает authenticator, coordinator, executors и сервисы без `bind()`.
 
 - [service_base.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/service_base.py)
   Содержит узкие протоколы `RequestExecutor`, read-only `SessionContext`,
@@ -55,7 +58,8 @@ APIClient SDK — асинхронная Python-библиотека для ра
 
 - [endpoints.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/endpoints.py)
   Декларативный каталог `EndpointSpec` для всех маршрутов, безопасного рендеринга
-  path-параметров и выбора POST/PUT/DELETE-вариантов.
+  path-параметров и выбора POST/PUT/DELETE-вариантов; `external_code` и
+  тарификация объявлены рядом с соответствующим endpoint/route.
 
 - [response.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/response.py)
   Единое декодирование JSON, бинарных ответов и API-ошибок.
@@ -85,7 +89,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 
 ## 📦 Установка
 
-Пакет `api-client-opti24==2.1.0` опубликован на TestPyPI и поддерживает
+Пакет `api-client-opti24==2.2.0` опубликован на TestPyPI и поддерживает
 `Python >=3.11,<3.15`. Зависимости лучше устанавливать из основного PyPI
 отдельно: это исключает случайную подмену зависимостей пакетами из тестового
 индекса.
@@ -96,7 +100,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 uv venv --python 3.11
 uv pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 uv pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.1.0
+  --no-deps api-client-opti24==2.2.0
 ```
 
 ### Вариант 2: pip
@@ -106,7 +110,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 python -m pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.1.0
+  --no-deps api-client-opti24==2.2.0
 ```
 
 Проверка версии и публичных импортов:
@@ -430,7 +434,7 @@ uv publish --publish-url https://test.pypi.org/legacy/
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.1.0
+  --no-deps api-client-opti24==2.2.0
 ```
 
 ## 🤖 GitHub Actions
@@ -539,16 +543,16 @@ uv run mypy src
 |---------------|-------------------------------|-----------|
 | Возможности | `client.py`, `services/`, `service_groups.py` | Все 89 endpoint-методов доступны только через композиционные доменные сервисы |
 | Архитектура | `client.py`, `executor.py`, `service_base.py`, `service_groups.py` | Сервисы не хранят `APIClient`; зависимости разделены узкими протоколами |
-| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.1.0`, диапазон Python и публичные импорты совпадают |
+| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.2.0`, диапазон Python и публичные импорты совпадают |
 | Быстрый старт | `config.py`, `auth.py`, `cards.py`, модели auth/cards | Сигнатуры и используемые поля ответа проверены |
 | Конфигурация | `config.py`, `credentials.py`, `.env.example`, `env.py` | Безопасные connection settings отделены от providers секретов |
 | Retry и безопасность | `policies.py`, `transport.py`, `logger.py`, `utils.py` | Retry зависит от idempotency; удалённый HTTP запрещён; логи очищаются |
 | Ошибки API | `errors.py`, `response.py` | HTTP/API-коды и перечисленные классы ошибок обрабатываются |
-| Registry и DEMO | `endpoints.py`, `registry.py`, `tests/contracts/endpoints.json` | 89 спецификаций и вся metadata проверяются snapshot-тестом |
+| Registry и DEMO | `endpoints.py`, `registry.py`, `tests/contracts/endpoints.json`, `specifications/api-methods.yaml` | 91 внешний код, маршруты, DEMO-флаги и тарификация строго сверяются с независимым YAML-контрактом |
 | Модели | `modeling.py`, `models/` | Pydantic проверяет контейнеры и request extras; response extras сохраняются |
 | Документация | `scripts/generate_api_docs.py`, `scripts/build_docs_site.py`, `docs/` | Генераторы и статический сайт присутствуют |
 | Политика спецификации | `docs/spec-compatibility.md`, модели и тесты | Зафиксированы известные расхождения и принятые решения |
-| Тестирование | `tests/`, настройки pytest в `pyproject.toml` | Полный набор содержит 125 тестов |
+| Тестирование | `tests/`, настройки pytest в `pyproject.toml` | Полный набор и внешняя contract-проверка запускаются в CI |
 | Публикация | `pyproject.toml`, `uv.lock` | Сборка выполняется через `uv build`, публикация — `uv publish` |
 | GitHub Actions | `.github/workflows/` | CI, Docs и Pages соответствуют описанию |
 | Demo-скрипт | `examples/demo_async.py` | Асинхронный цветной сценарий существует и учитывает rate limit |
