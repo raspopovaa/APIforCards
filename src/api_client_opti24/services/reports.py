@@ -1,5 +1,6 @@
+from typing import Any
+
 from ..decorators import api_method
-from ..logger import logger
 from ..modeling import decode_model
 from ..models.reports import (
     ReportJobList,
@@ -8,10 +9,11 @@ from ..models.reports import (
     ReportV1JobList,
     ReportV1OrderResponse,
 )
+from ..service_base import _BaseService
 from ..utils import to_json_param
 
 
-class ReportsMixin:
+class ReportsService(_BaseService):
     """
     Методы для работы с отчетами (v1 и v2)
     Будет возвращен транзакционный отчет, относящийся к указанному договору.
@@ -35,7 +37,7 @@ class ReportsMixin:
         """
         Получить список доступных отчетов (v2).
         """
-        logger.info("Запрос списка доступных отчетов (v2)")
+        self.logger.info("Запрос списка доступных отчетов (v2)")
         raw = await self._request(
             "get",
             "reports",
@@ -50,7 +52,7 @@ class ReportsMixin:
         *,
         report_id: str,
         format: str,
-        params: dict,
+        params: dict[str, Any],
         emails: str | None = None,
         api_version: str = "v2",
     ) -> ReportOrderResponse:
@@ -61,7 +63,7 @@ class ReportsMixin:
         if emails:
             body["emails"] = emails
 
-        logger.info("Ordering report format=%s delivery=%s", format, bool(emails))
+        self.logger.info("Ordering report format=%s delivery=%s", format, bool(emails))
 
         raw = await self._request(
             "post",
@@ -81,7 +83,7 @@ class ReportsMixin:
         """
         Получить список заказанных отчетов (v2).
         """
-        logger.info("Получение списка заказанных отчетов (v2)")
+        self.logger.info("Получение списка заказанных отчетов (v2)")
         raw = await self._request(
             "get",
             "reports/jobs",
@@ -103,15 +105,16 @@ class ReportsMixin:
         ⚠️ Важно: успешный запрос возможен только спустя ~300 секунд
         после заказа отчета.
         """
-        logger.info("Downloading report version=%s", api_version)
+        self.logger.info("Downloading report version=%s", api_version)
 
-        content = await self.transport.request_stream(
+        content = await self._request_stream(
             "get",
-            f"/vip/{api_version}/reports/jobs/{job_id}",
+            f"reports/jobs/{job_id}",
+            api_version=api_version,
             headers=self._headers(include_session=True),
         )
 
-        logger.info("Report downloaded bytes=%s", len(content))
+        self.logger.info("Report downloaded bytes=%s", len(content))
         return content
 
     # -------- v1 --------
@@ -148,7 +151,7 @@ class ReportsMixin:
         if archive:
             params["archive"] = "true"
 
-        logger.info("Ordering report version=v1 format=%s", report_format)
+        self.logger.info("Ordering report version=v1 format=%s", report_format)
 
         raw = await self._request(
             "get",
@@ -168,7 +171,7 @@ class ReportsMixin:
         """
         Получить список заказанных отчетов (v1).
         """
-        logger.info("Получение списка заказанных отчетов (v1)")
+        self.logger.info("Получение списка заказанных отчетов (v1)")
         raw = await self._request(
             "get",
             "getReportJobList",
@@ -197,14 +200,15 @@ class ReportsMixin:
         if archive:
             params["archive"] = "true"
 
-        logger.info("Downloading report version=v1 archive=%s", archive)
+        self.logger.info("Downloading report version=v1 archive=%s", archive)
 
-        content = await self.transport.request_stream(
+        content = await self._request_stream(
             "get",
-            f"/vip/{api_version}/getReportFile",
+            "getReportFile",
+            api_version=api_version,
             headers=self._headers(include_session=True),
             params=params,
         )
 
-        logger.info("Report downloaded version=v1 bytes=%s", len(content))
+        self.logger.info("Report downloaded version=v1 bytes=%s", len(content))
         return content

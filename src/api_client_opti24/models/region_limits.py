@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ..modeling import BaseModel, Field
 
@@ -29,7 +29,7 @@ class RegionLimitList(BaseModel):
 class RegionLimitResponse(BaseModel):
     """Коллекция региональных лимитов."""
 
-    status: dict = Field(..., description="Статус ответа")
+    status: dict[str, Any] = Field(..., description="Статус ответа")
     data: RegionLimitList = Field(..., description="Данные с лимитами")
     timestamp: int = Field(..., description="Метка времени сервера")
 
@@ -37,6 +37,6 @@ class RegionLimitResponse(BaseModel):
 class RemoveRegionLimit(BaseModel):
     """Удаление регионального лимита."""
 
-    status: dict = Field(..., description="Статус выполнения запроса")
+    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
     data: bool = Field(..., description="Результат операции (True — успешно)")
     timestamp: int = Field(..., description="Временная метка ответа")

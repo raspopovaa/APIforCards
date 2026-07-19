@@ -1,5 +1,6 @@
+from typing import Any
+
 from ..decorators import api_method
-from ..logger import logger
 from ..models.templates import (
     TemplateCreateResponse,
     TemplateDeleteResponse,
@@ -15,9 +16,10 @@ from ..models.templates import (
     TemplatesListResponse,
 )
 from ..payloads import with_method_override
+from ..service_base import _BaseService
 
 
-class TemplatesMixin:
+class TemplatesService(_BaseService):
     # ---------- ШАБЛОНЫ ВК ----------
 
     """
@@ -34,7 +36,7 @@ class TemplatesMixin:
         self, contract_id: str, api_version: str = "v2"
     ) -> TemplatesListResponse:
         """Получить список шаблонов ВК"""
-        logger.info("Requesting templates")
+        self.logger.info("Requesting templates")
         data = await self._request(
             "get",
             "vc/templates",
@@ -50,7 +52,7 @@ class TemplatesMixin:
     ) -> TemplateCreateResponse:
         """Создать новый шаблон ВК"""
         payload = {"contract_id": contract_id, "type": type_, "name": name}
-        logger.info("Creating virtual card template")
+        self.logger.info("Creating virtual card template")
         data = await self._request(
             "post",
             "vc/templates",
@@ -71,7 +73,7 @@ class TemplatesMixin:
     ) -> TemplateCreateResponse:
         """Изменить существующий шаблон ВК"""
         payload = {"contract_id": contract_id, "type": type_, "name": name}
-        logger.info("Updating virtual card template")
+        self.logger.info("Updating virtual card template")
         data = await self._request(
             "post",
             f"vc/templates/{template_id}",
@@ -89,7 +91,7 @@ class TemplatesMixin:
         use_post: bool = False,
     ) -> TemplateDeleteResponse:
         """Удалить шаблон ВК"""
-        logger.info("Deleting virtual card template")
+        self.logger.info("Deleting virtual card template")
         method = "post" if use_post else "delete"
         data = await self._request(
             method,
@@ -106,7 +108,7 @@ class TemplatesMixin:
         self, template_id: str, api_version: str = "v2"
     ) -> TemplateLimitListResponse:
         """Получить список лимитов шаблона ВК"""
-        logger.info("Requesting template limits")
+        self.logger.info("Requesting template limits")
         data = await self._request(
             "get",
             f"vc/templates/{template_id}/limits",
@@ -117,10 +119,10 @@ class TemplatesMixin:
 
     @api_method(require_session=True, default_version="v2")
     async def create_template_limit(
-        self, template_id: str, payload: dict, api_version: str = "v2"
+        self, template_id: str, payload: dict[str, Any], api_version: str = "v2"
     ) -> TemplateLimitCreateResponse:
         """Создать лимит для шаблона ВК"""
-        logger.info("Creating template limit")
+        self.logger.info("Creating template limit")
         data = await self._request(
             "post",
             f"vc/templates/{template_id}/limits",
@@ -136,7 +138,7 @@ class TemplatesMixin:
         *,
         template_id: str,
         limit_id: str,
-        limits: list[dict],
+        limits: list[dict[str, Any]],
         use_post: bool = True,
         api_version: str = "v2",
     ) -> TemplateLimitCreateResponse:
@@ -170,7 +172,7 @@ class TemplatesMixin:
         Returns:
             TemplateLimitCreateResponse: объект с ID изменённого лимита
         """
-        logger.info(
+        self.logger.info(
             "Updating template limit item_count=%d post_fallback=%s",
             len(limits),
             use_post,
@@ -189,9 +191,9 @@ class TemplatesMixin:
                 raise ValueError("Каждый лимит должен содержать либо 'amount', либо 'sum'.")
 
         method = "post" if use_post else "put"
-        request_limits = with_method_override(limits, "PUT") if use_post else [
-            dict(limit) for limit in limits
-        ]
+        request_limits = (
+            with_method_override(limits, "PUT") if use_post else [dict(limit) for limit in limits]
+        )
 
         # Отправляем список лимитов
         data = await self._request(
@@ -213,7 +215,7 @@ class TemplatesMixin:
         use_post: bool = False,
     ) -> TemplateLimitDeleteResponse:
         """Удалить лимит шаблона ВК"""
-        logger.info("Deleting template limit")
+        self.logger.info("Deleting template limit")
         method = "post" if use_post else "delete"
         data = await self._request(
             method,
@@ -230,7 +232,7 @@ class TemplatesMixin:
         self, template_id: str, api_version: str = "v2"
     ) -> TemplateRestrictionListResponse:
         """Получить список ограничителей шаблона ВК"""
-        logger.info("Requesting template restrictions")
+        self.logger.info("Requesting template restrictions")
         data = await self._request(
             "get",
             f"vc/templates/{template_id}/restrictions",
@@ -241,10 +243,10 @@ class TemplatesMixin:
 
     @api_method(require_session=True, default_version="v2")
     async def create_template_restriction(
-        self, template_id: str, payload: dict, api_version: str = "v2"
+        self, template_id: str, payload: dict[str, Any], api_version: str = "v2"
     ) -> TemplateRestrictionCreateResponse:
         """Создать ограничитель для шаблона ВК"""
-        logger.info("Creating template restriction")
+        self.logger.info("Creating template restriction")
         data = await self._request(
             "post",
             f"vc/templates/{template_id}/restrictions",
@@ -259,16 +261,14 @@ class TemplatesMixin:
         self,
         template_id: str,
         restriction_id: str,
-        payload: dict,
+        payload: dict[str, Any],
         api_version: str = "v2",
         use_post: bool = True,
     ) -> TemplateRestrictionCreateResponse:
         """Изменить ограничитель шаблона ВК"""
-        logger.info("Updating template restriction post_fallback=%s", use_post)
+        self.logger.info("Updating template restriction post_fallback=%s", use_post)
         method = "post" if use_post else "put"
-        request_payload = (
-            with_method_override(payload, "PUT") if use_post else dict(payload)
-        )
+        request_payload = with_method_override(payload, "PUT") if use_post else dict(payload)
         data = await self._request(
             method,
             f"vc/templates/{template_id}/restrictions/{restriction_id}",
@@ -287,7 +287,7 @@ class TemplatesMixin:
         use_post: bool = False,
     ) -> TemplateRestrictionDeleteResponse:
         """Удалить ограничитель шаблона ВК"""
-        logger.info("Deleting template restriction")
+        self.logger.info("Deleting template restriction")
         method = "post" if use_post else "delete"
         data = await self._request(
             method,
@@ -304,7 +304,7 @@ class TemplatesMixin:
         self, template_id: str, api_version: str = "v2"
     ) -> TemplateGeoRestrictionListResponse:
         """Получить список геоограничителей шаблона ВК"""
-        logger.info("Requesting template geo restrictions")
+        self.logger.info("Requesting template geo restrictions")
         data = await self._request(
             "get",
             f"vc/templates/{template_id}/georestrictions",
@@ -315,10 +315,10 @@ class TemplatesMixin:
 
     @api_method(require_session=True, default_version="v2")
     async def create_template_georestriction(
-        self, template_id: str, payload: dict, api_version: str = "v2"
+        self, template_id: str, payload: dict[str, Any], api_version: str = "v2"
     ) -> TemplateGeoRestrictionCreateResponse:
         """Создать геоограничитель для шаблона ВК"""
-        logger.info("Creating template geo restriction")
+        self.logger.info("Creating template geo restriction")
         data = await self._request(
             "post",
             f"vc/templates/{template_id}/georestrictions",
@@ -333,16 +333,14 @@ class TemplatesMixin:
         self,
         template_id: str,
         georestriction_id: str,
-        payload: dict,
+        payload: dict[str, Any],
         api_version: str = "v2",
         use_post: bool = True,
     ) -> TemplateGeoRestrictionCreateResponse:
         """Изменить геоограничитель шаблона ВК"""
-        logger.info("Updating template geo restriction post_fallback=%s", use_post)
+        self.logger.info("Updating template geo restriction post_fallback=%s", use_post)
         method = "post" if use_post else "put"
-        request_payload = (
-            with_method_override(payload, "PUT") if use_post else dict(payload)
-        )
+        request_payload = with_method_override(payload, "PUT") if use_post else dict(payload)
         data = await self._request(
             method,
             f"vc/templates/{template_id}/georestrictions/{georestriction_id}",
@@ -361,7 +359,7 @@ class TemplatesMixin:
         use_post: bool = False,
     ) -> TemplateGeoRestrictionDeleteResponse:
         """Удалить геоограничитель шаблона ВК"""
-        logger.info("Deleting template geo restriction")
+        self.logger.info("Deleting template geo restriction")
         method = "post" if use_post else "delete"
         data = await self._request(
             method,

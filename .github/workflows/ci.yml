@@ -29,3 +29,12 @@ jobs:
 
       - name: Run pytest
         run: pytest
+
+      - name: Run critical lint checks
+        run: ruff check src tests --select E9,F63,F7,F82,I
+
+      - name: Check formatting
+        run: black --check src tests
+
+      - name: Type-check SDK
+        run: mypy src/api_client_opti24

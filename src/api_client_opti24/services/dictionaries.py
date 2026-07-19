@@ -1,16 +1,16 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ..decorators import api_method
-from ..logger import logger
 from ..models.dictionaries import (
     AzsFiltersResponse,
     AzsListV1Response,
     AzsListV2Response,
     DictionaryResponse,
 )
+from ..service_base import _BaseService
 
 
-class DictionariesMixin:
+class DictionariesService(_BaseService):
     """Методы для работы со справочниками и торговыми точками"""
 
     # ==========================================================
@@ -21,7 +21,7 @@ class DictionariesMixin:
         self,
         page: int = 1,
         onpage: int = 10,
-        filter: Optional[dict] = None,
+        filter: Optional[dict[str, Any]] = None,
         id: Optional[str] = None,
         api_version: str = "v1",
     ) -> AzsListV1Response:
@@ -30,9 +30,9 @@ class DictionariesMixin:
 
         Позволяет получить список АЗС с фильтрацией и пагинацией.
         """
-        logger.info("Получение списка торговых точек (v1), страница %s", page)
+        self.logger.info("Получение списка торговых точек (v1), страница %s", page)
 
-        params = {"page": page, "onpage": onpage}
+        params: dict[str, Any] = {"page": page, "onpage": onpage}
         if filter:
             params["filter"] = filter
         if id:
@@ -54,7 +54,7 @@ class DictionariesMixin:
     @api_method(require_session=True, default_version="v2")
     async def get_azs_list_v2(
         self,
-        filter: Optional[dict] = None,
+        filter: Optional[dict[str, Any]] = None,
         q: Optional[str] = None,
         api_version: str = "v2",
     ) -> AzsListV2Response:
@@ -63,9 +63,9 @@ class DictionariesMixin:
 
         Новая версия метода с расширенной фильтрацией и улучшенной структурой ответа.
         """
-        logger.info("Получение списка торговых точек (v2) с фильтрацией: %s", filter)
+        self.logger.info("Получение списка торговых точек (v2) с фильтрацией: %s", filter)
 
-        params = {}
+        params: dict[str, Any] = {}
         if filter:
             params["filter"] = filter
         if q:
@@ -92,7 +92,7 @@ class DictionariesMixin:
         """
         Получить список доступных фильтров для поиска торговых точек (АЗС)
         """
-        logger.info("Получение списка фильтров торговых точек")
+        self.logger.info("Получение списка фильтров торговых точек")
 
         data = await self._request(
             "get",
@@ -102,7 +102,7 @@ class DictionariesMixin:
         )
 
         # У метода data — это словарь с результатом фильтров
-        logger.info("Dictionary filters received")
+        self.logger.info("Dictionary filters received")
         return AzsFiltersResponse(**data)
 
     # ==========================================================
@@ -136,7 +136,7 @@ class DictionariesMixin:
         - POIPartner – партнёры
         - DiscountScheme – схемы расчёта скидок
         """
-        logger.info("Получение справочника: %s", name)
+        self.logger.info("Получение справочника: %s", name)
 
         params = {"name": name}
 

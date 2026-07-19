@@ -444,7 +444,9 @@ async def main() -> None:
         login=require_env("API_LOGIN"),
         password=require_env("API_PASSWORD"),
     ) as client:
-        auth = await run_method("auth_user", lambda: client.auth_user(), limiter=limiter)
+        auth = await run_method(
+            "auth_user", lambda: client.auth.auth_user(), limiter=limiter
+        )
         if auth is None:
             return
 
@@ -452,7 +454,7 @@ async def main() -> None:
         selected_contract = choose_contract(contracts)
         client.contract_id = selected_contract.id
 
-        await run_method("get_info", lambda: client.get_info(), limiter=limiter)
+        await run_method("get_info", lambda: client.auth.get_info(), limiter=limiter)
 
         contract_data = None
         payments = None
@@ -482,109 +484,117 @@ async def main() -> None:
         if contracts:
             contract_data = await run_method(
                 "get_contract_data",
-                lambda: client.get_contract_data(selected_contract.id),
+                lambda: client.contracts.get_contract_data(selected_contract.id),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             payments = await run_method(
                 "get_payments",
-                lambda: client.get_payments(selected_contract.id),
+                lambda: client.contracts.get_payments(selected_contract.id),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             invoices = await run_method(
                 "get_invoices",
-                lambda: client.get_invoices(),
+                lambda: client.contracts.get_invoices(),
                 context=[f"Активный договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             cards_v2 = await run_method(
                 "get_cards_v2",
-                lambda: client.get_cards_v2(contract_id=selected_contract.id, page=1, onpage=5),
+                lambda: client.cards.get_cards_v2(
+                    contract_id=selected_contract.id, page=1, onpage=5
+                ),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             cards_v1 = await run_method(
                 "get_cards_v1",
-                lambda: client.get_cards_v1(contract_id=selected_contract.id),
+                lambda: client.cards.get_cards_v1(contract_id=selected_contract.id),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             limits = await run_method(
                 "get_limits",
-                lambda: client.get_limits(contract_id=selected_contract.id),
+                lambda: client.limits.get_limits(contract_id=selected_contract.id),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             restrictions = await run_method(
                 "get_restrictions",
-                lambda: client.get_restrictions(contract_id=selected_contract.id),
+                lambda: client.restrictions.get_restrictions(
+                    contract_id=selected_contract.id
+                ),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             region_limits = await run_method(
                 "get_region_limits",
-                lambda: client.get_region_limits(contract_id=selected_contract.id),
+                lambda: client.region_limits.get_region_limits(
+                    contract_id=selected_contract.id
+                ),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             card_groups = await run_method(
                 "get_card_groups",
-                lambda: client.get_card_groups(contract_id=selected_contract.id),
+                lambda: client.card_groups.get_card_groups(
+                    contract_id=selected_contract.id
+                ),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             reports = await run_method(
                 "get_reports",
-                lambda: client.get_reports(),
+                lambda: client.reports.get_reports(),
                 context=[f"Активный договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             report_jobs = await run_method(
                 "get_report_jobs",
-                lambda: client.get_report_jobs(),
+                lambda: client.reports.get_report_jobs(),
                 context=[f"Активный договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             report_jobs_v1 = await run_method(
                 "get_report_job_list_v1",
-                lambda: client.get_report_job_list_v1(),
+                lambda: client.reports.get_report_job_list_v1(),
                 context=[f"Активный договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             invites = await run_method(
                 "get_invites",
-                lambda: client.get_invites(),
+                lambda: client.invites.get_invites(),
                 context=[f"Активный договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             users = await run_method(
                 "get_users",
-                lambda: client.get_users(page=1, on_page=5),
+                lambda: client.users.get_users(page=1, on_page=5),
                 context=[f"Активный договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             templates = await run_method(
                 "get_templates",
-                lambda: client.get_templates(selected_contract.id),
+                lambda: client.templates.get_templates(selected_contract.id),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             azs = await run_method(
                 "get_azs_list_v1",
-                lambda: client.get_azs_list_v1(page=1, onpage=3),
+                lambda: client.dictionaries.get_azs_list_v1(page=1, onpage=3),
                 context=[f"Активный договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             dictionary = await run_method(
                 "get_dictionary",
-                lambda: client.get_dictionary(name="CardStatus"),
+                lambda: client.dictionaries.get_dictionary(name="CardStatus"),
                 context=[f"Активный договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             transactions = await run_method(
                 "get_transactions_v2",
-                lambda: client.get_transactions_v2(
+                lambda: client.transactions.get_transactions_v2(
                     contract_id=selected_contract.id,
                     date_from=DATE_FROM,
                     date_to=DATE_TO,
@@ -602,7 +612,9 @@ async def main() -> None:
         if first_card_id:
             card_detail = await run_method(
                 "get_card_detail",
-                lambda: client.get_card_detail(contract_id=selected_contract.id, card_id=first_card_id),
+                lambda: client.cards.get_card_detail(
+                    contract_id=selected_contract.id, card_id=first_card_id
+                ),
                 context=[
                     f"Договор: {format_contract(selected_contract)}",
                     f"Карта: {first_card_id}",
@@ -611,7 +623,9 @@ async def main() -> None:
             )
             card_drivers = await run_method(
                 "get_card_drivers",
-                lambda: client.get_card_drivers(card_id=first_card_id, contract_id=selected_contract.id),
+                lambda: client.cards.get_card_drivers(
+                    card_id=first_card_id, contract_id=selected_contract.id
+                ),
                 context=[
                     f"Договор: {format_contract(selected_contract)}",
                     f"Карта: {first_card_id}",
@@ -620,7 +634,7 @@ async def main() -> None:
             )
             card_transactions = await run_method(
                 "get_card_transactions_v2",
-                lambda: client.get_card_transactions_v2(
+                lambda: client.transactions.get_card_transactions_v2(
                     card_id=first_card_id,
                     contract_id=selected_contract.id,
                     date_from=DATE_FROM,
@@ -642,7 +656,7 @@ async def main() -> None:
         if transaction_id:
             transaction_detail = await run_method(
                 "get_transaction_detail",
-                lambda: client.get_transaction_detail(
+                lambda: client.transactions.get_transaction_detail(
                     transaction_id=transaction_id,
                     contract_id=selected_contract.id,
                 ),
@@ -664,7 +678,7 @@ async def main() -> None:
         if template_id:
             template_limits = await run_method(
                 "get_template_limits",
-                lambda: client.get_template_limits(template_id),
+                lambda: client.templates.get_template_limits(template_id),
                 context=[
                     f"Договор: {format_contract(selected_contract)}",
                     f"Шаблон ВК: {template_id}",
@@ -674,7 +688,7 @@ async def main() -> None:
             if template_limits is not None:
                 template_restrictions = await run_method(
                     "get_template_restrictions",
-                    lambda: client.get_template_restrictions(template_id),
+                    lambda: client.templates.get_template_restrictions(template_id),
                     context=[
                         f"Договор: {format_contract(selected_contract)}",
                         f"Шаблон ВК: {template_id}",
@@ -683,7 +697,7 @@ async def main() -> None:
                 )
                 template_georestrictions = await run_method(
                     "get_template_georestrictions",
-                    lambda: client.get_template_georestrictions(template_id),
+                    lambda: client.templates.get_template_georestrictions(template_id),
                     context=[
                         f"Договор: {format_contract(selected_contract)}",
                         f"Шаблон ВК: {template_id}",
@@ -691,7 +705,7 @@ async def main() -> None:
                     limiter=limiter,
                 )
 
-        await run_method("logoff", lambda: client.logoff(), limiter=limiter)
+        await run_method("logoff", lambda: client.auth.logoff(), limiter=limiter)
 
 
 if __name__ == "__main__":

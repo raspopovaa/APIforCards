@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from ..decorators import api_method
 from ..models.invites import (
@@ -7,9 +7,10 @@ from ..models.invites import (
     InviteResponse,
 )
 from ..payloads import with_method_override
+from ..service_base import _BaseService
 
 
-class InviteMixin:
+class InvitesService(_BaseService):
     """
     Методы для работы с приглашениями пользователей (v2).
     Invites – функционал регистрации пользователей.
@@ -24,13 +25,13 @@ class InviteMixin:
     async def get_invites(
         self,
         *,
-        role: Optional[str] = None,
-        user_id: Optional[str] = None,
-        sort: Optional[str] = None,
-        status: Optional[str] = None,
-        q: Optional[str] = None,
-        page: Optional[int] = None,
-        on_page: Optional[int] = None,
+        role: str | None = None,
+        user_id: str | None = None,
+        sort: str | None = None,
+        status: str | None = None,
+        q: str | None = None,
+        page: int | None = None,
+        on_page: int | None = None,
         api_version: str = "v2",
     ) -> InviteList:
         """

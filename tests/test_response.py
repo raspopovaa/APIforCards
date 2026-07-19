@@ -66,9 +66,7 @@ def test_decoder_detects_api_error_in_json_download_response() -> None:
         json={
             "status": {
                 "code": 401,
-                "errors": [
-                    {"type": "notAuthenticated", "message": "Session expired"}
-                ],
+                "errors": [{"type": "notAuthenticated", "message": "Session expired"}],
             }
         },
         request=httpx.Request("GET", "https://example.invalid/report"),

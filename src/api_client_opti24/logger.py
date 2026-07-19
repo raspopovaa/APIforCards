@@ -1,6 +1,6 @@
 import logging
 from contextvars import ContextVar, Token
-from typing import Any
+from typing import Any, TypeAlias
 
 from .utils import REDACTED, message_mentions_sensitive_key, sanitize_for_logging, scrub
 
@@ -9,23 +9,24 @@ DEFAULT_LOG_FORMAT = "%(asctime)s [%(levelname)s] %(module)s: %(message)s"
 
 class SanitizingFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
-        has_args = bool(record.args)
-        if has_args:
-            if isinstance(record.args, dict):
-                record.args = sanitize_for_logging(record.args)
+        args = record.args
+        if args:
+            if isinstance(args, dict):
+                record.args = sanitize_for_logging(args)
             else:
                 if isinstance(record.msg, str) and message_mentions_sensitive_key(record.msg):
                     record.args = tuple(
                         REDACTED if isinstance(arg, str) else sanitize_for_logging(arg)
-                        for arg in record.args
+                        for arg in args
                     )
                 else:
-                    record.args = tuple(sanitize_for_logging(arg) for arg in record.args)
+                    record.args = tuple(sanitize_for_logging(arg) for arg in args)
 
-        if isinstance(record.msg, str) and not has_args:
+        if isinstance(record.msg, str) and not args:
             record.msg = scrub(record.msg)
 
         return True
+
 
 _default_logger = logging.getLogger("api_client_opti24")
 sanitizing_filter = SanitizingFilter()
@@ -44,6 +45,7 @@ class ContextLogger:
         return getattr(active_logger, name)
 
 
+LoggerLike: TypeAlias = logging.Logger | ContextLogger
 logger = ContextLogger()
 
 _configured_signature: tuple[str, str] | None = None
@@ -79,7 +81,7 @@ def ensure_sanitizing_filter(target: logging.Logger) -> None:
         target.addFilter(SanitizingFilter())
 
 
-def bind_logger(target: logging.Logger | ContextLogger) -> Token[logging.Logger | None]:
+def bind_logger(target: LoggerLike) -> Token[logging.Logger | None]:
     if isinstance(target, ContextLogger):
         target = _default_logger
     ensure_sanitizing_filter(target)

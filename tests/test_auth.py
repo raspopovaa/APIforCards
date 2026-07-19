@@ -1,16 +1,31 @@
+import logging
+
 import pytest
 
 from api_client_opti24.models.auth import AuthUserResponse
-from api_client_opti24.services import AuthMixin
+from api_client_opti24.services import AuthService
 from api_client_opti24.session import SessionManager, SessionState
+from tests.service_support import (
+    FrozenClock,
+    NoopRequestExecutor,
+    StubCredentialsProvider,
+    StubSessionGate,
+)
 
 
-class DummyClient(AuthMixin):
+class DummyClient(AuthService):
     def __init__(self):
-        self.login = "test_user"
-        self.password = "secret"
         self.session_manager = SessionManager()
         self.calls = []
+        super().__init__(
+            NoopRequestExecutor(),
+            self.session_manager,
+            StubSessionGate(),
+            self.session_manager,
+            StubCredentialsProvider(),
+            FrozenClock(),
+            logging.getLogger("auth-service-test"),
+        )
 
     def _headers(self, include_session: bool = False):
         headers = {"api_key": "FAKE_API_KEY"}
@@ -116,6 +131,9 @@ async def test_get_info_returns_data():
 
     assert result.status.code == 200
     assert result.data.client_info.ContractName == "Demo Client"
+    _, endpoint, kwargs = client.calls[-1]
+    assert endpoint == "info"
+    assert kwargs["params"]["period"] == "2026-07-19 12:30:00"
 
 
 @pytest.mark.asyncio

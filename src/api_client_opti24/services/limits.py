@@ -1,16 +1,16 @@
 import json
-from typing import Optional
+from typing import Any, Optional
 
 from ..decorators import api_method
-from ..logger import logger
 from ..models.limits import (
     LimitsResponse,
     RemoveLimitResponse,
     SetLimitResponse,
 )
+from ..service_base import _BaseService
 
 
-class LimitsMixin:
+class LimitsService(_BaseService):
     """
     Методы для работы с продуктовыми лимитами (v1).
 
@@ -56,7 +56,7 @@ class LimitsMixin:
             params=params,
         )
 
-        logger.debug("Limits received")
+        self.logger.debug("Limits received")
         return LimitsResponse(**raw)
 
     # ------------------- POST /setLimit -------------------
@@ -65,7 +65,7 @@ class LimitsMixin:
     async def set_limit(
         self,
         *,
-        limits: list[dict],
+        limits: list[dict[str, Any]],
         api_version: str = "v1",
     ) -> SetLimitResponse:
         """
@@ -86,7 +86,7 @@ class LimitsMixin:
             data=body,
         )
 
-        logger.info("Limit updated")
+        self.logger.info("Limit updated")
         return SetLimitResponse(**raw)
 
     # ------------------- POST /removeLimit -------------------
@@ -125,5 +125,5 @@ class LimitsMixin:
             data=body,
         )
 
-        logger.info("Limit removed")
+        self.logger.info("Limit removed")
         return RemoveLimitResponse(**raw)

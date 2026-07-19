@@ -1,16 +1,16 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ..decorators import api_method
-from ..logger import logger
 from ..models.restrictions import (
     RestrictionGetResponse,
     RestrictionRemoveResponse,
     RestrictionSetResponse,
 )
+from ..service_base import _BaseService
 from ..utils import to_json_param
 
 
-class RestrictionsMixin:
+class RestrictionsService(_BaseService):
     """
     Методы для работы с товарными ограничителями (v1).
     """
@@ -42,7 +42,7 @@ class RestrictionsMixin:
             params=params,
         )
 
-        logger.debug("Restriction list received")
+        self.logger.debug("Restriction list received")
         return RestrictionGetResponse(**raw)
 
     # ---------------- Установка ----------------
@@ -50,7 +50,7 @@ class RestrictionsMixin:
     async def set_restriction(
         self,
         *,
-        restrictions: list[dict],
+        restrictions: list[dict[str, Any]],
         api_version: str = "v1",
     ) -> RestrictionSetResponse:
         """
@@ -70,7 +70,7 @@ class RestrictionsMixin:
             data=body,
         )
 
-        logger.debug("Restriction updated")
+        self.logger.debug("Restriction updated")
         return RestrictionSetResponse(**raw)
 
     # ---------------- Удаление ----------------
@@ -101,5 +101,5 @@ class RestrictionsMixin:
             data=body,
         )
 
-        logger.debug("Restriction removed")
+        self.logger.debug("Restriction removed")
         return RestrictionRemoveResponse(**raw)

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ..modeling import BaseModel, Field
 
@@ -18,7 +18,9 @@ class TemplatesListData(BaseModel):
 
 
 class TemplatesListResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа (код, сообщение и т.д.)")
+    status: Optional[dict[str, Any]] = Field(
+        None, description="Статус ответа (код, сообщение и т.д.)"
+    )
     data: TemplatesListData = Field(..., description="Основные данные списка шаблонов")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
@@ -30,13 +32,13 @@ class TemplateCreateRequest(BaseModel):
 
 
 class TemplateCreateResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: str = Field(..., description="ID созданного шаблона")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
 
 class TemplateDeleteResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: bool = Field(..., description="Результат операции (true — успешно, false — ошибка)")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
@@ -111,7 +113,7 @@ class TemplateLimitListData(BaseModel):
 
 
 class TemplateLimitListResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: TemplateLimitListData = Field(..., description="Основные данные списка лимитов")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
@@ -132,13 +134,13 @@ class TemplateLimitCreateRequest(BaseModel):
 
 
 class TemplateLimitCreateResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: str = Field(..., description="ID созданного лимита шаблона")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
 
 class TemplateLimitDeleteResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: bool = Field(..., description="Результат удаления лимита (true — успешно)")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
@@ -164,7 +166,7 @@ class TemplateRestrictionListData(BaseModel):
 
 
 class TemplateRestrictionListResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: TemplateRestrictionListData = Field(
         ..., description="Основные данные списка ограничителей"
     )
@@ -181,13 +183,13 @@ class TemplateRestrictionCreateRequest(BaseModel):
 
 
 class TemplateRestrictionCreateResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: str = Field(..., description="ID созданного ограничителя шаблона")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
 
 class TemplateRestrictionDeleteResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: bool = Field(..., description="Результат удаления ограничителя")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
@@ -219,7 +221,7 @@ class TemplateGeoRestrictionListData(BaseModel):
 
 
 class TemplateGeoRestrictionListResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: TemplateGeoRestrictionListData = Field(
         ..., description="Основные данные списка геоограничителей"
     )
@@ -238,12 +240,12 @@ class TemplateGeoRestrictionCreateRequest(BaseModel):
 
 
 class TemplateGeoRestrictionCreateResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: str = Field(..., description="ID созданного геоограничителя шаблона")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
 
 
 class TemplateGeoRestrictionDeleteResponse(BaseModel):
-    status: Optional[dict] = Field(None, description="Статус ответа")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
     data: bool = Field(..., description="Результат удаления геоограничителя (true — успешно)")
     timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")

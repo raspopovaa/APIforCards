@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from ..modeling import BaseModel, Field
 
 # === Базовые структуры ===
@@ -88,7 +90,7 @@ class LimitsData(BaseModel):
 class LimitsResponse(BaseModel):
     """Ответ на запрос списка лимитов."""
 
-    status: dict = Field(..., description="Статус выполнения (например, {'code': 200})")
+    status: dict[str, Any] = Field(..., description="Статус выполнения (например, {'code': 200})")
     data: LimitsData = Field(..., description="Данные с лимитами")
     timestamp: int = Field(..., description="Временная метка ответа")
 
@@ -99,7 +101,7 @@ class LimitsResponse(BaseModel):
 class RemoveLimitResponse(BaseModel):
     """Ответ на удаление продуктового лимита."""
 
-    status: dict = Field(..., description="Статус выполнения запроса")
+    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
     data: bool = Field(..., description="Результат операции (True — успешно)")
     timestamp: int = Field(..., description="Временная метка ответа")
 
@@ -110,6 +112,6 @@ class RemoveLimitResponse(BaseModel):
 class SetLimitResponse(BaseModel):
     """Ответ на установку/изменение продуктового лимита."""
 
-    status: dict = Field(..., description="Статус выполнения запроса")
+    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
     data: list[str] = Field(..., description="ID созданных/обновлённых лимитов")
     timestamp: int = Field(..., description="Временная метка ответа")

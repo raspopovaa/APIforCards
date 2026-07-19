@@ -1,3 +1,5 @@
+from typing import Any
+
 from ..modeling import BaseModel, Field
 
 
@@ -21,7 +23,7 @@ class CardGroupListData(BaseModel):
 class CardGroupListResponse(BaseModel):
     """Ответ метода получения списка групп карт."""
 
-    status: dict = Field(..., description="Информация о статусе запроса (код и описание)")
+    status: dict[str, Any] = Field(..., description="Информация о статусе запроса (код и описание)")
     data: CardGroupListData = Field(..., description="Основные данные ответа")
     timestamp: int = Field(..., description="Временная метка ответа (UNIX timestamp)")
 
@@ -29,7 +31,7 @@ class CardGroupListResponse(BaseModel):
 class SetCardsToGroupResponse(BaseModel):
     """Ответ метода добавления карт в группу."""
 
-    status: dict = Field(..., description="Информация о статусе запроса (код и описание)")
+    status: dict[str, Any] = Field(..., description="Информация о статусе запроса (код и описание)")
     data: bool = Field(..., description="Флаг успешного выполнения операции")
     timestamp: int = Field(..., description="Временная метка ответа (UNIX timestamp)")
 
@@ -37,7 +39,7 @@ class SetCardsToGroupResponse(BaseModel):
 class RemoveCardGroupResponse(BaseModel):
     """Ответ метода удаления группы карт."""
 
-    status: dict = Field(..., description="Информация о статусе запроса (код и описание)")
+    status: dict[str, Any] = Field(..., description="Информация о статусе запроса (код и описание)")
     data: bool = Field(..., description="Флаг успешного выполнения операции")
     timestamp: int = Field(..., description="Временная метка ответа (UNIX timestamp)")
 
@@ -51,6 +53,6 @@ class SetCardGroupData(BaseModel):
 class SetCardGroupResponse(BaseModel):
     """Ответ метода установки/изменения группы карт."""
 
-    status: dict = Field(..., description="Информация о статусе запроса (код и описание)")
+    status: dict[str, Any] = Field(..., description="Информация о статусе запроса (код и описание)")
     data: SetCardGroupData = Field(..., description="Информация о созданной/обновлённой группе")
     timestamp: int = Field(..., description="Временная метка ответа (UNIX timestamp)")

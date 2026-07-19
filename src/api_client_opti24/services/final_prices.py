@@ -1,9 +1,11 @@
+from typing import Any
+
 from ..decorators import api_method
-from ..logger import logger
 from ..models.final_prices import CheckPurchaseResponse, FinalPricesResponse
+from ..service_base import _BaseService
 
 
-class FinalPricesMixin:
+class FinalPricesService(_BaseService):
     """
     Методы для получения финальных цен и проверки покупок по карте.
     """
@@ -21,7 +23,7 @@ class FinalPricesMixin:
         Получение финальных цен на АЗС по карте (POST /vip/v2/cards/{card_id}/calculatePrices)
         """
         payload = {"poi_id": poi_id, "goods": goods}
-        logger.info("Requesting final prices")
+        self.logger.info("Requesting final prices")
 
         data = await self._request(
             "post",
@@ -39,7 +41,7 @@ class FinalPricesMixin:
         *,
         card_id: str,
         poi_id: str,
-        goods: list[dict],
+        goods: list[dict[str, Any]],
         api_version: str = "v2",
     ) -> CheckPurchaseResponse:
         """
@@ -47,7 +49,7 @@ class FinalPricesMixin:
         (POST /vip/v2/cards/{card_id}/checkPurchase)
         """
         payload = {"poi_id": poi_id, "goods": goods}
-        logger.info("Checking purchase availability")
+        self.logger.info("Checking purchase availability")
 
         data = await self._request(
             "post",

@@ -1,14 +1,16 @@
 import pytest
 
-from api_client_opti24.services.templates import TemplatesMixin
+from api_client_opti24.services.templates import TemplatesService
 from api_client_opti24.session import SessionManager
+from tests.service_support import service_dependencies
 
 
-class DummyTemplatesClient(TemplatesMixin):
+class DummyTemplatesClient(TemplatesService):
     def __init__(self) -> None:
         self.session_manager = SessionManager()
         self.session_manager.mark_authenticated("session-1", "contract-1")
         self.calls = []
+        super().__init__(*service_dependencies(self.session_manager))
 
     @property
     def session_id(self):

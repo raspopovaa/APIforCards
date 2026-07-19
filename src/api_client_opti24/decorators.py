@@ -1,9 +1,14 @@
 import functools
+from collections.abc import Awaitable, Callable
 from contextvars import ContextVar
+from typing import Concatenate, ParamSpec, TypeVar, cast
 
 from .logger import bind_logger, reset_logger
-from .logger import logger as default_logger
-from .session import SessionManager
+from .service_base import ServiceMethodContext
+
+ServiceT = TypeVar("ServiceT", bound=ServiceMethodContext)
+Params = ParamSpec("Params")
+ResultT = TypeVar("ResultT")
 
 _current_api_method_name: ContextVar[str | None] = ContextVar(
     "current_api_method_name",
@@ -18,52 +23,34 @@ def get_current_api_method_name() -> str | None:
 def api_method(
     require_session: bool = False,
     default_version: str = "v1",
-    *,
-    http_method: str | None = None,
-    endpoint: str | None = None,
-    retry_class: str | None = None,
-):
-    def decorator(func):
+) -> Callable[
+    [Callable[Concatenate[ServiceT, Params], Awaitable[ResultT]]],
+    Callable[Concatenate[ServiceT, Params], Awaitable[ResultT]],
+]:
+    def decorator(
+        func: Callable[Concatenate[ServiceT, Params], Awaitable[ResultT]],
+    ) -> Callable[Concatenate[ServiceT, Params], Awaitable[ResultT]]:
         @functools.wraps(func)
-        async def wrapper(self, *args, **kwargs):
+        async def wrapper(
+            self: ServiceT,
+            *args: Params.args,
+            **kwargs: Params.kwargs,
+        ) -> ResultT:
             token = _current_api_method_name.set(func.__name__)
             method_name = f"{self.__class__.__name__}.{func.__name__}"
-            active_logger = getattr(self, "logger", default_logger)
+            active_logger = self.logger
             logger_token = bind_logger(active_logger)
-            if "api_version" not in kwargs:
-                kwargs["api_version"] = default_version
+            api_version = dict(kwargs).get("api_version", default_version)
 
             try:
                 if require_session:
                     active_logger.info("[%s] ensuring authenticated session", method_name)
-                    session_manager = getattr(self, "session_manager", None)
-                    if session_manager is None:
-                        session_manager = SessionManager()
-                        session_id = getattr(self, "session_id", None)
-                        contract_id = getattr(self, "contract_id", None)
-                        if session_id is not None:
-                            session_manager.mark_authenticated(session_id, contract_id)
-                        self.session_manager = session_manager
-
-                    current_session_id = getattr(self, "session_id", None)
-                    if session_manager.session_id is None and current_session_id:
-                        session_manager.mark_authenticated(
-                            current_session_id,
-                            getattr(self, "contract_id", None),
-                        )
-
-                    auth_user = getattr(self, "auth_user", None)
-                    if auth_user is not None:
-                        await session_manager.ensure_authenticated(auth_user)
-                    elif session_manager.session_id is None:
-                        raise RuntimeError(
-                            f"{method_name} requires session but auth_user is unavailable"
-                        )
+                    await self.session_gate.ensure_authenticated()
 
                 active_logger.info(
                     "Calling API method=%s version=%s",
                     method_name,
-                    kwargs.get("api_version"),
+                    api_version,
                 )
 
                 result = await func(self, *args, **kwargs)
@@ -85,14 +72,9 @@ def api_method(
                 reset_logger(logger_token)
                 _current_api_method_name.reset(token)
 
-        wrapper.__api_method_config__ = {
-            "require_session": require_session,
-            "default_version": default_version,
-            "http_method": http_method.upper() if http_method is not None else None,
-            "endpoint": endpoint,
-            "retry_class": retry_class,
-        }
-
-        return wrapper
+        return cast(
+            Callable[Concatenate[ServiceT, Params], Awaitable[ResultT]],
+            wrapper,
+        )
 
     return decorator

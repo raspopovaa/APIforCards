@@ -12,6 +12,8 @@ from typing import (
     Self,
     TypeVar,
     Union,
+    cast,
+    dataclass_transform,
     get_args,
     get_origin,
     get_type_hints,
@@ -46,7 +48,7 @@ def Field(
     default_factory: Callable[[], Any] | Any = MISSING,
     alias: str | None = None,
     description: str | None = None,
-) -> FieldInfo:
+) -> Any:
     return FieldInfo(
         default=default,
         default_factory=default_factory,
@@ -74,6 +76,7 @@ def validator(*field_names: str, pre: bool = False) -> Callable[[Callable[..., A
     return field_validator(*field_names, mode="before" if pre else "after")
 
 
+@dataclass_transform(field_specifiers=(Field,), kw_only_default=True)
 class BaseModel:
     __resolved_types__: ClassVar[dict[str, Any]]
     __field_validators__: ClassVar[dict[str, dict[str, list[Callable[[Any], Any]]]]]
@@ -110,7 +113,11 @@ class BaseModel:
 
         for base in reversed(cls.__mro__):
             for name, attribute in getattr(base, "__dict__", {}).items():
-                raw_callable = attribute.__func__ if isinstance(attribute, (classmethod, staticmethod)) else attribute
+                raw_callable = (
+                    attribute.__func__
+                    if isinstance(attribute, (classmethod, staticmethod))
+                    else attribute
+                )
                 config = getattr(raw_callable, "__field_validator_config__", None)
                 if config is None:
                     continue
@@ -123,13 +130,17 @@ class BaseModel:
         return collected
 
     def __init__(self, **kwargs: Any) -> None:
-        for model_field in fields(self):
+        for model_field in fields(cast(Any, self)):
             raw_value, has_value = self._extract_input_value(model_field, kwargs)
-            validators = self.__field_validators__.get(model_field.name, {"before": [], "after": []})
+            validators = self.__field_validators__.get(
+                model_field.name, {"before": [], "after": []}
+            )
 
             if has_value:
                 raw_value = self._apply_validators(type(self), validators["before"], raw_value)
-                value = self._convert_value(raw_value, self.__resolved_types__[model_field.name], model_field.name)
+                value = self._convert_value(
+                    raw_value, self.__resolved_types__[model_field.name], model_field.name
+                )
                 value = self._apply_validators(type(self), validators["after"], value)
             else:
                 value = self._resolve_default(model_field)
@@ -142,7 +153,7 @@ class BaseModel:
 
     def model_dump(self, *, by_alias: bool = False) -> dict[str, Any]:
         result: dict[str, Any] = {}
-        for model_field in fields(self):
+        for model_field in fields(cast(Any, self)):
             key = (
                 model_field.metadata.get("alias") or model_field.name
                 if by_alias
@@ -164,7 +175,9 @@ class BaseModel:
         return value
 
     @classmethod
-    def _extract_input_value(cls, model_field: DataclassField[Any], payload: dict[str, Any]) -> tuple[Any, bool]:
+    def _extract_input_value(
+        cls, model_field: DataclassField[Any], payload: dict[str, Any]
+    ) -> tuple[Any, bool]:
         if model_field.name in payload:
             return payload[model_field.name], True
 
@@ -185,7 +198,7 @@ class BaseModel:
     @staticmethod
     def _apply_validators(
         model_cls: type[BaseModel],
-        validators: list[Callable[[Any], Any]],
+        validators: list[Callable[..., Any]],
         value: Any,
     ) -> Any:
         current = value
@@ -242,7 +255,9 @@ class BaseModel:
                 if isinstance(value, annotation):
                     return value
                 if not isinstance(value, dict):
-                    raise ValidationError(f"{cls.__name__}.{field_name}: dict expected for nested model")
+                    raise ValidationError(
+                        f"{cls.__name__}.{field_name}: dict expected for nested model"
+                    )
                 return annotation(**value)
 
             if annotation is datetime:
@@ -331,12 +346,13 @@ class BaseModel:
     @classmethod
     def describe(cls) -> dict[str, dict[str, Any]]:
         description: dict[str, dict[str, Any]] = {}
-        for model_field in fields(cls):
+        for model_field in fields(cast(Any, cls)):
             description[model_field.name] = {
                 "type": cls._format_type(cls.__resolved_types__.get(model_field.name)),
                 "alias": model_field.metadata.get("alias"),
                 "description": model_field.metadata.get("description"),
-                "required": model_field.default is MISSING and model_field.default_factory is MISSING,
+                "required": model_field.default is MISSING
+                and model_field.default_factory is MISSING,
             }
         return description
 
@@ -378,7 +394,7 @@ class BaseModel:
 def decode_model(model_type: type[ModelT], payload: dict[str, Any]) -> ModelT:
     validator = getattr(model_type, "model_validate", None)
     if callable(validator):
-        return validator(payload)
+        return cast(ModelT, validator(payload))
     if is_dataclass(model_type):
         return model_type(**payload)
     raise TypeError(f"Unsupported response model: {model_type.__name__}")

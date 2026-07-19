@@ -1,3 +1,5 @@
+from typing import Any
+
 from ..modeling import BaseModel, Field
 
 
@@ -20,7 +22,7 @@ class FinalPricesData(BaseModel):
 class FinalPricesResponse(BaseModel):
     """Ответ метода получения финальных цен на АЗС"""
 
-    status: dict = Field(..., description="Статус ответа API, например {'code': 200}")
+    status: dict[str, Any] = Field(..., description="Статус ответа API, например {'code': 200}")
     data: FinalPricesData = Field(..., description="Основные данные ответа (цены)")
     timestamp: int = Field(..., description="Время формирования ответа в формате UNIX")
 
@@ -45,6 +47,6 @@ class CheckPurchaseRequest(BaseModel):
 class CheckPurchaseResponse(BaseModel):
     """Ответ метода проверки возможности проведения транзакции"""
 
-    status: dict = Field(..., description="Статус ответа API, например {'code': 200}")
+    status: dict[str, Any] = Field(..., description="Статус ответа API, например {'code': 200}")
     data: bool = Field(..., description="Результат проверки — True, если покупка возможна")
     timestamp: int = Field(..., description="Время ответа (UNIX timestamp)")

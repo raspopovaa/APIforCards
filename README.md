@@ -5,7 +5,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 Проект упрощает интеграцию с API и предоставляет:
 
 - единый `APIClient`
-- прямые доменные методы и композиционные сервисы `client.cards`, `client.reports`
+- композиционные доменные сервисы `client.auth`, `client.cards`, `client.reports` и другие
 - типизированные модели ответов
 - безопасные retry, re-auth и ограничение частоты на транспортном уровне
 - demo-сценарий для DEMO-стенда
@@ -33,7 +33,20 @@ APIClient SDK — асинхронная Python-библиотека для ра
 Основные слои проекта:
 
 - [client.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/client.py)  
-  Главная точка входа. Собирает зависимости и предоставляет композиционные сервисы `client.cards` и `client.reports`.
+  Главная точка входа. Собирает инфраструктуру и типизированный `ServiceContainer`.
+
+- [executor.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/executor.py)
+  Выполняет JSON/stream-запросы, применяет metadata из registry и проверяет тип ответа.
+
+- [service_base.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/service_base.py)
+  Содержит узкие протоколы `RequestExecutor`, read-only `SessionContext`,
+  `SessionGate`, внутренний `SessionMutator` и `CredentialsProvider`.
+
+- [authentication.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/authentication.py)
+  Изолирует credentials и координирует первичную авторизацию и re-auth.
+
+- [service_groups.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/service_groups.py)
+  Явно собирает 16 сервисов и предоставляет типизированные свойства без runtime-магии.
 
 - [transport.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/transport.py)  
   Независимый HTTP-слой с внедряемыми client, decoder, logger, clock и policy.
@@ -53,9 +66,22 @@ APIClient SDK — асинхронная Python-библиотека для ра
 - [modeling.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/modeling.py)  
   Совместимый stdlib-only слой моделей и адаптер `decode_model` для постепенной миграции.
 
+Публичные доменные пространства имён:
+
+| Домен | Вызов |
+|-------|-------|
+| Авторизация и статистика | `client.auth` |
+| Карты и группы карт | `client.cards`, `client.card_groups` |
+| Договоры и кошельки | `client.contracts`, `client.ewallet` |
+| Лимиты и ограничения | `client.limits`, `client.restrictions`, `client.region_limits` |
+| Отчёты и транзакции | `client.reports`, `client.transactions` |
+| Пользователи и приглашения | `client.users`, `client.invites` |
+| Шаблоны и виртуальные карты | `client.templates`, `client.virtual_cards` |
+| Справочники и цены | `client.dictionaries`, `client.final_prices` |
+
 ## 📦 Установка
 
-Пакет `api-client-opti24==1.2.1` опубликован на TestPyPI и поддерживает
+Пакет `api-client-opti24==2.0.0` опубликован на TestPyPI и поддерживает
 `Python >=3.11,<3.15`. Зависимости лучше устанавливать из основного PyPI
 отдельно: это исключает случайную подмену зависимостей пакетами из тестового
 индекса.
@@ -66,7 +92,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 uv venv --python 3.11
 uv pip install "httpx>=0.27.0,<1.0"
 uv pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==1.2.1
+  --no-deps api-client-opti24==2.0.0
 ```
 
 ### Вариант 2: pip
@@ -76,7 +102,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install "httpx>=0.27.0,<1.0"
 python -m pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==1.2.1
+  --no-deps api-client-opti24==2.0.0
 ```
 
 Проверка версии и публичных импортов:
@@ -111,16 +137,16 @@ async def main() -> None:
     settings = APISettings.from_env(env_file=Path(__file__).with_name(".env"))
 
     async with APIClient(settings=settings) as client:
-        auth = await client.auth_user()
+        auth = await client.auth.auth_user()
         try:
-            info = await client.get_info()
+            info = await client.auth.get_info()
             cards = await client.cards.get_cards_v2(page=1, onpage=5)
 
             print("Договоров:", len(auth.data.contracts))
             print("Запросов по тарифу:", info.data.client_info.Queries)
             print("Карт найдено:", cards.total_count)
         finally:
-            await client.logoff()
+            await client.auth.logoff()
 
 
 if __name__ == "__main__":
@@ -341,7 +367,7 @@ uv run pytest
 python -m pytest
 ```
 
-Сейчас набор из `95` тестов покрывает:
+Сейчас набор из `97` тестов покрывает:
 
 - auth
 - cards
@@ -380,7 +406,7 @@ uv publish --publish-url https://test.pypi.org/legacy/
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==1.2.1
+  --no-deps api-client-opti24==2.0.0
 ```
 
 ## 🤖 GitHub Actions
@@ -399,12 +425,9 @@ pip install --index-url https://test.pypi.org/simple/ \
 - запускает матрицу `Python 3.11` и `Python 3.14`
 - устанавливает зависимости через `pip install -e ".[dev]"`
 - запускает `pytest`
-
-Почему пока только тесты:
-
-- `pytest` уже стабильно зеленый
-- `ruff` и `mypy` пока требуют отдельной доработки проекта перед тем, как делать их блокирующими проверками
-- такой стартовый CI лучше, чем постоянно красный workflow без практической пользы
+- блокирует критические ошибки Ruff
+- проверяет Black для всего `src` и `tests`
+- запускает `mypy --strict` для всех source-файлов SDK
 
 ## ▶️ Demo-скрипт
 
@@ -444,15 +467,18 @@ api-pro-sdk/
 │   ├── models/
 │   ├── services/
 │   ├── client.py
+│   ├── authentication.py
 │   ├── config.py
 │   ├── env.py
 │   ├── errors.py
+│   ├── executor.py
 │   ├── endpoints.py
 │   ├── modeling.py
 │   ├── policies.py
 │   ├── registry.py
 │   ├── response.py
 │   ├── runtime.py
+│   ├── service_base.py
 │   ├── service_groups.py
 │   ├── session.py
 │   └── transport.py
@@ -473,9 +499,8 @@ uv run black .
 uv run mypy src
 ```
 
-Примечание:
-
-- локально доступны `ruff`, `black` и `mypy`, но в GitHub Actions они пока не включены как обязательные проверки
+Весь SDK проходит строгий `mypy`; modeling framework помечен через
+`dataclass_transform`, поэтому типы моделей проверяются без специальных плагинов.
 
 ## ⚠️ Ограничения
 
@@ -488,9 +513,9 @@ uv run mypy src
 
 | Раздел README | Источник истины в репозитории | Проверено |
 |---------------|-------------------------------|-----------|
-| Возможности | `client.py`, `services/`, `service_groups.py` | Домены и публичные методы существуют; композиция пока добавлена для cards/reports |
-| Архитектура | `client.py`, `transport.py`, `response.py`, `registry.py` | Transport не зависит от `APIClient`, endpoint-каталог декларативный |
-| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `1.2.1`, диапазон Python и публичные импорты совпадают |
+| Возможности | `client.py`, `services/`, `service_groups.py` | Все 89 endpoint-методов доступны только через композиционные доменные сервисы |
+| Архитектура | `client.py`, `executor.py`, `service_base.py`, `service_groups.py` | Сервисы не хранят `APIClient`; зависимости разделены узкими протоколами |
+| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.0.0`, диапазон Python и публичные импорты совпадают |
 | Быстрый старт | `config.py`, `auth.py`, `cards.py`, модели auth/cards | Сигнатуры и используемые поля ответа проверены |
 | Конфигурация | `config.py`, `.env.example`, `env.py` | Все перечисленные переменные поддерживаются |
 | Retry и безопасность | `policies.py`, `transport.py`, `logger.py`, `utils.py` | Retry зависит от idempotency; удалённый HTTP запрещён; логи очищаются |
@@ -499,7 +524,7 @@ uv run mypy src
 | Модели | `modeling.py`, `models/` | Поддерживаются Field, validators, nested parsing, dump/validate/describe |
 | Документация | `scripts/generate_api_docs.py`, `scripts/build_docs_site.py`, `docs/` | Генераторы и статический сайт присутствуют |
 | Политика спецификации | `docs/spec-compatibility.md`, модели и тесты | Зафиксированы известные расхождения и принятые решения |
-| Тестирование | `tests/`, настройки pytest в `pyproject.toml` | Полный набор содержит 95 тестов |
+| Тестирование | `tests/`, настройки pytest в `pyproject.toml` | Полный набор содержит 102 теста |
 | Публикация | `pyproject.toml`, `uv.lock` | Сборка выполняется через `uv build`, публикация — `uv publish` |
 | GitHub Actions | `.github/workflows/` | CI, Docs и Pages соответствуют описанию |
 | Demo-скрипт | `examples/demo_async.py` | Асинхронный цветной сценарий существует и учитывает rate limit |

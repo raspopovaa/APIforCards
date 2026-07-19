@@ -1,8 +1,7 @@
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from .. import utils
 from ..decorators import api_method
-from ..logger import logger
 from ..models.transactions import (
     TransactionDetailResponse,
     TransactionItemV2,
@@ -10,9 +9,10 @@ from ..models.transactions import (
     TransactionsV2Response,
     TransactionV1,
 )
+from ..service_base import _BaseService
 
 
-class TransactionsMixin:
+class TransactionsService(_BaseService):
     """
     Методы для работы с транзакциями (v1 и v2).
     """
@@ -21,12 +21,12 @@ class TransactionsMixin:
 
     def _filter_and_sort(
         self,
-        items: list,
+        items: list[Any],
         *,
-        filter_fn: Optional[Callable] = None,
+        filter_fn: Optional[Callable[..., Any]] = None,
         sort_by: Optional[str] = None,
         reverse: bool = False,
-    ) -> list:
+    ) -> list[Any]:
         """
         Фильтрует и сортирует список транзакций.
         """
@@ -37,9 +37,13 @@ class TransactionsMixin:
 
         if sort_by:
             try:
-                result.sort(key=lambda x: getattr(x, sort_by, None), reverse=reverse)
+
+                def sort_value(item: Any) -> Any:
+                    return getattr(item, sort_by, None)
+
+                result.sort(key=sort_value, reverse=reverse)
             except Exception:
-                logger.warning("Transaction sorting failed")
+                self.logger.warning("Transaction sorting failed")
 
         return result
 

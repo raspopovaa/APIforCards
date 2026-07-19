@@ -1,14 +1,14 @@
 from ..decorators import api_method
-from ..logger import logger
 from ..models.ewallet import (
     MoveToCardResponse,
     MoveToContractResponse,
     SetCardProductResponse,
 )
+from ..service_base import _BaseService
 from ..utils import to_json_param
 
 
-class EwalletMixin:
+class EwalletService(_BaseService):
     """
     Методы для работы с электронными кошельками (Ewallet).
 
@@ -46,7 +46,7 @@ class EwalletMixin:
         """
         cid = contract_id or self.contract_id
         if not cid:
-            logger.debug("contract_id обязателен для move_to_contract")
+            self.logger.debug("contract_id обязателен для move_to_contract")
             raise ValueError("contract_id обязателен для set_card_product")
 
         body = {
@@ -92,7 +92,7 @@ class EwalletMixin:
         """
         cid = contract_id or self.contract_id
         if not cid:
-            logger.debug("contract_id обязателен для move_to_contract")
+            self.logger.debug("contract_id обязателен для move_to_contract")
             raise ValueError("contract_id обязателен для move_to_card")
 
         body = {"contract_id": cid, "card_id": card_id, "amount": amount}
@@ -134,7 +134,7 @@ class EwalletMixin:
         """
         cid = contract_id or self.contract_id
         if not cid:
-            logger.debug("contract_id обязателен для move_to_contract")
+            self.logger.debug("contract_id обязателен для move_to_contract")
             raise ValueError("contract_id обязателен для move_to_contract")
 
         body = {"contract_id": cid, "card_id": card_id, "amount": amount}

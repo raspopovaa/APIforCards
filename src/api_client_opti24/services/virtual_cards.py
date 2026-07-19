@@ -1,7 +1,6 @@
 from typing import Any
 
 from ..decorators import api_method
-from ..logger import logger
 from ..models.virtual_cards import (
     MPCListResponse,
     MPCPayloadResponse,
@@ -9,9 +8,10 @@ from ..models.virtual_cards import (
     SimpleActionResponse,
     VirtualCardResponse,
 )
+from ..service_base import _BaseService
 
 
-class VirtualCardsMixin:
+class VirtualCardsService(_BaseService):
     """
     Методы для работы с виртуальными картами (ВК) и мобильными профилями карт (МПК)
     """
@@ -23,7 +23,7 @@ class VirtualCardsMixin:
         api_version: str = "v2",
     ) -> MPCListResponse:
         """Получить список выпущенных МПК/QR (GET /vip/v2/MPC)."""
-        logger.info("Получение списка выпущенных МПК/QR")
+        self.logger.info("Получение списка выпущенных МПК/QR")
         data = await self._request(
             "get",
             "MPC",
@@ -41,7 +41,7 @@ class VirtualCardsMixin:
     ) -> VirtualCardResponse:
         """Выпуск виртуальной карты (старый метод POST /vip/v2/cards)"""
         payload = {"user_id": user_id}
-        logger.info("Creating virtual card using legacy method")
+        self.logger.info("Creating virtual card using legacy method")
         data = await self._request(
             "post",
             "cards",
@@ -76,7 +76,7 @@ class VirtualCardsMixin:
         if user_id:
             payload["user_id"] = user_id
 
-        logger.info("Creating virtual card")
+        self.logger.info("Creating virtual card")
         data = await self._request(
             "post",
             "cards/release",
@@ -94,7 +94,7 @@ class VirtualCardsMixin:
         api_version: str = "v2",
     ) -> SimpleActionResponse:
         """Удаление мобильного профиля карты (МПК)"""
-        logger.info("Deleting mobile card profile")
+        self.logger.info("Deleting mobile card profile")
         data = await self._request(
             "post",
             f"cards/{card_id}/deleteMPC",
@@ -117,7 +117,7 @@ class VirtualCardsMixin:
         по-умолчанию, если не вызывать, вызывается ResetCounterCode)
         """
         payload = {"type": type_}
-        logger.info("Resetting mobile card profile counters")
+        self.logger.info("Resetting mobile card profile counters")
         data = await self._request(
             "post",
             f"cards/{card_id}/resetMPC",
@@ -137,7 +137,7 @@ class VirtualCardsMixin:
     ) -> MPCPayloadResponse:
         """Сгенерировать QR-код оплаты (POST /vip/v2/cards/{card_id}/pay)."""
         request_payload = payload or {}
-        logger.info("Generating payment QR")
+        self.logger.info("Generating payment QR")
         data = await self._request(
             "post",
             f"cards/{card_id}/pay",
@@ -157,7 +157,7 @@ class VirtualCardsMixin:
     ) -> MPCPayloadResponse:
         """Инициализировать выпуск МПК (POST /vip/v2/cards/{card_id}/initMPC)."""
         request_payload = payload or {}
-        logger.info("Initializing mobile card profile")
+        self.logger.info("Initializing mobile card profile")
         data = await self._request(
             "post",
             f"cards/{card_id}/initMPC",
@@ -177,7 +177,7 @@ class VirtualCardsMixin:
     ) -> MPCPayloadResponse:
         """Подтвердить выпуск МПК (POST /vip/v2/cards/{card_id}/confirmMPC)."""
         request_payload = payload or {}
-        logger.info("Confirming mobile card profile")
+        self.logger.info("Confirming mobile card profile")
         data = await self._request(
             "post",
             f"cards/{card_id}/confirmMPC",
@@ -197,7 +197,7 @@ class VirtualCardsMixin:
     ) -> MPCPayloadResponse:
         """Обновить МПК (POST /vip/v2/cards/{card_id}/updateMPC)."""
         request_payload = payload or {}
-        logger.info("Updating mobile card profile")
+        self.logger.info("Updating mobile card profile")
         data = await self._request(
             "post",
             f"cards/{card_id}/updateMPC",

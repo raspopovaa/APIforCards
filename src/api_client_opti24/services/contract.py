@@ -1,5 +1,4 @@
 from ..decorators import api_method
-from ..logger import logger
 from ..models.contracts import (
     ContractResponse,
     DocumentsOrderResponse,
@@ -9,9 +8,10 @@ from ..models.contracts import (
     OrderCardsResponse,
     PaymentsResponse,
 )
+from ..service_base import _BaseService
 
 
-class ContractMixin:
+class ContractsService(_BaseService):
     @api_method(require_session=True, default_version="v1")
     async def get_contract_data(
         self, contract_id: str, api_version: str = "v1"
@@ -28,9 +28,7 @@ class ContractMixin:
         return ContractResponse(**data["data"])
 
     @api_method(require_session=True, default_version="v1")
-    async def get_payments(
-        self, contract_id: str, api_version: str = "v1"
-    ) -> PaymentsResponse:
+    async def get_payments(self, contract_id: str, api_version: str = "v1") -> PaymentsResponse:
         """Получение данных о платежах по контракту."""
         params = {"contract_id": contract_id}
         data = await self._request(
@@ -73,7 +71,7 @@ class ContractMixin:
     ) -> DocumentsOrderResponse:
         """Заказ первичных документов по ID документа на указанные email – адреса (до 5 адресов)."""
         payload = {"id": ids, "format": fmt, "emails": emails}
-        logger.debug("Ordering documents")
+        self.logger.debug("Ordering documents")
         data = await self._request(
             "post",
             "documents",
@@ -89,7 +87,7 @@ class ContractMixin:
     ) -> OrderCardsResponse:
         """Заказ необходимого количества топливных карт в определенном офисе продаж."""
         payload = {"count": count, "office_id": office_id}
-        logger.debug("Ordering cards")
+        self.logger.debug("Ordering cards")
         data = await self._request(
             "post",
             "orderCards",
@@ -105,7 +103,7 @@ class ContractMixin:
     ) -> InvoiceOrderResponse:
         """Заказ счёта на оплату."""
         payload = {"sum": amount, "email": email}
-        logger.debug("Ordering invoice")
+        self.logger.debug("Ordering invoice")
         data = await self._request(
             "post",
             "invoice",

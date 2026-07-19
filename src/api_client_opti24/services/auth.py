@@ -1,18 +1,35 @@
-from datetime import datetime
-
 from ..decorators import api_method
-from ..logger import logger
+from ..logger import LoggerLike
 from ..models.auth import AuthUserResponse, GetInfoResponse
+from ..runtime import Clock
+from ..service_base import (
+    CredentialsProvider,
+    RequestExecutor,
+    SessionContext,
+    SessionGate,
+    SessionMutator,
+    _BaseService,
+)
 from ..utils import hash_password
 
 
-class AuthMixin:
-    @api_method(
-        require_session=True,
-        default_version="v1",
-        http_method="GET",
-        endpoint="logoff",
-    )
+class AuthService(_BaseService):
+    def __init__(
+        self,
+        request_executor: RequestExecutor,
+        session_context: SessionContext,
+        session_gate: SessionGate,
+        session_mutator: SessionMutator,
+        credentials_provider: CredentialsProvider,
+        clock: Clock,
+        logger: LoggerLike,
+    ) -> None:
+        super().__init__(request_executor, session_context, session_gate, logger)
+        self.__session_mutator = session_mutator
+        self.__credentials_provider = credentials_provider
+        self.__clock = clock
+
+    @api_method(require_session=True, default_version="v1")
     async def logoff(self, api_version: str = "v1") -> dict[str, object]:
         response = await self._request(
             "get",
@@ -20,15 +37,10 @@ class AuthMixin:
             api_version=api_version,
             headers=self._headers(include_session=True),
         )
-        self.session_manager.reset()
+        self.__session_mutator.reset()
         return response
 
-    @api_method(
-        require_session=True,
-        default_version="v1",
-        http_method="GET",
-        endpoint="info",
-    )
+    @api_method(require_session=True, default_version="v1")
     async def get_info(
         self,
         api_version: str = "v1",
@@ -36,8 +48,7 @@ class AuthMixin:
     ) -> GetInfoResponse:
         """Получение статистических данных по вызовам всех методов."""
         if period is None:
-            clock = getattr(self, "clock", None)
-            now = clock.now() if clock is not None else datetime.now()
+            now = self.__clock.now()
             period = now.strftime("%Y-%m-%d %H:%M:%S")
         data = await self._request(
             "get",
@@ -49,13 +60,7 @@ class AuthMixin:
 
         return GetInfoResponse(**data)
 
-    @api_method(
-        require_session=False,
-        default_version="v1",
-        http_method="POST",
-        endpoint="authUser",
-        retry_class="network_only",
-    )
+    @api_method(require_session=False, default_version="v1")
     async def auth_user(
         self,
         *,
@@ -63,7 +68,8 @@ class AuthMixin:
         contract_id: str | None = None,
         contract_number: str | None = None,
     ) -> AuthUserResponse:
-        payload = {"login": self.login, "password": hash_password(self.password)}
+        login, password = self.__credentials_provider.get_credentials()
+        payload = {"login": login, "password": hash_password(password)}
 
         data = await self._request(
             "post",
@@ -87,14 +93,14 @@ class AuthMixin:
             selected = contracts[0]
 
         selected_contract_id = selected["id"] if selected else None
-        self.session_manager.mark_authenticated(
+        self.__session_mutator.mark_authenticated(
             session_id=auth_response.data.session_id,
             contract_id=selected_contract_id,
         )
 
         if selected:
-            logger.info("Contract selected")
+            self.logger.info("Contract selected")
         else:
-            logger.warning("Контракт не найден — contract_id не установлен")
+            self.logger.warning("Контракт не найден — contract_id не установлен")
 
         return auth_response

@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from ..modeling import BaseModel, Field, field_validator
 
@@ -34,7 +34,7 @@ class DictionaryData(BaseModel):
 class DictionaryResponse(BaseModel):
     """Ответ метода GET /vip/v1/getDictionary"""
 
-    status: Optional[dict] = Field(None, description="Статус выполнения запроса")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус выполнения запроса")
     data: Optional[DictionaryData] = Field(None, description="Основные данные справочника")
     timestamp: Optional[int] = Field(None, description="Временная метка (UNIX-время запроса)")
 
@@ -67,7 +67,7 @@ class AzsFilterItem(BaseModel):
 class AzsFiltersResponse(BaseModel):
     """Ответ метода /azs/filters"""
 
-    status: Optional[dict] = Field(default=None, description="Статус выполнения запроса")
+    status: Optional[dict[str, Any]] = Field(default=None, description="Статус выполнения запроса")
     data: Optional[list[AzsFilterItem]] = Field(
         default_factory=list, description="Список доступных фильтров торговых точек"
     )
@@ -187,7 +187,7 @@ class AzsListV1Data(BaseModel):
 class AzsListV1Response(BaseModel):
     """Ответ метода GET /vip/v1/AZS"""
 
-    status: Optional[dict] = Field(None, description="Статус выполнения запроса")
+    status: Optional[dict[str, Any]] = Field(None, description="Статус выполнения запроса")
     data: Optional[AzsListV1Data] = Field(None, description="Основные данные торговых точек (v1)")
     timestamp: Optional[int] = Field(None, description="Временная метка (UNIX-время запроса)")
 
@@ -335,7 +335,7 @@ class AzsItemV2(BaseModel):
     prices: Optional[list[PriceItemV2]] = Field(
         default_factory=list, description="Список товаров с указанием цен"
     )
-    payment_type: Optional[list[dict]] = Field(
+    payment_type: Optional[list[dict[str, Any]]] = Field(
         default_factory=list, description="Доступные способы оплаты"
     )
     terminals: Optional[list[TerminalV2]] = Field(
@@ -354,7 +354,7 @@ class AzsItemV2(BaseModel):
         mode="before",
         check_fields=False,
     )
-    def fix_empty_service_groups(cls, v):
+    def fix_empty_service_groups(cls, v: Any) -> Any:
         """
         Исправляет ошибку, когда API возвращает [] вместо объекта.
         Конвертирует [] → None, чтобы избежать ValidationError.
@@ -375,7 +375,7 @@ class AzsListV2Data(BaseModel):
 class AzsListV2Response(BaseModel):
     """Ответ метода получения списка торговых точек (v2)"""
 
-    status: Optional[dict] = Field(..., description="Информация о статусе запроса")
+    status: Optional[dict[str, Any]] = Field(..., description="Информация о статусе запроса")
     data: Optional[AzsListV2Data] = Field(..., description="Основные данные торговых точек")
     timestamp: Optional[int] = Field(..., description="Метка времени запроса")
 

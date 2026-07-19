@@ -81,7 +81,9 @@ def sanitize_for_logging(value: Any) -> Any:
         sanitized: dict[Any, Any] = {}
         for key, item in value.items():
             key_str = str(key)
-            sanitized[key] = REDACTED if is_sensitive_log_key(key_str) else sanitize_for_logging(item)
+            sanitized[key] = (
+                REDACTED if is_sensitive_log_key(key_str) else sanitize_for_logging(item)
+            )
         return sanitized
 
     if isinstance(value, (list, tuple, set)):
@@ -102,7 +104,7 @@ def to_json_param(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
-def validate_month_span(date_from: str, date_to: str):
+def validate_month_span(date_from: str, date_to: str) -> None:
     """Проверка, что разница между датами не больше месяца."""
     d_from = date.fromisoformat(date_from)
     d_to = date.fromisoformat(date_to)
@@ -148,5 +150,5 @@ def format_number(number: float | int | None) -> str:
         return "—"
 
 
-def print_json(data):
+def print_json(data: Any) -> None:
     print(json.dumps(data, indent=2, ensure_ascii=False))

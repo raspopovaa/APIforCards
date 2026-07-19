@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ..modeling import BaseModel, Field
 
@@ -102,9 +102,7 @@ class ContractResponse(BaseModel):
     is_dealer: bool = Field(..., description="Признак дилерский")
     balanceData: BalanceData = Field(..., description="Данные по расходу и балансу договора")
     contractData: ContractData = Field(..., description="Данные договора")
-    managerData: Optional[ManagerData] = Field(
-        None, description="Данные по менеджеру договора"
-    )
+    managerData: Optional[ManagerData] = Field(None, description="Данные по менеджеру договора")
     cardsData: CardsData = Field(
         ..., description="Данные по количеству карт и групп карт на договоре"
     )
@@ -144,7 +142,7 @@ class PaymentsData(BaseModel):
 class PaymentsResponse(BaseModel):
     """Основная модель ответа метода /getPayments."""
 
-    status: dict = Field(
+    status: dict[str, Any] = Field(
         ..., description="Объект с кодом статуса ответа сервера, например {'code': 200}"
     )
     data: PaymentsData = Field(..., description="Основная часть ответа с данными о платежах")
@@ -183,7 +181,7 @@ class DocumentsData(BaseModel):
 class DocumentsResponse(BaseModel):
     """Ответ метода GET /v2/documents."""
 
-    status: dict = Field(..., description="Объект статуса, например {'code': 200}")
+    status: dict[str, Any] = Field(..., description="Объект статуса, например {'code': 200}")
     data: DocumentsData = Field(..., description="Основные данные — список документов")
     timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
@@ -196,7 +194,7 @@ class DocumentsResponse(BaseModel):
 class DocumentsOrderResponse(BaseModel):
     """Ответ метода POST /v2/documents (заказ документов)."""
 
-    status: dict = Field(..., description="Объект статуса, например {'code': 200}")
+    status: dict[str, Any] = Field(..., description="Объект статуса, например {'code': 200}")
     data: bool = Field(..., description="Признак успешной отправки (true — заказ выполнен)")
     timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
@@ -209,7 +207,7 @@ class DocumentsOrderResponse(BaseModel):
 class OrderCardsResponse(BaseModel):
     """Ответ метода POST /v2/orderCards."""
 
-    status: dict = Field(..., description="Объект статуса, например {'code': 200}")
+    status: dict[str, Any] = Field(..., description="Объект статуса, например {'code': 200}")
     data: bool = Field(..., description="Результат операции: true — заказ выполнен успешно")
     timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
@@ -222,7 +220,7 @@ class OrderCardsResponse(BaseModel):
 class InvoiceOrderResponse(BaseModel):
     """Ответ метода POST /v2/invoice."""
 
-    status: dict = Field(..., description="Объект статуса, например {'code': 200}")
+    status: dict[str, Any] = Field(..., description="Объект статуса, например {'code': 200}")
     data: bool = Field(..., description="Признак успешного создания счёта")
     timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
@@ -258,6 +256,6 @@ class InvoicesData(BaseModel):
 class InvoicesResponse(BaseModel):
     """Ответ метода GET /v2/invoices."""
 
-    status: dict = Field(..., description="Объект статуса, например {'code': 200}")
+    status: dict[str, Any] = Field(..., description="Объект статуса, например {'code': 200}")
     data: InvoicesData = Field(..., description="Основные данные — список счетов")
     timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")

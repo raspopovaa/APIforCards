@@ -1,83 +1,144 @@
 from __future__ import annotations
 
-import logging
-from typing import Any, Protocol
+from dataclasses import dataclass
 
-from .runtime import Clock
-from .services.cards import CardsMixin
-from .services.reports import ReportsMixin
-from .session import SessionManager
-from .transport import AsyncTransport
+from .logger import LoggerLike
+from .service_base import (
+    RequestExecutor,
+    SessionContext,
+    SessionGate,
+)
+from .services.auth import AuthService
+from .services.card_group import CardGroupsService
+from .services.cards import CardsService
+from .services.contract import ContractsService
+from .services.dictionaries import DictionariesService
+from .services.ewallet import EwalletService
+from .services.final_prices import FinalPricesService
+from .services.invites import InvitesService
+from .services.limits import LimitsService
+from .services.region_limits import RegionLimitsService
+from .services.reports import ReportsService
+from .services.restrictions import RestrictionsService
+from .services.templates import TemplatesService
+from .services.transactions import TransactionsService
+from .services.users import UsersService
+from .services.virtual_cards import VirtualCardsService
 
 
-class ServiceClient(Protocol):
-    session_manager: SessionManager
-    transport: AsyncTransport
-    logger: logging.Logger
-    clock: Clock
+@dataclass(frozen=True, slots=True)
+class ServiceContainer:
+    auth: AuthService
+    card_groups: CardGroupsService
+    cards: CardsService
+    contracts: ContractsService
+    dictionaries: DictionariesService
+    ewallet: EwalletService
+    final_prices: FinalPricesService
+    invites: InvitesService
+    limits: LimitsService
+    region_limits: RegionLimitsService
+    reports: ReportsService
+    restrictions: RestrictionsService
+    templates: TemplatesService
+    transactions: TransactionsService
+    users: UsersService
+    virtual_cards: VirtualCardsService
+
+    @classmethod
+    def create(
+        cls,
+        *,
+        request_executor: RequestExecutor,
+        session_context: SessionContext,
+        session_gate: SessionGate,
+        logger: LoggerLike,
+        auth: AuthService,
+    ) -> ServiceContainer:
+        common = (request_executor, session_context, session_gate, logger)
+        return cls(
+            auth=auth,
+            card_groups=CardGroupsService(*common),
+            cards=CardsService(*common),
+            contracts=ContractsService(*common),
+            dictionaries=DictionariesService(*common),
+            ewallet=EwalletService(*common),
+            final_prices=FinalPricesService(*common),
+            invites=InvitesService(*common),
+            limits=LimitsService(*common),
+            region_limits=RegionLimitsService(*common),
+            reports=ReportsService(*common),
+            restrictions=RestrictionsService(*common),
+            templates=TemplatesService(*common),
+            transactions=TransactionsService(*common),
+            users=UsersService(*common),
+            virtual_cards=VirtualCardsService(*common),
+        )
+
+
+class _ServiceFacade:
+    services: ServiceContainer
 
     @property
-    def session_id(self) -> str | None: ...
+    def auth(self) -> AuthService:
+        return self.services.auth
 
     @property
-    def contract_id(self) -> str | None: ...
-
-    async def auth_user(self, **kwargs: Any) -> Any: ...
-
-    async def _request(self, *args: Any, **kwargs: Any) -> Any: ...
-
-    def _headers(
-        self,
-        include_session: bool = False,
-        content_type_json: bool = False,
-    ) -> dict[str, str]: ...
-
-
-class BoundService:
-    def __init__(self, client: ServiceClient) -> None:
-        self.__client = client
+    def card_groups(self) -> CardGroupsService:
+        return self.services.card_groups
 
     @property
-    def session_manager(self) -> SessionManager:
-        return self.__client.session_manager
+    def cards(self) -> CardsService:
+        return self.services.cards
 
     @property
-    def transport(self) -> AsyncTransport:
-        return self.__client.transport
+    def contracts(self) -> ContractsService:
+        return self.services.contracts
 
     @property
-    def logger(self) -> logging.Logger:
-        return self.__client.logger
+    def dictionaries(self) -> DictionariesService:
+        return self.services.dictionaries
 
     @property
-    def clock(self) -> Clock:
-        return self.__client.clock
+    def ewallet(self) -> EwalletService:
+        return self.services.ewallet
 
     @property
-    def session_id(self) -> str | None:
-        return self.__client.session_id
+    def final_prices(self) -> FinalPricesService:
+        return self.services.final_prices
 
     @property
-    def contract_id(self) -> str | None:
-        return self.__client.contract_id
+    def invites(self) -> InvitesService:
+        return self.services.invites
 
-    async def auth_user(self, **kwargs: Any) -> Any:
-        return await self.__client.auth_user(**kwargs)
+    @property
+    def limits(self) -> LimitsService:
+        return self.services.limits
 
-    async def _request(self, *args: Any, **kwargs: Any) -> Any:
-        return await self.__client._request(*args, **kwargs)
+    @property
+    def region_limits(self) -> RegionLimitsService:
+        return self.services.region_limits
 
-    def _headers(
-        self,
-        include_session: bool = False,
-        content_type_json: bool = False,
-    ) -> dict[str, str]:
-        return self.__client._headers(include_session, content_type_json)
+    @property
+    def reports(self) -> ReportsService:
+        return self.services.reports
 
+    @property
+    def restrictions(self) -> RestrictionsService:
+        return self.services.restrictions
 
-class CardsService(CardsMixin, BoundService):
-    pass
+    @property
+    def templates(self) -> TemplatesService:
+        return self.services.templates
 
+    @property
+    def transactions(self) -> TransactionsService:
+        return self.services.transactions
 
-class ReportsService(ReportsMixin, BoundService):
-    pass
+    @property
+    def users(self) -> UsersService:
+        return self.services.users
+
+    @property
+    def virtual_cards(self) -> VirtualCardsService:
+        return self.services.virtual_cards

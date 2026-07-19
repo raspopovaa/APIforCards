@@ -5,10 +5,11 @@ from ..models.region_limits import (
     RegionLimitResponse,
     RemoveRegionLimit,
 )
+from ..service_base import _BaseService
 from ..utils import to_json_param
 
 
-class RegionLimitsMixin:
+class RegionLimitsService(_BaseService):
     """
     Методы для работы с региональными лимитами (v1).
     """
@@ -44,7 +45,7 @@ class RegionLimitsMixin:
     async def set_region_limit(
         self,
         *,
-        region_limits: list[dict],
+        region_limits: list[dict[str, Any]],
         api_version: str = "v1",
     ) -> dict[str, Any]:
         """

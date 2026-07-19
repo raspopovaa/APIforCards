@@ -1,23 +1,23 @@
 from __future__ import annotations
 
-import logging
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, cast
 
 import httpx
 
 from .errors import build_api_error
+from .logger import LoggerLike
 from .logger import logger as default_logger
 
 DecodedPayload: TypeAlias = dict[str, Any] | list[Any] | str | int | float | bool | None
 
 
 class ResponseDecoder:
-    def __init__(self, *, logger: logging.Logger | None = None) -> None:
+    def __init__(self, *, logger: LoggerLike | None = None) -> None:
         self._logger = logger or default_logger
 
     def parse(self, response: httpx.Response) -> DecodedPayload:
         try:
-            return response.json()
+            return cast(DecodedPayload, response.json())
         except (ValueError, UnicodeDecodeError):
             return response.text
 
@@ -42,9 +42,7 @@ class ResponseDecoder:
             error_type,
         )
         raise build_api_error(
-            status_code=(
-                api_status_code if api_status_code is not None else response.status_code
-            ),
+            status_code=(api_status_code if api_status_code is not None else response.status_code),
             body=body,
             endpoint=endpoint,
             method_name=method_name,

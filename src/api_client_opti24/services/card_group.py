@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import Any, Optional
 
 from ..decorators import api_method
 from ..models import (
@@ -8,9 +8,10 @@ from ..models import (
     SetCardGroupResponse,
     SetCardsToGroupResponse,
 )
+from ..service_base import _BaseService
 
 
-class CardGroupsMixin:
+class CardGroupsService(_BaseService):
     """
     Методы для работы с группами карт (v1).
     """
@@ -81,7 +82,7 @@ class CardGroupsMixin:
         *,
         contract_id: str,
         group_id: str,
-        cards_list: list[dict],
+        cards_list: list[dict[str, Any]],
         api_version: str = "v1",
     ) -> SetCardsToGroupResponse:
         """

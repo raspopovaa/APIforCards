@@ -1,15 +1,17 @@
+from typing import Any
+
 from ..decorators import api_method
-from ..logger import logger
 from ..models.users import (
     UserBoolResponse,
     UserCreateResponse,
     UserListResponse,
 )
 from ..payloads import with_method_override
+from ..service_base import _BaseService
 from ..utils import to_json_param
 
 
-class UsersMixin:
+class UsersService(_BaseService):
     """
     Методы для работы с пользователями (v2).
     """
@@ -24,14 +26,16 @@ class UsersMixin:
         page: int | None = None,
         on_page: int | None = None,
         q: str | None = None,
-        filter: dict | None = None,
+        filter: dict[str, Any] | None = None,
         api_version: str = "v2",
     ) -> UserListResponse:
         """
         Получить список пользователей.
 
         Пример:
-        await client.get_users(sort="id", page=1, on_page=10, q="Кирилл", filter={"role": "Driver"})
+        await client.users.get_users(
+            sort="id", page=1, on_page=10, q="Кирилл", filter={"role": "Driver"}
+        )
         """
         params = {
             "sort": sort,
@@ -42,7 +46,7 @@ class UsersMixin:
         }
         params = {k: v for k, v in params.items() if v is not None}
 
-        logger.info("Requesting users")
+        self.logger.info("Requesting users")
 
         raw = await self._request(
             "get",
@@ -71,11 +75,13 @@ class UsersMixin:
 
 
         Пример:
-        await client.create_user(uuid="62f2e267-4398-4ea2-b02e-6e88b81b0958", mobile="79999999999")
+        await client.users.create_user(
+            uuid="62f2e267-4398-4ea2-b02e-6e88b81b0958", mobile="79999999999"
+        )
         """
         body = {"uuid": uuid, "mobile": mobile}
 
-        logger.info("Creating user")
+        self.logger.info("Creating user")
 
         raw = await self._request(
             "post",
@@ -94,18 +100,18 @@ class UsersMixin:
         self,
         *,
         user_id: str,
-        contracts: list[dict],
+        contracts: list[dict[str, Any]],
         api_version: str = "v2",
     ) -> UserBoolResponse:
         """
         Прикрепление договоров к пользователю.
 
         Пример:
-        await client.attach_contracts(user_id="1-FK485FK", contracts=[
+        await client.users.attach_contracts(user_id="1-FK485FK", contracts=[
             {"sid": "1-380B94P", "template_id": "1-3BE470B", "use_mpc": True}
         ])
         """
-        logger.info("Attaching contracts to user")
+        self.logger.info("Attaching contracts to user")
 
         raw = await self._request(
             "post",
@@ -131,9 +137,11 @@ class UsersMixin:
         Открепление договоров от пользователя.
 
         Пример:
-        await client.detach_contracts(user_id="1-FK485FK", contracts=["1-380B94P", "1-37PYW2D"])
+        await client.users.detach_contracts(
+            user_id="1-FK485FK", contracts=["1-380B94P", "1-37PYW2D"]
+        )
         """
-        logger.info("Detaching contracts from user")
+        self.logger.info("Detaching contracts from user")
 
         raw = await self._request(
             "post",
@@ -159,9 +167,9 @@ class UsersMixin:
         Прикрепление карты к пользователю.
 
         Пример:
-        await client.attach_card(user_id="1-FK485FK", card_id="5050505")
+        await client.users.attach_card(user_id="1-FK485FK", card_id="5050505")
         """
-        logger.info("Attaching card to user")
+        self.logger.info("Attaching card to user")
 
         raw = await self._request(
             "post",
@@ -187,9 +195,9 @@ class UsersMixin:
         Открепление карты от пользователя.
 
         Пример:
-        await client.detach_card(user_id="1-FK485FK", card_id="5050505")
+        await client.users.detach_card(user_id="1-FK485FK", card_id="5050505")
         """
-        logger.info("Detaching card from user")
+        self.logger.info("Detaching card from user")
 
         raw = await self._request(
             "post",
@@ -215,9 +223,9 @@ class UsersMixin:
         Удаление пользователя.
         Если ваша система не умеет отправлять DELETE запросы, то можно отправить POST, но в BODY указать _method=DELETE:
         Пример:
-        await client.delete_user(user_id="1-FK485FK")
+        await client.users.delete_user(user_id="1-FK485FK")
         """
-        logger.info("Deleting user")
+        self.logger.info("Deleting user")
 
         method = "post" if use_post else "delete"
         raw = await self._request(

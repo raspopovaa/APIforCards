@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import logging
 import sys
 import time
 from collections import Counter
@@ -14,53 +15,20 @@ SRC_PATH = PROJECT_ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from api_client_opti24.services.auth import AuthMixin
-from api_client_opti24.services.cards import CardsMixin
-from api_client_opti24.services.reports import ReportsMixin
-from api_client_opti24.services.users import UsersMixin
-from api_client_opti24.session import SessionManager
+from api_client_opti24 import APIClient, APISettings
 
 
-class MockLoadClient(AuthMixin, CardsMixin, UsersMixin, ReportsMixin):
+class MockTransport:
     def __init__(self) -> None:
-        self.api_key = "FAKE_API_KEY"
-        self.login = "demo"
-        self.password = "secret"
-        self.session_manager = SessionManager()
         self.request_count = 0
         self.auth_calls = 0
         self.endpoint_counts: Counter[str] = Counter()
+        self.auth_recovery = None
 
-    @property
-    def session_id(self) -> str | None:
-        return self.session_manager.session_id
+    def set_auth_recovery(self, callback) -> None:
+        self.auth_recovery = callback
 
-    @session_id.setter
-    def session_id(self, value: str | None) -> None:
-        if value is None:
-            self.session_manager.invalidate()
-        else:
-            self.session_manager.mark_authenticated(value, self.contract_id)
-
-    @property
-    def contract_id(self) -> str | None:
-        return self.session_manager.contract_id
-
-    @contract_id.setter
-    def contract_id(self, value: str | None) -> None:
-        self.session_manager.set_contract(value)
-
-    def _headers(self, include_session: bool = False, content_type_json: bool = False) -> dict[str, str]:
-        headers = {"api_key": self.api_key}
-        if include_session and self.session_id:
-            headers["session_id"] = self.session_id
-        if self.contract_id:
-            headers["contract_id"] = self.contract_id
-        if content_type_json:
-            headers["Content-Type"] = "application/json"
-        return headers
-
-    async def _request(
+    async def request(
         self,
         method: str,
         endpoint: str,
@@ -237,25 +205,42 @@ class MockLoadClient(AuthMixin, CardsMixin, UsersMixin, ReportsMixin):
 
         raise ValueError(f"Unexpected request: {api_version} {method} {endpoint}")
 
+    async def aclose(self) -> None:
+        return None
+
 
 async def run_load_test(total_operations: int, concurrency: int) -> dict[str, Any]:
-    client = MockLoadClient()
+    transport = MockTransport()
+    logger = logging.getLogger("api_client_opti24.mock_load")
+    logger.addHandler(logging.NullHandler())
+    client = APIClient(
+        settings=APISettings(
+            base_url="https://example.invalid/vip/",
+            api_key="FAKE_API_KEY",
+            login="demo",
+            password="secret",
+        ),
+        transport=transport,
+        logger=logger,
+    )
 
     initial_burst = min(concurrency, total_operations)
     remaining = total_operations - initial_burst
 
     started_at = time.perf_counter()
 
-    burst_results = await asyncio.gather(*(client.get_cards_v2() for _ in range(initial_burst)))
+    burst_results = await asyncio.gather(
+        *(client.cards.get_cards_v2() for _ in range(initial_burst))
+    )
     assert all(item.total_count == 1 for item in burst_results)
 
     operations = [
-        lambda: client.get_cards_v2(),
-        lambda: client.get_cards_v1(contract_id="1-AAA"),
-        lambda: client.get_users(),
-        lambda: client.get_reports(),
-        lambda: client.get_report_jobs(),
-        lambda: client.get_info(period="2025-01-15 12:30:00"),
+        lambda: client.cards.get_cards_v2(),
+        lambda: client.cards.get_cards_v1(contract_id="1-AAA"),
+        lambda: client.users.get_users(),
+        lambda: client.reports.get_reports(),
+        lambda: client.reports.get_report_jobs(),
+        lambda: client.auth.get_info(period="2025-01-15 12:30:00"),
     ]
 
     semaphore = asyncio.Semaphore(concurrency)
@@ -268,21 +253,27 @@ async def run_load_test(total_operations: int, concurrency: int) -> dict[str, An
     remaining_results = await asyncio.gather(*(execute(index) for index in range(remaining)))
     elapsed = time.perf_counter() - started_at
 
-    return {
+    summary = {
         "total_operations": total_operations,
         "concurrency": concurrency,
         "elapsed_seconds": round(elapsed, 3),
         "operations_per_second": round(total_operations / elapsed, 2) if elapsed else None,
-        "auth_calls": client.auth_calls,
-        "request_count": client.request_count,
-        "result_types": dict(Counter([type(item).__name__ for item in burst_results] + remaining_results)),
-        "endpoint_counts": dict(sorted(client.endpoint_counts.items())),
+        "auth_calls": transport.auth_calls,
+        "request_count": transport.request_count,
+        "result_types": dict(
+            Counter([type(item).__name__ for item in burst_results] + remaining_results)
+        ),
+        "endpoint_counts": dict(sorted(transport.endpoint_counts.items())),
     }
+    await client.aclose()
+    return summary
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run mock load test for 1000+ SDK operations.")
-    parser.add_argument("--operations", type=int, default=1200, help="Total business operations to execute.")
+    parser.add_argument(
+        "--operations", type=int, default=1200, help="Total business operations to execute."
+    )
     parser.add_argument("--concurrency", type=int, default=100, help="Concurrent operations limit.")
     return parser.parse_args()
 

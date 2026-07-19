@@ -1,5 +1,5 @@
 # api_client_opti24/models/users.py
-from typing import Optional
+from typing import Any, Optional
 
 from ..modeling import BaseModel, Field
 
@@ -75,7 +75,9 @@ class UserList(BaseModel):
 
 
 class UserListResponse(BaseModel):
-    status: dict = Field(..., description="Статус выполнения запроса (например {'code': 200})")
+    status: dict[str, Any] = Field(
+        ..., description="Статус выполнения запроса (например {'code': 200})"
+    )
     data: Optional[UserList] = Field(None, description="Основные данные ответа")
     timestamp: Optional[int] = Field(None, description="Временная метка ответа")
 
@@ -89,13 +91,13 @@ class UserListResponse(BaseModel):
 
 
 class UserCreateResponse(BaseModel):
-    status: dict = Field(..., description="Статус выполнения запроса")
+    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
     data: str = Field(..., description="ID созданного пользователя")
     timestamp: Optional[int] = Field(None, description="Метка времени")
 
 
 class UserBoolResponse(BaseModel):
-    status: dict = Field(..., description="Статус выполнения запроса")
+    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
     data: bool = Field(..., description="Результат операции (true/false)")
     timestamp: Optional[int] = Field(None, description="Метка времени")
 

@@ -240,9 +240,7 @@ async def test_request_uses_injected_auth_recovery(monkeypatch):
                 json_data={
                     "status": {
                         "code": 401,
-                        "errors": [
-                            {"type": "notAuthenticated", "message": "Session expired"}
-                        ],
+                        "errors": [{"type": "notAuthenticated", "message": "Session expired"}],
                     }
                 },
             ),
@@ -331,3 +329,38 @@ async def test_auth_limiter_spaces_repeated_authorizations(monkeypatch):
     await transport.request("post", "authUser", retry_class="network_only")
 
     assert sleep_calls == [5]
+
+
+@pytest.mark.asyncio
+async def test_stream_builds_same_origin_url_without_duplicate_vip():
+    seen_urls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen_urls.append(str(request.url))
+        return httpx.Response(200, content=b"report", request=request)
+
+    http_client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    transport = AsyncTransport(
+        base_url="https://example.com/vip/",
+        http_client=http_client,
+    )
+
+    content = await transport.request_stream(
+        "get",
+        "reports/jobs/job-1",
+        api_version="v2",
+    )
+
+    assert content == b"report"
+    assert seen_urls == ["https://example.com/vip/v2/reports/jobs/job-1"]
+    await http_client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_stream_rejects_absolute_external_url():
+    transport = AsyncTransport(base_url="https://example.com/vip/")
+
+    with pytest.raises(ValueError, match="must be relative"):
+        await transport.request_stream("get", "https://attacker.invalid/report")
+
+    await transport.aclose()

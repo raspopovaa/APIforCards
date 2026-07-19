@@ -181,13 +181,16 @@ def build_api_error(
         messages = (body,)
         message = body
 
-    effective_status_code = api_status_code if api_status_code and api_status_code >= 300 else status_code
+    effective_status_code = (
+        api_status_code if api_status_code and api_status_code >= 300 else status_code
+    )
     hint = ERROR_HINTS.get(
         effective_status_code,
         ERROR_HINTS.get(500) if effective_status_code >= 500 else None,
     )
     retryable = effective_status_code in {429, 500, 502, 503, 504, 509}
 
+    exc_type: type[APIError]
     if error_type is None:
         if effective_status_code == 400:
             exc_type = ValidationError
@@ -208,9 +211,11 @@ def build_api_error(
     else:
         exc_type = error_map.get(
             error_type,
-            RateLimitError
-            if effective_status_code in {429, 509}
-            else (ServerError if effective_status_code >= 500 else APIError),
+            (
+                RateLimitError
+                if effective_status_code in {429, 509}
+                else (ServerError if effective_status_code >= 500 else APIError)
+            ),
         )
 
     return exc_type(

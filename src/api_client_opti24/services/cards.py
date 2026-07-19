@@ -1,5 +1,4 @@
 from ..decorators import api_method
-from ..logger import logger
 from ..modeling import decode_model
 from ..models.cards import (
     BoolResponse,
@@ -10,9 +9,10 @@ from ..models.cards import (
     CardsV2Response,
     IDListResponse,
 )
+from ..service_base import _BaseService
 
 
-class CardsMixin:
+class CardsService(_BaseService):
     """Методы работы с топливными картами."""
 
     # --- Список карт (v1) ---
@@ -27,7 +27,7 @@ class CardsMixin:
 
         """
         params = {"contract_id": contract_id, "cache": str(cache).lower()}
-        logger.info("Requesting cards version=v1")
+        self.logger.info("Requesting cards version=v1")
         data = await self._request(
             "get",
             "cards",
@@ -50,8 +50,8 @@ class CardsMixin:
         avtodor: bool | None = None,
         users: bool | None = None,
         group_id: str | None = None,
-        page: int = None,
-        onpage: int = None,
+        page: int | None = None,
+        onpage: int | None = None,
         api_version: str = "v2",
     ) -> CardsV2Response:
         """
@@ -69,7 +69,7 @@ class CardsMixin:
         :param onpage: Количество элементов на странице (по умолчанию 10)
         :return: Объект CardsV2Response с данными о картах
         """
-        resolved_contract_id = contract_id or getattr(self, "contract_id", None)
+        resolved_contract_id = contract_id or self.contract_id
         if resolved_contract_id is None:
             raise ValueError("contract_id is required when no default contract is selected")
 
@@ -108,7 +108,7 @@ class CardsMixin:
     ) -> CardGroupResponse:
         """Получение списка топливных карт по группе карт."""
         params = {"contract_id": contract_id, "group_id": group_id}
-        logger.info("Requesting cards by group")
+        self.logger.info("Requesting cards by group")
         data = await self._request(
             "get",
             "cards",
@@ -124,7 +124,7 @@ class CardsMixin:
         self, card_id: str, contract_id: str, api_version: str = "v2"
     ) -> CardDriversResponse:
         """Получение списка водителей по карте."""
-        logger.info("Requesting card drivers")
+        self.logger.info("Requesting card drivers")
         data = await self._request(
             "get",
             f"cards/{card_id}/drivers",
@@ -141,7 +141,7 @@ class CardsMixin:
     ) -> CardDetailResponse:
         """Получение детальной информации по карте."""
         params = {"contract_id": contract_id, "card_id": card_id}
-        logger.info("Requesting card details")
+        self.logger.info("Requesting card details")
         data = await self._request(
             "get",
             "cards",
@@ -172,9 +172,9 @@ class CardsMixin:
             "block": str(block).lower(),
         }
         if block:
-            logger.info("Blocking cards")
+            self.logger.info("Blocking cards")
         else:
-            logger.info("Unblocking cards")
+            self.logger.info("Unblocking cards")
 
         data = await self._request(
             "post",
@@ -192,7 +192,7 @@ class CardsMixin:
     ) -> BoolResponse:
         """Установить комментарий на топливную карту."""
         payload = {"card_id": card_id, "contract_id": contract_id, "comment": comment}
-        logger.info("Updating card comment")
+        self.logger.info("Updating card comment")
         data = await self._request(
             "post",
             "setCardComment",
@@ -212,7 +212,7 @@ class CardsMixin:
         Вам будет отправлено письмо с кодом подтверждения на почту, которая привязана к вашей учетной записи.
         Данный код нужно ввести в метод resetPIN для завершения операции сброса попыток.
         """
-        logger.info("Requesting PIN reset verification")
+        self.logger.info("Requesting PIN reset verification")
         data = await self._request(
             "post",
             f"cards/{card_id}/verifyPIN",
@@ -232,7 +232,7 @@ class CardsMixin:
         Код подтверждения будет отправлен на почту, которая привязана к вашей учетной записи.
         """
         payload = {"contract_id": contract_id, "code": code}
-        logger.info("Resetting card PIN")
+        self.logger.info("Resetting card PIN")
         data = await self._request(
             "post",
             f"cards/{card_id}/resetPIN",

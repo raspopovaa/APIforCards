@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
-import logging
 import time
 from collections.abc import Awaitable, Callable, Mapping
+from contextlib import AbstractAsyncContextManager
 from typing import Any, Protocol
 from urllib.parse import urlsplit
 
 import httpx
 
 from .errors import NotAuthenticatedError
+from .logger import LoggerLike
 from .logger import logger as default_logger
 from .policies import (
     IDEMPOTENT_HTTP_METHODS,
@@ -26,7 +27,12 @@ from .runtime import Clock
 class AsyncHTTPClient(Protocol):
     async def request(self, method: str, url: str, **kwargs: Any) -> httpx.Response: ...
 
-    def stream(self, method: str, url: str, **kwargs: Any): ...
+    def stream(
+        self,
+        method: str,
+        url: str,
+        **kwargs: Any,
+    ) -> AbstractAsyncContextManager[httpx.Response]: ...
 
     async def aclose(self) -> None: ...
 
@@ -47,7 +53,7 @@ class AsyncTransport:
         rate_limit_policy: RateLimitPolicy | None = None,
         allow_insecure_http: bool = False,
         response_decoder: ResponseDecoder | None = None,
-        logger: logging.Logger | None = None,
+        logger: LoggerLike | None = None,
         clock: Clock | None = None,
         sleep: AsyncSleep = asyncio.sleep,
         monotonic: Callable[[], float] = time.monotonic,
@@ -59,7 +65,7 @@ class AsyncTransport:
         self.client = http_client or httpx.AsyncClient(timeout=default_timeout)
         self._owns_http_client = http_client is None
         self._auth_recovery = auth_recovery
-        self.logger = logger or default_logger
+        self.logger: LoggerLike = logger or default_logger
         self.response_decoder = response_decoder or ResponseDecoder(logger=self.logger)
         self.retry_policy = retry_policy or RetryPolicy()
         self.rate_limit_policy = rate_limit_policy or RateLimitPolicy()
@@ -174,13 +180,13 @@ class AsyncTransport:
         method: str,
         endpoint: str,
         api_version: str = "v1",
-        headers=None,
+        headers: Mapping[str, str] | None = None,
         retry_auth: bool = True,
         timeout: float | None = None,
         method_name: str | None = None,
         retry_class: str | RetryClass | None = None,
         idempotent: bool | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> DecodedPayload:
         url = self._build_url(api_version, endpoint)
         normalized_method = method.upper()
@@ -190,9 +196,7 @@ class AsyncTransport:
             else RetryClass.NEVER.value
         )
         resolved_idempotent = (
-            normalized_method in IDEMPOTENT_HTTP_METHODS
-            if idempotent is None
-            else idempotent
+            normalized_method in IDEMPOTENT_HTTP_METHODS if idempotent is None else idempotent
         )
         network_attempts = self.retry_policy.network_attempt_count(
             resolved_retry_class,
@@ -282,19 +286,22 @@ class AsyncTransport:
                     network_backoff * 2,
                     self.retry_policy.network_backoff_max_seconds,
                 )
+        raise RuntimeError("Network retry loop exhausted unexpectedly")
 
     async def request_stream(
         self,
         method: str,
-        url: str,
-        headers=None,
+        endpoint: str,
+        api_version: str = "v1",
+        headers: Mapping[str, str] | None = None,
         *,
         method_name: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> bytes:
-        if not url.startswith("http://") and not url.startswith("https://"):
-            url = url.lstrip("/")
-            url = f"{self.base_url}{url}"
+        parsed = urlsplit(endpoint)
+        if parsed.scheme or parsed.netloc:
+            raise ValueError("stream endpoint must be relative to the configured base_url")
+        url = self._build_url(api_version, endpoint)
         await self._wait_for_rate_limit()
         async with self.client.stream(method, url, headers=headers, **kwargs) as resp:
             content = await resp.aread()

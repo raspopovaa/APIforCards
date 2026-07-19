@@ -1,5 +1,5 @@
 import pytest
-from api_client_opti24.services.contract import ContractMixin
+
 from api_client_opti24.models import ContractResponse
 from api_client_opti24.models.contracts import (
     DocumentsOrderResponse,
@@ -9,12 +9,18 @@ from api_client_opti24.models.contracts import (
     OrderCardsResponse,
     PaymentsResponse,
 )
+from api_client_opti24.services.contract import ContractsService
+from api_client_opti24.session import SessionManager
+from tests.service_support import service_dependencies
 
 
-class MockContractClient(ContractMixin):
-    """Мок для ContractMixin."""
+class MockContractClient(ContractsService):
+    """Мок для ContractsService."""
 
     def __init__(self):
+        session_manager = SessionManager()
+        session_manager.mark_authenticated("mock-session")
+        super().__init__(*service_dependencies(session_manager))
         self.session_id = "mock-session"
 
     def _headers(self, include_session: bool = False, content_type_json: bool = False):

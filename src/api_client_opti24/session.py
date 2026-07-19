@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class SessionState(str, Enum):
+class SessionState(StrEnum):
     ANONYMOUS = "anonymous"
     AUTHENTICATING = "authenticating"
     AUTHENTICATED = "authenticated"
@@ -63,7 +64,10 @@ class SessionManager:
         self._contract_id = None
         self._state = SessionState.ANONYMOUS
 
-    async def ensure_authenticated(self, authenticate) -> str:
+    async def ensure_authenticated(
+        self,
+        authenticate: Callable[[], Awaitable[object]],
+    ) -> str:
         if self._state == SessionState.AUTHENTICATED and self._session_id:
             return self._session_id
 

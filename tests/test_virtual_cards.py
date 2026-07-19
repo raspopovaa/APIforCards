@@ -7,11 +7,16 @@ from api_client_opti24.models.virtual_cards import (
     SimpleActionResponse,
     VirtualCardResponse,
 )
-from api_client_opti24.services.virtual_cards import VirtualCardsMixin
+from api_client_opti24.services.virtual_cards import VirtualCardsService
+from api_client_opti24.session import SessionManager
+from tests.service_support import service_dependencies
 
 
-class DummyClient(VirtualCardsMixin):
+class DummyClient(VirtualCardsService):
     def __init__(self):
+        session_manager = SessionManager()
+        session_manager.mark_authenticated("mock-session")
+        super().__init__(*service_dependencies(session_manager))
         self.session_id = "mock-session"
         self._called = []
 

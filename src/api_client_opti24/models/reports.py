@@ -55,7 +55,7 @@ class ReportOrderParams(BaseModel):
     id_card: Optional[list[str]] = Field(None, description="Список карт")
     card_group_code: Optional[list[str]] = Field(None, description="Список групп карт")
     id_client: Optional[list[str]] = Field(None, description="Список клиентов")
-    additional: Optional[dict] = Field(None, description="Дополнительные параметры")
+    additional: Optional[dict[str, Any]] = Field(None, description="Дополнительные параметры")
 
 
 class ReportOrderRequest(BaseModel):

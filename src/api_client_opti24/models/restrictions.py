@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ..modeling import BaseModel, Field
 
@@ -59,6 +59,6 @@ class RestrictionRemoveResponse(BaseModel):
     Ответ на удаление ограничителя (POST /removeRestriction).
     """
 
-    status: dict = Field(..., description="Статус выполнения (например, {'code': 200})")
+    status: dict[str, Any] = Field(..., description="Статус выполнения (например, {'code': 200})")
     data: bool = Field(..., description="Результат операции (True — успешно)")
     timestamp: int = Field(None, description="Временная метка ответа (Unix time)")

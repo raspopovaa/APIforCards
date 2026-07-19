@@ -1,12 +1,22 @@
 import pytest
-from api_client_opti24.services.users import UsersMixin
-from api_client_opti24.models.users import UserBoolResponse, UserCreateResponse, UsersListResponse
+
+from api_client_opti24.models.users import (
+    UserBoolResponse,
+    UserCreateResponse,
+    UsersListResponse,
+)
+from api_client_opti24.services.users import UsersService
+from api_client_opti24.session import SessionManager
+from tests.service_support import service_dependencies
 
 
-class DummyClient(UsersMixin):
-    """Мок-клиент для UsersMixin."""
+class DummyClient(UsersService):
+    """Мок-клиент для UsersService."""
 
     def __init__(self):
+        session_manager = SessionManager()
+        session_manager.mark_authenticated("mock-session")
+        super().__init__(*service_dependencies(session_manager))
         self.session_id = "mock-session"
 
     def _headers(self, include_session: bool = False, content_type_json: bool = False):

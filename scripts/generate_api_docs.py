@@ -78,7 +78,10 @@ def iter_public_methods(cls: type) -> list[tuple[str, object]]:
             methods.append((name, obj))
             continue
         if inspect.isfunction(obj) or inspect.ismethod(obj):
-            if getattr(obj, "__module__", None) == cls.__module__:
+            method_module = getattr(obj, "__module__", "")
+            if method_module == cls.__module__ or method_module.startswith(
+                "api_client_opti24.services."
+            ):
                 methods.append((name, obj))
     return methods
 

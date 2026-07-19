@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from ..modeling import BaseModel, Field
 
@@ -96,7 +96,7 @@ class TransactionsV1Data(BaseModel):
 
 
 class TransactionsV1Response(BaseModel):
-    status: dict = Field(..., description="Статус ответа")
+    status: dict[str, Any] = Field(..., description="Статус ответа")
     data: TransactionsV1Data = Field(..., description="Данные ответа")
     timestamp: int = Field(..., description="Метка времени сервера")
 
@@ -107,7 +107,7 @@ class TransactionsV2Data(BaseModel):
 
 
 class TransactionsV2Response(BaseModel):
-    status: dict = Field(..., description="Статус ответа")
+    status: dict[str, Any] = Field(..., description="Статус ответа")
     data: TransactionsV2Data = Field(..., description="Данные ответа")
     timestamp: int = Field(..., description="Метка времени сервера")
 
@@ -115,6 +115,6 @@ class TransactionsV2Response(BaseModel):
 class TransactionDetailResponse(BaseModel):
     """Ответ метода получения детальной информации по транзакции (v2)."""
 
-    status: dict = Field(..., description="Статус ответа")
+    status: dict[str, Any] = Field(..., description="Статус ответа")
     data: TransactionsV2Data = Field(..., description="Информация по одной транзакции")
     timestamp: int = Field(..., description="Метка времени сервера")

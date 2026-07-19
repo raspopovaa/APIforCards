@@ -13,11 +13,28 @@ from api_client_opti24 import logger as logger_module
 
 def test_config_import_does_not_load_dotenv(monkeypatch):
     monkeypatch.delenv("API_KEY", raising=False)
-    monkeypatch.setattr(env_module, "load_env_file", lambda: (_ for _ in ()).throw(AssertionError()))
+    monkeypatch.setattr(
+        env_module, "load_env_file", lambda: (_ for _ in ()).throw(AssertionError())
+    )
 
     importlib.reload(config_module)
 
-    assert config_module.API_KEY == ""
+    assert not hasattr(config_module, "API_KEY")
+
+
+def test_settings_repr_redacts_credentials():
+    settings = config_module.APISettings(
+        base_url="https://example.invalid/vip/",
+        api_key="secret-api-key",
+        login="secret-login",
+        password="secret-password",
+    )
+
+    rendered = repr(settings)
+
+    assert "secret-api-key" not in rendered
+    assert "secret-login" not in rendered
+    assert "secret-password" not in rendered
 
 
 def test_from_env_loads_dotenv_when_requested(monkeypatch):
@@ -73,7 +90,9 @@ def test_configure_logger_creates_sanitized_file_handler(tmp_path):
 
     logger_module.configure_logger("INFO", str(log_path))
 
-    assert any(isinstance(handler, logging.FileHandler) for handler in logger_module.logger.handlers)
+    assert any(
+        isinstance(handler, logging.FileHandler) for handler in logger_module.logger.handlers
+    )
 
     logger_module.logger.info("api_key=%s password=%s", "secret-key", "secret-pass")
 

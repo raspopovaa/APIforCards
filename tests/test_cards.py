@@ -1,26 +1,30 @@
 import pytest
 
 from api_client_opti24.modeling import ValidationError
-from api_client_opti24.services.cards import CardsMixin
 from api_client_opti24.models.cards import (
-    CardV2Item,
     BoolResponse,
-    CardsV2Response,
-    CardsV1Response,
     CardDriversResponse,
+    CardsV1Response,
+    CardsV2Response,
+    CardV2Item,
     IDListResponse,
 )
+from api_client_opti24.services.cards import CardsService
+from api_client_opti24.session import SessionManager
+from tests.service_support import service_dependencies
 
 
 @pytest.fixture
 def mock_client():
-    """Создаём мок клиента с CardMixin и заглушками _request, _headers и auth_user."""
+    """Создаём изолированный CardsService с заглушками request executor."""
 
-    class MockClient(CardsMixin):
+    class MockClient(CardsService):
         def __init__(self):
             self._called = []
+            session_manager = SessionManager()
+            session_manager.mark_authenticated("fake-session", "1-1FLW4T7")
+            super().__init__(*service_dependencies(session_manager))
             self.session_id = "fake-session"
-            self.contract_id = "1-1FLW4T7"
 
         async def auth_user(self, *args, **kwargs):
             """Заглушка авторизации"""
@@ -120,7 +124,11 @@ def mock_client():
                     "timestamp": 1710000000,
                 }
             elif endpoint == "blockCard":
-                return {"status": {"code": 200}, "data": ["517945", "517946"], "timestamp": 1710000000}
+                return {
+                    "status": {"code": 200},
+                    "data": ["517945", "517946"],
+                    "timestamp": 1710000000,
+                }
             elif endpoint == "setCardComment":
                 return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
             elif "verifyPIN" in endpoint:

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from ..modeling import BaseModel, Field, field_validator
 
@@ -47,7 +48,9 @@ class CardsListData(BaseModel):
 
 
 class CardsListResponse(BaseModel):
-    status: dict = Field(..., description="Объект со статусом ответа (например, {'code': 200})")
+    status: dict[str, Any] = Field(
+        ..., description="Объект со статусом ответа (например, {'code': 200})"
+    )
     data: CardsListData = Field(..., description="Основные данные ответа")
     timestamp: int = Field(..., description="Временная метка сервера (UNIX-timestamp)")
 
@@ -81,7 +84,7 @@ class CardGroupData(BaseModel):
 
 
 class CardGroupResponse(BaseModel):
-    status: dict = Field(..., description="Статус ответа")
+    status: dict[str, Any] = Field(..., description="Статус ответа")
     data: CardGroupData = Field(..., description="Основные данные")
     timestamp: int = Field(..., description="Метка времени сервера")
 
@@ -108,7 +111,7 @@ class CardDriversData(BaseModel):
 
 
 class CardDriversResponse(BaseModel):
-    status: dict = Field(..., description="Статус запроса")
+    status: dict[str, Any] = Field(..., description="Статус запроса")
     data: CardDriversData = Field(..., description="Основные данные")
     timestamp: int = Field(..., description="Метка времени сервера")
 
@@ -150,7 +153,7 @@ class CardDetail(BaseModel):
 
     @field_validator("date_last_usage", "date_released", mode="before")
     @classmethod
-    def empty_str_to_none(cls, v):
+    def empty_str_to_none(cls, v: Any) -> Any:
         if v in ("", None):
             return None
         return v
@@ -162,7 +165,7 @@ class CardDetailData(BaseModel):
 
 
 class CardDetailResponse(BaseModel):
-    status: dict = Field(..., description="Статус ответа")
+    status: dict[str, Any] = Field(..., description="Статус ответа")
     data: CardDetailData = Field(..., description="Основные данные")
     timestamp: int = Field(..., description="Метка времени сервера")
 
@@ -171,13 +174,13 @@ class CardDetailResponse(BaseModel):
 # блокировка/разблокировка карт и ресет пин кода
 # ==========================
 class BoolResponse(BaseModel):
-    status: dict = Field(..., description="Статус запроса")
+    status: dict[str, Any] = Field(..., description="Статус запроса")
     data: bool = Field(..., description="Флаг результата операции (True — успех)")
     timestamp: int = Field(..., description="Метка времени сервера")
 
 
 class IDListResponse(BaseModel):
-    status: dict = Field(..., description="Статус запроса")
+    status: dict[str, Any] = Field(..., description="Статус запроса")
     data: list[str] = Field(..., description="ID карт, которые были заблокированы/разблокированы")
     timestamp: int = Field(..., description="Метка времени сервера")
 
@@ -224,7 +227,7 @@ class CardsV2Data(BaseModel):
 class CardsV2Response(BaseModel):
     """Ответ API метода GET /v2/cards."""
 
-    status: dict = Field(..., description="Объект статуса (например {'code': 200})")
+    status: dict[str, Any] = Field(..., description="Объект статуса (например {'code': 200})")
     data: CardsV2Data = Field(..., description="Основные данные (список карт)")
     timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 

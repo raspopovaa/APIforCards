@@ -10,15 +10,38 @@
 
 _Публичные классы и функции не обнаружены._
 
+## `api_client_opti24.authentication`
+
+Описание отсутствует.
+
+### `AuthenticationCoordinator`
+
+Описание отсутствует.
+
+Сигнатура: `AuthenticationCoordinator(session: 'AuthenticationSession', request_executor: 'RequestExecutor') -> 'None'`
+
+Публичные методы:
+
+- `authenticate(self) -> 'AuthUserResponse'`
+- `bind(self, authenticate: 'Callable[[], Awaitable[AuthUserResponse]]') -> 'None'`
+- `ensure_authenticated(self) -> 'str'`
+- `recover(self) -> 'dict[str, str]'`
+
+### `build_credentials_provider`
+
+Описание отсутствует.
+
+Сигнатура: `build_credentials_provider(login: 'str', password: 'str') -> 'CredentialsProvider'`
+
 ## `api_client_opti24.client`
 
 Описание отсутствует.
 
 ### `APIClient`
 
-Методы работы с топливными картами.
+Описание отсутствует.
 
-Сигнатура: `APIClient(base_url: str | None = None, api_key: str | None = None, login: str | None = None, password: str | None = None, *, settings: api_client_opti24.config.APISettings | None = None, transport: api_client_opti24.transport.AsyncTransport | None = None, session_manager: api_client_opti24.session.SessionManager | None = None, registry: api_client_opti24.registry.MethodRegistry | None = None, logger: logging.Logger | None = None, clock: api_client_opti24.runtime.Clock | None = None)`
+Сигнатура: `APIClient(base_url: str | None = None, api_key: str | None = None, login: str | None = None, password: str | None = None, *, settings: api_client_opti24.config.APISettings | None = None, transport: api_client_opti24.executor.Transport | None = None, session_manager: api_client_opti24.session.SessionManager | None = None, registry: api_client_opti24.registry.MethodRegistry | None = None, logger: logging.Logger | None = None, clock: api_client_opti24.runtime.Clock | None = None, credentials_provider: api_client_opti24.service_base.CredentialsProvider | None = None) -> None`
 
 Публичные методы:
 
@@ -30,9 +53,9 @@ _Публичные классы и функции не обнаружены._
 
 ### `APISettings`
 
-APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None))
+APISettings(base_url: 'str', api_key: 'str', login: 'str | None' = None, password: 'str | None' = None, request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None))
 
-Сигнатура: `APISettings(base_url: 'str', api_key: 'str', login: 'str', password: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None)) -> None`
+Сигнатура: `APISettings(base_url: 'str', api_key: 'str', login: 'str | None' = None, password: 'str | None' = None, request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None)) -> None`
 
 Публичные методы:
 
@@ -56,7 +79,7 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 Описание отсутствует.
 
-Сигнатура: `api_method(require_session: bool = False, default_version: str = 'v1', *, http_method: str | None = None, endpoint: str | None = None, retry_class: str | None = None)`
+Сигнатура: `api_method(require_session: bool = False, default_version: str = 'v1') -> collections.abc.Callable[[collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]], collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]]`
 
 ### `get_current_api_method_name`
 
@@ -175,6 +198,64 @@ Common base class for all non-exit exceptions.
 
 Сигнатура: `build_api_error(*, status_code: 'int', body: 'Any', endpoint: 'str | None', method_name: 'str | None' = None, http_status_code: 'int | None' = None) -> 'APIError'`
 
+## `api_client_opti24.executor`
+
+Описание отсутствует.
+
+### `DefaultRequestExecutor`
+
+Описание отсутствует.
+
+Сигнатура: `DefaultRequestExecutor(*, api_key: 'str', transport: 'Transport', session_context: 'SessionContext', registry: 'MethodRegistry', timeouts: 'TimeoutPolicy', logger: 'LoggerLike', clock: 'Clock') -> 'None'`
+
+Публичные методы:
+
+- `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False) -> 'dict[str, str]'`
+- `request(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', **kwargs: 'Any') -> 'JSONPayload'`
+- `request_stream(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', headers: 'dict[str, str] | None' = None, **kwargs: 'Any') -> 'bytes'`
+
+### `Transport`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `Transport(*args, **kwargs)`
+
+Публичные методы:
+
+- `aclose(self) -> 'None'`
+- `request(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', **kwargs: 'Any') -> 'DecodedPayload'`
+- `request_stream(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', headers: 'dict[str, str] | None' = None, **kwargs: 'Any') -> 'bytes'`
+- `set_auth_recovery(self, auth_recovery: 'AuthRecovery') -> 'None'`
+
 ## `api_client_opti24.modeling`
 
 Описание отсутствует.
@@ -207,7 +288,7 @@ Inappropriate argument value (of correct type).
 
 Описание отсутствует.
 
-Сигнатура: `Field(default: 'Any' = <object object>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object>, alias: 'str | None' = None, description: 'str | None' = None) -> 'FieldInfo'`
+Сигнатура: `Field(default: 'Any' = <object object>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object>, alias: 'str | None' = None, description: 'str | None' = None) -> 'Any'`
 
 ### `decode_model`
 
@@ -733,7 +814,7 @@ result:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Информация о статусе запроса (код и описание)
 data:
@@ -760,7 +841,7 @@ timestamp:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Информация о статусе запроса (код и описание)
 data:
@@ -806,7 +887,7 @@ id:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Информация о статусе запроса (код и описание)
 data:
@@ -833,7 +914,7 @@ timestamp:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Информация о статусе запроса (код и описание)
 data:
@@ -864,7 +945,7 @@ BoolResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус запроса
 data:
@@ -967,7 +1048,7 @@ next:
 Публичные методы:
 
 - `describe() -> 'dict[str, dict[str, Any]]'`
-- `empty_str_to_none(v)`
+- `empty_str_to_none(v: 'Any') -> 'Any'`
 
 ### `CardDetailData`
 
@@ -1002,7 +1083,7 @@ CardDetailResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус ответа
 data:
@@ -1107,7 +1188,7 @@ CardDriversResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус запроса
 data:
@@ -1208,7 +1289,7 @@ CardGroupResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус ответа
 data:
@@ -1420,7 +1501,7 @@ CardsListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект со статусом ответа (например, {'code': 200})
 data:
@@ -1447,7 +1528,7 @@ CardsListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект со статусом ответа (например, {'code': 200})
 data:
@@ -1497,7 +1578,7 @@ result:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект статуса (например {'code': 200})
 data:
@@ -1524,7 +1605,7 @@ IDListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус запроса
 data:
@@ -1936,7 +2017,7 @@ result:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект статуса, например {'code': 200}
 data:
@@ -1963,7 +2044,7 @@ timestamp:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект статуса, например {'code': 200}
 data:
@@ -2049,7 +2130,7 @@ comment:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект статуса, например {'code': 200}
 data:
@@ -2099,7 +2180,7 @@ result:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект статуса, например {'code': 200}
 data:
@@ -2161,7 +2242,7 @@ work_phone:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект статуса, например {'code': 200}
 data:
@@ -2266,7 +2347,7 @@ result:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Объект с кодом статуса ответа сервера, например {'code': 200}
 data:
@@ -2449,7 +2530,7 @@ code:
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус выполнения запроса
 data:
@@ -2771,7 +2852,7 @@ prices:
   required: False
   description: Список товаров с указанием цен
 payment_type:
-  type: list[dict] | None
+  type: list[dict[str, Any]] | None
   required: False
   description: Доступные способы оплаты
 terminals:
@@ -2791,7 +2872,7 @@ working_time:
 Публичные методы:
 
 - `describe() -> 'dict[str, dict[str, Any]]'`
-- `fix_empty_service_groups(cls, v)`
+- `fix_empty_service_groups(cls, v: Any) -> Any`
 
 ### `AzsListV1Data`
 
@@ -2826,7 +2907,7 @@ result:
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус выполнения запроса
 data:
@@ -2876,7 +2957,7 @@ result:
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: True
   description: Информация о статусе запроса
 data:
@@ -2988,7 +3069,7 @@ last_update:
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус выполнения запроса
 data:
@@ -3465,7 +3546,7 @@ goods:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус ответа API, например {'code': 200}
 data:
@@ -3538,7 +3619,7 @@ goods:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус ответа API, например {'code': 200}
 data:
@@ -4088,7 +4169,7 @@ result:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения (например, {'code': 200})
 data:
@@ -4115,7 +4196,7 @@ timestamp:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения запроса
 data:
@@ -4142,7 +4223,7 @@ timestamp:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения запроса
 data:
@@ -4247,7 +4328,7 @@ result:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус ответа
 data:
@@ -4274,7 +4355,7 @@ timestamp:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения запроса
 data:
@@ -4488,7 +4569,7 @@ id_client:
   required: False
   description: Список клиентов
 additional:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Дополнительные параметры
 ```
@@ -4805,7 +4886,7 @@ result:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения (например, {'code': 200})
 data:
@@ -5029,7 +5110,7 @@ TemplateCreateResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5056,7 +5137,7 @@ TemplateDeleteResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5189,7 +5270,7 @@ TemplateGeoRestrictionCreateResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5216,7 +5297,7 @@ TemplateGeoRestrictionDeleteResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5266,7 +5347,7 @@ TemplateGeoRestrictionListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5438,7 +5519,7 @@ TemplateLimitCreateResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5465,7 +5546,7 @@ TemplateLimitDeleteResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5515,7 +5596,7 @@ TemplateLimitListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5624,7 +5705,7 @@ TemplateRestrictionCreateResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5651,7 +5732,7 @@ TemplateRestrictionDeleteResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5701,7 +5782,7 @@ TemplateRestrictionListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа
 data:
@@ -5751,7 +5832,7 @@ TemplatesListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict | None
+  type: dict[str, Any] | None
   required: False
   description: Статус ответа (код, сообщение и т.д.)
 data:
@@ -5805,7 +5886,7 @@ name:
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус ответа
 data:
@@ -6104,7 +6185,7 @@ TransactionsV1Response(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус ответа
 data:
@@ -6154,7 +6235,7 @@ TransactionsV2Response(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус ответа
 data:
@@ -6212,7 +6293,7 @@ UserBoolResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения запроса
 data:
@@ -6329,7 +6410,7 @@ UserCreateResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения запроса
 data:
@@ -6450,7 +6531,7 @@ UserListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения запроса (например {'code': 200})
 data:
@@ -6523,7 +6604,7 @@ UserListResponse(**kwargs: 'Any') -> 'None'
 
 ```text
 status:
-  type: dict
+  type: dict[str, Any]
   required: True
   description: Статус выполнения запроса (например {'code': 200})
 data:
@@ -7049,7 +7130,7 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 Описание отсутствует.
 
-Сигнатура: `ResponseDecoder(*, logger: 'logging.Logger | None' = None) -> 'None'`
+Сигнатура: `ResponseDecoder(*, logger: 'LoggerLike | None' = None) -> 'None'`
 
 Публичные методы:
 
@@ -7114,50 +7195,11 @@ Protocol classes can be generic, they are defined as::
 - `now(self) -> 'datetime'`
 - `sleep(self, seconds: 'float') -> 'None'`
 
-## `api_client_opti24.service_groups`
+## `api_client_opti24.service_base`
 
 Описание отсутствует.
 
-### `BoundService`
-
-Описание отсутствует.
-
-Сигнатура: `BoundService(client: 'ServiceClient') -> 'None'`
-
-Публичные методы:
-
-- `auth_user(self, **kwargs: 'Any') -> 'Any'`
-
-### `CardsService`
-
-Методы работы с топливными картами.
-
-Сигнатура: `CardsService(client: 'ServiceClient') -> 'None'`
-
-Публичные методы:
-
-- `auth_user(self, **kwargs: 'Any') -> 'Any'`
-
-### `ReportsService`
-
-Методы для работы с отчетами (v1 и v2)
-Будет возвращен транзакционный отчет, относящийся к указанному договору.
-Дата начала периода должна быть меньше или равна дате окончания периода.
-В противном случае сервер автоматически выставит дату окончания периода равной дате начала.
-Длина периода не должна превышать 3 календарных месяцев.
-Если длина периода будет превышена, то он автоматически будет сокращен до 3 календарных месяцев с указанной даты начала периода.
-Карты и группы карт, указанные в запросе, должны принадлежать указанному договору.
-Ограничения отправки отчетов на Email составляет 15мб.
-Длительность формирования отчетов за период 1 месяц составляет порядка 300 секунд, при выборе периода более 1 месяца, время формирования отчета может занять до 15 минут.
-Теперь отчет можно заказать и скачать по ссылке. Заказ производится стандартным образом, только не нужно указывать email, иначе прийдет на email..
-
-Сигнатура: `ReportsService(client: 'ServiceClient') -> 'None'`
-
-Публичные методы:
-
-- `auth_user(self, **kwargs: 'Any') -> 'Any'`
-
-### `ServiceClient`
+### `AuthenticationSession`
 
 Base class for protocol classes.
 
@@ -7190,11 +7232,260 @@ Protocol classes can be generic, they are defined as::
         def meth(self) -> T:
             ...
 
-Сигнатура: `ServiceClient(*args, **kwargs)`
+Сигнатура: `AuthenticationSession(*args, **kwargs)`
 
 Публичные методы:
 
-- `auth_user(self, **kwargs: 'Any') -> 'Any'`
+- `ensure_authenticated(self, authenticate: 'AuthenticateCallback') -> 'str'`
+- `invalidate(self) -> 'None'`
+- `mark_authenticated(self, session_id: 'str', contract_id: 'str | None' = None) -> 'None'`
+- `reset(self) -> 'None'`
+- `set_contract(self, contract_id: 'str | None') -> 'None'`
+
+### `CredentialsProvider`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `CredentialsProvider(*args, **kwargs)`
+
+Публичные методы:
+
+- `get_credentials(self) -> 'tuple[str, str]'`
+
+### `RequestExecutor`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `RequestExecutor(*args, **kwargs)`
+
+Публичные методы:
+
+- `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False) -> 'dict[str, str]'`
+- `request(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', **kwargs: 'Any') -> 'JSONPayload'`
+- `request_stream(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', headers: 'dict[str, str] | None' = None, **kwargs: 'Any') -> 'bytes'`
+
+### `ServiceMethodContext`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `ServiceMethodContext(*args, **kwargs)`
+
+### `SessionContext`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `SessionContext(*args, **kwargs)`
+
+### `SessionGate`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `SessionGate(*args, **kwargs)`
+
+Публичные методы:
+
+- `ensure_authenticated(self) -> 'str'`
+
+### `SessionMutator`
+
+Base class for protocol classes.
+
+Protocol classes are defined as::
+
+    class Proto(Protocol):
+        def meth(self) -> int:
+            ...
+
+Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).
+
+For example::
+
+    class C:
+        def meth(self) -> int:
+            return 0
+
+    def func(x: Proto) -> int:
+        return x.meth()
+
+    func(C())  # Passes static type check
+
+See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::
+
+    class GenProto[T](Protocol):
+        def meth(self) -> T:
+            ...
+
+Сигнатура: `SessionMutator(*args, **kwargs)`
+
+Публичные методы:
+
+- `invalidate(self) -> 'None'`
+- `mark_authenticated(self, session_id: 'str', contract_id: 'str | None' = None) -> 'None'`
+- `reset(self) -> 'None'`
+- `set_contract(self, contract_id: 'str | None') -> 'None'`
+
+## `api_client_opti24.service_groups`
+
+Описание отсутствует.
+
+### `ServiceContainer`
+
+ServiceContainer(auth: 'AuthService', card_groups: 'CardGroupsService', cards: 'CardsService', contracts: 'ContractsService', dictionaries: 'DictionariesService', ewallet: 'EwalletService', final_prices: 'FinalPricesService', invites: 'InvitesService', limits: 'LimitsService', region_limits: 'RegionLimitsService', reports: 'ReportsService', restrictions: 'RestrictionsService', templates: 'TemplatesService', transactions: 'TransactionsService', users: 'UsersService', virtual_cards: 'VirtualCardsService')
+
+Сигнатура: `ServiceContainer(auth: 'AuthService', card_groups: 'CardGroupsService', cards: 'CardsService', contracts: 'ContractsService', dictionaries: 'DictionariesService', ewallet: 'EwalletService', final_prices: 'FinalPricesService', invites: 'InvitesService', limits: 'LimitsService', region_limits: 'RegionLimitsService', reports: 'ReportsService', restrictions: 'RestrictionsService', templates: 'TemplatesService', transactions: 'TransactionsService', users: 'UsersService', virtual_cards: 'VirtualCardsService') -> None`
+
+Публичные методы:
+
+- `create(*, request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike', auth: 'AuthService') -> 'ServiceContainer'`
 
 ## `api_client_opti24.services`
 
@@ -7202,38 +7493,15 @@ Protocol classes can be generic, they are defined as::
 
 _Публичные классы и функции не обнаружены._
 
-## `api_client_opti24.services.Invites`
-
-Описание отсутствует.
-
-### `InviteMixin`
-
-Методы для работы с приглашениями пользователей (v2).
-Invites – функционал регистрации пользователей.
-Приглашение можно отправить по Email/SMS или получить уникальную ссылку и отправить удобным для вас способом.
-Ссылка действует 3 календарных дня, повторно направить Email/SMS по одному приглашению можно не чаще 3х раз в день.
-С помощью приглашения можно зарегистрировать, например, водителя и сразу привязать шаблон виртуальной карты,
-либо привязать физические топливные карты.
-
-Сигнатура: `InviteMixin()`
-
-Публичные методы:
-
-- `create_invite(self, *, data: dict[str, typing.Any], with_send: bool = True, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteResponse`
-- `delete_invite(self, *, invite_id: str, use_post: bool = False, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
-- `get_invites(self, *, role: str | None = None, user_id: str | None = None, sort: str | None = None, status: str | None = None, q: str | None = None, page: int | None = None, on_page: int | None = None, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteList`
-- `prolong_invite(self, *, invite_id: str, with_send: bool = True, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
-- `resend_invite(self, *, invite_id: str, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteResponse`
-
 ## `api_client_opti24.services.auth`
 
 Описание отсутствует.
 
-### `AuthMixin`
+### `AuthService`
 
 Описание отсутствует.
 
-Сигнатура: `AuthMixin()`
+Сигнатура: `AuthService(request_executor: api_client_opti24.service_base.RequestExecutor, session_context: api_client_opti24.service_base.SessionContext, session_gate: api_client_opti24.service_base.SessionGate, session_mutator: api_client_opti24.service_base.SessionMutator, credentials_provider: api_client_opti24.service_base.CredentialsProvider, clock: api_client_opti24.runtime.Clock, logger: logging.Logger | api_client_opti24.logger.ContextLogger) -> None`
 
 Публичные методы:
 
@@ -7245,28 +7513,28 @@ Invites – функционал регистрации пользователе
 
 Описание отсутствует.
 
-### `CardGroupsMixin`
+### `CardGroupsService`
 
 Методы для работы с группами карт (v1).
 
-Сигнатура: `CardGroupsMixin()`
+Сигнатура: `CardGroupsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
 - `get_card_groups(self, *, contract_id: str, api_version: str = 'v1') -> api_client_opti24.models.card_group.CardGroupListResponse`
 - `remove_card_group(self, *, contract_id: str, group_id: str, api_version: str = 'v1') -> api_client_opti24.models.card_group.RemoveCardGroupResponse`
 - `set_card_group(self, *, contract_id: str, name: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.card_group.SetCardGroupResponse`
-- `set_cards_to_group(self, *, contract_id: str, group_id: str, cards_list: list[dict], api_version: str = 'v1') -> api_client_opti24.models.card_group.SetCardsToGroupResponse`
+- `set_cards_to_group(self, *, contract_id: str, group_id: str, cards_list: list[dict[str, typing.Any]], api_version: str = 'v1') -> api_client_opti24.models.card_group.SetCardsToGroupResponse`
 
 ## `api_client_opti24.services.cards`
 
 Описание отсутствует.
 
-### `CardsMixin`
+### `CardsService`
 
 Методы работы с топливными картами.
 
-Сигнатура: `CardsMixin()`
+Сигнатура: `CardsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
@@ -7275,7 +7543,7 @@ Invites – функционал регистрации пользователе
 - `get_card_drivers(self, card_id: str, contract_id: str, api_version: str = 'v2') -> api_client_opti24.models.cards.CardDriversResponse`
 - `get_cards_by_group(self, contract_id: str, group_id: str, api_version: str = 'v1') -> api_client_opti24.models.cards.CardGroupResponse`
 - `get_cards_v1(self, contract_id: str, cache: bool = True, api_version: str = 'v1') -> api_client_opti24.models.cards.CardsListResponse`
-- `get_cards_v2(self, contract_id: str | None = None, sort: str = '-id', q: str | None = None, status: str | None = None, carrier: str | None = None, platon: bool | None = None, avtodor: bool | None = None, users: bool | None = None, group_id: str | None = None, page: int = None, onpage: int = None, api_version: str = 'v2') -> api_client_opti24.models.cards.CardsV2Response`
+- `get_cards_v2(self, contract_id: str | None = None, sort: str = '-id', q: str | None = None, status: str | None = None, carrier: str | None = None, platon: bool | None = None, avtodor: bool | None = None, users: bool | None = None, group_id: str | None = None, page: int | None = None, onpage: int | None = None, api_version: str = 'v2') -> api_client_opti24.models.cards.CardsV2Response`
 - `reset_pin(self, card_id: str, contract_id: str, code: str, api_version: str = 'v2') -> api_client_opti24.models.cards.BoolResponse`
 - `set_card_comment(self, card_id: str, contract_id: str, comment: str, api_version: str = 'v1') -> api_client_opti24.models.cards.BoolResponse`
 - `verify_pin(self, card_id: str, contract_id: str, api_version: str = 'v2') -> api_client_opti24.models.cards.BoolResponse`
@@ -7284,11 +7552,11 @@ Invites – функционал регистрации пользователе
 
 Описание отсутствует.
 
-### `ContractMixin`
+### `ContractsService`
 
 Описание отсутствует.
 
-Сигнатура: `ContractMixin()`
+Сигнатура: `ContractsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
@@ -7304,24 +7572,24 @@ Invites – функционал регистрации пользователе
 
 Описание отсутствует.
 
-### `DictionariesMixin`
+### `DictionariesService`
 
 Методы для работы со справочниками и торговыми точками
 
-Сигнатура: `DictionariesMixin()`
+Сигнатура: `DictionariesService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
 - `get_azs_filters(self, *, api_version: str = 'v2') -> api_client_opti24.models.dictionaries.AzsFiltersResponse`
-- `get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: dict | None = None, id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.dictionaries.AzsListV1Response`
-- `get_azs_list_v2(self, filter: dict | None = None, q: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.dictionaries.AzsListV2Response`
+- `get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: dict[str, Any] | None = None, id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.dictionaries.AzsListV1Response`
+- `get_azs_list_v2(self, filter: dict[str, Any] | None = None, q: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.dictionaries.AzsListV2Response`
 - `get_dictionary(self, *, name: str, api_version: str = 'v1') -> api_client_opti24.models.dictionaries.DictionaryResponse`
 
 ## `api_client_opti24.services.ewallet`
 
 Описание отсутствует.
 
-### `EwalletMixin`
+### `EwalletService`
 
 Методы для работы с электронными кошельками (Ewallet).
 
@@ -7331,7 +7599,7 @@ Invites – функционал регистрации пользователе
   • переводить средства со счёта договора на кошелёк;
   • переводить средства обратно с кошелька на договор.
 
-Сигнатура: `EwalletMixin()`
+Сигнатура: `EwalletService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
@@ -7343,22 +7611,45 @@ Invites – функционал регистрации пользователе
 
 Описание отсутствует.
 
-### `FinalPricesMixin`
+### `FinalPricesService`
 
 Методы для получения финальных цен и проверки покупок по карте.
 
-Сигнатура: `FinalPricesMixin()`
+Сигнатура: `FinalPricesService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
-- `check_purchase(self, *, card_id: str, poi_id: str, goods: list[dict], api_version: str = 'v2') -> api_client_opti24.models.final_prices.CheckPurchaseResponse`
+- `check_purchase(self, *, card_id: str, poi_id: str, goods: list[dict[str, typing.Any]], api_version: str = 'v2') -> api_client_opti24.models.final_prices.CheckPurchaseResponse`
 - `get_final_prices(self, *, card_id: str, poi_id: str, goods: list[str], api_version: str = 'v2') -> api_client_opti24.models.final_prices.FinalPricesResponse`
+
+## `api_client_opti24.services.invites`
+
+Описание отсутствует.
+
+### `InvitesService`
+
+Методы для работы с приглашениями пользователей (v2).
+Invites – функционал регистрации пользователей.
+Приглашение можно отправить по Email/SMS или получить уникальную ссылку и отправить удобным для вас способом.
+Ссылка действует 3 календарных дня, повторно направить Email/SMS по одному приглашению можно не чаще 3х раз в день.
+С помощью приглашения можно зарегистрировать, например, водителя и сразу привязать шаблон виртуальной карты,
+либо привязать физические топливные карты.
+
+Сигнатура: `InvitesService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
+
+Публичные методы:
+
+- `create_invite(self, *, data: dict[str, typing.Any], with_send: bool = True, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteResponse`
+- `delete_invite(self, *, invite_id: str, use_post: bool = False, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
+- `get_invites(self, *, role: str | None = None, user_id: str | None = None, sort: str | None = None, status: str | None = None, q: str | None = None, page: int | None = None, on_page: int | None = None, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteList`
+- `prolong_invite(self, *, invite_id: str, with_send: bool = True, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
+- `resend_invite(self, *, invite_id: str, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteResponse`
 
 ## `api_client_opti24.services.limits`
 
 Описание отсутствует.
 
-### `LimitsMixin`
+### `LimitsService`
 
 Методы для работы с продуктовыми лимитами (v1).
 
@@ -7367,35 +7658,35 @@ Invites – функционал регистрации пользователе
   • Установка / изменение лимита
   • Удаление лимита
 
-Сигнатура: `LimitsMixin()`
+Сигнатура: `LimitsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
 - `get_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.limits.LimitsResponse`
 - `remove_limit(self, *, contract_id: str, limit_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.limits.RemoveLimitResponse`
-- `set_limit(self, *, limits: list[dict], api_version: str = 'v1') -> api_client_opti24.models.limits.SetLimitResponse`
+- `set_limit(self, *, limits: list[dict[str, typing.Any]], api_version: str = 'v1') -> api_client_opti24.models.limits.SetLimitResponse`
 
 ## `api_client_opti24.services.region_limits`
 
 Описание отсутствует.
 
-### `RegionLimitsMixin`
+### `RegionLimitsService`
 
 Методы для работы с региональными лимитами (v1).
 
-Сигнатура: `RegionLimitsMixin()`
+Сигнатура: `RegionLimitsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
 - `get_region_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RegionLimitResponse`
 - `remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RemoveRegionLimit`
-- `set_region_limit(self, *, region_limits: list[dict], api_version: str = 'v1') -> dict[str, typing.Any]`
+- `set_region_limit(self, *, region_limits: list[dict[str, typing.Any]], api_version: str = 'v1') -> dict[str, typing.Any]`
 
 ## `api_client_opti24.services.reports`
 
 Описание отсутствует.
 
-### `ReportsMixin`
+### `ReportsService`
 
 Методы для работы с отчетами (v1 и v2)
 Будет возвращен транзакционный отчет, относящийся к указанному договору.
@@ -7408,7 +7699,7 @@ Invites – функционал регистрации пользователе
 Длительность формирования отчетов за период 1 месяц составляет порядка 300 секунд, при выборе периода более 1 месяца, время формирования отчета может занять до 15 минут.
 Теперь отчет можно заказать и скачать по ссылке. Заказ производится стандартным образом, только не нужно указывать email, иначе прийдет на email..
 
-Сигнатура: `ReportsMixin()`
+Сигнатура: `ReportsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
@@ -7417,30 +7708,30 @@ Invites – функционал регистрации пользователе
 - `get_report_job_list_v1(self, *, api_version: str = 'v1') -> api_client_opti24.models.reports.ReportV1JobList`
 - `get_report_jobs(self, *, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportJobList`
 - `get_reports(self, *, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportList`
-- `order_report(self, *, report_id: str, format: str, params: dict, emails: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportOrderResponse`
+- `order_report(self, *, report_id: str, format: str, params: dict[str, typing.Any], emails: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportOrderResponse`
 - `order_report_v1(self, *, contract_id: str, start: str, end: str, report_format: str, email: str | None = None, cards_list: list[str] | None = None, group_id: list[str] | None = None, archive: bool = False, api_version: str = 'v1') -> api_client_opti24.models.reports.ReportV1OrderResponse`
 
 ## `api_client_opti24.services.restrictions`
 
 Описание отсутствует.
 
-### `RestrictionsMixin`
+### `RestrictionsService`
 
 Методы для работы с товарными ограничителями (v1).
 
-Сигнатура: `RestrictionsMixin()`
+Сигнатура: `RestrictionsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
 - `get_restrictions(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionGetResponse`
 - `remove_restriction(self, *, contract_id: str, restriction_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionRemoveResponse`
-- `set_restriction(self, *, restrictions: list[dict], api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionSetResponse`
+- `set_restriction(self, *, restrictions: list[dict[str, typing.Any]], api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionSetResponse`
 
 ## `api_client_opti24.services.templates`
 
 Описание отсутствует.
 
-### `TemplatesMixin`
+### `TemplatesService`
 
 ВК – виртуальная карта. Чтобы выпустить ВК, потребуется создать шаблон лимита и прикрепить этот шаблон к пользователю.
 Прикрепление происходит на этапе приглашения нового пользователя или методом для существующих пользователей.
@@ -7449,14 +7740,14 @@ Invites – функционал регистрации пользователе
 Шаблон сделан с точки зрения безопасности,
 для того чтобы по-умолчанию все выпускаемые ВК имели ограничения на покупку (Лимит/Ограничитель).
 
-Сигнатура: `TemplatesMixin()`
+Сигнатура: `TemplatesService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
 - `create_template(self, contract_id: str, type_: str, name: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateCreateResponse`
-- `create_template_georestriction(self, template_id: str, payload: dict, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
-- `create_template_limit(self, template_id: str, payload: dict, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
-- `create_template_restriction(self, template_id: str, payload: dict, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
+- `create_template_georestriction(self, template_id: str, payload: dict[str, typing.Any], api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
+- `create_template_limit(self, template_id: str, payload: dict[str, typing.Any], api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
+- `create_template_restriction(self, template_id: str, payload: dict[str, typing.Any], api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
 - `delete_template(self, template_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateDeleteResponse`
 - `delete_template_georestriction(self, template_id: str, georestriction_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateGeoRestrictionDeleteResponse`
 - `delete_template_limit(self, template_id: str, limit_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateLimitDeleteResponse`
@@ -7466,19 +7757,19 @@ Invites – функционал регистрации пользователе
 - `get_template_restrictions(self, template_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionListResponse`
 - `get_templates(self, contract_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplatesListResponse`
 - `update_template(self, template_id: str, contract_id: str, type_: str, name: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateCreateResponse`
-- `update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict, api_version: str = 'v2', use_post: bool = True) -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
-- `update_template_limit(self, *, template_id: str, limit_id: str, limits: list[dict], use_post: bool = True, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
-- `update_template_restriction(self, template_id: str, restriction_id: str, payload: dict, api_version: str = 'v2', use_post: bool = True) -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
+- `update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict[str, typing.Any], api_version: str = 'v2', use_post: bool = True) -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
+- `update_template_limit(self, *, template_id: str, limit_id: str, limits: list[dict[str, typing.Any]], use_post: bool = True, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
+- `update_template_restriction(self, template_id: str, restriction_id: str, payload: dict[str, typing.Any], api_version: str = 'v2', use_post: bool = True) -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
 
 ## `api_client_opti24.services.transactions`
 
 Описание отсутствует.
 
-### `TransactionsMixin`
+### `TransactionsService`
 
 Методы для работы с транзакциями (v1 и v2).
 
-Сигнатура: `TransactionsMixin()`
+Сигнатура: `TransactionsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
@@ -7491,31 +7782,31 @@ Invites – функционал регистрации пользователе
 
 Описание отсутствует.
 
-### `UsersMixin`
+### `UsersService`
 
 Методы для работы с пользователями (v2).
 
-Сигнатура: `UsersMixin()`
+Сигнатура: `UsersService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
 - `attach_card(self, *, user_id: str, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
-- `attach_contracts(self, *, user_id: str, contracts: list[dict], api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
+- `attach_contracts(self, *, user_id: str, contracts: list[dict[str, typing.Any]], api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
 - `create_user(self, *, uuid: str, mobile: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserCreateResponse`
 - `delete_user(self, *, user_id: str, use_post: bool = False, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
 - `detach_card(self, *, user_id: str, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
 - `detach_contracts(self, *, user_id: str, contracts: list[str], api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
-- `get_users(self, *, sort: str | None = None, page: int | None = None, on_page: int | None = None, q: str | None = None, filter: dict | None = None, api_version: str = 'v2') -> api_client_opti24.models.users.UserListResponse`
+- `get_users(self, *, sort: str | None = None, page: int | None = None, on_page: int | None = None, q: str | None = None, filter: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.users.UserListResponse`
 
 ## `api_client_opti24.services.virtual_cards`
 
 Описание отсутствует.
 
-### `VirtualCardsMixin`
+### `VirtualCardsService`
 
 Методы для работы с виртуальными картами (ВК) и мобильными профилями карт (МПК)
 
-Сигнатура: `VirtualCardsMixin()`
+Сигнатура: `VirtualCardsService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
@@ -7541,7 +7832,7 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `ensure_authenticated(self, authenticate) -> 'str'`
+- `ensure_authenticated(self, authenticate: 'Callable[[], Awaitable[object]]') -> 'str'`
 - `invalidate(self) -> 'None'`
 - `mark_authenticated(self, session_id: 'str', contract_id: 'str | None' = None) -> 'None'`
 - `reset(self) -> 'None'`
@@ -7556,16 +7847,7 @@ SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 's
 
 ### `SessionState`
 
-str(object='') -> str
-str(bytes_or_buffer[, encoding[, errors]]) -> str
-
-Create a new string object from the given object. If encoding or
-errors is specified, then the object must expose a data buffer
-that will be decoded using the given encoding and error handler.
-Otherwise, returns the result of object.__str__() (if defined)
-or repr(object).
-encoding defaults to 'utf-8'.
-errors defaults to 'strict'.
+Enum where members are also (and must be) strings
 
 Сигнатура: `SessionState(*values)`
 
@@ -7612,19 +7894,19 @@ Protocol classes can be generic, they are defined as::
 
 - `aclose(self) -> 'None'`
 - `request(self, method: 'str', url: 'str', **kwargs: 'Any') -> 'httpx.Response'`
-- `stream(self, method: 'str', url: 'str', **kwargs: 'Any')`
+- `stream(self, method: 'str', url: 'str', **kwargs: 'Any') -> 'AbstractAsyncContextManager[httpx.Response]'`
 
 ### `AsyncTransport`
 
 Описание отсутствует.
 
-Сигнатура: `AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, auth_recovery: 'AuthRecovery | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'logging.Logger | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = <function sleep>, monotonic: 'Callable[[], float]' = <built-in function monotonic>)`
+Сигнатура: `AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, auth_recovery: 'AuthRecovery | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'LoggerLike | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = <function sleep>, monotonic: 'Callable[[], float]' = <built-in function monotonic>)`
 
 Публичные методы:
 
 - `aclose(self) -> 'None'`
-- `request(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers=None, retry_auth: 'bool' = True, timeout: 'float | None' = None, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, **kwargs) -> 'DecodedPayload'`
-- `request_stream(self, method: 'str', url: 'str', headers=None, *, method_name: 'str | None' = None, **kwargs) -> 'bytes'`
+- `request(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, retry_auth: 'bool' = True, timeout: 'float | None' = None, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, **kwargs: 'Any') -> 'DecodedPayload'`
+- `request_stream(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, *, method_name: 'str | None' = None, **kwargs: 'Any') -> 'bytes'`
 - `set_auth_recovery(self, auth_recovery: 'AuthRecovery') -> 'None'`
 
 ## `api_client_opti24.utils`
@@ -7665,7 +7947,7 @@ SHA-512 хэш пароля в нижнем регистре.
 
 Описание отсутствует.
 
-Сигнатура: `print_json(data)`
+Сигнатура: `print_json(data: Any) -> None`
 
 ### `sanitize_for_logging`
 
@@ -7689,4 +7971,4 @@ SHA-512 хэш пароля в нижнем регистре.
 
 Проверка, что разница между датами не больше месяца.
 
-Сигнатура: `validate_month_span(date_from: str, date_to: str)`
+Сигнатура: `validate_month_span(date_from: str, date_to: str) -> None`

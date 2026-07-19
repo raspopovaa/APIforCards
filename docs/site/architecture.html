@@ -95,20 +95,26 @@
       <div class="card">
         <h1>Архитектура SDK</h1>
 <h2>Request pipeline</h2>
-<p>1. Доменный метод устанавливает имя операции через <code>@api_method</code>. 2. <code>APIClient</code> получает декларативный <code>EndpointSpec</code> из registry. 3. Timeout, <code>retry_class</code> и <code>idempotent</code> передаются в <code>AsyncTransport</code>. 4. Transport применяет rate limit, retry и при необходимости единственный re-auth. 5. <code>ResponseDecoder</code> одинаково проверяет HTTP-код и <code>payload.status.code</code>. 6. Доменный сервис преобразует payload через <code>decode_model</code>.</p>
+<p>1. Доменный метод устанавливает имя операции через <code>@api_method</code>. 2. <code>DefaultRequestExecutor</code> получает декларативный <code>EndpointSpec</code> из registry. 3. Executor передаёт timeout, <code>retry_class</code> и <code>idempotent</code> в transport. 4. Transport применяет rate limit, retry и при необходимости единственный re-auth. 5. <code>ResponseDecoder</code> одинаково проверяет HTTP-код и <code>payload.status.code</code>. 6. Executor проверяет, что JSON-ответ является объектом, а доменный сервис преобразует его в типизированную модель.</p>
 <h2>Декларативные endpoints</h2>
 <p>Все маршруты находятся в <code>endpoints.py</code>. Registry не использует AST, <code>inspect</code>, динамический импорт сервисов или соглашения об именовании методов. <code>MethodSpec</code> сохранён как alias <code>EndpointSpec</code> для обратной совместимости.</p>
 <h2>Dependency injection</h2>
 <p><code>APIClient</code> принимает <code>transport</code>, <code>session_manager</code>, <code>registry</code>, <code>logger</code> и <code>clock</code>. <code>AsyncTransport</code> отдельно принимает HTTP client, response decoder, политики, logger и clock. Transport не знает об <code>APIClient</code>; re-auth подключается через callback.</p>
+<p>Сервисы зависят только от узких протоколов <code>RequestExecutor</code>, read-only <code>SessionContext</code>, <code>SessionGate</code> и logger. Они не могут изменять состояние сессии. Только <code>AuthService</code> дополнительно получает <code>SessionMutator</code>, <code>CredentialsProvider</code> и <code>Clock</code>. Ни один доменный сервис не хранит ссылку на <code>APIClient</code>, его настройки или transport.</p>
+<p><code>AuthenticationCoordinator</code> связывает <code>AuthService</code> с <code>SessionManager</code> и transport re-auth callback, а также реализует <code>SessionGate</code>. Пароль не передаётся остальным сервисам.</p>
+<p>Потоковые и JSON-запросы используют одинаковые относительные endpoint и настроенный <code>base_url</code>. Абсолютные stream URL запрещены, поэтому API key и session ID не могут быть отправлены на другой origin.</p>
 <h2>Композиционные сервисы</h2>
-<p>Новый код рекомендуется писать через:</p>
+<p>Все доменные вызовы выполняются через композиционные сервисы:</p>
 <pre><code>
+auth = await client.auth.auth_user()
 cards = await client.cards.get_cards_v2()
 jobs = await client.reports.get_report_jobs()
+users = await client.users.get_users()
 </code></pre>
-<p>Прямые методы <code>client.get_cards_v2()</code> и <code>client.get_report_jobs()</code> пока сохранены для обратной совместимости. Остальные домены могут переноситься на композицию тем же способом.</p>
+<p>Каждый доменный метод объявлен непосредственно в конкретном сервисе. В SDK нет доменных mixin-классов и прямых методов вида <code>client.get_cards_v2()</code>. <code>AuthService</code> создаётся отдельно в composition root и является единственным сервисом, получающим <code>CredentialsProvider</code>. <code>ServiceContainer</code> не зависит от учётных данных и собирает остальные сервисы в одном типизированном composition root, а внутренний <code>_ServiceFacade</code> предоставляет явные свойства без динамического <code>__getattr__</code>.</p>
+<p>Доступные пространства имён: <code>auth</code>, <code>card_groups</code>, <code>cards</code>, <code>contracts</code>, <code>dictionaries</code>, <code>ewallet</code>, <code>final_prices</code>, <code>invites</code>, <code>limits</code>, <code>region_limits</code>, <code>reports</code>, <code>restrictions</code>, <code>templates</code>, <code>transactions</code>, <code>users</code> и <code>virtual_cards</code>.</p>
 <h2>Миграция моделей</h2>
-<p>Существующий <code>BaseModel</code> поддерживает <code>model_validate()</code> и <code>model_dump()</code>. Функция <code>decode_model()</code> отделяет сервисы от конкретного modeling framework и уже используется доменами cards/reports. Следующие домены следует переносить по одному, после чего внутренний framework можно заменить стандартными dataclass либо внешним валидатором без изменения сервисного API.</p>
+<p>Существующий <code>BaseModel</code> поддерживает <code>model_validate()</code> и <code>model_dump()</code>. <code>@dataclass_transform</code> сохраняет сигнатуры полей для статических анализаторов. Функция <code>decode_model()</code> отделяет сервисы от конкретного modeling framework и уже используется частью доменов. Следующие модели следует переносить по одной, после чего внутренний framework можно заменить стандартными dataclass либо внешним валидатором без изменения сервисного API.</p>
       </div>
     </div>
   </body>
