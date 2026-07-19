@@ -28,25 +28,23 @@ class ReportsService(_BaseService):
     """
 
     # -------- v2 --------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_reports(
         self,
         *,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> ReportList:
         """
         Получить список доступных отчетов (v2).
         """
         self.logger.info("Запрос списка доступных отчетов (v2)")
         raw = await self._request(
-            "get",
-            "reports",
+            "get_reports",
             api_version=api_version,
-            headers=self._headers(include_session=True),
         )
         return decode_model(ReportList, raw.get("data", {}))
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def order_report(
         self,
         *,
@@ -54,7 +52,7 @@ class ReportsService(_BaseService):
         format: str,
         params: dict[str, Any],
         emails: str | None = None,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> ReportOrderResponse:
         """
         Заказать отчет (на email или по ссылке).
@@ -66,38 +64,34 @@ class ReportsService(_BaseService):
         self.logger.info("Ordering report format=%s delivery=%s", format, bool(emails))
 
         raw = await self._request(
-            "post",
-            "reports",
+            "order_report",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             json=body,
         )
         return decode_model(ReportOrderResponse, raw.get("data", {}))
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_report_jobs(
         self,
         *,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> ReportJobList:
         """
         Получить список заказанных отчетов (v2).
         """
         self.logger.info("Получение списка заказанных отчетов (v2)")
         raw = await self._request(
-            "get",
-            "reports/jobs",
+            "get_report_jobs",
             api_version=api_version,
-            headers=self._headers(include_session=True),
         )
         return decode_model(ReportJobList, raw.get("data", {}))
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def download_report_file(
         self,
         *,
         job_id: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> bytes:
         """
         Скачать файл отчета (по job_id).
@@ -108,17 +102,16 @@ class ReportsService(_BaseService):
         self.logger.info("Downloading report version=%s", api_version)
 
         content = await self._request_stream(
-            "get",
-            f"reports/jobs/{job_id}",
+            "download_report_file",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"job_id": job_id},
         )
 
         self.logger.info("Report downloaded bytes=%s", len(content))
         return content
 
     # -------- v1 --------
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def order_report_v1(
         self,
         *,
@@ -130,7 +123,7 @@ class ReportsService(_BaseService):
         cards_list: list[str] | None = None,
         group_id: list[str] | None = None,
         archive: bool = False,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> ReportV1OrderResponse:
         """
         Заказ отчета (v1) – email или файл.
@@ -154,39 +147,35 @@ class ReportsService(_BaseService):
         self.logger.info("Ordering report version=v1 format=%s", report_format)
 
         raw = await self._request(
-            "get",
-            "reports",
+            "order_report_v1",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
         return decode_model(ReportV1OrderResponse, {"report_ids": raw.get("data", [])})
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_report_job_list_v1(
         self,
         *,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> ReportV1JobList:
         """
         Получить список заказанных отчетов (v1).
         """
         self.logger.info("Получение списка заказанных отчетов (v1)")
         raw = await self._request(
-            "get",
-            "getReportJobList",
+            "get_report_job_list_v1",
             api_version=api_version,
-            headers=self._headers(include_session=True),
         )
         return decode_model(ReportV1JobList, {"jobs": raw.get("data", [])})
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def download_report_file_v1(
         self,
         *,
         job_id: str,
         archive: bool = False,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> bytes:
         """
         Скачать файл отчета (v1)
@@ -203,10 +192,8 @@ class ReportsService(_BaseService):
         self.logger.info("Downloading report version=v1 archive=%s", archive)
 
         content = await self._request_stream(
-            "get",
-            "getReportFile",
+            "download_report_file_v1",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
 

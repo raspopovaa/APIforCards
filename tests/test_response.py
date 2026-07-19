@@ -6,7 +6,7 @@ import logging
 import httpx
 import pytest
 
-from api_client_opti24.errors import NotAuthenticatedError, ValidationError
+from api_client_opti24.errors import NotAuthenticatedError, ServerError, ValidationError
 from api_client_opti24.response import ResponseDecoder
 
 
@@ -74,3 +74,39 @@ def test_decoder_detects_api_error_in_json_download_response() -> None:
 
     with pytest.raises(NotAuthenticatedError):
         decoder.decode_bytes(response, response.content, "reports/job")
+
+
+def test_decoder_never_masks_http_error_with_successful_api_status() -> None:
+    decoder = ResponseDecoder()
+    response = httpx.Response(
+        500,
+        json={"status": {"code": 200}, "data": {"unexpected": True}},
+        request=httpx.Request("GET", "https://example.invalid/cards"),
+    )
+
+    with pytest.raises(ServerError) as exc_info:
+        decoder.decode(response, "cards")
+
+    assert exc_info.value.http_status_code == 500
+    assert exc_info.value.api_status_code == 200
+
+
+def test_decoder_never_treats_server_error_as_expired_session() -> None:
+    decoder = ResponseDecoder()
+    response = httpx.Response(
+        500,
+        json={
+            "status": {
+                "code": 401,
+                "errors": [{"type": "notAuthenticated", "message": "Conflicting status"}],
+            }
+        },
+        request=httpx.Request("GET", "https://example.invalid/cards"),
+    )
+
+    with pytest.raises(ServerError) as exc_info:
+        decoder.decode(response, "cards")
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.http_status_code == 500
+    assert exc_info.value.api_status_code == 401

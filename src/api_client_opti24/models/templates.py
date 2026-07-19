@@ -1,6 +1,6 @@
-from typing import Any, Optional
+from typing import Any
 
-from ..modeling import BaseModel, Field
+from ..modeling import BaseModel, Field, StrictRequestModel
 
 # ====== ОСНОВНОЙ ШАБЛОН ВК ======
 
@@ -18,71 +18,65 @@ class TemplatesListData(BaseModel):
 
 
 class TemplatesListResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(
-        None, description="Статус ответа (код, сообщение и т.д.)"
-    )
+    status: dict[str, Any] | None = Field(None, description="Статус ответа (код, сообщение и т.д.)")
     data: TemplatesListData = Field(..., description="Основные данные списка шаблонов")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
-class TemplateCreateRequest(BaseModel):
+class TemplateCreateRequest(StrictRequestModel):
     contract_id: str = Field(..., description="Идентификатор договора")
     type: str = Field(..., description="Тип создаваемого шаблона (Limit или Wallet)")
     name: str = Field(..., description="Имя (название) нового шаблона ВК")
 
 
 class TemplateCreateResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: str = Field(..., description="ID созданного шаблона")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
 class TemplateDeleteResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: bool = Field(..., description="Результат операции (true — успешно, false — ошибка)")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
 # ====== ЛИМИТЫ ШАБЛОНОВ ======
 
 
 class LimitSum(BaseModel):
-    currency: Optional[str] = Field(None, description="Код валюты (например, '810')")
-    currencyName: Optional[str] = Field(None, description="Название валюты (например, 'р.')")
-    value: Optional[float] = Field(None, description="Сумма лимита в указанной валюте")
+    currency: str | None = Field(None, description="Код валюты (например, '810')")
+    currencyName: str | None = Field(None, description="Название валюты (например, 'р.')")
+    value: float | None = Field(None, description="Сумма лимита в указанной валюте")
 
 
 class LimitAmount(BaseModel):
-    unit: Optional[str] = Field(None, description="Единица измерения (например, 'LIT')")
-    value: Optional[float] = Field(None, description="Количество или объем в единицах измерения")
+    unit: str | None = Field(None, description="Единица измерения (например, 'LIT')")
+    value: float | None = Field(None, description="Количество или объем в единицах измерения")
 
 
 class LimitTime(BaseModel):
-    type: Optional[int] = Field(
-        None, description="Тип периода лимита (например, 3 — день, 5 — месяц)"
-    )
-    number: Optional[int] = Field(None, description="Количество единиц выбранного периода")
+    type: int | None = Field(None, description="Тип периода лимита (например, 3 — день, 5 — месяц)")
+    number: int | None = Field(None, description="Количество единиц выбранного периода")
 
 
 class LimitTermTime(BaseModel):
-    from_: Optional[str] = Field(
+    from_: str | None = Field(
         None,
         alias="from",
         description="Начало временного диапазона (например, '03:00')",
     )
-    to: Optional[str] = Field(None, description="Конец временного диапазона (например, '08:00')")
+    to: str | None = Field(None, description="Конец временного диапазона (например, '08:00')")
 
 
 class LimitTerm(BaseModel):
-    days: Optional[str] = Field(
-        None, description="Маска дней действия лимита (например, '1111100')"
-    )
-    type: Optional[int] = Field(None, description="Тип временного ограничения")
-    time: Optional[LimitTermTime] = Field(None, description="Временные границы лимита")
+    days: str | None = Field(None, description="Маска дней действия лимита (например, '1111100')")
+    type: int | None = Field(None, description="Тип временного ограничения")
+    time: LimitTermTime | None = Field(None, description="Временные границы лимита")
 
 
 class LimitTransactions(BaseModel):
-    count: Optional[int] = Field(
+    count: int | None = Field(
         None, description="Количество транзакций, на которое распространяется лимит"
     )
 
@@ -93,18 +87,18 @@ class TemplateLimit(BaseModel):
     contract_id: str = Field(
         ..., description="Идентификатор договора, на который распространяется лимит"
     )
-    amount: Optional[LimitAmount] = Field(None, description="Объемный лимит (в литрах и т.д.)")
-    sum: Optional[LimitSum] = Field(None, description="Суммовой лимит (в рублях и т.д.)")
-    time: Optional[LimitTime] = Field(None, description="Период действия лимита")
-    term: Optional[LimitTerm] = Field(None, description="Дополнительные временные ограничения")
-    transactions: Optional[LimitTransactions] = Field(
+    amount: LimitAmount | None = Field(None, description="Объемный лимит (в литрах и т.д.)")
+    sum: LimitSum | None = Field(None, description="Суммовой лимит (в рублях и т.д.)")
+    time: LimitTime | None = Field(None, description="Период действия лимита")
+    term: LimitTerm | None = Field(None, description="Дополнительные временные ограничения")
+    transactions: LimitTransactions | None = Field(
         None, description="Информация по транзакциям лимита"
     )
-    date: Optional[str] = Field(None, description="Дата создания лимита")
-    productType: Optional[str] = Field(None, description="Тип продукта (топливо, услуга и т.д.)")
-    productGroup: Optional[str] = Field(None, description="Группа продукта (например, G-95)")
-    productTypeName: Optional[str] = Field(None, description="Название типа продукта")
-    productGroupName: Optional[str] = Field(None, description="Название группы продукта")
+    date: str | None = Field(None, description="Дата создания лимита")
+    productType: str | None = Field(None, description="Тип продукта (топливо, услуга и т.д.)")
+    productGroup: str | None = Field(None, description="Группа продукта (например, G-95)")
+    productTypeName: str | None = Field(None, description="Название типа продукта")
+    productGroupName: str | None = Field(None, description="Название группы продукта")
 
 
 class TemplateLimitListData(BaseModel):
@@ -113,36 +107,32 @@ class TemplateLimitListData(BaseModel):
 
 
 class TemplateLimitListResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: TemplateLimitListData = Field(..., description="Основные данные списка лимитов")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
-class TemplateLimitCreateRequest(BaseModel):
+class TemplateLimitCreateRequest(StrictRequestModel):
     contract_id: str = Field(..., description="Идентификатор договора")
     product_type: str = Field(..., description="Тип продукта (например, '1-276PF01')")
-    product_group: Optional[str] = Field(
-        None, description="Группа продукта (например, '1-276PF0E')"
-    )
-    sum: Optional[LimitSum] = Field(None, description="Суммовой лимит")
-    amount: Optional[LimitAmount] = Field(None, description="Объемный лимит")
+    product_group: str | None = Field(None, description="Группа продукта (например, '1-276PF0E')")
+    sum: LimitSum | None = Field(None, description="Суммовой лимит")
+    amount: LimitAmount | None = Field(None, description="Объемный лимит")
     time: LimitTime = Field(..., description="Период лимита")
-    term: Optional[LimitTerm] = Field(None, description="Дополнительные временные ограничения")
-    create_restriction: Optional[bool] = Field(
-        None, description="Создать ограничитель автоматически"
-    )
+    term: LimitTerm | None = Field(None, description="Дополнительные временные ограничения")
+    create_restriction: bool | None = Field(None, description="Создать ограничитель автоматически")
 
 
 class TemplateLimitCreateResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: str = Field(..., description="ID созданного лимита шаблона")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
 class TemplateLimitDeleteResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: bool = Field(..., description="Результат удаления лимита (true — успешно)")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
 # ====== ОГРАНИЧИТЕЛИ ШАБЛОНА ======
@@ -152,11 +142,11 @@ class TemplateRestriction(BaseModel):
     id: str = Field(..., description="Идентификатор ограничителя шаблона")
     template_id: str = Field(..., description="Идентификатор шаблона")
     contract_id: str = Field(..., description="Идентификатор договора")
-    date: Optional[str] = Field(None, description="Дата создания ограничителя")
-    productType: Optional[str] = Field(None, description="Тип продукта")
-    productGroup: Optional[str] = Field(None, description="Группа продукта")
-    productTypeName: Optional[str] = Field(None, description="Название типа продукта")
-    productGroupName: Optional[str] = Field(None, description="Название группы продукта")
+    date: str | None = Field(None, description="Дата создания ограничителя")
+    productType: str | None = Field(None, description="Тип продукта")
+    productGroup: str | None = Field(None, description="Группа продукта")
+    productTypeName: str | None = Field(None, description="Название типа продукта")
+    productGroupName: str | None = Field(None, description="Название группы продукта")
     restriction_type: int = Field(..., description="Тип ограничителя (1 — разрешение, 2 — запрет)")
 
 
@@ -166,32 +156,30 @@ class TemplateRestrictionListData(BaseModel):
 
 
 class TemplateRestrictionListResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: TemplateRestrictionListData = Field(
         ..., description="Основные данные списка ограничителей"
     )
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
-class TemplateRestrictionCreateRequest(BaseModel):
+class TemplateRestrictionCreateRequest(StrictRequestModel):
     contract_id: str = Field(..., description="Идентификатор договора")
     product_type: str = Field(..., description="Тип продукта (например, '1-276PF01')")
-    product_group: Optional[str] = Field(
-        None, description="Группа продукта (например, '1-276PF0E')"
-    )
+    product_group: str | None = Field(None, description="Группа продукта (например, '1-276PF0E')")
     restriction_type: int = Field(..., description="Тип ограничителя (1 — разрешение, 2 — запрет)")
 
 
 class TemplateRestrictionCreateResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: str = Field(..., description="ID созданного ограничителя шаблона")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
 class TemplateRestrictionDeleteResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: bool = Field(..., description="Результат удаления ограничителя")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
 # ====== ГЕООГРАНИЧИТЕЛИ ШАБЛОНА ======
@@ -201,15 +189,15 @@ class TemplateGeoRestriction(BaseModel):
     id: str = Field(..., description="Идентификатор геоограничителя шаблона")
     template_id: str = Field(..., description="Идентификатор шаблона")
     contract_id: str = Field(..., description="Идентификатор договора")
-    date: Optional[str] = Field(None, description="Дата создания записи")
-    country: Optional[str] = Field(None, description="Код страны (например, 'RUS')")
-    countryName: Optional[str] = Field(None, description="Название страны")
-    region: Optional[str] = Field(None, description="Код региона")
-    regionName: Optional[str] = Field(None, description="Название региона")
-    partner: Optional[str] = Field(None, description="Код партнера (АЗС)")
-    partnerName: Optional[str] = Field(None, description="Название партнера (АЗС)")
-    service_center: Optional[str] = Field(None, description="Код сервисного центра")
-    service_centerName: Optional[str] = Field(None, description="Название сервисного центра")
+    date: str | None = Field(None, description="Дата создания записи")
+    country: str | None = Field(None, description="Код страны (например, 'RUS')")
+    countryName: str | None = Field(None, description="Название страны")
+    region: str | None = Field(None, description="Код региона")
+    regionName: str | None = Field(None, description="Название региона")
+    partner: str | None = Field(None, description="Код партнера (АЗС)")
+    partnerName: str | None = Field(None, description="Название партнера (АЗС)")
+    service_center: str | None = Field(None, description="Код сервисного центра")
+    service_centerName: str | None = Field(None, description="Название сервисного центра")
     restriction_type: int = Field(
         ..., description="Тип геоограничителя (1 — разрешение, 2 — запрет)"
     )
@@ -221,31 +209,31 @@ class TemplateGeoRestrictionListData(BaseModel):
 
 
 class TemplateGeoRestrictionListResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: TemplateGeoRestrictionListData = Field(
         ..., description="Основные данные списка геоограничителей"
     )
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
-class TemplateGeoRestrictionCreateRequest(BaseModel):
+class TemplateGeoRestrictionCreateRequest(StrictRequestModel):
     contract_id: str = Field(..., description="Идентификатор договора")
     country: str = Field(..., description="Код страны (например, 'RUS')")
-    region: Optional[str] = Field(None, description="Код региона (например, '45')")
-    partner: Optional[str] = Field(None, description="Код партнера (АЗС)")
-    service_center: Optional[str] = Field(None, description="Код сервисного центра")
+    region: str | None = Field(None, description="Код региона (например, '45')")
+    partner: str | None = Field(None, description="Код партнера (АЗС)")
+    service_center: str | None = Field(None, description="Код сервисного центра")
     restriction_type: int = Field(
         ..., description="Тип геоограничителя (1 — разрешение, 2 — запрет)"
     )
 
 
 class TemplateGeoRestrictionCreateResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: str = Field(..., description="ID созданного геоограничителя шаблона")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")
 
 
 class TemplateGeoRestrictionDeleteResponse(BaseModel):
-    status: Optional[dict[str, Any]] = Field(None, description="Статус ответа")
+    status: dict[str, Any] | None = Field(None, description="Статус ответа")
     data: bool = Field(..., description="Результат удаления геоограничителя (true — успешно)")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа (Unix)")
+    timestamp: int | None = Field(None, description="Метка времени ответа (Unix)")

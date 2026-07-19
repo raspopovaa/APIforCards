@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from ..modeling import BaseModel, Field
 
@@ -30,7 +29,7 @@ class ContractInfo(BaseModel):
     id: str = Field(..., description="ID договора")
     number: str = Field(..., description="Номер договора")
     mpc: bool = Field(default=False, description="Есть ли МПК (виртуальные карты)")
-    template_id: Optional[str] = Field(None, description="ID шаблона ВК, если есть")
+    template_id: str | None = Field(None, description="ID шаблона ВК, если есть")
     cards_count: int = Field(default=0, description="Количество карт по договору")
     one_price: bool = Field(default=False, description="Признак единой цены")
 
@@ -38,28 +37,28 @@ class ContractInfo(BaseModel):
 class AuthUserData(BaseModel):
     client_id: str = Field(..., description="ID клиента в системе")
     client_status: str = Field(..., description="Статус клиента (Active, Blocked, и т.п.)")
-    org_name: Optional[str] = Field(None, description="Наименование организации")
+    org_name: str | None = Field(None, description="Наименование организации")
     session_id: str = Field(..., description="JWT токен активной сессии")
     user_id: str = Field(..., description="ID пользователя")
     contracts: list[ContractInfo] = Field(
         default_factory=list, description="Список доступных договоров"
     )
-    role_id: Optional[str] = Field(None, description="Код роли (например, Supervisor)")
-    role_name: Optional[str] = Field(None, description="Название роли (например, Администратор)")
+    role_id: str | None = Field(None, description="Код роли (например, Supervisor)")
+    role_name: str | None = Field(None, description="Название роли (например, Администратор)")
     read_only: bool = Field(default=False, description="Флаг режима только чтение")
-    user_name: Optional[str] = Field(None, description="Имя пользователя")
-    user_patronymic: Optional[str] = Field(None, description="Отчество пользователя")
-    user_surname: Optional[str] = Field(None, description="Фамилия пользователя")
-    last_contract: Optional[str] = Field(None, description="SID последнего договора")
-    access: Optional[AccessRights] = Field(None, description="Права доступа (web/api/mobile)")
-    email: Optional[str] = Field(None, description="Электронная почта")
-    phone: Optional[str] = Field(None, description="Телефон")
+    user_name: str | None = Field(None, description="Имя пользователя")
+    user_patronymic: str | None = Field(None, description="Отчество пользователя")
+    user_surname: str | None = Field(None, description="Фамилия пользователя")
+    last_contract: str | None = Field(None, description="SID последнего договора")
+    access: AccessRights | None = Field(None, description="Права доступа (web/api/mobile)")
+    email: str | None = Field(None, description="Электронная почта")
+    phone: str | None = Field(None, description="Телефон")
 
 
 class AuthUserResponse(BaseModel):
     status: StatusResponse = Field(..., description="Статус ответа API")
     data: AuthUserData = Field(..., description="Данные авторизованного пользователя")
-    timestamp: Optional[int] = Field(None, description="Метка времени (unix timestamp)")
+    timestamp: int | None = Field(None, description="Метка времени (unix timestamp)")
 
 
 # -------------------------
@@ -70,7 +69,7 @@ class AuthUserResponse(BaseModel):
 class LogoffResponse(BaseModel):
     status: StatusResponse = Field(..., description="Статус ответа API")
     data: bool = Field(..., description="True — если выход выполнен успешно")
-    timestamp: Optional[int] = Field(None, description="Метка времени ответа")
+    timestamp: int | None = Field(None, description="Метка времени ответа")
 
 
 # -------------------------
@@ -97,17 +96,17 @@ class ClientInfo(BaseModel):
     ClientType: str = Field(..., description="Тип клиента (например, D)")
     Contract: str = Field(..., description="ID контракта")
     ContractName: str = Field(..., description="Название контракта")
-    PricePlan: Optional[str] = Field(None, description="Тарифный план")
-    Cost: Optional[float] = Field(None, description="Стоимость запросов")
-    Queries: Optional[int] = Field(None, description="Количество запросов")
-    Additional: Optional[int] = Field(None, description="Дополнительное значение")
+    PricePlan: str | None = Field(None, description="Тарифный план")
+    Cost: float | None = Field(None, description="Стоимость запросов")
+    Queries: int | None = Field(None, description="Количество запросов")
+    Additional: int | None = Field(None, description="Дополнительное значение")
 
 
 class MethodsCount(BaseModel):
     all: int = Field(0, description="Общее количество методов")
-    cards: Optional[int] = Field(0, description="Методы, связанные с картами")
-    cardgroups: Optional[int] = Field(0, description="Методы, связанные с группами карт")
-    card: Optional[int] = Field(0, description="Методы, связанные с одной картой")
+    cards: int | None = Field(0, description="Методы, связанные с картами")
+    cardgroups: int | None = Field(0, description="Методы, связанные с группами карт")
+    card: int | None = Field(0, description="Методы, связанные с одной картой")
 
 
 class MethodsInfo(BaseModel):

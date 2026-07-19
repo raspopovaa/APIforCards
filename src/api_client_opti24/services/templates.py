@@ -31,108 +31,100 @@ class TemplatesService(_BaseService):
     для того чтобы по-умолчанию все выпускаемые ВК имели ограничения на покупку (Лимит/Ограничитель).
     """
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_templates(
-        self, contract_id: str, api_version: str = "v2"
+        self, contract_id: str, api_version: str | None = None
     ) -> TemplatesListResponse:
         """Получить список шаблонов ВК"""
         self.logger.info("Requesting templates")
         data = await self._request(
-            "get",
-            "vc/templates",
+            "get_templates",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params={"contract_id": contract_id},
         )
         return TemplatesListResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def create_template(
-        self, contract_id: str, type_: str, name: str, api_version: str = "v2"
+        self, contract_id: str, type_: str, name: str, api_version: str | None = None
     ) -> TemplateCreateResponse:
         """Создать новый шаблон ВК"""
         payload = {"contract_id": contract_id, "type": type_, "name": name}
         self.logger.info("Creating virtual card template")
         data = await self._request(
-            "post",
-            "vc/templates",
+            "create_template",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=payload,
         )
         return TemplateCreateResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def update_template(
         self,
         template_id: str,
         contract_id: str,
         type_: str,
         name: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> TemplateCreateResponse:
         """Изменить существующий шаблон ВК"""
         payload = {"contract_id": contract_id, "type": type_, "name": name}
         self.logger.info("Updating virtual card template")
         data = await self._request(
-            "post",
-            f"vc/templates/{template_id}",
+            "update_template",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"template_id": template_id},
             data=payload,
         )
         return TemplateCreateResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def delete_template(
         self,
         template_id: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
         use_post: bool = False,
     ) -> TemplateDeleteResponse:
         """Удалить шаблон ВК"""
         self.logger.info("Deleting virtual card template")
-        method = "post" if use_post else "delete"
         data = await self._request(
-            method,
-            f"vc/templates/{template_id}",
+            "delete_template",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="post_override" if use_post else "default",
+            path_params={"template_id": template_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
         return TemplateDeleteResponse(**data)
 
     # ---------- ЛИМИТЫ ----------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_template_limits(
-        self, template_id: str, api_version: str = "v2"
+        self, template_id: str, api_version: str | None = None
     ) -> TemplateLimitListResponse:
         """Получить список лимитов шаблона ВК"""
         self.logger.info("Requesting template limits")
         data = await self._request(
-            "get",
-            f"vc/templates/{template_id}/limits",
+            "get_template_limits",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"template_id": template_id},
         )
         return TemplateLimitListResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def create_template_limit(
-        self, template_id: str, payload: dict[str, Any], api_version: str = "v2"
+        self, template_id: str, payload: dict[str, Any], api_version: str | None = None
     ) -> TemplateLimitCreateResponse:
         """Создать лимит для шаблона ВК"""
         self.logger.info("Creating template limit")
         data = await self._request(
-            "post",
-            f"vc/templates/{template_id}/limits",
+            "create_template_limit",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"template_id": template_id},
             data=payload,
         )
         return TemplateLimitCreateResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def update_template_limit(
         self,
         *,
@@ -140,7 +132,7 @@ class TemplatesService(_BaseService):
         limit_id: str,
         limits: list[dict[str, Any]],
         use_post: bool = True,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> TemplateLimitCreateResponse:
         """
         Обновить лимит шаблона ВК.
@@ -190,182 +182,172 @@ class TemplatesService(_BaseService):
             if "amount" not in limit and "sum" not in limit:
                 raise ValueError("Каждый лимит должен содержать либо 'amount', либо 'sum'.")
 
-        method = "post" if use_post else "put"
         request_limits = (
             with_method_override(limits, "PUT") if use_post else [dict(limit) for limit in limits]
         )
 
         # Отправляем список лимитов
         data = await self._request(
-            method,
-            f"vc/templates/{template_id}/limits/{limit_id}",
+            "update_template_limit",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="default" if use_post else "put",
+            path_params={"template_id": template_id, "limit_id": limit_id},
             json=request_limits,
         )
 
         return TemplateLimitCreateResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def delete_template_limit(
         self,
         template_id: str,
         limit_id: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
         use_post: bool = False,
     ) -> TemplateLimitDeleteResponse:
         """Удалить лимит шаблона ВК"""
         self.logger.info("Deleting template limit")
-        method = "post" if use_post else "delete"
         data = await self._request(
-            method,
-            f"vc/templates/{template_id}/limits/{limit_id}",
+            "delete_template_limit",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="post_override" if use_post else "default",
+            path_params={"template_id": template_id, "limit_id": limit_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
         return TemplateLimitDeleteResponse(**data)
 
     # ---------- ОГРАНИЧИТЕЛИ ----------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_template_restrictions(
-        self, template_id: str, api_version: str = "v2"
+        self, template_id: str, api_version: str | None = None
     ) -> TemplateRestrictionListResponse:
         """Получить список ограничителей шаблона ВК"""
         self.logger.info("Requesting template restrictions")
         data = await self._request(
-            "get",
-            f"vc/templates/{template_id}/restrictions",
+            "get_template_restrictions",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"template_id": template_id},
         )
         return TemplateRestrictionListResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def create_template_restriction(
-        self, template_id: str, payload: dict[str, Any], api_version: str = "v2"
+        self, template_id: str, payload: dict[str, Any], api_version: str | None = None
     ) -> TemplateRestrictionCreateResponse:
         """Создать ограничитель для шаблона ВК"""
         self.logger.info("Creating template restriction")
         data = await self._request(
-            "post",
-            f"vc/templates/{template_id}/restrictions",
+            "create_template_restriction",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"template_id": template_id},
             data=payload,
         )
         return TemplateRestrictionCreateResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def update_template_restriction(
         self,
         template_id: str,
         restriction_id: str,
         payload: dict[str, Any],
-        api_version: str = "v2",
+        api_version: str | None = None,
         use_post: bool = True,
     ) -> TemplateRestrictionCreateResponse:
         """Изменить ограничитель шаблона ВК"""
         self.logger.info("Updating template restriction post_fallback=%s", use_post)
-        method = "post" if use_post else "put"
         request_payload = with_method_override(payload, "PUT") if use_post else dict(payload)
         data = await self._request(
-            method,
-            f"vc/templates/{template_id}/restrictions/{restriction_id}",
+            "update_template_restriction",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="default" if use_post else "put",
+            path_params={"template_id": template_id, "restriction_id": restriction_id},
             data=request_payload,
         )
         return TemplateRestrictionCreateResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def delete_template_restriction(
         self,
         template_id: str,
         restriction_id: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
         use_post: bool = False,
     ) -> TemplateRestrictionDeleteResponse:
         """Удалить ограничитель шаблона ВК"""
         self.logger.info("Deleting template restriction")
-        method = "post" if use_post else "delete"
         data = await self._request(
-            method,
-            f"vc/templates/{template_id}/restrictions/{restriction_id}",
+            "delete_template_restriction",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="post_override" if use_post else "default",
+            path_params={"template_id": template_id, "restriction_id": restriction_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
         return TemplateRestrictionDeleteResponse(**data)
 
     # ---------- ГЕООГРАНИЧИТЕЛИ ----------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_template_georestrictions(
-        self, template_id: str, api_version: str = "v2"
+        self, template_id: str, api_version: str | None = None
     ) -> TemplateGeoRestrictionListResponse:
         """Получить список геоограничителей шаблона ВК"""
         self.logger.info("Requesting template geo restrictions")
         data = await self._request(
-            "get",
-            f"vc/templates/{template_id}/georestrictions",
+            "get_template_georestrictions",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"template_id": template_id},
         )
         return TemplateGeoRestrictionListResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def create_template_georestriction(
-        self, template_id: str, payload: dict[str, Any], api_version: str = "v2"
+        self, template_id: str, payload: dict[str, Any], api_version: str | None = None
     ) -> TemplateGeoRestrictionCreateResponse:
         """Создать геоограничитель для шаблона ВК"""
         self.logger.info("Creating template geo restriction")
         data = await self._request(
-            "post",
-            f"vc/templates/{template_id}/georestrictions",
+            "create_template_georestriction",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"template_id": template_id},
             data=payload,
         )
         return TemplateGeoRestrictionCreateResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def update_template_georestriction(
         self,
         template_id: str,
         georestriction_id: str,
         payload: dict[str, Any],
-        api_version: str = "v2",
+        api_version: str | None = None,
         use_post: bool = True,
     ) -> TemplateGeoRestrictionCreateResponse:
         """Изменить геоограничитель шаблона ВК"""
         self.logger.info("Updating template geo restriction post_fallback=%s", use_post)
-        method = "post" if use_post else "put"
         request_payload = with_method_override(payload, "PUT") if use_post else dict(payload)
         data = await self._request(
-            method,
-            f"vc/templates/{template_id}/georestrictions/{georestriction_id}",
+            "update_template_georestriction",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="default" if use_post else "put",
+            path_params={"template_id": template_id, "georestriction_id": georestriction_id},
             data=request_payload,
         )
         return TemplateGeoRestrictionCreateResponse(**data)
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def delete_template_georestriction(
         self,
         template_id: str,
         georestriction_id: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
         use_post: bool = False,
     ) -> TemplateGeoRestrictionDeleteResponse:
         """Удалить геоограничитель шаблона ВК"""
         self.logger.info("Deleting template geo restriction")
-        method = "post" if use_post else "delete"
         data = await self._request(
-            method,
-            f"vc/templates/{template_id}/georestrictions/{georestriction_id}",
+            "delete_template_georestriction",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="post_override" if use_post else "default",
+            path_params={"template_id": template_id, "georestriction_id": georestriction_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
         return TemplateGeoRestrictionDeleteResponse(**data)

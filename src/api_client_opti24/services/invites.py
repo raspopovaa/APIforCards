@@ -21,7 +21,7 @@ class InvitesService(_BaseService):
     """
 
     # ---------------------- GET /v2/invites ----------------------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_invites(
         self,
         *,
@@ -32,7 +32,7 @@ class InvitesService(_BaseService):
         q: str | None = None,
         page: int | None = None,
         on_page: int | None = None,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> InviteList:
         """
         Получить список приглашений (v2).
@@ -57,22 +57,20 @@ class InvitesService(_BaseService):
         params = {k: v for k, v in params.items() if v is not None}
 
         raw = await self._request(
-            "get",
-            "invites",
+            "get_invites",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
         return InviteList(**raw.get("data", {}))
 
     # ---------------------- POST /v2/invites / invites_free ----------------------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def create_invite(
         self,
         *,
         data: dict[str, Any],
         with_send: bool = True,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> InviteResponse:
         """
         Создать приглашение.
@@ -80,66 +78,61 @@ class InvitesService(_BaseService):
         with_send=True  → POST /v2/invites  (с отправкой SMS/Email)
         with_send=False → POST /v2/invites_free (без отправки)
         """
-        endpoint = "invites" if with_send else "invites_free"
-
         raw = await self._request(
-            "post",
-            endpoint,
+            "create_invite",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="default" if with_send else "without_send",
             json=data,
         )
         return InviteResponse(**raw)
 
     # ---------------------- DELETE /v2/invites/{invite_id} ----------------------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def delete_invite(
         self,
         *,
         invite_id: str,
         use_post: bool = False,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> InviteBoolResponse:
         """
         Удалить приглашение (v2).
         """
-        method = "post" if use_post else "delete"
         raw = await self._request(
-            method,
-            f"invites/{invite_id}",
+            "delete_invite",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="post_override" if use_post else "default",
+            path_params={"invite_id": invite_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
         return InviteBoolResponse(**raw)
 
     # ---------------------- GET /v2/invites/{invite_id}/send ----------------------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def resend_invite(
         self,
         *,
         invite_id: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> InviteResponse:
         """
         Повторно отправить приглашение (v2).
         """
         raw = await self._request(
-            "get",
-            f"invites/{invite_id}/send",
+            "resend_invite",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"invite_id": invite_id},
         )
         return InviteResponse(**raw)
 
     # ---------------------- POST /v2/invites/{invite_id}/prolong / prolong_free ----------------------
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def prolong_invite(
         self,
         *,
         invite_id: str,
         with_send: bool = True,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> InviteBoolResponse:
         """
         Продлить приглашение.
@@ -147,12 +140,10 @@ class InvitesService(_BaseService):
         with_send=True  → POST /v2/invites/{invite_id}/prolong  (с отправкой)
         with_send=False → POST /v2/invites/{invite_id}/prolong_free (без отправки)
         """
-        path = "prolong" if with_send else "prolong_free"
-
         raw = await self._request(
-            "post",
-            f"invites/{invite_id}/{path}",
+            "prolong_invite",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="default" if with_send else "without_send",
+            path_params={"invite_id": invite_id},
         )
         return InviteBoolResponse(**raw)

@@ -181,8 +181,16 @@ def build_api_error(
         messages = (body,)
         message = body
 
+    resolved_http_status_code = http_status_code if http_status_code is not None else status_code
+    http_failed = not 200 <= resolved_http_status_code < 300
     effective_status_code = (
-        api_status_code if api_status_code and api_status_code >= 300 else status_code
+        resolved_http_status_code
+        if http_failed
+        else (
+            api_status_code
+            if api_status_code is not None and not 200 <= api_status_code < 300
+            else status_code
+        )
     )
     hint = ERROR_HINTS.get(
         effective_status_code,
@@ -191,7 +199,7 @@ def build_api_error(
     retryable = effective_status_code in {429, 500, 502, 503, 504, 509}
 
     exc_type: type[APIError]
-    if error_type is None:
+    if http_failed or error_type is None:
         if effective_status_code == 400:
             exc_type = ValidationError
         elif effective_status_code == 401:
@@ -223,7 +231,7 @@ def build_api_error(
         message=message,
         body=body,
         endpoint=endpoint,
-        http_status_code=http_status_code if http_status_code is not None else status_code,
+        http_status_code=resolved_http_status_code,
         api_status_code=api_status_code,
         error_type=error_type,
         messages=messages,

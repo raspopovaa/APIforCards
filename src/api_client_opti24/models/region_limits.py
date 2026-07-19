@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from ..modeling import BaseModel, Field
 
@@ -6,14 +6,14 @@ from ..modeling import BaseModel, Field
 class RegionLimit(BaseModel):
     """Региональный лимит по договору, карте или группе карт."""
 
-    id: Optional[str] = Field(..., description="ID регионального лимита")
+    id: str | None = Field(..., description="ID регионального лимита")
     contract_id: str = Field(..., description="ID договора, к которому относится лимит")
-    card_id: Optional[str] = Field(None, description="ID карты, если лимит задан для карты")
-    group_id: Optional[str] = Field(None, description="ID группы карт, если лимит задан для группы")
+    card_id: str | None = Field(None, description="ID карты, если лимит задан для карты")
+    group_id: str | None = Field(None, description="ID группы карт, если лимит задан для группы")
     country: str = Field(..., description="Код страны обслуживания, пример - RUS")
-    region: Optional[str] = Field(None, description="Код регион обслуживания")
-    service_center: Optional[str] = Field(None, description="ID АЗС")
-    date: Optional[str] = Field(None, description="Дата последнего изменения")
+    region: str | None = Field(None, description="Код регион обслуживания")
+    service_center: str | None = Field(None, description="ID АЗС")
+    date: str | None = Field(None, description="Дата последнего изменения")
     limit_type: int = Field(
         ..., description="Тип лимита"
     )  # 1 – Разрешающий ограничитель, 2 – Запрещающий ограничитель

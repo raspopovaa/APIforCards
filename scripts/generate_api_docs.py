@@ -44,6 +44,9 @@ def format_signature(obj: object) -> str:
 
 
 def clean_docstring(obj: object) -> str:
+    if inspect.isclass(obj):
+        own_docstring = vars(obj).get("__doc__")
+        return inspect.cleandoc(own_docstring) if own_docstring else "Описание отсутствует."
     return inspect.getdoc(obj) or "Описание отсутствует."
 
 
@@ -97,7 +100,7 @@ def render_model_block(cls: type[BaseModel]) -> str:
             lines.append(f"  alias: {metadata.get('alias')}")
         if metadata.get("description"):
             lines.append(f"  description: {metadata.get('description')}")
-    return f"```text\n" + "\n".join(lines) + "\n```"
+    return "```text\n" + "\n".join(lines) + "\n```"
 
 
 def render_class(cls: type) -> list[str]:

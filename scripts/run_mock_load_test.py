@@ -23,10 +23,6 @@ class MockTransport:
         self.request_count = 0
         self.auth_calls = 0
         self.endpoint_counts: Counter[str] = Counter()
-        self.auth_recovery = None
-
-    def set_auth_recovery(self, callback) -> None:
-        self.auth_recovery = callback
 
     async def request(
         self,
@@ -133,7 +129,7 @@ class MockTransport:
                 "timestamp": 1710000000,
             }
 
-        if endpoint == "users" and method == "get":
+        if endpoint == "users" and method.upper() == "GET":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -155,7 +151,7 @@ class MockTransport:
                 "timestamp": 1710000000,
             }
 
-        if endpoint == "reports" and api_version == "v2" and method == "get":
+        if endpoint == "reports" and api_version == "v2" and method.upper() == "GET":
             return {
                 "status": {"code": 200},
                 "data": {

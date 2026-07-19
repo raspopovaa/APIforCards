@@ -18,7 +18,7 @@ class UsersService(_BaseService):
 
     # -------------------- Список пользователей --------------------
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_users(
         self,
         *,
@@ -27,7 +27,7 @@ class UsersService(_BaseService):
         on_page: int | None = None,
         q: str | None = None,
         filter: dict[str, Any] | None = None,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> UserListResponse:
         """
         Получить список пользователей.
@@ -49,10 +49,8 @@ class UsersService(_BaseService):
         self.logger.info("Requesting users")
 
         raw = await self._request(
-            "get",
-            "users",
+            "get_users",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
 
@@ -60,13 +58,13 @@ class UsersService(_BaseService):
 
     # -------------------- Создание пользователя --------------------
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def create_user(
         self,
         *,
         uuid: str,
         mobile: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> UserCreateResponse:
         """
         Создание водителя без персональных данных.
@@ -84,10 +82,8 @@ class UsersService(_BaseService):
         self.logger.info("Creating user")
 
         raw = await self._request(
-            "post",
-            "users",
+            "create_user",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 
@@ -95,13 +91,13 @@ class UsersService(_BaseService):
 
     # -------------------- Прикрепление договоров --------------------
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def attach_contracts(
         self,
         *,
         user_id: str,
         contracts: list[dict[str, Any]],
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> UserBoolResponse:
         """
         Прикрепление договоров к пользователю.
@@ -114,10 +110,9 @@ class UsersService(_BaseService):
         self.logger.info("Attaching contracts to user")
 
         raw = await self._request(
-            "post",
-            f"users/{user_id}/attachContracts",
+            "attach_contracts",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"user_id": user_id},
             json=contracts,
         )
 
@@ -125,13 +120,13 @@ class UsersService(_BaseService):
 
     # -------------------- Открепление договоров --------------------
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def detach_contracts(
         self,
         *,
         user_id: str,
         contracts: list[str],
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> UserBoolResponse:
         """
         Открепление договоров от пользователя.
@@ -144,10 +139,9 @@ class UsersService(_BaseService):
         self.logger.info("Detaching contracts from user")
 
         raw = await self._request(
-            "post",
-            f"users/{user_id}/detachContracts",
+            "detach_contracts",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"user_id": user_id},
             json=contracts,
         )
 
@@ -155,13 +149,13 @@ class UsersService(_BaseService):
 
     # -------------------- Прикрепление карты --------------------
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def attach_card(
         self,
         *,
         user_id: str,
         card_id: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> UserBoolResponse:
         """
         Прикрепление карты к пользователю.
@@ -172,10 +166,9 @@ class UsersService(_BaseService):
         self.logger.info("Attaching card to user")
 
         raw = await self._request(
-            "post",
-            f"users/{user_id}/attachCard",
+            "attach_card",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"user_id": user_id},
             data={"card_id": card_id},
         )
 
@@ -183,13 +176,13 @@ class UsersService(_BaseService):
 
     # -------------------- Открепление карты --------------------
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def detach_card(
         self,
         *,
         user_id: str,
         card_id: str,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> UserBoolResponse:
         """
         Открепление карты от пользователя.
@@ -200,10 +193,9 @@ class UsersService(_BaseService):
         self.logger.info("Detaching card from user")
 
         raw = await self._request(
-            "post",
-            f"users/{user_id}/detachCard",
+            "detach_card",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"user_id": user_id},
             data={"card_id": card_id},
         )
 
@@ -211,13 +203,13 @@ class UsersService(_BaseService):
 
     # -------------------- Удаление пользователя --------------------
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def delete_user(
         self,
         *,
         user_id: str,
         use_post: bool = False,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> UserBoolResponse:
         """
         Удаление пользователя.
@@ -227,12 +219,11 @@ class UsersService(_BaseService):
         """
         self.logger.info("Deleting user")
 
-        method = "post" if use_post else "delete"
         raw = await self._request(
-            method,
-            f"users/{user_id}",
+            "delete_user",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            route_name="post_override" if use_post else "default",
+            path_params={"user_id": user_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
 

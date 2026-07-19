@@ -18,20 +18,14 @@ _Публичные классы и функции не обнаружены._
 
 Описание отсутствует.
 
-Сигнатура: `AuthenticationCoordinator(session: 'AuthenticationSession', request_executor: 'RequestExecutor') -> 'None'`
+Сигнатура: `AuthenticationCoordinator(session: 'SessionManager') -> 'None'`
 
 Публичные методы:
 
 - `authenticate(self) -> 'AuthUserResponse'`
 - `bind(self, authenticate: 'Callable[[], Awaitable[AuthUserResponse]]') -> 'None'`
 - `ensure_authenticated(self) -> 'str'`
-- `recover(self) -> 'dict[str, str]'`
-
-### `build_credentials_provider`
-
-Описание отсутствует.
-
-Сигнатура: `build_credentials_provider(login: 'str', password: 'str') -> 'CredentialsProvider'`
+- `recover(self) -> 'str'`
 
 ## `api_client_opti24.client`
 
@@ -41,7 +35,7 @@ _Публичные классы и функции не обнаружены._
 
 Описание отсутствует.
 
-Сигнатура: `APIClient(base_url: str | None = None, api_key: str | None = None, login: str | None = None, password: str | None = None, *, settings: api_client_opti24.config.APISettings | None = None, transport: api_client_opti24.executor.Transport | None = None, session_manager: api_client_opti24.session.SessionManager | None = None, registry: api_client_opti24.registry.MethodRegistry | None = None, logger: logging.Logger | None = None, clock: api_client_opti24.runtime.Clock | None = None, credentials_provider: api_client_opti24.service_base.CredentialsProvider | None = None) -> None`
+Сигнатура: `APIClient(base_url: str | None = None, api_key: str | None = None, login: str | None = None, password: str | None = None, *, settings: api_client_opti24.config.ConnectionSettings | api_client_opti24.config.APISettings | None = None, transport: api_client_opti24.executor.Transport | None = None, session_manager: api_client_opti24.session.SessionManager | None = None, registry: api_client_opti24.registry.MethodRegistry | None = None, logger: logging.Logger | None = None, clock: api_client_opti24.runtime.Clock | None = None, credentials_provider: api_client_opti24.service_base.CredentialsProvider | None = None, api_key_provider: api_client_opti24.service_base.APIKeyProvider | None = None) -> None`
 
 Публичные методы:
 
@@ -53,13 +47,24 @@ _Публичные классы и функции не обнаружены._
 
 ### `APISettings`
 
-APISettings(base_url: 'str', api_key: 'str', login: 'str | None' = None, password: 'str | None' = None, request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None))
+APISettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None), api_key: 'str', login: 'str | None' = None, password: 'str | None' = None)
 
-Сигнатура: `APISettings(base_url: 'str', api_key: 'str', login: 'str | None' = None, password: 'str | None' = None, request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None)) -> None`
+Сигнатура: `APISettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None), api_key: 'str', login: 'str | None' = None, password: 'str | None' = None) -> None`
 
 Публичные методы:
 
+- `connection_settings(self) -> 'ConnectionSettings'`
 - `from_env(*, load_dotenv: 'bool' = True, env_file: 'str | Path' = '.env') -> 'APISettings'`
+
+### `ConnectionSettings`
+
+ConnectionSettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None))
+
+Сигнатура: `ConnectionSettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None)) -> None`
+
+Публичные методы:
+
+- `from_env(*, load_dotenv: 'bool' = True, env_file: 'str | Path' = '.env') -> 'ConnectionSettings'`
 
 ### `TimeoutPolicy`
 
@@ -71,6 +76,43 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 - `resolve(self, timeout_class: 'str') -> 'float'`
 
+## `api_client_opti24.contracts`
+
+Описание отсутствует.
+
+### `serialize_registry_contract`
+
+Описание отсутствует.
+
+Сигнатура: `serialize_registry_contract(registry: 'MethodRegistry') -> 'list[dict[str, object]]'`
+
+## `api_client_opti24.credentials`
+
+Описание отсутствует.
+
+### `EnvironmentCredentialsProvider`
+
+Описание отсутствует.
+
+Сигнатура: `EnvironmentCredentialsProvider(*, api_key: 'str', login: 'str', password: 'str') -> 'None'`
+
+Публичные методы:
+
+- `from_env(*, load_dotenv: 'bool' = True, env_file: 'str | Path' = '.env') -> 'EnvironmentCredentialsProvider'`
+- `get_api_key(self) -> 'str'`
+- `get_credentials(self) -> 'tuple[str, str]'`
+
+### `StaticCredentialsProvider`
+
+Описание отсутствует.
+
+Сигнатура: `StaticCredentialsProvider(*, api_key: 'str', login: 'str', password: 'str') -> 'None'`
+
+Публичные методы:
+
+- `get_api_key(self) -> 'str'`
+- `get_credentials(self) -> 'tuple[str, str]'`
+
 ## `api_client_opti24.decorators`
 
 Описание отсутствует.
@@ -79,13 +121,7 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 Описание отсутствует.
 
-Сигнатура: `api_method(require_session: bool = False, default_version: str = 'v1') -> collections.abc.Callable[[collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]], collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]]`
-
-### `get_current_api_method_name`
-
-Описание отсутствует.
-
-Сигнатура: `get_current_api_method_name() -> str | None`
+Сигнатура: `api_method(func: collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]) -> collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]`
 
 ## `api_client_opti24.endpoints`
 
@@ -93,36 +129,38 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 
 ### `EndpointSpec`
 
-EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())
+EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', requires_session: 'bool' = True, timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ())
 
-Сигнатура: `EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -> None`
+Сигнатура: `EndpointSpec(name: 'str', domain: 'str', http_method: 'str', endpoint: 'str', supported_versions: 'tuple[str, ...]', default_version: 'str', demo_available: 'bool', idempotent: 'bool', requires_session: 'bool' = True, timeout_class: 'str' = 'default', retry_class: 'str' = 'safe', route_variants: 'tuple[RouteVariant, ...]' = ()) -> None`
 
 Публичные методы:
 
 - `iter_routes(self) -> 'tuple[RouteVariant, ...]'`
+- `resolve_route(self, *, api_version: 'str | None' = None, route_name: 'str' = 'default') -> 'RouteVariant'`
 - `supports(self, version: 'str') -> 'bool'`
 
 ### `RouteVariant`
 
-RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool')
+RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool', name: 'str' = 'default')
 
-Сигнатура: `RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool') -> None`
+Сигнатура: `RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_available: 'bool', name: 'str' = 'default') -> None`
 
 Публичные методы:
 
+- `render(self, path_params: 'PathParams | None' = None) -> 'str'`
 - `supports(self, version: 'str') -> 'bool'`
 
 ### `endpoint`
 
 Описание отсутствует.
 
-Сигнатура: `endpoint(name: 'str', domain: 'str', http_method: 'str', path: 'str', version: 'str', *, demo: 'bool' = True, timeout: 'str' = 'default', retry: 'str | None' = None, variants: 'tuple[RouteVariant, ...]' = ()) -> 'EndpointSpec'`
+Сигнатура: `endpoint(name: 'str', domain: 'str', http_method: 'str', path: 'str', version: 'str', *, demo: 'bool' = True, timeout: 'str' = 'default', retry: 'str | None' = None, requires_session: 'bool' = True, variants: 'tuple[RouteVariant, ...]' = ()) -> 'EndpointSpec'`
 
 ### `route`
 
 Описание отсутствует.
 
-Сигнатура: `route(http_method: 'str', path: 'str', version: 'str', *, demo: 'bool') -> 'RouteVariant'`
+Сигнатура: `route(http_method: 'str', path: 'str', version: 'str', *, demo: 'bool', name: 'str') -> 'RouteVariant'`
 
 ## `api_client_opti24.env`
 
@@ -140,19 +178,19 @@ RouteVariant(http_method: 'str', endpoint: 'str', api_version: 'str', demo_avail
 
 ### `APIError`
 
-Common base class for all non-exit exceptions.
+Описание отсутствует.
 
 Сигнатура: `APIError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `AccessDeniedError`
 
-Common base class for all non-exit exceptions.
+Описание отсутствует.
 
 Сигнатура: `AccessDeniedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `DuplicateConflictError`
 
-Common base class for all non-exit exceptions.
+Описание отсутствует.
 
 Сигнатура: `DuplicateConflictError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
@@ -164,31 +202,31 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 ### `NotAuthenticatedError`
 
-Common base class for all non-exit exceptions.
+Описание отсутствует.
 
 Сигнатура: `NotAuthenticatedError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `NotFoundError`
 
-Common base class for all non-exit exceptions.
+Описание отсутствует.
 
 Сигнатура: `NotFoundError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `RateLimitError`
 
-Common base class for all non-exit exceptions.
+Описание отсутствует.
 
 Сигнатура: `RateLimitError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `ServerError`
 
-Common base class for all non-exit exceptions.
+Описание отсутствует.
 
 Сигнатура: `ServerError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
 ### `ValidationError`
 
-Common base class for all non-exit exceptions.
+Описание отсутствует.
 
 Сигнатура: `ValidationError(status_code: 'int', message: 'str' = '', body: 'Any' = None, endpoint: 'str | None' = None, *, http_status_code: 'int | None' = None, api_status_code: 'int | None' = None, error_type: 'str | None' = None, messages: 'tuple[str, ...] | None' = None, method_name: 'str | None' = None, hint: 'str | None' = None, retryable: 'bool' = False) -> 'None'`
 
@@ -206,46 +244,17 @@ Common base class for all non-exit exceptions.
 
 Описание отсутствует.
 
-Сигнатура: `DefaultRequestExecutor(*, api_key: 'str', transport: 'Transport', session_context: 'SessionContext', registry: 'MethodRegistry', timeouts: 'TimeoutPolicy', logger: 'LoggerLike', clock: 'Clock') -> 'None'`
+Сигнатура: `DefaultRequestExecutor(*, api_key: 'str', transport: 'Transport', session_context: 'SessionContext', session_gate: 'SessionGate', session_recovery: 'SessionRecovery', registry: 'MethodRegistry', timeouts: 'TimeoutPolicy', logger: 'LoggerLike', clock: 'Clock') -> 'None'`
 
 Публичные методы:
 
+- `execute(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'JSONPayload'`
+- `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
 - `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False) -> 'dict[str, str]'`
-- `request(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', **kwargs: 'Any') -> 'JSONPayload'`
-- `request_stream(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', headers: 'dict[str, str] | None' = None, **kwargs: 'Any') -> 'bytes'`
 
 ### `Transport`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `Transport(*args, **kwargs)`
 
@@ -253,8 +262,7 @@ Protocol classes can be generic, they are defined as::
 
 - `aclose(self) -> 'None'`
 - `request(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', **kwargs: 'Any') -> 'DecodedPayload'`
-- `request_stream(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', headers: 'dict[str, str] | None' = None, **kwargs: 'Any') -> 'bytes'`
-- `set_auth_recovery(self, auth_recovery: 'AuthRecovery') -> 'None'`
+- `request_stream(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, **kwargs: 'Any') -> 'bytes'`
 
 ## `api_client_opti24.modeling`
 
@@ -264,31 +272,21 @@ Protocol classes can be generic, they are defined as::
 
 Описание отсутствует.
 
-Сигнатура: `BaseModel(**kwargs: 'Any') -> 'None'`
+Сигнатура: `BaseModel(**extra_data: Any) -> None`
 
 Публичные методы:
 
 - `describe() -> 'dict[str, dict[str, Any]]'`
-- `model_dump(self, *, by_alias: 'bool' = False) -> 'dict[str, Any]'`
-- `model_validate(payload: 'dict[str, Any]') -> 'Self'`
 
-### `FieldInfo`
+### `StrictRequestModel`
 
 Описание отсутствует.
 
-Сигнатура: `FieldInfo(default: 'Any' = <object object>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object>, alias: 'str | None' = None, description: 'str | None' = None) -> 'None'`
+Сигнатура: `StrictRequestModel() -> None`
 
-### `ValidationError`
+Публичные методы:
 
-Inappropriate argument value (of correct type).
-
-Сигнатура: `ValidationError()`
-
-### `Field`
-
-Описание отсутствует.
-
-Сигнатура: `Field(default: 'Any' = <object object>, *, default_factory: 'Callable[[], Any] | Any' = <dataclasses._MISSING_TYPE object>, alias: 'str | None' = None, description: 'str | None' = None) -> 'Any'`
+- `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `decode_model`
 
@@ -296,17 +294,11 @@ Inappropriate argument value (of correct type).
 
 Сигнатура: `decode_model(model_type: 'type[ModelT]', payload: 'dict[str, Any]') -> 'ModelT'`
 
-### `field_validator`
-
-Описание отсутствует.
-
-Сигнатура: `field_validator(*field_names: 'str', mode: 'str' = 'after', **_: 'Any') -> 'Callable[[Callable[..., Any]], Any]'`
-
 ### `validator`
 
 Описание отсутствует.
 
-Сигнатура: `validator(*field_names: 'str', pre: 'bool' = False) -> 'Callable[[Callable[..., Any]], Any]'`
+Сигнатура: `validator(*field_names: 'str', pre: 'bool' = False) -> 'Any'`
 
 ## `api_client_opti24.models`
 
@@ -320,26 +312,9 @@ _Публичные классы и функции не обнаружены._
 
 ### `AccessRights`
 
-AccessRights(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `AccessRights(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-web:
-  type: bool
-  required: False
-  description: Доступ к веб-интерфейсу
-api:
-  type: bool
-  required: False
-  description: Доступ к API
-mobile:
-  type: bool
-  required: False
-  description: Доступ к мобильному приложению
-```
+Сигнатура: `AccessRights(*, web: bool = False, api: bool = False, mobile: bool = False, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -347,22 +322,9 @@ mobile:
 
 ### `AuthError`
 
-AuthError(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `AuthError(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-code:
-  type: str
-  required: True
-  description: Код ошибки (например, INVALID_CREDENTIALS)
-message:
-  type: str
-  required: True
-  description: Текст ошибки
-```
+Сигнатура: `AuthError(*, code: str, message: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -370,18 +332,9 @@ message:
 
 ### `AuthErrorResponse`
 
-AuthErrorResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `AuthErrorResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-error:
-  type: AuthError
-  required: True
-  description: Описание ошибки авторизации
-```
+Сигнатура: `AuthErrorResponse(*, error: api_client_opti24.models.auth.AuthError, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -389,78 +342,9 @@ error:
 
 ### `AuthUserData`
 
-AuthUserData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `AuthUserData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-client_id:
-  type: str
-  required: True
-  description: ID клиента в системе
-client_status:
-  type: str
-  required: True
-  description: Статус клиента (Active, Blocked, и т.п.)
-org_name:
-  type: str | None
-  required: False
-  description: Наименование организации
-session_id:
-  type: str
-  required: True
-  description: JWT токен активной сессии
-user_id:
-  type: str
-  required: True
-  description: ID пользователя
-contracts:
-  type: list[ContractInfo]
-  required: False
-  description: Список доступных договоров
-role_id:
-  type: str | None
-  required: False
-  description: Код роли (например, Supervisor)
-role_name:
-  type: str | None
-  required: False
-  description: Название роли (например, Администратор)
-read_only:
-  type: bool
-  required: False
-  description: Флаг режима только чтение
-user_name:
-  type: str | None
-  required: False
-  description: Имя пользователя
-user_patronymic:
-  type: str | None
-  required: False
-  description: Отчество пользователя
-user_surname:
-  type: str | None
-  required: False
-  description: Фамилия пользователя
-last_contract:
-  type: str | None
-  required: False
-  description: SID последнего договора
-access:
-  type: AccessRights | None
-  required: False
-  description: Права доступа (web/api/mobile)
-email:
-  type: str | None
-  required: False
-  description: Электронная почта
-phone:
-  type: str | None
-  required: False
-  description: Телефон
-```
+Сигнатура: `AuthUserData(*, client_id: str, client_status: str, org_name: str | None = None, session_id: str, user_id: str, contracts: list[api_client_opti24.models.auth.ContractInfo] = <factory>, role_id: str | None = None, role_name: str | None = None, read_only: bool = False, user_name: str | None = None, user_patronymic: str | None = None, user_surname: str | None = None, last_contract: str | None = None, access: api_client_opti24.models.auth.AccessRights | None = None, email: str | None = None, phone: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -468,26 +352,9 @@ phone:
 
 ### `AuthUserResponse`
 
-AuthUserResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `AuthUserResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusResponse
-  required: True
-  description: Статус ответа API
-data:
-  type: AuthUserData
-  required: True
-  description: Данные авторизованного пользователя
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени (unix timestamp)
-```
+Сигнатура: `AuthUserResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: api_client_opti24.models.auth.AuthUserData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -495,46 +362,9 @@ timestamp:
 
 ### `ClientInfo`
 
-ClientInfo(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `ClientInfo(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-Client:
-  type: str
-  required: True
-  description: ID клиента
-ClientType:
-  type: str
-  required: True
-  description: Тип клиента (например, D)
-Contract:
-  type: str
-  required: True
-  description: ID контракта
-ContractName:
-  type: str
-  required: True
-  description: Название контракта
-PricePlan:
-  type: str | None
-  required: False
-  description: Тарифный план
-Cost:
-  type: float | None
-  required: False
-  description: Стоимость запросов
-Queries:
-  type: int | None
-  required: False
-  description: Количество запросов
-Additional:
-  type: int | None
-  required: False
-  description: Дополнительное значение
-```
+Сигнатура: `ClientInfo(*, Client: str, ClientType: str, Contract: str, ContractName: str, PricePlan: str | None = None, Cost: float | None = None, Queries: int | None = None, Additional: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -542,38 +372,9 @@ Additional:
 
 ### `ContractInfo`
 
-ContractInfo(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `ContractInfo(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID договора
-number:
-  type: str
-  required: True
-  description: Номер договора
-mpc:
-  type: bool
-  required: False
-  description: Есть ли МПК (виртуальные карты)
-template_id:
-  type: str | None
-  required: False
-  description: ID шаблона ВК, если есть
-cards_count:
-  type: int
-  required: False
-  description: Количество карт по договору
-one_price:
-  type: bool
-  required: False
-  description: Признак единой цены
-```
+Сигнатура: `ContractInfo(*, id: str, number: str, mpc: bool = False, template_id: str | None = None, cards_count: int = 0, one_price: bool = False, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -581,26 +382,9 @@ one_price:
 
 ### `GetInfoResponse`
 
-GetInfoResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `GetInfoResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusResponse
-  required: True
-  description: Статус ответа API
-data:
-  type: InfoData
-  required: True
-  description: Детализированные данные о статистике
-timestamp:
-  type: int
-  required: True
-  description: Временная метка (UNIX timestamp)
-```
+Сигнатура: `GetInfoResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: api_client_opti24.models.auth.InfoData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -608,35 +392,9 @@ timestamp:
 
 ### `InfoData`
 
-InfoData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `InfoData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-from_:
-  type: datetime
-  required: True
-  alias: from
-  description: Начало периода статистики
-to:
-  type: datetime
-  required: True
-  description: Конец периода статистики
-client_info:
-  type: ClientInfo
-  required: True
-  description: Информация о клиенте
-methods:
-  type: MethodsCount
-  required: True
-  description: Количество вызовов по категориям
-methods_info:
-  type: MethodsInfo
-  required: True
-  description: Описание доступных методов API
-```
+Сигнатура: `InfoData(*, from_: datetime.datetime, to: datetime.datetime, client_info: api_client_opti24.models.auth.ClientInfo, methods: api_client_opti24.models.auth.MethodsCount, methods_info: api_client_opti24.models.auth.MethodsInfo, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -644,26 +402,9 @@ methods_info:
 
 ### `LogoffResponse`
 
-LogoffResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `LogoffResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusResponse
-  required: True
-  description: Статус ответа API
-data:
-  type: bool
-  required: True
-  description: True — если выход выполнен успешно
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа
-```
+Сигнатура: `LogoffResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -671,30 +412,9 @@ timestamp:
 
 ### `MethodsCount`
 
-MethodsCount(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `MethodsCount(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-all:
-  type: int
-  required: False
-  description: Общее количество методов
-cards:
-  type: int | None
-  required: False
-  description: Методы, связанные с картами
-cardgroups:
-  type: int | None
-  required: False
-  description: Методы, связанные с группами карт
-card:
-  type: int | None
-  required: False
-  description: Методы, связанные с одной картой
-```
+Сигнатура: `MethodsCount(*, all: int = 0, cards: int | None = 0, cardgroups: int | None = 0, card: int | None = 0, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -702,22 +422,9 @@ card:
 
 ### `MethodsInfo`
 
-MethodsInfo(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `MethodsInfo(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-actions_bill:
-  type: dict[str, str]
-  required: True
-  description: Платные методы API (влияют на статистику)
-actions_not_bill:
-  type: dict[str, str]
-  required: True
-  description: Бесплатные методы API (не влияют на статистику)
-```
+Сигнатура: `MethodsInfo(*, actions_bill: dict[str, str], actions_not_bill: dict[str, str], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -725,18 +432,9 @@ actions_not_bill:
 
 ### `StatusResponse`
 
-StatusResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `StatusResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-code:
-  type: int
-  required: True
-  description: Код состояния ответа (например, 200 — OK, 400 — ошибка запроса)
-```
+Сигнатура: `StatusResponse(*, code: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -750,32 +448,7 @@ code:
 
 Информация о группе карт.
 
-Сигнатура: `CardGroupItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор группы карт
-name:
-  type: str
-  required: True
-  description: Название группы карт
-cards_count:
-  type: int
-  required: True
-  description: Количество карт в группе
-status:
-  type: str
-  required: True
-  description: Статус группы (например, Synchronize)
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора
-```
+Сигнатура: `CardGroupItem(*, id: str, name: str, cards_count: int, status: str, contract_id: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -785,20 +458,7 @@ contract_id:
 
 Контейнер данных со списком групп карт.
 
-Сигнатура: `CardGroupListData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество групп
-result:
-  type: list[CardGroupItem]
-  required: True
-  description: Список групп карт
-```
+Сигнатура: `CardGroupListData(*, total_count: int, result: list[api_client_opti24.models.card_group.CardGroupItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -808,24 +468,7 @@ result:
 
 Ответ метода получения списка групп карт.
 
-Сигнатура: `CardGroupListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Информация о статусе запроса (код и описание)
-data:
-  type: CardGroupListData
-  required: True
-  description: Основные данные ответа
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа (UNIX timestamp)
-```
+Сигнатура: `CardGroupListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.card_group.CardGroupListData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -835,24 +478,7 @@ timestamp:
 
 Ответ метода удаления группы карт.
 
-Сигнатура: `RemoveCardGroupResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Информация о статусе запроса (код и описание)
-data:
-  type: bool
-  required: True
-  description: Флаг успешного выполнения операции
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа (UNIX timestamp)
-```
+Сигнатура: `RemoveCardGroupResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -862,16 +488,7 @@ timestamp:
 
 Информация о созданной или изменённой группе.
 
-Сигнатура: `SetCardGroupData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор созданной или изменённой группы
-```
+Сигнатура: `SetCardGroupData(*, id: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -881,24 +498,7 @@ id:
 
 Ответ метода установки/изменения группы карт.
 
-Сигнатура: `SetCardGroupResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Информация о статусе запроса (код и описание)
-data:
-  type: SetCardGroupData
-  required: True
-  description: Информация о созданной/обновлённой группе
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа (UNIX timestamp)
-```
+Сигнатура: `SetCardGroupResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.card_group.SetCardGroupData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -908,24 +508,7 @@ timestamp:
 
 Ответ метода добавления карт в группу.
 
-Сигнатура: `SetCardsToGroupResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Информация о статусе запроса (код и описание)
-data:
-  type: bool
-  required: True
-  description: Флаг успешного выполнения операции
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа (UNIX timestamp)
-```
+Сигнатура: `SetCardsToGroupResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -937,26 +520,9 @@ timestamp:
 
 ### `BoolResponse`
 
-BoolResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `BoolResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус запроса
-data:
-  type: bool
-  required: True
-  description: Флаг результата операции (True — успех)
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `BoolResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -964,86 +530,9 @@ timestamp:
 
 ### `CardDetail`
 
-CardDetail(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardDetail(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор карты
-contract_id:
-  type: str
-  required: True
-  description: ID договора
-number:
-  type: str
-  required: True
-  description: Номер карты
-status:
-  type: str
-  required: True
-  description: Статус карты
-can_work_offline:
-  type: bool | None
-  required: False
-  description: Может работать офлайн
-card_auth_type:
-  type: str | None
-  required: False
-  description: Тип аутентификации карты
-comment:
-  type: str | None
-  required: False
-  description: Комментарий к карте
-date_last_usage:
-  type: datetime | str | None
-  required: False
-  description: Дата последнего использования (может быть пустой строкой)
-date_released:
-  type: datetime | str | None
-  required: False
-  description: Дата выпуска карты
-servicecenter_last_usage_name:
-  type: str | None
-  required: False
-  description: Название АЗС последнего использования
-transaction_timeout:
-  type: TransactionTimeout | None
-  required: False
-  description: Таймаут транзакции
-product:
-  type: str | None
-  required: False
-  description: Тип продукта (limit/wallet)
-carrier:
-  type: str | None
-  required: False
-  description: Тип карты (Plastic/Virtual)
-available:
-  type: str | None
-  required: False
-  description: Доступный лимит или баланс
-currency:
-  type: str | None
-  required: False
-  description: Валюта
-payment_of_tolls:
-  type: str | None
-  required: False
-  description: Признак оплаты дорожных сборов
-previous:
-  type: str | None
-  required: False
-  description: ID предыдущей карты
-next:
-  type: str | None
-  required: False
-  description: ID следующей карты
-```
+Сигнатура: `CardDetail(*, id: str, contract_id: str, number: str, status: str, can_work_offline: bool | None = None, card_auth_type: str | None = None, comment: str | None = None, date_last_usage: datetime.datetime | str | None = None, date_released: datetime.datetime | str | None = None, servicecenter_last_usage_name: str | None = None, transaction_timeout: api_client_opti24.models.cards.TransactionTimeout | None = None, product: str | None = None, carrier: str | None = None, available: str | None = None, currency: str | None = None, payment_of_tolls: str | None = None, previous: str | None = None, next: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1052,22 +541,9 @@ next:
 
 ### `CardDetailData`
 
-CardDetailData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardDetailData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество записей
-result:
-  type: list[CardDetail]
-  required: True
-  description: Список карт
-```
+Сигнатура: `CardDetailData(*, total_count: int, result: list[api_client_opti24.models.cards.CardDetail], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1075,26 +551,9 @@ result:
 
 ### `CardDetailResponse`
 
-CardDetailResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardDetailResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус ответа
-data:
-  type: CardDetailData
-  required: True
-  description: Основные данные
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `CardDetailResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardDetailData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1102,54 +561,9 @@ timestamp:
 
 ### `CardDriverInfo`
 
-CardDriverInfo(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardDriverInfo(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID пользователя/водителя
-login:
-  type: str
-  required: True
-  description: Логин (обычно телефон)
-first_name:
-  type: str
-  required: True
-  description: Имя водителя
-last_name:
-  type: str
-  required: True
-  description: Фамилия водителя
-middle_name:
-  type: str | None
-  required: False
-  description: Отчество водителя
-date:
-  type: str | None
-  required: False
-  description: Дата рождения или дата регистрации
-position:
-  type: str | None
-  required: False
-  description: Должность водителя
-role:
-  type: str | None
-  required: False
-  description: Роль пользователя
-mobile_phone:
-  type: str
-  required: True
-  description: Номер телефона
-email:
-  type: str | None
-  required: False
-  description: Email водителя
-```
+Сигнатура: `CardDriverInfo(*, id: str, login: str, first_name: str, last_name: str, middle_name: str | None = None, date: str | None = None, position: str | None = None, role: str | None = None, mobile_phone: str, email: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1157,22 +571,9 @@ email:
 
 ### `CardDriversData`
 
-CardDriversData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardDriversData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество водителей, связанных с картой
-result:
-  type: list[CardDriverInfo]
-  required: True
-  description: Список водителей
-```
+Сигнатура: `CardDriversData(*, total_count: int, result: list[api_client_opti24.models.cards.CardDriverInfo], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1180,26 +581,9 @@ result:
 
 ### `CardDriversResponse`
 
-CardDriversResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardDriversResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус запроса
-data:
-  type: CardDriversData
-  required: True
-  description: Основные данные
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `CardDriversResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardDriversData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1207,22 +591,9 @@ timestamp:
 
 ### `CardGroupData`
 
-CardGroupData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardGroupData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество карт в группе
-result:
-  type: list[CardGroupInfo]
-  required: True
-  description: Список карт в группе
-```
+Сигнатура: `CardGroupData(*, total_count: int, result: list[api_client_opti24.models.cards.CardGroupInfo], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1230,50 +601,9 @@ result:
 
 ### `CardGroupInfo`
 
-CardGroupInfo(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardGroupInfo(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID карты
-group:
-  type: str
-  required: True
-  description: ID группы карт
-contract_id:
-  type: str
-  required: True
-  description: ID договора
-number:
-  type: str
-  required: True
-  description: Номер карты
-status:
-  type: str
-  required: True
-  description: Статус карты
-comment:
-  type: str | None
-  required: False
-  description: Комментарий
-product:
-  type: str | None
-  required: False
-  description: Тип продукта
-payment_of_tolls:
-  type: str | None
-  required: False
-  description: Оплата платных дорог ('Y' или 'N')
-sync_group_state:
-  type: str | None
-  required: False
-  description: Статус синхронизации группы
-```
+Сигнатура: `CardGroupInfo(*, id: str, group: str, contract_id: str, number: str, status: str, comment: str | None = None, product: str | None = None, payment_of_tolls: str | None = None, sync_group_state: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1281,26 +611,9 @@ sync_group_state:
 
 ### `CardGroupResponse`
 
-CardGroupResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardGroupResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус ответа
-data:
-  type: CardGroupData
-  required: True
-  description: Основные данные
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `CardGroupResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardGroupData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1308,74 +621,9 @@ timestamp:
 
 ### `CardInfo`
 
-CardInfo(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardInfo(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Уникальный идентификатор карты
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора
-number:
-  type: str
-  required: True
-  description: Номер топливной карты
-status:
-  type: str
-  required: True
-  description: Статус карты (например, Active, Locked(Client))
-can_work_offline:
-  type: bool | None
-  required: False
-  description: Может ли карта работать офлайн
-card_auth_type:
-  type: str | None
-  required: False
-  description: Тип авторизации карты (например, PIN)
-comment:
-  type: str | None
-  required: False
-  description: Комментарий к карте
-date_expired:
-  type: datetime | None
-  required: False
-  description: Дата истечения срока действия карты
-date_last_usage:
-  type: datetime | None
-  required: False
-  description: Дата последнего использования карты
-date_released:
-  type: datetime | None
-  required: False
-  description: Дата выпуска карты
-servicecenter_last_usage_name:
-  type: str | None
-  required: False
-  description: Название последней АЗС, где использовалась карта
-transaction_last_detail:
-  type: str | None
-  required: False
-  description: Информация о последней транзакции
-transaction_timeout:
-  type: TransactionTimeout | None
-  required: False
-  description: Таймаут последней транзакции
-product:
-  type: str | None
-  required: False
-  description: Тип продукта (limit/wallet)
-payment_of_tolls:
-  type: str | None
-  required: False
-  description: Оплата платных дорог ('Y' или 'N')
-```
+Сигнатура: `CardInfo(*, id: str, contract_id: str, number: str, status: str, can_work_offline: bool | None = None, card_auth_type: str | None = None, comment: str | None = None, date_expired: datetime.datetime | None = None, date_last_usage: datetime.datetime | None = None, date_released: datetime.datetime | None = None, servicecenter_last_usage_name: str | None = None, transaction_last_detail: str | None = None, transaction_timeout: api_client_opti24.models.cards.TransactionTimeout | None = None, product: str | None = None, payment_of_tolls: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1385,84 +633,7 @@ payment_of_tolls:
 
 Информация об одной топливной карте договора.
 
-Сигнатура: `CardV2Item(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Уникальный идентификатор карты
-group_id:
-  type: str | None
-  required: False
-  description: ID группы карт, если назначена
-group_name:
-  type: str | None
-  required: False
-  description: Название группы карт
-contract_id:
-  type: str
-  required: True
-  description: ID договора, к которому принадлежит карта
-contract_name:
-  type: str
-  required: True
-  description: Название договора
-number:
-  type: str
-  required: True
-  description: Номер топливной карты
-status:
-  type: str
-  required: True
-  description: Системное значение статуса карты
-status_name:
-  type: str | None
-  required: False
-  description: Отображаемое имя статуса (например 'Активна')
-comment:
-  type: str | None
-  required: False
-  description: Комментарий, установленный пользователем
-product:
-  type: str
-  required: True
-  description: Тип продукта, например 'limit' или 'wallet'
-product_name:
-  type: str | None
-  required: False
-  description: Отображаемое имя продукта
-carrier:
-  type: str
-  required: True
-  description: Тип носителя карты ('Plastic' или 'Virtual Card')
-carrier_name:
-  type: str | None
-  required: False
-  description: Название типа носителя карты
-platon:
-  type: bool
-  required: True
-  description: Признак наличия поддержки Platon (оплата проезда)
-avtodor:
-  type: bool
-  required: True
-  description: Признак наличия поддержки Автодора
-sync_group_state:
-  type: str | None
-  required: False
-  description: Состояние синхронизации группы карт
-users:
-  type: list[str] | None
-  required: False
-  description: Список ID пользователей, привязанных к карте
-mpc:
-  type: bool | None
-  required: False
-  description: Признак наличия мультипроцессингового центра (mpc)
-```
+Сигнатура: `CardV2Item(*, id: str, group_id: str | None = None, group_name: str | None = None, contract_id: str, contract_name: str, number: str, status: str, status_name: str | None = None, comment: str | None = None, product: str, product_name: str | None = None, carrier: str, carrier_name: str | None = None, platon: bool, avtodor: bool, sync_group_state: str | None = None, users: list[str] | None = <factory>, mpc: bool | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1470,22 +641,9 @@ mpc:
 
 ### `CardsListData`
 
-CardsListData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardsListData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество найденных карт
-result:
-  type: list[CardInfo]
-  required: True
-  description: Список найденных карт
-```
+Сигнатура: `CardsListData(*, total_count: int, result: list[api_client_opti24.models.cards.CardInfo], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1493,26 +651,9 @@ result:
 
 ### `CardsListResponse`
 
-CardsListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardsListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект со статусом ответа (например, {'code': 200})
-data:
-  type: CardsListData
-  required: True
-  description: Основные данные ответа
-timestamp:
-  type: int
-  required: True
-  description: Временная метка сервера (UNIX-timestamp)
-```
+Сигнатура: `CardsListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardsListData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1520,26 +661,9 @@ timestamp:
 
 ### `CardsListResponse`
 
-CardsListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `CardsListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект со статусом ответа (например, {'code': 200})
-data:
-  type: CardsListData
-  required: True
-  description: Основные данные ответа
-timestamp:
-  type: int
-  required: True
-  description: Временная метка сервера (UNIX-timestamp)
-```
+Сигнатура: `CardsListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardsListData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1549,20 +673,7 @@ timestamp:
 
 Основной объект данных для списка карт (v2).
 
-Сигнатура: `CardsV2Data(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество найденных карт
-result:
-  type: list[CardV2Item]
-  required: True
-  description: Список карт договора
-```
+Сигнатура: `CardsV2Data(*, total_count: int, result: list[api_client_opti24.models.cards.CardV2Item], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1572,24 +683,7 @@ result:
 
 Ответ API метода GET /v2/cards.
 
-Сигнатура: `CardsV2Response(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект статуса (например {'code': 200})
-data:
-  type: CardsV2Data
-  required: True
-  description: Основные данные (список карт)
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (Unix timestamp)
-```
+Сигнатура: `CardsV2Response(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardsV2Data, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1597,26 +691,9 @@ timestamp:
 
 ### `IDListResponse`
 
-IDListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `IDListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус запроса
-data:
-  type: list[str]
-  required: True
-  description: ID карт, которые были заблокированы/разблокированы
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `IDListResponse(*, status: dict[str, typing.Any], data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1624,22 +701,9 @@ timestamp:
 
 ### `TransactionTimeout`
 
-TransactionTimeout(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TransactionTimeout(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-type:
-  type: str | int
-  required: True
-  description: Тип таймаута ('H', 'N' или числовое значение)
-value:
-  type: str | int
-  required: True
-  description: Значение таймаута
-```
+Сигнатура: `TransactionTimeout(*, type: str | int, value: str | int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1653,48 +717,7 @@ value:
 
 Данные по расходу и балансу договора
 
-Сигнатура: `BalanceData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-available_amount:
-  type: str
-  required: True
-  description: Доступный остаток
-own_balance:
-  type: str
-  required: True
-  description: Собственные средства
-balance:
-  type: str
-  required: True
-  description: Собственные средства клиента с учетом блокировок
-consumption_for_month:
-  type: str
-  required: True
-  description: Расход в текущем месяце (в валюте контракта)
-consumption_for_month_volume:
-  type: str
-  required: True
-  description: Объем потребления в текущем месяце (в литрах)
-consumption_for_prev_month_volume:
-  type: str
-  required: True
-  description: Объем потребления в предыдущем месяце (в литрах)
-last_payment_sum:
-  type: str | None
-  required: False
-  description: Сумма последнего платежа
-last_payment_date:
-  type: str | None
-  required: False
-  description: Дата последнего платежа
-currency:
-  type: str
-  required: True
-  description: Валюта договора
-```
+Сигнатура: `BalanceData(*, available_amount: str, own_balance: str, balance: str, consumption_for_month: str, consumption_for_month_volume: str, consumption_for_prev_month_volume: str, last_payment_sum: str | None = None, last_payment_date: str | None = None, currency: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1704,24 +727,7 @@ currency:
 
 Информация по картам договора
 
-Сигнатура: `CardsData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-cards_quantity_all:
-  type: str
-  required: True
-  description: Число карт договора
-cards_quantity_active:
-  type: str
-  required: True
-  description: Число активных карт договора
-card_groups_quantity_all:
-  type: str | None
-  required: False
-  description: Число групп карт на договоре
-```
+Сигнатура: `CardsData(*, cards_quantity_all: str, cards_quantity_active: str, card_groups_quantity_all: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1731,132 +737,7 @@ card_groups_quantity_all:
 
 Основные данные договора
 
-Сигнатура: `ContractData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-contract_id:
-  type: str
-  required: True
-  description: ID договора
-way_id:
-  type: str
-  required: True
-  description: ID договора в процессинге
-contract_number:
-  type: str
-  required: True
-  description: Номер договора
-unique_payment_id:
-  type: str
-  required: True
-  description: Уникальный идентификатор платежа (УИП)
-client:
-  type: str
-  required: True
-  description: ID клиента
-client_category:
-  type: str
-  required: True
-  description: Категория клиента
-contract_category:
-  type: str
-  required: True
-  description: Категория договора
-country:
-  type: str
-  required: True
-  description: Страна заключения
-region:
-  type: str
-  required: True
-  description: Регион заключения
-fin_institution:
-  type: str
-  required: True
-  description: Финансовый институт
-invoice_scheme:
-  type: str
-  required: True
-  description: Подключение инвойсирования
-invoice_period:
-  type: str | None
-  required: False
-  description: Дни выставления счетов
-invoice_pmt_delay:
-  type: str | None
-  required: False
-  description: Количество дней на оплату инвойса
-contract_status:
-  type: str
-  required: True
-  description: ID статуса договора
-contract_status_name:
-  type: str
-  required: True
-  description: Значение статуса договора
-pay_scheme:
-  type: str
-  required: True
-  description: Условия оплаты
-discount_scheme:
-  type: str
-  required: True
-  description: Схема расчета скидки (код из справочника DiscountScheme)
-auto_pay:
-  type: str
-  required: True
-  description: Признак разрешения для подключения автосписания с р/с
-auto_pay_type:
-  type: str
-  required: True
-  description: Тип подключения автоматического платежа
-credit_limit:
-  type: str | None
-  required: False
-  description: Кредитный лимит
-current_amount_limiter:
-  type: str
-  required: True
-  description: Накопленная сумма по контракту
-balance_amount_limiter:
-  type: str | None
-  required: False
-  description: Доступная сумма по контракту (max – current)
-max_amount_limiter:
-  type: str | None
-  required: False
-  description: Ограничение лимита на сумму договора
-date_open:
-  type: str
-  required: True
-  description: Дата заключения договора
-effective_date:
-  type: str
-  required: True
-  description: Дата вступления в силу
-end_date:
-  type: str
-  required: True
-  description: Дата окончания
-date_expire:
-  type: str
-  required: True
-  description: Дата закрытия
-product_type:
-  type: bool
-  required: True
-  description: Признак универсального топливного продукта (false – старый продукт, true – УТП)
-type_code:
-  type: str
-  required: True
-  description: Тип договора
-supplier_name:
-  type: str
-  required: True
-  description: Имя поставщика
-```
+Сигнатура: `ContractData(*, contract_id: str, way_id: str, contract_number: str, unique_payment_id: str, client: str, client_category: str, contract_category: str, country: str, region: str, fin_institution: str, invoice_scheme: str, invoice_period: str | None = None, invoice_pmt_delay: str | None = None, contract_status: str, contract_status_name: str, pay_scheme: str, discount_scheme: str, auto_pay: str, auto_pay_type: str, credit_limit: str | None = None, current_amount_limiter: str, balance_amount_limiter: str | None = None, max_amount_limiter: str | None = None, date_open: str, effective_date: str, end_date: str, date_expire: str, product_type: bool, type_code: str, supplier_name: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1866,56 +747,7 @@ supplier_name:
 
 Полный ответ API по договору
 
-Сигнатура: `ContractResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-mpc:
-  type: bool
-  required: True
-  description: Разрешен ли выпуск виртуальных карт
-template_id:
-  type: str
-  required: True
-  description: ID шаблона виртуальных карт
-status:
-  type: str
-  required: True
-  description: Статус Way4
-status_crm:
-  type: str
-  required: True
-  description: Статус CRM
-payment_term_id:
-  type: str | None
-  required: False
-  description: ID справочника условия оплаты
-payment_scheme_id:
-  type: str | None
-  required: False
-  description: ID справочника схема оплаты
-is_dealer:
-  type: bool
-  required: True
-  description: Признак дилерский
-balanceData:
-  type: BalanceData
-  required: True
-  description: Данные по расходу и балансу договора
-contractData:
-  type: ContractData
-  required: True
-  description: Данные договора
-managerData:
-  type: ManagerData | None
-  required: False
-  description: Данные по менеджеру договора
-cardsData:
-  type: CardsData
-  required: True
-  description: Данные по количеству карт и групп карт на договоре
-```
+Сигнатура: `ContractResponse(*, mpc: bool, template_id: str, status: str, status_crm: str, payment_term_id: str | None = None, payment_scheme_id: str | None = None, is_dealer: bool, balanceData: api_client_opti24.models.contracts.BalanceData, contractData: api_client_opti24.models.contracts.ContractData, managerData: api_client_opti24.models.contracts.ManagerData | None = None, cardsData: api_client_opti24.models.contracts.CardsData, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1925,60 +757,7 @@ cardsData:
 
 Информация об одном первичном документе.
 
-Сигнатура: `DocumentItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Уникальный идентификатор документа (UUID)
-name:
-  type: str
-  required: True
-  description: Название документа, например 'УПД'
-name_doc:
-  type: str
-  required: True
-  description: Системное имя документа, например 'СчетФактураВыданный'
-number:
-  type: str
-  required: True
-  description: Номер документа, например 'CSC0000000533998'
-date:
-  type: int
-  required: True
-  description: Дата документа в формате UNIX timestamp
-total:
-  type: float
-  required: True
-  description: Общая сумма документа
-vat:
-  type: float
-  required: True
-  description: Сумма НДС
-sum:
-  type: float
-  required: True
-  description: Сумма без НДС
-currency:
-  type: str
-  required: True
-  description: Валюта документа, например 'руб.'
-consignee:
-  type: str
-  required: True
-  description: Грузополучатель (организация)
-contract_id:
-  type: str
-  required: True
-  description: ID договора, к которому относится документ
-contract_name:
-  type: str
-  required: True
-  description: Номер или название договора
-```
+Сигнатура: `DocumentItem(*, id: str, name: str, name_doc: str, number: str, date: int, total: float, vat: float, sum: float, currency: str, consignee: str, contract_id: str, contract_name: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1988,20 +767,7 @@ contract_name:
 
 Секция 'data' в ответе метода /documents.
 
-Сигнатура: `DocumentsData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество найденных документов
-result:
-  type: list[DocumentItem]
-  required: True
-  description: Список найденных документов
-```
+Сигнатура: `DocumentsData(*, total_count: int, result: list[api_client_opti24.models.contracts.DocumentItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2011,24 +777,7 @@ result:
 
 Ответ метода POST /v2/documents (заказ документов).
 
-Сигнатура: `DocumentsOrderResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект статуса, например {'code': 200}
-data:
-  type: bool
-  required: True
-  description: Признак успешной отправки (true — заказ выполнен)
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (Unix timestamp)
-```
+Сигнатура: `DocumentsOrderResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2038,24 +787,7 @@ timestamp:
 
 Ответ метода GET /v2/documents.
 
-Сигнатура: `DocumentsResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект статуса, например {'code': 200}
-data:
-  type: DocumentsData
-  required: True
-  description: Основные данные — список документов
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (Unix timestamp)
-```
+Сигнатура: `DocumentsResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.contracts.DocumentsData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2065,56 +797,7 @@ timestamp:
 
 Информация об одном счёте на оплату.
 
-Сигнатура: `InvoiceItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Уникальный идентификатор счёта
-contract_id:
-  type: str
-  required: True
-  description: ID договора, к которому относится счёт
-ref_number:
-  type: str
-  required: True
-  description: Номер счёта, указанный в системе
-date_start:
-  type: str
-  required: True
-  description: Дата начала периода счёта (YYYY-MM-DD)
-date_end:
-  type: str
-  required: True
-  description: Дата окончания периода счёта (YYYY-MM-DD)
-last_update:
-  type: str
-  required: True
-  description: Дата и время последнего обновления счёта (ISO формат)
-currency:
-  type: str
-  required: True
-  description: Код валюты, например '810'
-amount:
-  type: str
-  required: True
-  description: Сумма счёта
-paid_amount:
-  type: str
-  required: True
-  description: Оплаченная сумма
-status:
-  type: str
-  required: True
-  description: Статус счёта, например 'OPEN' или 'PAID'
-comment:
-  type: str
-  required: True
-  description: Комментарий к счёту, например 'Intermediate Invoice'
-```
+Сигнатура: `InvoiceItem(*, id: str, contract_id: str, ref_number: str, date_start: str, date_end: str, last_update: str, currency: str, amount: str, paid_amount: str, status: str, comment: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2124,24 +807,7 @@ comment:
 
 Ответ метода POST /v2/invoice.
 
-Сигнатура: `InvoiceOrderResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект статуса, например {'code': 200}
-data:
-  type: bool
-  required: True
-  description: Признак успешного создания счёта
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (Unix timestamp)
-```
+Сигнатура: `InvoiceOrderResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2151,20 +817,7 @@ timestamp:
 
 Секция 'data' в ответе списка счетов.
 
-Сигнатура: `InvoicesData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество найденных счетов
-result:
-  type: list[InvoiceItem]
-  required: True
-  description: Список счетов на оплату
-```
+Сигнатура: `InvoicesData(*, total_count: int, result: list[api_client_opti24.models.contracts.InvoiceItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2174,24 +827,7 @@ result:
 
 Ответ метода GET /v2/invoices.
 
-Сигнатура: `InvoicesResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект статуса, например {'code': 200}
-data:
-  type: InvoicesData
-  required: True
-  description: Основные данные — список счетов
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (Unix timestamp)
-```
+Сигнатура: `InvoicesResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.contracts.InvoicesData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2201,32 +837,7 @@ timestamp:
 
 Данные менеджера по сопровождению договора
 
-Сигнатура: `ManagerData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-email:
-  type: str
-  required: True
-  description: Email менеджера
-first_name:
-  type: str
-  required: True
-  description: Имя менеджера
-last_name:
-  type: str
-  required: True
-  description: Фамилия менеджера
-middle_name:
-  type: str | None
-  required: False
-  description: Отчество менеджера
-work_phone:
-  type: str | None
-  required: False
-  description: Рабочий телефон менеджера
-```
+Сигнатура: `ManagerData(*, email: str, first_name: str, last_name: str, middle_name: str | None = None, work_phone: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2236,24 +847,7 @@ work_phone:
 
 Ответ метода POST /v2/orderCards.
 
-Сигнатура: `OrderCardsResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект статуса, например {'code': 200}
-data:
-  type: bool
-  required: True
-  description: Результат операции: true — заказ выполнен успешно
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (Unix timestamp)
-```
+Сигнатура: `OrderCardsResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2263,52 +857,7 @@ timestamp:
 
 Информация об одном платеже по договору.
 
-Сигнатура: `PaymentItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор платежа
-contract_id:
-  type: str
-  required: True
-  description: ID договора, к которому относится платёж
-date:
-  type: str
-  required: True
-  description: Дата и время платежа в формате ISO 8601 (например, 2015-04-15T15:25:20)
-amount:
-  type: str
-  required: True
-  description: Сумма платежа в валюте договора
-currency:
-  type: str
-  required: True
-  description: Код валюты и её обозначение, например '810;RUR'
-amount_client:
-  type: str
-  required: True
-  description: Сумма, поступившая клиенту
-description:
-  type: str
-  required: True
-  description: Описание или назначение платежа
-payment_name:
-  type: str
-  required: True
-  description: Наименование типа платежа, например 'Payment To Client Contract'
-payment_type:
-  type: str
-  required: True
-  description: Тип платежа, например 'P;Advice'
-payment_number:
-  type: str
-  required: True
-  description: Номер платёжного документа
-```
+Сигнатура: `PaymentItem(*, id: str, contract_id: str, date: str, amount: str, currency: str, amount_client: str, description: str, payment_name: str, payment_type: str, payment_number: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2318,20 +867,7 @@ payment_number:
 
 Секция data из ответа API, содержит список платежей и их количество.
 
-Сигнатура: `PaymentsData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество найденных платежей
-result:
-  type: list[PaymentItem]
-  required: True
-  description: Список платежей по договору
-```
+Сигнатура: `PaymentsData(*, total_count: int, result: list[api_client_opti24.models.contracts.PaymentItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2341,24 +877,7 @@ result:
 
 Основная модель ответа метода /getPayments.
 
-Сигнатура: `PaymentsResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Объект с кодом статуса ответа сервера, например {'code': 200}
-data:
-  type: PaymentsData
-  required: True
-  description: Основная часть ответа с данными о платежах
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа сервера в формате Unix timestamp
-```
+Сигнатура: `PaymentsResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.contracts.PaymentsData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2372,48 +891,7 @@ timestamp:
 
 Адрес торговой точки
 
-Сигнатура: `AddressV1(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-track_id:
-  type: str | None
-  required: False
-  description: Номер трассы, если применимо
-kmRoad:
-  type: str | None
-  required: False
-  description: Километр трассы
-roadSide:
-  type: str | None
-  required: False
-  description: Сторона дороги
-city:
-  type: str | None
-  required: False
-  description: Город
-street:
-  type: str | None
-  required: False
-  description: Улица
-house:
-  type: str | None
-  required: False
-  description: Дом
-building:
-  type: str | None
-  required: False
-  description: Строение
-phone:
-  type: str | None
-  required: False
-  description: Телефон торговой точки
-fax:
-  type: str | None
-  required: False
-  description: Факс
-```
+Сигнатура: `AddressV1(*, track_id: str | None = None, kmRoad: str | None = None, roadSide: str | None = None, city: str | None = None, street: str | None = None, house: str | None = None, building: str | None = None, phone: str | None = None, fax: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2423,48 +901,7 @@ fax:
 
 Адрес торговой точки
 
-Сигнатура: `AddressV2(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-track_id:
-  type: str | None
-  required: False
-  description: Номер трассы
-kmRoad:
-  type: str | None
-  required: False
-  description: Километр трассы
-roadSide:
-  type: str | None
-  required: False
-  description: Сторона дороги
-city:
-  type: str | None
-  required: False
-  description: Город
-street:
-  type: str | None
-  required: False
-  description: Улица
-house:
-  type: str | None
-  required: False
-  description: Дом
-building:
-  type: str | None
-  required: False
-  description: Строение
-phone:
-  type: str | None
-  required: False
-  description: Телефон
-fax:
-  type: str | None
-  required: False
-  description: Факс
-```
+Сигнатура: `AddressV2(*, track_id: str | None = None, kmRoad: str | None = None, roadSide: str | None = None, city: str | None = None, street: str | None = None, house: str | None = None, building: str | None = None, phone: str | None = None, fax: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2474,24 +911,7 @@ fax:
 
 Описание фильтра торговых точек
 
-Сигнатура: `AzsFilterItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-filter:
-  type: str | None
-  required: False
-  description: Ключ фильтра (например: services_with_card, countries и т.д.)
-name:
-  type: str | None
-  required: False
-  description: Название фильтра (человекочитаемое)
-values:
-  type: dict[str, AzsFilterValue] | None
-  required: False
-  description: Список значений для данного фильтра
-```
+Сигнатура: `AzsFilterItem(*, filter: str | None = None, name: str | None = None, values: dict[str, api_client_opti24.models.dictionaries.AzsFilterValue] | None = <factory>, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2501,20 +921,7 @@ values:
 
 Отдельное значение фильтра
 
-Сигнатура: `AzsFilterValue(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-name:
-  type: str | None
-  required: False
-  description: Название значения фильтра
-code:
-  type: str | None
-  required: False
-  description: Код значения фильтра
-```
+Сигнатура: `AzsFilterValue(*, name: str | None = None, code: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2524,24 +931,7 @@ code:
 
 Ответ метода /azs/filters
 
-Сигнатура: `AzsFiltersResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус выполнения запроса
-data:
-  type: list[AzsFilterItem] | None
-  required: False
-  description: Список доступных фильтров торговых точек
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (timestamp)
-```
+Сигнатура: `AzsFiltersResponse(*, status: dict[str, Any] | None = None, data: list[api_client_opti24.models.dictionaries.AzsFilterItem] | None = <factory>, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2551,140 +941,7 @@ timestamp:
 
 Информация о торговой точке (v1)
 
-Сигнатура: `AzsItemV1(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str | None
-  required: False
-  description: ID торговой точки (АЗС)
-siebelId:
-  type: str | None
-  required: False
-  description: ID торговой точки в CRM
-contractNumber:
-  type: str | None
-  required: False
-  description: Код торговой точки (договор)
-contractName:
-  type: str | None
-  required: False
-  description: Название торговой точки
-status:
-  type: str | None
-  required: False
-  description: Статус точки (257 – работает, 258 – не работает)
-countryCode:
-  type: str | None
-  required: False
-  description: Код страны
-regionCode:
-  type: str | None
-  required: False
-  description: Код региона
-secessionGPN:
-  type: str | None
-  required: False
-  description: Отделение ГПН по географии
-belongsTo:
-  type: str | None
-  required: False
-  description: Название владельца или оператора
-partner:
-  type: str | None
-  required: False
-  description: ID партнера
-ownType:
-  type: str | None
-  required: False
-  description: Тип собственности (Own / FRAN и др.)
-locationType:
-  type: str | None
-  required: False
-  description: Тип расположения (ROAD и т.д.)
-brand:
-  type: str | None
-  required: False
-  description: Бренд торговой точки
-openDate:
-  type: str | None
-  required: False
-  description: Дата открытия точки
-closeDate:
-  type: str | None
-  required: False
-  description: Дата закрытия (если закрыта)
-latitude:
-  type: str | None
-  required: False
-  description: Координата широты
-longitude:
-  type: str | None
-  required: False
-  description: Координата долготы
-type:
-  type: str | None
-  required: False
-  description: Тип торговой точки (АЗС, СТО и т.д.)
-timeZone:
-  type: str | None
-  required: False
-  description: Часовой пояс точки
-services:
-  type: list[int] | None
-  required: False
-  description: Массив ID услуг
-terminals:
-  type: list[TerminalV1] | None
-  required: False
-  description: Список терминалов торговой точки
-address:
-  type: AddressV1 | None
-  required: False
-  description: Адрес торговой точки
-prices:
-  type: list[PriceItemV1] | None
-  required: False
-  description: Цены товаров на точке
-searchTxt:
-  type: str | None
-  required: False
-  description: Строка поиска
-phone:
-  type: str | None
-  required: False
-  description: Контактный телефон
-height_post:
-  type: str | None
-  required: False
-  description: Высота поста (в метрах)
-working_time:
-  type: list[WorkingTimeV1] | None
-  required: False
-  description: Режим работы
-only_virtual_card:
-  type: bool | None
-  required: False
-  description: Принимаются ли только виртуальные карты
-accept_cards:
-  type: bool | None
-  required: False
-  description: Принимаются ли карты
-hidden_on_map:
-  type: bool | None
-  required: False
-  description: Скрыта ли точка на карте
-active:
-  type: bool | None
-  required: False
-  description: Активна ли торговая точка
-POIType:
-  type: str | None
-  required: False
-  description: Тип торговой точки (POI-код)
-```
+Сигнатура: `AzsItemV1(*, id: str | None = None, siebelId: str | None = None, contractNumber: str | None = None, contractName: str | None = None, status: str | None = None, countryCode: str | None = None, regionCode: str | None = None, secessionGPN: str | None = None, belongsTo: str | None = None, partner: str | None = None, ownType: str | None = None, locationType: str | None = None, brand: str | None = None, openDate: str | None = None, closeDate: str | None = None, latitude: str | None = None, longitude: str | None = None, type: str | None = None, timeZone: str | None = None, services: list[int] | None = <factory>, terminals: list[api_client_opti24.models.dictionaries.TerminalV1] | None = <factory>, address: api_client_opti24.models.dictionaries.AddressV1 | None = None, prices: list[api_client_opti24.models.dictionaries.PriceItemV1] | None = <factory>, searchTxt: str | None = None, phone: str | None = None, height_post: str | None = None, working_time: list[api_client_opti24.models.dictionaries.WorkingTimeV1] | None = <factory>, only_virtual_card: bool | None = None, accept_cards: bool | None = None, hidden_on_map: bool | None = None, active: bool | None = None, POIType: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2694,204 +951,18 @@ POIType:
 
 Информация о торговой точке (АЗС)
 
-Сигнатура: `AzsItemV2(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID торговой точки
-siebel_id:
-  type: str
-  required: True
-  description: Идентификатор Siebel
-status:
-  type: str | None
-  required: False
-  description: Статус торговой точки (257 – работает, 258 – не работает)
-full_name:
-  type: str | None
-  required: False
-  description: Полное наименование торговой точки
-brand:
-  type: str | None
-  required: False
-  description: Бренд
-poi_type_name:
-  type: str | None
-  required: False
-  description: Именование типа
-poi_type_code:
-  type: str | None
-  required: False
-  description: Код типа
-own_type_name:
-  type: str
-  required: True
-  description: Тип собственности (наименование)
-own_type_code:
-  type: str
-  required: True
-  description: Код типа собственности (по отношению к ГПН)
-contract_name:
-  type: str | None
-  required: False
-  description: Название договора
-contract_number:
-  type: str | None
-  required: False
-  description: Номер договора
-phone:
-  type: str | None
-  required: False
-  description: Телефон контактный
-utc_timezone:
-  type: str | None
-  required: False
-  description: UTC часовой пояс АЗС (+5)
-time_zone:
-  type: str | None
-  required: False
-  description: Часовой пояс АЗС относительно Москвы
-open_date:
-  type: str | None
-  required: False
-  description: Дата открытия
-close_date:
-  type: str | None
-  required: False
-  description: Дата закрытия
-last_update:
-  type: str | None
-  required: False
-  description: Дата последнего обновления
-height_post:
-  type: str | None
-  required: False
-  description: Высота поста (в метрах)
-country_name:
-  type: str | None
-  required: True
-  description: Название страны
-country_code:
-  type: str | None
-  required: True
-  description: Код страны
-region_name:
-  type: str | None
-  required: False
-  description: Название региона
-region_code:
-  type: str | None
-  required: False
-  description: Код региона
-address_full:
-  type: str | None
-  required: False
-  description: Полный адрес торговой точки
-location:
-  type: Coordinates | None
-  required: False
-  description: Географические координаты
-latitude:
-  type: str | None
-  required: False
-  description: Широта
-longitude:
-  type: str | None
-  required: False
-  description: Долгота
-location_type:
-  type: str | None
-  required: False
-  description: Тип локации
-secession_gpn:
-  type: str | None
-  required: False
-  description: Отделение ГПН
-partner:
-  type: str | None
-  required: False
-  description: ID партнёра
-belongs_to:
-  type: str | None
-  required: False
-  description: Принадлежность
-info:
-  type: str | None
-  required: False
-  description: Дополнительная информация о точке
-search_txt:
-  type: str | None
-  required: True
-  description: Строка для запроса поиска
-accept_cards:
-  type: bool | None
-  required: True
-  description: Принимаются ли банковские карты
-adblue:
-  type: ServiceGroup | None
-  required: False
-  description: Услуги AdBlue
-electric_charging_station:
-  type: ServiceGroup | None
-  required: False
-  description: Электрозарядные станции
-services_with_card:
-  type: ServiceGroup | None
-  required: False
-  description: Услуги, доступные при оплате картой
-services_without_card:
-  type: ServiceGroup | None
-  required: False
-  description: Услуги, доступные без карты
-prices:
-  type: list[PriceItemV2] | None
-  required: False
-  description: Список товаров с указанием цен
-payment_type:
-  type: list[dict[str, Any]] | None
-  required: False
-  description: Доступные способы оплаты
-terminals:
-  type: list[TerminalV2] | None
-  required: False
-  description: Список терминалов
-address:
-  type: AddressV2 | None
-  required: False
-  description: Адрес торговой точки
-working_time:
-  type: list[WorkingTimeV2] | None
-  required: False
-  description: Расписание работы торговой точки
-```
+Сигнатура: `AzsItemV2(*, id: str, siebel_id: str, status: str | None = None, full_name: str | None = None, brand: str | None = None, poi_type_name: str | None = None, poi_type_code: str | None = None, own_type_name: str, own_type_code: str, contract_name: str | None = None, contract_number: str | None = None, phone: str | None = None, utc_timezone: str | None = None, time_zone: str | None = None, open_date: str | None = None, close_date: str | None = None, last_update: str | None = None, height_post: str | None = None, country_name: str | None, country_code: str | None, region_name: str | None = None, region_code: str | None = None, address_full: str | None = None, location: api_client_opti24.models.dictionaries.Coordinates | None = None, latitude: str | None = None, longitude: str | None = None, location_type: str | None = None, secession_gpn: str | None = None, partner: str | None = None, belongs_to: str | None = None, info: str | None = None, search_txt: str | None, accept_cards: bool | None, adblue: api_client_opti24.models.dictionaries.ServiceGroup | None = None, electric_charging_station: api_client_opti24.models.dictionaries.ServiceGroup | None = None, services_with_card: api_client_opti24.models.dictionaries.ServiceGroup | None = None, services_without_card: api_client_opti24.models.dictionaries.ServiceGroup | None = None, prices: list[api_client_opti24.models.dictionaries.PriceItemV2] | None = <factory>, payment_type: list[dict[str, Any]] | None = <factory>, terminals: list[api_client_opti24.models.dictionaries.TerminalV2] | None = <factory>, address: api_client_opti24.models.dictionaries.AddressV2 | None = None, working_time: list[api_client_opti24.models.dictionaries.WorkingTimeV2] | None = <factory>, **extra_data: Any) -> None`
 
 Публичные методы:
 
 - `describe() -> 'dict[str, dict[str, Any]]'`
-- `fix_empty_service_groups(cls, v: Any) -> Any`
+- `fix_empty_service_groups(v: Any) -> Any`
 
 ### `AzsListV1Data`
 
 Основные данные списка торговых точек (v1)
 
-Сигнатура: `AzsListV1Data(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int | None
-  required: False
-  description: Количество найденных торговых точек
-result:
-  type: list[AzsItemV1] | None
-  required: False
-  description: Список торговых точек
-```
+Сигнатура: `AzsListV1Data(*, total_count: int | None = None, result: list[api_client_opti24.models.dictionaries.AzsItemV1] | None = <factory>, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2901,24 +972,7 @@ result:
 
 Ответ метода GET /vip/v1/AZS
 
-Сигнатура: `AzsListV1Response(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус выполнения запроса
-data:
-  type: AzsListV1Data | None
-  required: False
-  description: Основные данные торговых точек (v1)
-timestamp:
-  type: int | None
-  required: False
-  description: Временная метка (UNIX-время запроса)
-```
+Сигнатура: `AzsListV1Response(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.dictionaries.AzsListV1Data | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2928,20 +982,7 @@ timestamp:
 
 Данные списка торговых точек (v2)
 
-Сигнатура: `AzsListV2Data(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество торговых точек
-result:
-  type: list[AzsItemV2]
-  required: True
-  description: Список торговых точек (АЗС)
-```
+Сигнатура: `AzsListV2Data(*, total_count: int, result: list[api_client_opti24.models.dictionaries.AzsItemV2], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2951,24 +992,7 @@ result:
 
 Ответ метода получения списка торговых точек (v2)
 
-Сигнатура: `AzsListV2Response(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: True
-  description: Информация о статусе запроса
-data:
-  type: AzsListV2Data | None
-  required: True
-  description: Основные данные торговых точек
-timestamp:
-  type: int | None
-  required: True
-  description: Метка времени запроса
-```
+Сигнатура: `AzsListV2Response(*, status: dict[str, Any] | None, data: api_client_opti24.models.dictionaries.AzsListV2Data | None, timestamp: int | None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2978,20 +1002,7 @@ timestamp:
 
 Географические координаты торговой точки
 
-Сигнатура: `Coordinates(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-type:
-  type: str | None
-  required: False
-  description: Тип геоданных (обычно 'Point')
-coordinates:
-  type: list[float]
-  required: False
-  description: Координаты в формате [долгота, широта]
-```
+Сигнатура: `Coordinates(*, type: str | None = None, coordinates: list[float] = <factory>, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3001,20 +1012,7 @@ coordinates:
 
 Основные данные справочника
 
-Сигнатура: `DictionaryData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int | None
-  required: False
-  description: Количество элементов в справочнике
-result:
-  type: list[DictionaryItem] | None
-  required: False
-  description: Список элементов справочника
-```
+Сигнатура: `DictionaryData(*, total_count: int | None = None, result: list[api_client_opti24.models.dictionaries.DictionaryItem] | None = <factory>, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3024,36 +1022,7 @@ result:
 
 Элемент справочника (универсальная модель)
 
-Сигнатура: `DictionaryItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Уникальный идентификатор элемента справочника
-code:
-  type: str | None
-  required: False
-  description: Код элемента (например, код валюты)
-value:
-  type: str | None
-  required: False
-  description: Значение элемента (используется в старых справочниках)
-name:
-  type: str | None
-  required: False
-  description: Название элемента (используется в новых справочниках)
-deleted:
-  type: int | None
-  required: False
-  description: Признак удаления элемента (0 — активен)
-last_update:
-  type: str | None
-  required: False
-  description: Дата последнего обновления записи
-```
+Сигнатура: `DictionaryItem(*, id: str, code: str | None = None, value: str | None = None, name: str | None = None, deleted: int | None = 0, last_update: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3063,24 +1032,7 @@ last_update:
 
 Ответ метода GET /vip/v1/getDictionary
 
-Сигнатура: `DictionaryResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус выполнения запроса
-data:
-  type: DictionaryData | None
-  required: False
-  description: Основные данные справочника
-timestamp:
-  type: int | None
-  required: False
-  description: Временная метка (UNIX-время запроса)
-```
+Сигнатура: `DictionaryResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.dictionaries.DictionaryData | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3090,40 +1042,7 @@ timestamp:
 
 Цена товара на торговой точке
 
-Сигнатура: `PriceItemV1(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-ID:
-  type: str | None
-  required: False
-  description: Идентификатор записи цены
-GasStationID:
-  type: str | None
-  required: False
-  description: ID торговой точки (АЗС)
-GoodsCode:
-  type: str | None
-  required: False
-  description: Код товара (см. справочник GoodsCode)
-Price:
-  type: str | None
-  required: False
-  description: Цена товара
-Currency:
-  type: str | None
-  required: False
-  description: Валюта (код и наименование через ';')
-DateTo:
-  type: str | None
-  required: False
-  description: Дата окончания действия цены
-DateFrom:
-  type: str | None
-  required: False
-  description: Дата начала действия цены
-```
+Сигнатура: `PriceItemV1(*, ID: str | None = None, GasStationID: str | None = None, GoodsCode: str | None = None, Price: str | None = None, Currency: str | None = None, DateTo: str | None = None, DateFrom: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3133,56 +1052,7 @@ DateFrom:
 
 Информация о цене товара на торговой точке
 
-Сигнатура: `PriceItemV2(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-ID:
-  type: str | None
-  required: False
-  description: Идентификатор цены
-GasStationID:
-  type: str | None
-  required: False
-  description: ID торговой точки (АЗС)
-GoodsCode:
-  type: str | None
-  required: False
-  description: Код товара (из справочника GoodsCode)
-Price:
-  type: str | None
-  required: False
-  description: Цена товара
-Currency:
-  type: str | None
-  required: False
-  description: Код валюты, например '810;RUR'
-DateTo:
-  type: str | None
-  required: False
-  description: Дата действия цены до
-DateFrom:
-  type: str | None
-  required: False
-  description: Дата начала действия цены
-hex_color:
-  type: str | None
-  required: False
-  description: HEX-код цвета товара (если указан)
-name:
-  type: str | None
-  required: False
-  description: Название товара
-CurrencyName:
-  type: str | None
-  required: False
-  description: Наименование валюты
-sort:
-  type: int | None
-  required: False
-  description: Порядковый номер отображения
-```
+Сигнатура: `PriceItemV2(*, ID: str | None = None, GasStationID: str | None = None, GoodsCode: str | None = None, Price: str | None = None, Currency: str | None = None, DateTo: str | None = None, DateFrom: str | None = None, hex_color: str | None = None, name: str | None = None, CurrencyName: str | None = None, sort: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3192,20 +1062,7 @@ sort:
 
 Группа услуг, доступных на торговой точке
 
-Сигнатура: `ServiceGroup(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-name:
-  type: str | None
-  required: False
-  description: Наименование группы услуг
-items:
-  type: list[ServiceItem] | None
-  required: False
-  description: Список услуг, входящих в группу
-```
+Сигнатура: `ServiceGroup(*, name: str | None = None, items: list[api_client_opti24.models.dictionaries.ServiceItem] | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3215,24 +1072,7 @@ items:
 
 Описание отдельной услуги
 
-Сигнатура: `ServiceItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-name:
-  type: str | None
-  required: False
-  description: Наименование услуги
-code:
-  type: int | str | None
-  required: False
-  description: Код услуги (числовой или строковый)
-sort:
-  type: int | None
-  required: False
-  description: Порядок сортировки
-```
+Сигнатура: `ServiceItem(*, name: str | None = None, code: int | str | None = None, sort: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3242,40 +1082,7 @@ sort:
 
 Терминал торговой точки
 
-Сигнатура: `TerminalV1(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str | None
-  required: False
-  description: Идентификатор терминала
-active:
-  type: bool | None
-  required: False
-  description: Статус активности терминала (True — включен, False — выключен)
-name:
-  type: str | None
-  required: False
-  description: Наименование терминала
-status:
-  type: str | None
-  required: False
-  description: Статус терминала
-type:
-  type: str | None
-  required: False
-  description: Тип терминала
-connectionType:
-  type: str | None
-  required: False
-  description: Тип подключения терминала
-number:
-  type: str | None
-  required: False
-  description: Номер терминала
-```
+Сигнатура: `TerminalV1(*, id: str | None = None, active: bool | None = None, name: str | None = None, status: str | None = None, type: str | None = None, connectionType: str | None = None, number: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3285,40 +1092,7 @@ number:
 
 Информация о терминале, установленном на торговой точке
 
-Сигнатура: `TerminalV2(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str | None
-  required: False
-  description: Идентификатор терминала
-active:
-  type: bool | None
-  required: False
-  description: Активен ли терминал (true — включен)
-name:
-  type: str | None
-  required: False
-  description: Наименование терминала
-status:
-  type: str | None
-  required: False
-  description: Статус терминала
-type:
-  type: str | None
-  required: False
-  description: Тип терминала
-connectionType:
-  type: str | None
-  required: False
-  description: Тип подключения
-number:
-  type: str | None
-  required: False
-  description: Номер терминала
-```
+Сигнатура: `TerminalV2(*, id: str | None = None, active: bool | None = None, name: str | None = None, status: str | None = None, type: str | None = None, connectionType: str | None = None, number: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3328,24 +1102,7 @@ number:
 
 Рабочее время торговой точки
 
-Сигнатура: `WorkingTimeV1(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-Weekday:
-  type: str | None
-  required: False
-  description: День недели или режим работы
-StartWorkTime:
-  type: str | None
-  required: False
-  description: Время открытия
-FinishWorkTime:
-  type: str | None
-  required: False
-  description: Время закрытия
-```
+Сигнатура: `WorkingTimeV1(*, Weekday: str | None = None, StartWorkTime: str | None = None, FinishWorkTime: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3355,33 +1112,7 @@ FinishWorkTime:
 
 Расписание работы торговой точки
 
-Сигнатура: `WorkingTimeV2(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-Weekday:
-  type: str | None
-  required: False
-  description: День недели или режим работы (Monday, Everyday, Round-The-Clock)
-StartWorkTime:
-  type: str | None
-  required: False
-  description: Время открытия, формат HH:MM
-FinishWorkTime:
-  type: str | None
-  required: False
-  description: Время закрытия, формат HH:MM
-Everyday:
-  type: bool | None
-  required: False
-  description: Признак работы ежедневно
-Round_The_Clock:
-  type: bool | None
-  required: False
-  alias: Round-The-Clock
-  description: Признак круглосуточного режима
-```
+Сигнатура: `WorkingTimeV2(*, Weekday: str | None = None, StartWorkTime: str | None = None, FinishWorkTime: str | None = None, Everyday: bool | None = False, Round_The_Clock: bool | None = False, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3401,24 +1132,7 @@ Round_The_Clock:
     "timestamp": 1596024392
 }
 
-Сигнатура: `MoveToCardResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: Status
-  required: True
-  description: Статус выполнения операции.
-data:
-  type: bool
-  required: True
-  description: Результат выполнения операции (true — успешно).
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (UNIX timestamp).
-```
+Сигнатура: `MoveToCardResponse(*, status: api_client_opti24.models.ewallet.Status, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3434,24 +1148,7 @@ timestamp:
     "timestamp": 1596024392
 }
 
-Сигнатура: `MoveToContractResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: Status
-  required: True
-  description: Статус выполнения операции.
-data:
-  type: bool
-  required: True
-  description: Результат выполнения операции (true — успешно).
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (UNIX timestamp).
-```
+Сигнатура: `MoveToContractResponse(*, status: api_client_opti24.models.ewallet.Status, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3467,24 +1164,7 @@ timestamp:
     "timestamp": 1596024392
 }
 
-Сигнатура: `SetCardProductResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: Status
-  required: True
-  description: Статус выполнения операции.
-data:
-  type: list[str]
-  required: True
-  description: Список идентификаторов карт, у которых изменён продукт.
-timestamp:
-  type: int
-  required: True
-  description: Метка времени ответа (UNIX timestamp).
-```
+Сигнатура: `SetCardProductResponse(*, status: api_client_opti24.models.ewallet.Status, data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3494,16 +1174,7 @@ timestamp:
 
 Модель для статуса ответа API.
 
-Сигнатура: `Status(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-code:
-  type: int
-  required: True
-  description: Код HTTP-статуса ответа (например, 200).
-```
+Сигнатура: `Status(*, code: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3517,20 +1188,7 @@ code:
 
 Параметры запроса для проверки покупки
 
-Сигнатура: `CheckPurchaseRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-poi_id:
-  type: str
-  required: True
-  description: ID точки продажи (АЗС)
-goods:
-  type: list[PurchaseGoodItem]
-  required: True
-  description: Список товаров для проверки возможности покупки
-```
+Сигнатура: `CheckPurchaseRequest(*, poi_id: str, goods: list[api_client_opti24.models.final_prices.PurchaseGoodItem]) -> None`
 
 Публичные методы:
 
@@ -3540,24 +1198,7 @@ goods:
 
 Ответ метода проверки возможности проведения транзакции
 
-Сигнатура: `CheckPurchaseResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус ответа API, например {'code': 200}
-data:
-  type: bool
-  required: True
-  description: Результат проверки — True, если покупка возможна
-timestamp:
-  type: int
-  required: True
-  description: Время ответа (UNIX timestamp)
-```
+Сигнатура: `CheckPurchaseResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3567,20 +1208,7 @@ timestamp:
 
 Информация о финальной цене товара на АЗС
 
-Сигнатура: `FinalPriceItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-code:
-  type: str
-  required: True
-  description: Код товарной позиции
-price:
-  type: float
-  required: True
-  description: Финальная цена товара (с учетом всех скидок и тарифов)
-```
+Сигнатура: `FinalPriceItem(*, code: str, price: float, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3590,20 +1218,7 @@ price:
 
 Основные данные о финальных ценах
 
-Сигнатура: `FinalPricesData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество товарных позиций в ответе
-goods:
-  type: list[FinalPriceItem]
-  required: True
-  description: Список товарных позиций с рассчитанными финальными ценами
-```
+Сигнатура: `FinalPricesData(*, total_count: int, goods: list[api_client_opti24.models.final_prices.FinalPriceItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3613,24 +1228,7 @@ goods:
 
 Ответ метода получения финальных цен на АЗС
 
-Сигнатура: `FinalPricesResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус ответа API, например {'code': 200}
-data:
-  type: FinalPricesData
-  required: True
-  description: Основные данные ответа (цены)
-timestamp:
-  type: int
-  required: True
-  description: Время формирования ответа в формате UNIX
-```
+Сигнатура: `FinalPricesResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.final_prices.FinalPricesData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3640,24 +1238,7 @@ timestamp:
 
 Описание товарной позиции для проверки возможности покупки
 
-Сигнатура: `PurchaseGoodItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-code:
-  type: str
-  required: True
-  description: Код товара (SKU или PLU на АЗС)
-quantity:
-  type: float
-  required: True
-  description: Количество товара для покупки
-price:
-  type: float
-  required: True
-  description: Цена за единицу товара
-```
+Сигнатура: `PurchaseGoodItem(*, code: str, quantity: float, price: float, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3671,28 +1252,7 @@ price:
 
 Результат действий с приглашениями (создание, продление, повторная отправка)
 
-Сигнатура: `InviteActionResult(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID приглашения
-url:
-  type: str
-  required: True
-  description: Ссылка на приглашение
-attempts:
-  type: int | None
-  required: False
-  description: Количество попыток отправки
-expired_at:
-  type: int | None
-  required: False
-  description: Дата истечения срока действия ссылки (timestamp)
-```
+Сигнатура: `InviteActionResult(*, id: str, url: str, attempts: int | None = None, expired_at: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3702,15 +1262,7 @@ expired_at:
 
 Результат простых действий (удаление, продление и т.п.)
 
-Сигнатура: `InviteBoolResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-data:
-  type: bool
-  required: True
-```
+Сигнатура: `InviteBoolResponse(*, data: bool, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3720,44 +1272,7 @@ data:
 
 Информация о карте, привязанной к приглашению
 
-Сигнатура: `InviteCard(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-sid:
-  type: str
-  required: True
-  description: ID карты (SID)
-number:
-  type: str
-  required: True
-  description: Номер карты
-product:
-  type: str
-  required: True
-  description: Тип продукта ('wallet' и т.п.)
-comment:
-  type: str | None
-  required: False
-  description: Комментарий к карте (например, имя водителя)
-status:
-  type: str | None
-  required: False
-  description: Технический статус карты
-status_name:
-  type: str | None
-  required: False
-  description: Отображаемое название статуса
-contract_id:
-  type: str | None
-  required: False
-  description: ID договора, к которому относится карта
-contract_name:
-  type: str | None
-  required: False
-  description: Номер договора
-```
+Сигнатура: `InviteCard(*, sid: str, number: str, product: str, comment: str | None = None, status: str | None = None, status_name: str | None = None, contract_id: str | None = None, contract_name: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3767,36 +1282,7 @@ contract_name:
 
 Информация о договоре, привязанном к приглашению
 
-Сигнатура: `InviteContract(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-sid:
-  type: str
-  required: True
-  description: ID договора
-number:
-  type: str
-  required: True
-  description: Номер договора
-status:
-  type: str | None
-  required: False
-  description: Технический статус договора
-status_name:
-  type: str | None
-  required: False
-  description: Название статуса
-template_id:
-  type: str | None
-  required: False
-  description: ID шаблона виртуальной карты, если есть
-cards_count:
-  type: int | None
-  required: False
-  description: Количество карт по договору
-```
+Сигнатура: `InviteContract(*, sid: str, number: str, status: str | None = None, status_name: str | None = None, template_id: str | None = None, cards_count: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3806,76 +1292,7 @@ cards_count:
 
 Элемент списка приглашений
 
-Сигнатура: `InviteItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID приглашения
-user_id:
-  type: str | None
-  required: False
-  description: ID пользователя, если уже создан
-url:
-  type: str
-  required: True
-  description: Ссылка на регистрацию (уникальная, активна 3 дня)
-status:
-  type: str
-  required: True
-  description: Технический статус приглашения (Active, Finished и т.п.)
-status_name:
-  type: str
-  required: True
-  description: Отображаемое название статуса
-role:
-  type: str
-  required: True
-  description: Роль пользователя ('Driver', 'Admin' и т.п.)
-role_name:
-  type: str
-  required: True
-  description: Название роли
-attempts:
-  type: int | None
-  required: False
-  description: Количество отправок приглашения
-cards:
-  type: list[InviteCard] | None
-  required: False
-  description: Список карт, связанных с приглашением
-initiator:
-  type: str | None
-  required: False
-  description: Пользователь, создавший приглашение
-contracts:
-  type: list[InviteContract] | None
-  required: False
-  description: Список договоров, привязанных к приглашению
-mobile:
-  type: str | None
-  required: False
-  description: Номер телефона приглашенного
-email:
-  type: str | None
-  required: False
-  description: Email приглашенного
-communication_type:
-  type: str | None
-  required: False
-  description: Тип отправки ('sms', 'email' и т.п.)
-sended_at:
-  type: int | None
-  required: False
-  description: Время отправки (timestamp)
-expired_at:
-  type: int | None
-  required: False
-  description: Время истечения срока действия ссылки (timestamp)
-```
+Сигнатура: `InviteItem(*, id: str, user_id: str | None = None, url: str, status: str, status_name: str, role: str, role_name: str, attempts: int | None = None, cards: list[api_client_opti24.models.invites.InviteCard] | None = None, initiator: str | None = None, contracts: list[api_client_opti24.models.invites.InviteContract] | None = None, mobile: str | None = None, email: str | None = None, communication_type: str | None = None, sended_at: int | None = None, expired_at: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3885,20 +1302,7 @@ expired_at:
 
 Ответ на запрос списка приглашений
 
-Сигнатура: `InviteList(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество приглашений
-result:
-  type: list[InviteItem]
-  required: True
-  description: Список приглашений
-```
+Сигнатура: `InviteList(*, total_count: int, result: list[api_client_opti24.models.invites.InviteItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3908,15 +1312,7 @@ result:
 
 Обертка для InviteActionResult
 
-Сигнатура: `InviteResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-data:
-  type: InviteActionResult
-  required: True
-```
+Сигнатура: `InviteResponse(*, data: api_client_opti24.models.invites.InviteActionResult, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3930,24 +1326,7 @@ data:
 
 Объёмный лимит (например, литры).
 
-Сигнатура: `LimitAmount(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-value:
-  type: float
-  required: True
-  description: Установленное значение лимита
-used:
-  type: float | None
-  required: False
-  description: Использованное значение лимита
-unit:
-  type: str
-  required: True
-  description: Единица измерения (например, 'LIT' или 'RUB')
-```
+Сигнатура: `LimitAmount(*, value: float, used: float | None = None, unit: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3957,60 +1336,7 @@ unit:
 
 Продуктовый лимит (карта, группа или договор).
 
-Сигнатура: `LimitItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str | None
-  required: False
-  description: ID лимита (для изменения — обязателен)
-card_id:
-  type: str | None
-  required: False
-  description: ID карты, если лимит задан для карты
-group_id:
-  type: str | None
-  required: False
-  description: ID группы карт, если лимит задан для группы
-contract_id:
-  type: str
-  required: True
-  description: ID договора, к которому относится лимит
-productGroup:
-  type: str | None
-  required: False
-  description: ID группы продуктов
-productType:
-  type: str | None
-  required: False
-  description: ID типа продукта
-amount:
-  type: LimitAmount | None
-  required: False
-  description: Ограничение по объёму (литры и т.д.)
-sum:
-  type: LimitSum | None
-  required: False
-  description: Ограничение по сумме в валюте договора
-term:
-  type: LimitTerm | None
-  required: False
-  description: Периодичность и временные ограничения
-transactions:
-  type: LimitTransactions | None
-  required: False
-  description: Ограничения по количеству транзакций
-time:
-  type: LimitTime | None
-  required: False
-  description: Периодичность сброса лимита
-date:
-  type: str | None
-  required: False
-  description: Дата создания лимита (формат dd/mm/yyyy hh:mm:ss)
-```
+Сигнатура: `LimitItem(*, id: str | None = None, card_id: str | None = None, group_id: str | None = None, contract_id: str, productGroup: str | None = None, productType: str | None = None, amount: api_client_opti24.models.limits.LimitAmount | None = None, sum: api_client_opti24.models.limits.LimitSum | None = None, term: api_client_opti24.models.limits.LimitTerm | None = None, transactions: api_client_opti24.models.limits.LimitTransactions | None = None, time: api_client_opti24.models.limits.LimitTime | None = None, date: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4020,20 +1346,7 @@ date:
 
 Денежный лимит.
 
-Сигнатура: `LimitSum(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-currency:
-  type: str
-  required: True
-  description: Код валюты (например, 810)
-value:
-  type: float
-  required: True
-  description: Сумма лимита
-```
+Сигнатура: `LimitSum(*, currency: str, value: float, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4043,24 +1356,7 @@ value:
 
 Периодичность и временные ограничения.
 
-Сигнатура: `LimitTerm(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-days:
-  type: str | None
-  required: False
-  description: Дни недели (например, '1111100' для Пн–Пт)
-type:
-  type: int | None
-  required: False
-  description: Тип периода (1 — будни, 2 — ежедневно и т.д.)
-time:
-  type: LimitTermTime | None
-  required: False
-  description: Временной диапазон действия
-```
+Сигнатура: `LimitTerm(*, days: str | None = None, type: int | None = None, time: api_client_opti24.models.limits.LimitTermTime | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4070,21 +1366,7 @@ time:
 
 Временной диапазон действия лимита.
 
-Сигнатура: `LimitTermTime(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-from_:
-  type: str
-  required: True
-  alias: from
-  description: Время начала действия лимита (HH:MM)
-to:
-  type: str
-  required: True
-  description: Время окончания действия лимита (HH:MM)
-```
+Сигнатура: `LimitTermTime(*, from_: str, to: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4094,20 +1376,7 @@ to:
 
 Периодичность сброса лимита.
 
-Сигнатура: `LimitTime(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-number:
-  type: int | None
-  required: False
-  description: Период в числовом виде (например, 3)
-type:
-  type: int | None
-  required: False
-  description: Тип периода (например, 7 — неделя)
-```
+Сигнатура: `LimitTime(*, number: int | None = None, type: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4117,20 +1386,7 @@ type:
 
 Ограничения по количеству транзакций.
 
-Сигнатура: `LimitTransactions(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-count:
-  type: int | None
-  required: False
-  description: Максимальное количество транзакций
-occured:
-  type: int | None
-  required: False
-  description: Фактическое количество транзакций
-```
+Сигнатура: `LimitTransactions(*, count: int | None = None, occured: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4140,20 +1396,7 @@ occured:
 
 Данные по лимитам.
 
-Сигнатура: `LimitsData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество лимитов
-result:
-  type: list[LimitItem]
-  required: True
-  description: Список лимитов
-```
+Сигнатура: `LimitsData(*, total_count: int, result: list[api_client_opti24.models.limits.LimitItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4163,24 +1406,7 @@ result:
 
 Ответ на запрос списка лимитов.
 
-Сигнатура: `LimitsResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения (например, {'code': 200})
-data:
-  type: LimitsData
-  required: True
-  description: Данные с лимитами
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа
-```
+Сигнатура: `LimitsResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.limits.LimitsData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4190,24 +1416,7 @@ timestamp:
 
 Ответ на удаление продуктового лимита.
 
-Сигнатура: `RemoveLimitResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения запроса
-data:
-  type: bool
-  required: True
-  description: Результат операции (True — успешно)
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа
-```
+Сигнатура: `RemoveLimitResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4217,24 +1426,7 @@ timestamp:
 
 Ответ на установку/изменение продуктового лимита.
 
-Сигнатура: `SetLimitResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения запроса
-data:
-  type: list[str]
-  required: True
-  description: ID созданных/обновлённых лимитов
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа
-```
+Сигнатура: `SetLimitResponse(*, status: dict[str, typing.Any], data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4248,48 +1440,7 @@ timestamp:
 
 Региональный лимит по договору, карте или группе карт.
 
-Сигнатура: `RegionLimit(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str | None
-  required: True
-  description: ID регионального лимита
-contract_id:
-  type: str
-  required: True
-  description: ID договора, к которому относится лимит
-card_id:
-  type: str | None
-  required: False
-  description: ID карты, если лимит задан для карты
-group_id:
-  type: str | None
-  required: False
-  description: ID группы карт, если лимит задан для группы
-country:
-  type: str
-  required: True
-  description: Код страны обслуживания, пример - RUS
-region:
-  type: str | None
-  required: False
-  description: Код регион обслуживания
-service_center:
-  type: str | None
-  required: False
-  description: ID АЗС
-date:
-  type: str | None
-  required: False
-  description: Дата последнего изменения
-limit_type:
-  type: int
-  required: True
-  description: Тип лимита
-```
+Сигнатура: `RegionLimit(*, id: str | None, contract_id: str, card_id: str | None = None, group_id: str | None = None, country: str, region: str | None = None, service_center: str | None = None, date: str | None = None, limit_type: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4299,20 +1450,7 @@ limit_type:
 
 Коллекция региональных лимитов.
 
-Сигнатура: `RegionLimitList(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество лимитов
-result:
-  type: list[RegionLimit]
-  required: True
-  description: Данные с лимитами
-```
+Сигнатура: `RegionLimitList(*, total_count: int, result: list[api_client_opti24.models.region_limits.RegionLimit], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4322,24 +1460,7 @@ result:
 
 Коллекция региональных лимитов.
 
-Сигнатура: `RegionLimitResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус ответа
-data:
-  type: RegionLimitList
-  required: True
-  description: Данные с лимитами
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `RegionLimitResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.region_limits.RegionLimitList, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4349,24 +1470,7 @@ timestamp:
 
 Удаление регионального лимита.
 
-Сигнатура: `RemoveRegionLimit(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения запроса
-data:
-  type: bool
-  required: True
-  description: Результат операции (True — успешно)
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа
-```
+Сигнатура: `RemoveRegionLimit(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4380,28 +1484,7 @@ timestamp:
 
 Ответ при генерации файла отчета.
 
-Сигнатура: `ReportFileResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-content:
-  type: bytes | None
-  required: False
-  description: Бинарное содержимое файла (application/octet-stream)
-format:
-  type: str | None
-  required: False
-  description: Формат файла (pdf, xlsx, csv и т.д.)
-filename:
-  type: str | None
-  required: False
-  description: Имя файла отчета
-size:
-  type: int | None
-  required: False
-  description: Размер файла в байтах
-```
+Сигнатура: `ReportFileResponse(*, content: bytes | None = None, format: str | None = None, filename: str | None = None, size: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4411,28 +1494,7 @@ size:
 
 Описание доступного отчета (v2).
 
-Сигнатура: `ReportItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор отчета
-name:
-  type: str
-  required: True
-  description: Название отчета
-formats:
-  type: list[str]
-  required: True
-  description: Список поддерживаемых форматов (pdf, xlsx, csv и т.д.)
-parameters:
-  type: list[ReportParameter]
-  required: True
-  description: Список параметров отчета
-```
+Сигнатура: `ReportItem(*, id: str, name: str, formats: list[str], parameters: list[api_client_opti24.models.reports.ReportParameter], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4442,48 +1504,7 @@ parameters:
 
 Элемент списка заказанных отчетов.
 
-Сигнатура: `ReportJobItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-date:
-  type: str
-  required: True
-  description: Дата создания заказа отчета
-client_id:
-  type: str | None
-  required: False
-  description: ID клиента
-user_id:
-  type: str | None
-  required: False
-  description: ID пользователя
-contract_id:
-  type: str | None
-  required: False
-  description: ID договора
-contract_name:
-  type: str | None
-  required: False
-  description: Название договора
-job_id:
-  type: str
-  required: True
-  description: Идентификатор задания (Job ID)
-report_name:
-  type: str
-  required: True
-  description: Название отчета
-report_format:
-  type: str
-  required: True
-  description: Формат отчета (pdf, xlsx и т.д.)
-available_after:
-  type: int | None
-  required: False
-  description: Количество секунд до доступности отчета
-```
+Сигнатура: `ReportJobItem(*, date: str, client_id: str | None = None, user_id: str | None = None, contract_id: str | None = None, contract_name: str | None = None, job_id: str, report_name: str, report_format: str, available_after: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4493,20 +1514,7 @@ available_after:
 
 Ответ со списком заказанных отчетов (v1/v2).
 
-Сигнатура: `ReportJobList(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int | None
-  required: False
-  description: Количество найденных отчетов
-result:
-  type: list[ReportJobItem]
-  required: True
-  description: Список заказанных отчетов
-```
+Сигнатура: `ReportJobList(*, total_count: int | None = None, result: list[api_client_opti24.models.reports.ReportJobItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4516,20 +1524,7 @@ result:
 
 Ответ метода /v2/reports — список доступных отчетов.
 
-Сигнатура: `ReportList(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество доступных отчетов
-result:
-  type: list[ReportItem]
-  required: True
-  description: Массив отчетов
-```
+Сигнатура: `ReportList(*, total_count: int, result: list[api_client_opti24.models.reports.ReportItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4539,40 +1534,7 @@ result:
 
 Параметры заказа отчета.
 
-Сигнатура: `ReportOrderParams(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-start_date:
-  type: str | None
-  required: False
-  description: Дата начала периода
-end_date:
-  type: str | None
-  required: False
-  description: Дата окончания периода
-id_agreement:
-  type: str | None
-  required: False
-  description: Список ID договоров
-id_card:
-  type: list[str] | None
-  required: False
-  description: Список карт
-card_group_code:
-  type: list[str] | None
-  required: False
-  description: Список групп карт
-id_client:
-  type: list[str] | None
-  required: False
-  description: Список клиентов
-additional:
-  type: dict[str, Any] | None
-  required: False
-  description: Дополнительные параметры
-```
+Сигнатура: `ReportOrderParams(*, start_date: str | None = None, end_date: str | None = None, id_agreement: str | None = None, id_card: list[str] | None = None, card_group_code: list[str] | None = None, id_client: list[str] | None = None, additional: dict[str, Any] | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4582,28 +1544,7 @@ additional:
 
 Тело запроса для заказа отчета (v2).
 
-Сигнатура: `ReportOrderRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор отчета
-format:
-  type: str
-  required: True
-  description: Формат отчета (pdf, xlsx и т.д.)
-emails:
-  type: str | None
-  required: False
-  description: Email-адреса для отправки отчета
-params:
-  type: ReportOrderParams
-  required: True
-  description: Параметры отчета
-```
+Сигнатура: `ReportOrderRequest(*, id: str, format: str, emails: str | None = None, params: api_client_opti24.models.reports.ReportOrderParams) -> None`
 
 Публичные методы:
 
@@ -4613,16 +1554,7 @@ params:
 
 Ответ на заказ отчета (v2).
 
-Сигнатура: `ReportOrderResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-job_id:
-  type: list[str]
-  required: True
-  description: Идентификаторы созданных заданий на генерацию отчета
-```
+Сигнатура: `ReportOrderResponse(*, job_id: list[str], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4632,36 +1564,7 @@ job_id:
 
 Параметр отчета (например, дата, карта, договор).
 
-Сигнатура: `ReportParameter(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-name:
-  type: str
-  required: True
-  description: Имя параметра, используемое в запросах
-value:
-  type: Any | None
-  required: False
-  description: Значение параметра
-label:
-  type: str | None
-  required: False
-  description: Отображаемое название параметра
-default_value:
-  type: str | None
-  required: False
-  description: Значение по умолчанию
-menu_values:
-  type: list[ReportParameterMenuValue] | None
-  required: False
-  description: Список возможных значений для выбора из меню
-type:
-  type: str | None
-  required: False
-  description: Тип параметра (например, date, Contract, Group)
-```
+Сигнатура: `ReportParameter(*, name: str, value: Any | None = None, label: str | None = None, default_value: str | None = None, menu_values: list[api_client_opti24.models.reports.ReportParameterMenuValue] | None = None, type: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4671,20 +1574,7 @@ type:
 
 Значения меню для параметра отчета.
 
-Сигнатура: `ReportParameterMenuValue(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-labels:
-  type: str | None
-  required: False
-  description: Отображаемое имя пункта меню
-values:
-  type: str | None
-  required: False
-  description: Значение пункта меню
-```
+Сигнатура: `ReportParameterMenuValue(*, labels: str | None = None, values: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4694,40 +1584,7 @@ values:
 
 Элемент списка ранее заказанных отчетов (v1).
 
-Сигнатура: `ReportV1JobItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-date:
-  type: str
-  required: True
-  description: Дата создания отчета
-client_id:
-  type: str | None
-  required: False
-  description: ID клиента
-user_id:
-  type: str | None
-  required: False
-  description: ID пользователя
-contract_id:
-  type: str | None
-  required: False
-  description: ID договора
-job_id:
-  type: str
-  required: True
-  description: Идентификатор задания (Job ID)
-report_name:
-  type: str
-  required: True
-  description: Название отчета
-report_format:
-  type: str
-  required: True
-  description: Формат отчета (pdf, xlsx, xml и т.д.)
-```
+Сигнатура: `ReportV1JobItem(*, date: str, client_id: str | None = None, user_id: str | None = None, contract_id: str | None = None, job_id: str, report_name: str, report_format: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4737,16 +1594,7 @@ report_format:
 
 Список заказанных отчетов (v1).
 
-Сигнатура: `ReportV1JobList(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-jobs:
-  type: list[ReportV1JobItem]
-  required: True
-  description: Массив заказанных отчетов
-```
+Сигнатура: `ReportV1JobList(*, jobs: list[api_client_opti24.models.reports.ReportV1JobItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4756,16 +1604,7 @@ jobs:
 
 Ответ для v1 метода /reports.
 
-Сигнатура: `ReportV1OrderResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-report_ids:
-  type: list[str]
-  required: True
-  description: ID заказанных отчетов
-```
+Сигнатура: `ReportV1OrderResponse(*, report_ids: list[str], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4779,20 +1618,7 @@ report_ids:
 
 Ответ на запрос списка ограничителей (GET /restriction).
 
-Сигнатура: `RestrictionGetResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-data:
-  type: RestrictionList
-  required: True
-  description: Данные с ограничителями
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа (Unix time)
-```
+Сигнатура: `RestrictionGetResponse(*, data: api_client_opti24.models.restrictions.RestrictionList, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4802,52 +1628,7 @@ timestamp:
 
 Модель одного товарного ограничителя (ограничение по продукту).
 
-Сигнатура: `RestrictionItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID ограничителя
-card_id:
-  type: str | None
-  required: False
-  description: ID карты, если ограничитель задан для карты
-group_id:
-  type: str | None
-  required: False
-  description: ID группы карт, если ограничитель задан для группы
-contract_id:
-  type: str
-  required: True
-  description: ID договора
-productType:
-  type: str | None
-  required: False
-  description: ID типа продукта (например, '1-CK231')
-productGroup:
-  type: str | None
-  required: False
-  description: ID группы продуктов (если применимо)
-productTypeName:
-  type: str | None
-  required: False
-  description: Название типа продукта
-productGroupName:
-  type: str | None
-  required: False
-  description: Название группы продуктов
-restriction_type:
-  type: int
-  required: True
-  description: Тип ограничения (1 – Разрешающий ограничитель, 2 – Запрещающий ограничитель)
-date:
-  type: str | None
-  required: False
-  description: Дата установки ограничителя (в формате MM/DD/YYYY HH:mm:ss)
-```
+Сигнатура: `RestrictionItem(*, id: str, card_id: str | None = None, group_id: str | None = None, contract_id: str, productType: str | None = None, productGroup: str | None = None, productTypeName: str | None = None, productGroupName: str | None = None, restriction_type: int, date: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4857,20 +1638,7 @@ date:
 
 Список товарных ограничителей.
 
-Сигнатура: `RestrictionList(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество ограничителей
-result:
-  type: list[RestrictionItem]
-  required: True
-  description: Список ограничителей
-```
+Сигнатура: `RestrictionList(*, total_count: int, result: list[api_client_opti24.models.restrictions.RestrictionItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4880,24 +1648,7 @@ result:
 
 Ответ на удаление ограничителя (POST /removeRestriction).
 
-Сигнатура: `RestrictionRemoveResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения (например, {'code': 200})
-data:
-  type: bool
-  required: True
-  description: Результат операции (True — успешно)
-timestamp:
-  type: int
-  required: False
-  description: Временная метка ответа (Unix time)
-```
+Сигнатура: `RestrictionRemoveResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4907,20 +1658,7 @@ timestamp:
 
 Ответ на установку или изменение ограничителя (POST /setRestriction).
 
-Сигнатура: `RestrictionSetResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-data:
-  type: list[str]
-  required: True
-  description: Список ID созданных или изменённых ограничителей
-timestamp:
-  type: int
-  required: True
-  description: Временная метка ответа (Unix time)
-```
+Сигнатура: `RestrictionSetResponse(*, data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4932,22 +1670,9 @@ timestamp:
 
 ### `LimitAmount`
 
-LimitAmount(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `LimitAmount(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-unit:
-  type: str | None
-  required: False
-  description: Единица измерения (например, 'LIT')
-value:
-  type: float | None
-  required: False
-  description: Количество или объем в единицах измерения
-```
+Сигнатура: `LimitAmount(*, unit: str | None = None, value: float | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4955,26 +1680,9 @@ value:
 
 ### `LimitSum`
 
-LimitSum(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `LimitSum(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-currency:
-  type: str | None
-  required: False
-  description: Код валюты (например, '810')
-currencyName:
-  type: str | None
-  required: False
-  description: Название валюты (например, 'р.')
-value:
-  type: float | None
-  required: False
-  description: Сумма лимита в указанной валюте
-```
+Сигнатура: `LimitSum(*, currency: str | None = None, currencyName: str | None = None, value: float | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -4982,26 +1690,9 @@ value:
 
 ### `LimitTerm`
 
-LimitTerm(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `LimitTerm(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-days:
-  type: str | None
-  required: False
-  description: Маска дней действия лимита (например, '1111100')
-type:
-  type: int | None
-  required: False
-  description: Тип временного ограничения
-time:
-  type: LimitTermTime | None
-  required: False
-  description: Временные границы лимита
-```
+Сигнатура: `LimitTerm(*, days: str | None = None, type: int | None = None, time: api_client_opti24.models.templates.LimitTermTime | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5009,23 +1700,9 @@ time:
 
 ### `LimitTermTime`
 
-LimitTermTime(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `LimitTermTime(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-from_:
-  type: str | None
-  required: False
-  alias: from
-  description: Начало временного диапазона (например, '03:00')
-to:
-  type: str | None
-  required: False
-  description: Конец временного диапазона (например, '08:00')
-```
+Сигнатура: `LimitTermTime(*, from_: str | None = None, to: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5033,22 +1710,9 @@ to:
 
 ### `LimitTime`
 
-LimitTime(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `LimitTime(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-type:
-  type: int | None
-  required: False
-  description: Тип периода лимита (например, 3 — день, 5 — месяц)
-number:
-  type: int | None
-  required: False
-  description: Количество единиц выбранного периода
-```
+Сигнатура: `LimitTime(*, type: int | None = None, number: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5056,18 +1720,9 @@ number:
 
 ### `LimitTransactions`
 
-LimitTransactions(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `LimitTransactions(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-count:
-  type: int | None
-  required: False
-  description: Количество транзакций, на которое распространяется лимит
-```
+Сигнатура: `LimitTransactions(*, count: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5075,26 +1730,9 @@ count:
 
 ### `TemplateCreateRequest`
 
-TemplateCreateRequest(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateCreateRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора
-type:
-  type: str
-  required: True
-  description: Тип создаваемого шаблона (Limit или Wallet)
-name:
-  type: str
-  required: True
-  description: Имя (название) нового шаблона ВК
-```
+Сигнатура: `TemplateCreateRequest(*, contract_id: str, type: str, name: str) -> None`
 
 Публичные методы:
 
@@ -5102,26 +1740,9 @@ name:
 
 ### `TemplateCreateResponse`
 
-TemplateCreateResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateCreateResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: str
-  required: True
-  description: ID созданного шаблона
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5129,26 +1750,9 @@ timestamp:
 
 ### `TemplateDeleteResponse`
 
-TemplateDeleteResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateDeleteResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: bool
-  required: True
-  description: Результат операции (true — успешно, false — ошибка)
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5156,66 +1760,9 @@ timestamp:
 
 ### `TemplateGeoRestriction`
 
-TemplateGeoRestriction(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateGeoRestriction(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор геоограничителя шаблона
-template_id:
-  type: str
-  required: True
-  description: Идентификатор шаблона
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора
-date:
-  type: str | None
-  required: False
-  description: Дата создания записи
-country:
-  type: str | None
-  required: False
-  description: Код страны (например, 'RUS')
-countryName:
-  type: str | None
-  required: False
-  description: Название страны
-region:
-  type: str | None
-  required: False
-  description: Код региона
-regionName:
-  type: str | None
-  required: False
-  description: Название региона
-partner:
-  type: str | None
-  required: False
-  description: Код партнера (АЗС)
-partnerName:
-  type: str | None
-  required: False
-  description: Название партнера (АЗС)
-service_center:
-  type: str | None
-  required: False
-  description: Код сервисного центра
-service_centerName:
-  type: str | None
-  required: False
-  description: Название сервисного центра
-restriction_type:
-  type: int
-  required: True
-  description: Тип геоограничителя (1 — разрешение, 2 — запрет)
-```
+Сигнатура: `TemplateGeoRestriction(*, id: str, template_id: str, contract_id: str, date: str | None = None, country: str | None = None, countryName: str | None = None, region: str | None = None, regionName: str | None = None, partner: str | None = None, partnerName: str | None = None, service_center: str | None = None, service_centerName: str | None = None, restriction_type: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5223,38 +1770,9 @@ restriction_type:
 
 ### `TemplateGeoRestrictionCreateRequest`
 
-TemplateGeoRestrictionCreateRequest(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateGeoRestrictionCreateRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора
-country:
-  type: str
-  required: True
-  description: Код страны (например, 'RUS')
-region:
-  type: str | None
-  required: False
-  description: Код региона (например, '45')
-partner:
-  type: str | None
-  required: False
-  description: Код партнера (АЗС)
-service_center:
-  type: str | None
-  required: False
-  description: Код сервисного центра
-restriction_type:
-  type: int
-  required: True
-  description: Тип геоограничителя (1 — разрешение, 2 — запрет)
-```
+Сигнатура: `TemplateGeoRestrictionCreateRequest(*, contract_id: str, country: str, region: str | None = None, partner: str | None = None, service_center: str | None = None, restriction_type: int) -> None`
 
 Публичные методы:
 
@@ -5262,26 +1780,9 @@ restriction_type:
 
 ### `TemplateGeoRestrictionCreateResponse`
 
-TemplateGeoRestrictionCreateResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateGeoRestrictionCreateResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: str
-  required: True
-  description: ID созданного геоограничителя шаблона
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateGeoRestrictionCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5289,26 +1790,9 @@ timestamp:
 
 ### `TemplateGeoRestrictionDeleteResponse`
 
-TemplateGeoRestrictionDeleteResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateGeoRestrictionDeleteResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: bool
-  required: True
-  description: Результат удаления геоограничителя (true — успешно)
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateGeoRestrictionDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5316,22 +1800,9 @@ timestamp:
 
 ### `TemplateGeoRestrictionListData`
 
-TemplateGeoRestrictionListData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateGeoRestrictionListData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество найденных геоограничителей
-result:
-  type: list[TemplateGeoRestriction]
-  required: True
-  description: Список геоограничителей шаблона
-```
+Сигнатура: `TemplateGeoRestrictionListData(*, total_count: int, result: list[api_client_opti24.models.templates.TemplateGeoRestriction], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5339,26 +1810,9 @@ result:
 
 ### `TemplateGeoRestrictionListResponse`
 
-TemplateGeoRestrictionListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateGeoRestrictionListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: TemplateGeoRestrictionListData
-  required: True
-  description: Основные данные списка геоограничителей
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateGeoRestrictionListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateGeoRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5366,30 +1820,9 @@ timestamp:
 
 ### `TemplateItem`
 
-TemplateItem(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор шаблона ВК
-name:
-  type: str
-  required: True
-  description: Название шаблона ВК
-type:
-  type: str
-  required: True
-  description: Тип шаблона (Limit — лимитная, Wallet — электронная карта)
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора, к которому относится шаблон
-```
+Сигнатура: `TemplateItem(*, id: str, name: str, type: str, contract_id: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5397,66 +1830,9 @@ contract_id:
 
 ### `TemplateLimit`
 
-TemplateLimit(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateLimit(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор лимита шаблона
-template_id:
-  type: str
-  required: True
-  description: Идентификатор шаблона, которому принадлежит лимит
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора, на который распространяется лимит
-amount:
-  type: LimitAmount | None
-  required: False
-  description: Объемный лимит (в литрах и т.д.)
-sum:
-  type: LimitSum | None
-  required: False
-  description: Суммовой лимит (в рублях и т.д.)
-time:
-  type: LimitTime | None
-  required: False
-  description: Период действия лимита
-term:
-  type: LimitTerm | None
-  required: False
-  description: Дополнительные временные ограничения
-transactions:
-  type: LimitTransactions | None
-  required: False
-  description: Информация по транзакциям лимита
-date:
-  type: str | None
-  required: False
-  description: Дата создания лимита
-productType:
-  type: str | None
-  required: False
-  description: Тип продукта (топливо, услуга и т.д.)
-productGroup:
-  type: str | None
-  required: False
-  description: Группа продукта (например, G-95)
-productTypeName:
-  type: str | None
-  required: False
-  description: Название типа продукта
-productGroupName:
-  type: str | None
-  required: False
-  description: Название группы продукта
-```
+Сигнатура: `TemplateLimit(*, id: str, template_id: str, contract_id: str, amount: api_client_opti24.models.templates.LimitAmount | None = None, sum: api_client_opti24.models.templates.LimitSum | None = None, time: api_client_opti24.models.templates.LimitTime | None = None, term: api_client_opti24.models.templates.LimitTerm | None = None, transactions: api_client_opti24.models.templates.LimitTransactions | None = None, date: str | None = None, productType: str | None = None, productGroup: str | None = None, productTypeName: str | None = None, productGroupName: str | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5464,46 +1840,9 @@ productGroupName:
 
 ### `TemplateLimitCreateRequest`
 
-TemplateLimitCreateRequest(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateLimitCreateRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора
-product_type:
-  type: str
-  required: True
-  description: Тип продукта (например, '1-276PF01')
-product_group:
-  type: str | None
-  required: False
-  description: Группа продукта (например, '1-276PF0E')
-sum:
-  type: LimitSum | None
-  required: False
-  description: Суммовой лимит
-amount:
-  type: LimitAmount | None
-  required: False
-  description: Объемный лимит
-time:
-  type: LimitTime
-  required: True
-  description: Период лимита
-term:
-  type: LimitTerm | None
-  required: False
-  description: Дополнительные временные ограничения
-create_restriction:
-  type: bool | None
-  required: False
-  description: Создать ограничитель автоматически
-```
+Сигнатура: `TemplateLimitCreateRequest(*, contract_id: str, product_type: str, product_group: str | None = None, sum: api_client_opti24.models.templates.LimitSum | None = None, amount: api_client_opti24.models.templates.LimitAmount | None = None, time: api_client_opti24.models.templates.LimitTime, term: api_client_opti24.models.templates.LimitTerm | None = None, create_restriction: bool | None = None) -> None`
 
 Публичные методы:
 
@@ -5511,26 +1850,9 @@ create_restriction:
 
 ### `TemplateLimitCreateResponse`
 
-TemplateLimitCreateResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateLimitCreateResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: str
-  required: True
-  description: ID созданного лимита шаблона
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateLimitCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5538,26 +1860,9 @@ timestamp:
 
 ### `TemplateLimitDeleteResponse`
 
-TemplateLimitDeleteResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateLimitDeleteResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: bool
-  required: True
-  description: Результат удаления лимита (true — успешно)
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateLimitDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5565,22 +1870,9 @@ timestamp:
 
 ### `TemplateLimitListData`
 
-TemplateLimitListData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateLimitListData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество найденных лимитов
-result:
-  type: list[TemplateLimit]
-  required: True
-  description: Список лимитов шаблона
-```
+Сигнатура: `TemplateLimitListData(*, total_count: int, result: list[api_client_opti24.models.templates.TemplateLimit], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5588,26 +1880,9 @@ result:
 
 ### `TemplateLimitListResponse`
 
-TemplateLimitListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateLimitListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: TemplateLimitListData
-  required: True
-  description: Основные данные списка лимитов
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateLimitListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateLimitListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5615,50 +1890,9 @@ timestamp:
 
 ### `TemplateRestriction`
 
-TemplateRestriction(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateRestriction(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: Идентификатор ограничителя шаблона
-template_id:
-  type: str
-  required: True
-  description: Идентификатор шаблона
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора
-date:
-  type: str | None
-  required: False
-  description: Дата создания ограничителя
-productType:
-  type: str | None
-  required: False
-  description: Тип продукта
-productGroup:
-  type: str | None
-  required: False
-  description: Группа продукта
-productTypeName:
-  type: str | None
-  required: False
-  description: Название типа продукта
-productGroupName:
-  type: str | None
-  required: False
-  description: Название группы продукта
-restriction_type:
-  type: int
-  required: True
-  description: Тип ограничителя (1 — разрешение, 2 — запрет)
-```
+Сигнатура: `TemplateRestriction(*, id: str, template_id: str, contract_id: str, date: str | None = None, productType: str | None = None, productGroup: str | None = None, productTypeName: str | None = None, productGroupName: str | None = None, restriction_type: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5666,30 +1900,9 @@ restriction_type:
 
 ### `TemplateRestrictionCreateRequest`
 
-TemplateRestrictionCreateRequest(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateRestrictionCreateRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-contract_id:
-  type: str
-  required: True
-  description: Идентификатор договора
-product_type:
-  type: str
-  required: True
-  description: Тип продукта (например, '1-276PF01')
-product_group:
-  type: str | None
-  required: False
-  description: Группа продукта (например, '1-276PF0E')
-restriction_type:
-  type: int
-  required: True
-  description: Тип ограничителя (1 — разрешение, 2 — запрет)
-```
+Сигнатура: `TemplateRestrictionCreateRequest(*, contract_id: str, product_type: str, product_group: str | None = None, restriction_type: int) -> None`
 
 Публичные методы:
 
@@ -5697,26 +1910,9 @@ restriction_type:
 
 ### `TemplateRestrictionCreateResponse`
 
-TemplateRestrictionCreateResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateRestrictionCreateResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: str
-  required: True
-  description: ID созданного ограничителя шаблона
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateRestrictionCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5724,26 +1920,9 @@ timestamp:
 
 ### `TemplateRestrictionDeleteResponse`
 
-TemplateRestrictionDeleteResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateRestrictionDeleteResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: bool
-  required: True
-  description: Результат удаления ограничителя
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateRestrictionDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5751,22 +1930,9 @@ timestamp:
 
 ### `TemplateRestrictionListData`
 
-TemplateRestrictionListData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateRestrictionListData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Количество найденных ограничителей
-result:
-  type: list[TemplateRestriction]
-  required: True
-  description: Список ограничителей шаблона
-```
+Сигнатура: `TemplateRestrictionListData(*, total_count: int, result: list[api_client_opti24.models.templates.TemplateRestriction], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5774,26 +1940,9 @@ result:
 
 ### `TemplateRestrictionListResponse`
 
-TemplateRestrictionListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplateRestrictionListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа
-data:
-  type: TemplateRestrictionListData
-  required: True
-  description: Основные данные списка ограничителей
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplateRestrictionListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5801,22 +1950,9 @@ timestamp:
 
 ### `TemplatesListData`
 
-TemplatesListData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplatesListData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество найденных шаблонов
-result:
-  type: list[TemplateItem]
-  required: True
-  description: Список найденных шаблонов ВК
-```
+Сигнатура: `TemplatesListData(*, total_count: int, result: list[api_client_opti24.models.templates.TemplateItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5824,26 +1960,9 @@ result:
 
 ### `TemplatesListResponse`
 
-TemplatesListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TemplatesListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any] | None
-  required: False
-  description: Статус ответа (код, сообщение и т.д.)
-data:
-  type: TemplatesListData
-  required: True
-  description: Основные данные списка шаблонов
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени ответа (Unix)
-```
+Сигнатура: `TemplatesListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplatesListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5857,20 +1976,7 @@ timestamp:
 
 Информация о типе и названии запроса.
 
-Сигнатура: `RequestInfo(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-type:
-  type: str
-  required: True
-  description: Тип операции (например, Advice)
-name:
-  type: str
-  required: True
-  description: Название операции (например, Покупка)
-```
+Сигнатура: `RequestInfo(*, type: str, name: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5880,24 +1986,7 @@ name:
 
 Ответ метода получения детальной информации по транзакции (v2).
 
-Сигнатура: `TransactionDetailResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус ответа
-data:
-  type: TransactionsV2Data
-  required: True
-  description: Информация по одной транзакции
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `TransactionDetailResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.transactions.TransactionsV2Data, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5907,60 +1996,7 @@ timestamp:
 
 Позиция (товар) внутри транзакции.
 
-Сигнатура: `TransactionItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID позиции транзакции
-rrn:
-  type: str
-  required: True
-  description: Уникальный номер RRN
-product:
-  type: str
-  required: True
-  description: Наименование продукта (топлива)
-amount:
-  type: str
-  required: True
-  description: Количество продукта
-price:
-  type: str
-  required: True
-  description: Цена за единицу
-base_cost:
-  type: str
-  required: True
-  description: Базовая стоимость
-cost:
-  type: str
-  required: True
-  description: Итоговая стоимость с учетом скидки
-discount:
-  type: str
-  required: True
-  description: Скидка по позиции
-discount_cost:
-  type: str
-  required: True
-  description: Стоимость с учётом скидки
-transaction:
-  type: str
-  required: True
-  description: ID транзакции
-currency:
-  type: str
-  required: True
-  description: Валюта
-unit:
-  type: str
-  required: True
-  description: Единица измерения
-```
+Сигнатура: `TransactionItem(*, id: str, rrn: str, product: str, amount: str, price: str, base_cost: str, cost: str, discount: str, discount_cost: str, transaction: str, currency: str, unit: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -5974,108 +2010,7 @@ unit:
 и реальным ответам DEMO-стенда, а не табличным типам, которые местами
 противоречат самим же payload-примерам.
 
-Сигнатура: `TransactionItemV2(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: int
-  required: True
-  description: ID транзакции
-timestamp:
-  type: datetime
-  required: True
-  description: Время транзакции (локальное)
-utc_time:
-  type: datetime | None
-  required: False
-  description: Время транзакции в UTC
-card_id:
-  type: str
-  required: True
-  description: ID карты
-poi_id:
-  type: str
-  required: True
-  description: ID точки продаж (АЗС)
-terminal_id:
-  type: str
-  required: True
-  description: ID терминала
-type:
-  type: str
-  required: True
-  description: Тип операции (P — покупка, R — возврат)
-product_id:
-  type: str
-  required: True
-  description: ID продукта
-product_name:
-  type: str | None
-  required: False
-  description: Наименование продукта
-product_category_id:
-  type: str
-  required: True
-  description: Категория продукта (например, НП)
-currency:
-  type: str
-  required: True
-  description: Код валюты (например, RUR)
-check_id:
-  type: int
-  required: True
-  description: Номер чека
-stor_transaction_id:
-  type: int
-  required: True
-  description: ID сторнируемой транзакции
-is_storno:
-  type: bool
-  required: True
-  description: Признак сторно
-is_manual_corrention:
-  type: bool
-  required: True
-  description: Признак ручной корректировки
-qty:
-  type: float
-  required: True
-  description: Количество
-price:
-  type: float
-  required: True
-  description: Цена за единицу
-price_no_discount:
-  type: float
-  required: True
-  description: Цена без скидки
-sum:
-  type: float
-  required: True
-  description: Сумма с учетом скидки
-sum_no_discount:
-  type: float
-  required: True
-  description: Сумма без скидки
-discount:
-  type: float
-  required: True
-  description: Размер скидки
-exchange_rate:
-  type: float
-  required: True
-  description: Курс обмена
-card_number:
-  type: str
-  required: True
-  description: Номер карты
-payment_type:
-  type: str
-  required: True
-  description: Тип оплаты (например, Карта)
-```
+Сигнатура: `TransactionItemV2(*, id: int, timestamp: datetime.datetime, utc_time: datetime.datetime | None = None, card_id: str, poi_id: str, terminal_id: str, type: str, product_id: str, product_name: str | None = None, product_category_id: str, currency: str, check_id: int, stor_transaction_id: int, is_storno: bool, is_manual_corrention: bool, qty: float, price: float, price_no_discount: float, sum: float, sum_no_discount: float, discount: float, exchange_rate: float, card_number: str, payment_type: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6085,68 +2020,7 @@ payment_type:
 
 Транзакция для версии v1.
 
-Сигнатура: `TransactionV1(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID транзакции
-time:
-  type: datetime
-  required: True
-  description: Дата и время транзакции
-host_date:
-  type: datetime
-  required: True
-  description: Дата и время на хосте
-currency:
-  type: str
-  required: True
-  description: Код валюты (например, 810)
-card_id:
-  type: str
-  required: True
-  description: ID карты
-service_center:
-  type: str
-  required: True
-  description: ID сервисного центра (АЗС)
-card_number:
-  type: str
-  required: True
-  description: Номер карты
-base_cost:
-  type: str
-  required: True
-  description: Базовая стоимость транзакции
-cost:
-  type: str
-  required: True
-  description: Фактическая стоимость с учётом скидок
-discount:
-  type: str
-  required: True
-  description: Размер скидки
-discount_cost:
-  type: str
-  required: True
-  description: Стоимость после применения скидки
-incoming:
-  type: bool
-  required: True
-  description: Признак входящей транзакции
-request:
-  type: RequestInfo
-  required: True
-  description: Информация о типе операции
-transaction_items:
-  type: list[TransactionItem]
-  required: True
-  description: Список товаров в транзакции
-```
+Сигнатура: `TransactionV1(*, id: str, time: datetime.datetime, host_date: datetime.datetime, currency: str, card_id: str, service_center: str, card_number: str, base_cost: str, cost: str, discount: str, discount_cost: str, incoming: bool, request: api_client_opti24.models.transactions.RequestInfo, transaction_items: list[api_client_opti24.models.transactions.TransactionItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6154,22 +2028,9 @@ transaction_items:
 
 ### `TransactionsV1Data`
 
-TransactionsV1Data(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TransactionsV1Data(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество транзакций
-result:
-  type: list[TransactionV1]
-  required: True
-  description: Список транзакций
-```
+Сигнатура: `TransactionsV1Data(*, total_count: int, result: list[api_client_opti24.models.transactions.TransactionV1], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6177,26 +2038,9 @@ result:
 
 ### `TransactionsV1Response`
 
-TransactionsV1Response(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TransactionsV1Response(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус ответа
-data:
-  type: TransactionsV1Data
-  required: True
-  description: Данные ответа
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `TransactionsV1Response(*, status: dict[str, typing.Any], data: api_client_opti24.models.transactions.TransactionsV1Data, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6204,22 +2048,9 @@ timestamp:
 
 ### `TransactionsV2Data`
 
-TransactionsV2Data(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TransactionsV2Data(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество транзакций
-result:
-  type: list[TransactionItemV2]
-  required: True
-  description: Список транзакций (v2)
-```
+Сигнатура: `TransactionsV2Data(*, total_count: int, result: list[api_client_opti24.models.transactions.TransactionItemV2], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6227,26 +2058,9 @@ result:
 
 ### `TransactionsV2Response`
 
-TransactionsV2Response(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `TransactionsV2Response(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус ответа
-data:
-  type: TransactionsV2Data
-  required: True
-  description: Данные ответа
-timestamp:
-  type: int
-  required: True
-  description: Метка времени сервера
-```
+Сигнатура: `TransactionsV2Response(*, status: dict[str, typing.Any], data: api_client_opti24.models.transactions.TransactionsV2Data, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6258,26 +2072,9 @@ timestamp:
 
 ### `UserAccess`
 
-UserAccess(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserAccess(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-web:
-  type: bool
-  required: True
-  description: Доступ через веб-интерфейс
-api:
-  type: bool
-  required: True
-  description: Доступ через API
-mobile:
-  type: bool
-  required: True
-  description: Доступ через мобильное приложение
-```
+Сигнатура: `UserAccess(*, web: bool, api: bool, mobile: bool, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6285,26 +2082,9 @@ mobile:
 
 ### `UserBoolResponse`
 
-UserBoolResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserBoolResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения запроса
-data:
-  type: bool
-  required: True
-  description: Результат операции (true/false)
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени
-```
+Сигнатура: `UserBoolResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6312,50 +2092,9 @@ timestamp:
 
 ### `UserCardItem`
 
-UserCardItem(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserCardItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-sid:
-  type: str
-  required: True
-  description: SID карты
-number:
-  type: str
-  required: True
-  description: Номер карты
-mpc:
-  type: bool
-  required: True
-  description: Признак мультикарты
-product:
-  type: str | None
-  required: False
-  description: Тип продукта карты (wallet, limit и т.д.)
-comment:
-  type: str | None
-  required: False
-  description: Комментарий к карте
-status:
-  type: str
-  required: True
-  description: Статус карты (Active, Blocked и т.п.)
-contract_id:
-  type: str
-  required: True
-  description: ID договора, к которому привязана карта
-contract_name:
-  type: str | None
-  required: False
-  description: Название договора
-available:
-  type: bool
-  required: True
-  description: Доступна ли карта пользователю
-```
+Сигнатура: `UserCardItem(*, sid: str, number: str, mpc: bool, product: str | None = None, comment: str | None = None, status: str, contract_id: str, contract_name: str | None = None, available: bool, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6363,38 +2102,9 @@ available:
 
 ### `UserContractItem`
 
-UserContractItem(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserContractItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-sid:
-  type: str
-  required: True
-  description: ID договора
-number:
-  type: str
-  required: True
-  description: Номер договора
-available:
-  type: bool
-  required: True
-  description: Доступен ли договор пользователю
-template_id:
-  type: str | None
-  required: False
-  description: ID шаблона договора, если есть
-cards_count:
-  type: int | None
-  required: False
-  description: Количество карт по договору
-status:
-  type: UserStatus | None
-  required: False
-  description: Статус договора
-```
+Сигнатура: `UserContractItem(*, sid: str, number: str, available: bool, template_id: str | None = None, cards_count: int | None = None, status: api_client_opti24.models.users.UserStatus | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6402,26 +2112,9 @@ status:
 
 ### `UserCreateResponse`
 
-UserCreateResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserCreateResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения запроса
-data:
-  type: str
-  required: True
-  description: ID созданного пользователя
-timestamp:
-  type: int | None
-  required: False
-  description: Метка времени
-```
+Сигнатура: `UserCreateResponse(*, status: dict[str, typing.Any], data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6429,70 +2122,9 @@ timestamp:
 
 ### `UserItem`
 
-UserItem(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserItem(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID пользователя в системе
-login:
-  type: str
-  required: True
-  description: Логин пользователя (обычно номер телефона)
-first_name:
-  type: str
-  required: True
-  description: Имя пользователя
-last_name:
-  type: str
-  required: True
-  description: Фамилия пользователя
-middle_name:
-  type: str | None
-  required: False
-  description: Отчество пользователя
-date:
-  type: str
-  required: True
-  description: Дата рождения
-position:
-  type: str | None
-  required: False
-  description: Должность или UUID должности
-role:
-  type: UserRole
-  required: True
-  description: Роль пользователя
-active:
-  type: bool
-  required: True
-  description: Активен ли пользователь
-access:
-  type: UserAccess
-  required: True
-  description: Информация о доступах пользователя
-mobile_phone:
-  type: str | None
-  required: False
-  description: Мобильный телефон пользователя
-email:
-  type: str | None
-  required: False
-  description: Email пользователя
-contracts:
-  type: list[UserContractItem]
-  required: False
-  description: Список договоров пользователя
-cards:
-  type: list[UserCardItem]
-  required: False
-  description: Список карт пользователя
-```
+Сигнатура: `UserItem(*, id: str, login: str, first_name: str, last_name: str, middle_name: str | None = None, date: str, position: str | None = None, role: api_client_opti24.models.users.UserRole, active: bool, access: api_client_opti24.models.users.UserAccess, mobile_phone: str | None = None, email: str | None = None, contracts: list[api_client_opti24.models.users.UserContractItem] = <factory>, cards: list[api_client_opti24.models.users.UserCardItem] = <factory>, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6500,22 +2132,9 @@ cards:
 
 ### `UserList`
 
-UserList(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserList(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-total_count:
-  type: int
-  required: True
-  description: Общее количество пользователей
-result:
-  type: list[UserItem]
-  required: True
-  description: Список пользователей
-```
+Сигнатура: `UserList(*, total_count: int, result: list[api_client_opti24.models.users.UserItem], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6523,26 +2142,9 @@ result:
 
 ### `UserListResponse`
 
-UserListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения запроса (например {'code': 200})
-data:
-  type: UserList | None
-  required: False
-  description: Основные данные ответа
-timestamp:
-  type: int | None
-  required: False
-  description: Временная метка ответа
-```
+Сигнатура: `UserListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.users.UserList | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6550,22 +2152,9 @@ timestamp:
 
 ### `UserRole`
 
-UserRole(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserRole(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID роли пользователя (Driver, Manager и т.д.)
-name:
-  type: str
-  required: True
-  description: Название роли пользователя
-```
+Сигнатура: `UserRole(*, id: str, name: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6573,22 +2162,9 @@ name:
 
 ### `UserStatus`
 
-UserStatus(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserStatus(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID статуса договора, например Active
-name:
-  type: str
-  required: True
-  description: Название статуса договора, например Активен
-```
+Сигнатура: `UserStatus(*, id: str, name: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6596,26 +2172,9 @@ name:
 
 ### `UserListResponse`
 
-UserListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `UserListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: dict[str, Any]
-  required: True
-  description: Статус выполнения запроса (например {'code': 200})
-data:
-  type: UserList | None
-  required: False
-  description: Основные данные ответа
-timestamp:
-  type: int | None
-  required: False
-  description: Временная метка ответа
-```
+Сигнатура: `UserListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.users.UserList | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6627,22 +2186,9 @@ timestamp:
 
 ### `ConfirmVirtualCardRequest`
 
-ConfirmVirtualCardRequest(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `ConfirmVirtualCardRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-card_id:
-  type: str
-  required: True
-  description: ID виртуальной карты для подтверждения выпуска
-code:
-  type: str
-  required: True
-  description: Код подтверждения из СМС
-```
+Сигнатура: `ConfirmVirtualCardRequest(*, card_id: str, code: str) -> None`
 
 Публичные методы:
 
@@ -6650,26 +2196,9 @@ code:
 
 ### `ConfirmVirtualCardResponse`
 
-ConfirmVirtualCardResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `ConfirmVirtualCardResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус подтверждения выпуска
-data:
-  type: bool
-  required: True
-  description: Результат подтверждения (True — успешно)
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `ConfirmVirtualCardResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6677,26 +2206,9 @@ timestamp:
 
 ### `DeleteMPCResponse`
 
-DeleteMPCResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `DeleteMPCResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус удаления мобильного профиля карты (МПК)
-data:
-  type: bool
-  required: True
-  description: Результат удаления (True — успешно)
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `DeleteMPCResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6704,26 +2216,9 @@ timestamp:
 
 ### `DeleteVirtualCardResponse`
 
-DeleteVirtualCardResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `DeleteVirtualCardResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус удаления виртуальной карты
-data:
-  type: bool
-  required: True
-  description: Результат удаления карты (True — успешно)
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `DeleteVirtualCardResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6731,26 +2226,9 @@ timestamp:
 
 ### `MPCActionResponse`
 
-MPCActionResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `MPCActionResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус выполнения операции с МПК
-data:
-  type: bool
-  required: True
-  description: Результат выполнения операции (True — успешно)
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `MPCActionResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6758,26 +2236,9 @@ timestamp:
 
 ### `MPCListResponse`
 
-MPCListResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `MPCListResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус получения списка МПК
-data:
-  type: Any
-  required: True
-  description: Список или контейнер с опубликованными МПК/QR
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `MPCListResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: Any, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6785,26 +2246,9 @@ timestamp:
 
 ### `MPCPayloadResponse`
 
-MPCPayloadResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `MPCPayloadResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус выполнения операции с МПК
-data:
-  type: Any
-  required: True
-  description: Полезная нагрузка операции с МПК
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `MPCPayloadResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: Any, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6812,22 +2256,9 @@ timestamp:
 
 ### `RerunVirtualCardReleaseRequest`
 
-RerunVirtualCardReleaseRequest(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `RerunVirtualCardReleaseRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-card_id:
-  type: str
-  required: True
-  description: ID виртуальной карты для перезапуска выпуска
-reason:
-  type: str | None
-  required: False
-  description: Причина перезапуска выпуска (опционально)
-```
+Сигнатура: `RerunVirtualCardReleaseRequest(*, card_id: str, reason: str | None = None) -> None`
 
 Публичные методы:
 
@@ -6835,26 +2266,9 @@ reason:
 
 ### `RerunVirtualCardReleaseResponse`
 
-RerunVirtualCardReleaseResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `RerunVirtualCardReleaseResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус перезапуска выпуска карты
-data:
-  type: VirtualCardData
-  required: True
-  description: Обновлённая информация о виртуальной карте
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `RerunVirtualCardReleaseResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: api_client_opti24.models.virtual_cards.VirtualCardData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6862,18 +2276,9 @@ timestamp:
 
 ### `ResendSMSRequest`
 
-ResendSMSRequest(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `ResendSMSRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-card_id:
-  type: str
-  required: True
-  description: ID виртуальной карты, для которой нужно повторно отправить СМС-код
-```
+Сигнатура: `ResendSMSRequest(*, card_id: str) -> None`
 
 Публичные методы:
 
@@ -6881,26 +2286,9 @@ card_id:
 
 ### `ResendSMSResponse`
 
-ResendSMSResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `ResendSMSResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус запроса на повторную отправку СМС-кода
-data:
-  type: bool
-  required: True
-  description: Результат операции (True — СМС отправлено успешно)
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `ResendSMSResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6908,18 +2296,9 @@ timestamp:
 
 ### `ResetMPCRequest`
 
-ResetMPCRequest(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `ResetMPCRequest(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-type:
-  type: str
-  required: True
-  description: Тип операции сброса ('ResetCounterCode' и т.п.)
-```
+Сигнатура: `ResetMPCRequest(*, type: str) -> None`
 
 Публичные методы:
 
@@ -6927,26 +2306,9 @@ type:
 
 ### `ResetMPCResponse`
 
-ResetMPCResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `ResetMPCResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус выполнения операции сброса
-data:
-  type: bool
-  required: True
-  description: Результат операции (True — успешно)
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `ResetMPCResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6954,26 +2316,9 @@ timestamp:
 
 ### `SimpleActionResponse`
 
-SimpleActionResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `SimpleActionResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус выполнения операции
-data:
-  type: bool
-  required: True
-  description: Результат операции (True — успешно)
-timestamp:
-  type: int
-  required: True
-  description: Время выполнения запроса (Unix Timestamp)
-```
+Сигнатура: `SimpleActionResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -6981,18 +2326,9 @@ timestamp:
 
 ### `StatusModel`
 
-StatusModel(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `StatusModel(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-code:
-  type: int
-  required: True
-  description: Код статуса ответа (200 — успешно, иное — ошибка)
-```
+Сигнатура: `StatusModel(*, code: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -7000,34 +2336,9 @@ code:
 
 ### `VirtualCardData`
 
-VirtualCardData(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `VirtualCardData(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-id:
-  type: str
-  required: True
-  description: ID виртуальной карты
-number:
-  type: str
-  required: True
-  description: Номер виртуальной карты
-carrier:
-  type: str
-  required: True
-  description: Тип носителя, обычно 'Virtual Card'
-product:
-  type: str
-  required: True
-  description: Тип продукта карты ('wallet' или 'limit')
-status:
-  type: str
-  required: True
-  description: Статус карты (например, 'Active', 'Blocked', 'Pending')
-```
+Сигнатура: `VirtualCardData(*, id: str, number: str, carrier: str, product: str, status: str, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -7035,26 +2346,9 @@ status:
 
 ### `VirtualCardResponse`
 
-VirtualCardResponse(**kwargs: 'Any') -> 'None'
+Описание отсутствует.
 
-Сигнатура: `VirtualCardResponse(**kwargs: 'Any') -> 'None'`
-
-Описание полей:
-
-```text
-status:
-  type: StatusModel
-  required: True
-  description: Статус ответа от сервера
-data:
-  type: VirtualCardData
-  required: True
-  description: Информация о выпущенной виртуальной карте
-timestamp:
-  type: int
-  required: True
-  description: Время ответа сервера в формате Unix Timestamp
-```
+Сигнатура: `VirtualCardResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: api_client_opti24.models.virtual_cards.VirtualCardData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -7082,7 +2376,7 @@ RateLimitPolicy(requests_per_second: 'float | None' = None)
 
 ### `RetryClass`
 
-Enum where members are also (and must be) strings
+Описание отсутствует.
 
 Сигнатура: `RetryClass(*values)`
 
@@ -7144,36 +2438,7 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 ### `Clock`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `Clock(*args, **kwargs)`
 
@@ -7199,81 +2464,19 @@ Protocol classes can be generic, they are defined as::
 
 Описание отсутствует.
 
-### `AuthenticationSession`
+### `APIKeyProvider`
 
-Base class for protocol classes.
+Описание отсутствует.
 
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
-
-Сигнатура: `AuthenticationSession(*args, **kwargs)`
+Сигнатура: `APIKeyProvider(*args, **kwargs)`
 
 Публичные методы:
 
-- `ensure_authenticated(self, authenticate: 'AuthenticateCallback') -> 'str'`
-- `invalidate(self) -> 'None'`
-- `mark_authenticated(self, session_id: 'str', contract_id: 'str | None' = None) -> 'None'`
-- `reset(self) -> 'None'`
-- `set_contract(self, contract_id: 'str | None') -> 'None'`
+- `get_api_key(self) -> 'str'`
 
 ### `CredentialsProvider`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `CredentialsProvider(*args, **kwargs)`
 
@@ -7283,147 +2486,30 @@ Protocol classes can be generic, they are defined as::
 
 ### `RequestExecutor`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `RequestExecutor(*args, **kwargs)`
 
 Публичные методы:
 
-- `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False) -> 'dict[str, str]'`
-- `request(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', **kwargs: 'Any') -> 'JSONPayload'`
-- `request_stream(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', headers: 'dict[str, str] | None' = None, **kwargs: 'Any') -> 'bytes'`
+- `execute(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'JSONPayload'`
+- `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
 
 ### `ServiceMethodContext`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `ServiceMethodContext(*args, **kwargs)`
 
 ### `SessionContext`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `SessionContext(*args, **kwargs)`
 
 ### `SessionGate`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `SessionGate(*args, **kwargs)`
 
@@ -7433,36 +2519,7 @@ Protocol classes can be generic, they are defined as::
 
 ### `SessionMutator`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `SessionMutator(*args, **kwargs)`
 
@@ -7472,6 +2529,16 @@ Protocol classes can be generic, they are defined as::
 - `mark_authenticated(self, session_id: 'str', contract_id: 'str | None' = None) -> 'None'`
 - `reset(self) -> 'None'`
 - `set_contract(self, contract_id: 'str | None') -> 'None'`
+
+### `SessionRecovery`
+
+Описание отсутствует.
+
+Сигнатура: `SessionRecovery(*args, **kwargs)`
+
+Публичные методы:
+
+- `recover(self) -> 'str'`
 
 ## `api_client_opti24.service_groups`
 
@@ -7501,13 +2568,13 @@ _Публичные классы и функции не обнаружены._
 
 Описание отсутствует.
 
-Сигнатура: `AuthService(request_executor: api_client_opti24.service_base.RequestExecutor, session_context: api_client_opti24.service_base.SessionContext, session_gate: api_client_opti24.service_base.SessionGate, session_mutator: api_client_opti24.service_base.SessionMutator, credentials_provider: api_client_opti24.service_base.CredentialsProvider, clock: api_client_opti24.runtime.Clock, logger: logging.Logger | api_client_opti24.logger.ContextLogger) -> None`
+Сигнатура: `AuthService(request_executor: api_client_opti24.service_base.RequestExecutor, session_context: api_client_opti24.service_base.SessionContext, session_gate: api_client_opti24.service_base.SessionGate, session_mutator: api_client_opti24.service_base.SessionMutator, credentials_provider: api_client_opti24.service_base.CredentialsProvider, clock: api_client_opti24.runtime.Clock, logger: logging.Logger) -> None`
 
 Публичные методы:
 
-- `auth_user(self, *, api_version: str = 'v1', contract_id: str | None = None, contract_number: str | None = None) -> api_client_opti24.models.auth.AuthUserResponse`
-- `get_info(self, api_version: str = 'v1', period: str | None = None) -> api_client_opti24.models.auth.GetInfoResponse`
-- `logoff(self, api_version: str = 'v1') -> dict[str, object]`
+- `auth_user(self, *, api_version: str | None = None, contract_id: str | None = None, contract_number: str | None = None) -> api_client_opti24.models.auth.AuthUserResponse`
+- `get_info(self, api_version: str | None = None, period: str | None = None) -> api_client_opti24.models.auth.GetInfoResponse`
+- `logoff(self, api_version: str | None = None) -> dict[str, object]`
 
 ## `api_client_opti24.services.card_group`
 
@@ -7521,10 +2588,10 @@ _Публичные классы и функции не обнаружены._
 
 Публичные методы:
 
-- `get_card_groups(self, *, contract_id: str, api_version: str = 'v1') -> api_client_opti24.models.card_group.CardGroupListResponse`
-- `remove_card_group(self, *, contract_id: str, group_id: str, api_version: str = 'v1') -> api_client_opti24.models.card_group.RemoveCardGroupResponse`
-- `set_card_group(self, *, contract_id: str, name: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.card_group.SetCardGroupResponse`
-- `set_cards_to_group(self, *, contract_id: str, group_id: str, cards_list: list[dict[str, typing.Any]], api_version: str = 'v1') -> api_client_opti24.models.card_group.SetCardsToGroupResponse`
+- `get_card_groups(self, *, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.card_group.CardGroupListResponse`
+- `remove_card_group(self, *, contract_id: str, group_id: str, api_version: str | None = None) -> api_client_opti24.models.card_group.RemoveCardGroupResponse`
+- `set_card_group(self, *, contract_id: str, name: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.card_group.SetCardGroupResponse`
+- `set_cards_to_group(self, *, contract_id: str, group_id: str, cards_list: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.card_group.SetCardsToGroupResponse`
 
 ## `api_client_opti24.services.cards`
 
@@ -7538,15 +2605,15 @@ _Публичные классы и функции не обнаружены._
 
 Публичные методы:
 
-- `block_card(self, contract_id: str, card_ids: list[str], block: bool = True, api_version: str = 'v1') -> api_client_opti24.models.cards.IDListResponse`
-- `get_card_detail(self, contract_id: str, card_id: str, api_version: str = 'v1') -> api_client_opti24.models.cards.CardDetailResponse`
-- `get_card_drivers(self, card_id: str, contract_id: str, api_version: str = 'v2') -> api_client_opti24.models.cards.CardDriversResponse`
-- `get_cards_by_group(self, contract_id: str, group_id: str, api_version: str = 'v1') -> api_client_opti24.models.cards.CardGroupResponse`
-- `get_cards_v1(self, contract_id: str, cache: bool = True, api_version: str = 'v1') -> api_client_opti24.models.cards.CardsListResponse`
-- `get_cards_v2(self, contract_id: str | None = None, sort: str = '-id', q: str | None = None, status: str | None = None, carrier: str | None = None, platon: bool | None = None, avtodor: bool | None = None, users: bool | None = None, group_id: str | None = None, page: int | None = None, onpage: int | None = None, api_version: str = 'v2') -> api_client_opti24.models.cards.CardsV2Response`
-- `reset_pin(self, card_id: str, contract_id: str, code: str, api_version: str = 'v2') -> api_client_opti24.models.cards.BoolResponse`
-- `set_card_comment(self, card_id: str, contract_id: str, comment: str, api_version: str = 'v1') -> api_client_opti24.models.cards.BoolResponse`
-- `verify_pin(self, card_id: str, contract_id: str, api_version: str = 'v2') -> api_client_opti24.models.cards.BoolResponse`
+- `block_card(self, contract_id: str, card_ids: list[str], block: bool = True, api_version: str | None = None) -> api_client_opti24.models.cards.IDListResponse`
+- `get_card_detail(self, contract_id: str, card_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardDetailResponse`
+- `get_card_drivers(self, card_id: str, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardDriversResponse`
+- `get_cards_by_group(self, contract_id: str, group_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardGroupResponse`
+- `get_cards_v1(self, contract_id: str, cache: bool = True, api_version: str | None = None) -> api_client_opti24.models.cards.CardsListResponse`
+- `get_cards_v2(self, contract_id: str | None = None, sort: str = '-id', q: str | None = None, status: str | None = None, carrier: str | None = None, platon: bool | None = None, avtodor: bool | None = None, users: bool | None = None, group_id: str | None = None, page: int | None = None, onpage: int | None = None, api_version: str | None = None) -> api_client_opti24.models.cards.CardsV2Response`
+- `reset_pin(self, card_id: str, contract_id: str, code: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
+- `set_card_comment(self, card_id: str, contract_id: str, comment: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
+- `verify_pin(self, card_id: str, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
 
 ## `api_client_opti24.services.contract`
 
@@ -7560,13 +2627,13 @@ _Публичные классы и функции не обнаружены._
 
 Публичные методы:
 
-- `get_contract_data(self, contract_id: str, api_version: str = 'v1') -> api_client_opti24.models.contracts.ContractResponse`
-- `get_documents(self, date_start: str, date_end: str, api_version: str = 'v2', page: int = 1, on_page: int = 10) -> api_client_opti24.models.contracts.DocumentsResponse`
-- `get_invoices(self, api_version: str = 'v2') -> api_client_opti24.models.contracts.InvoicesResponse`
-- `get_payments(self, contract_id: str, api_version: str = 'v1') -> api_client_opti24.models.contracts.PaymentsResponse`
-- `order_cards(self, count: int, office_id: str, api_version: str = 'v2') -> api_client_opti24.models.contracts.OrderCardsResponse`
-- `order_documents_email(self, ids: list[str], fmt: str, emails: list[str], api_version: str = 'v2') -> api_client_opti24.models.contracts.DocumentsOrderResponse`
-- `order_invoice(self, amount: float, email: str, api_version: str = 'v2') -> api_client_opti24.models.contracts.InvoiceOrderResponse`
+- `get_contract_data(self, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.contracts.ContractResponse`
+- `get_documents(self, date_start: str, date_end: str, api_version: str | None = None, page: int = 1, on_page: int = 10) -> api_client_opti24.models.contracts.DocumentsResponse`
+- `get_invoices(self, api_version: str | None = None) -> api_client_opti24.models.contracts.InvoicesResponse`
+- `get_payments(self, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.contracts.PaymentsResponse`
+- `order_cards(self, count: int, office_id: str, api_version: str | None = None) -> api_client_opti24.models.contracts.OrderCardsResponse`
+- `order_documents_email(self, ids: list[str], fmt: str, emails: list[str], api_version: str | None = None) -> api_client_opti24.models.contracts.DocumentsOrderResponse`
+- `order_invoice(self, amount: float, email: str, api_version: str | None = None) -> api_client_opti24.models.contracts.InvoiceOrderResponse`
 
 ## `api_client_opti24.services.dictionaries`
 
@@ -7580,10 +2647,10 @@ _Публичные классы и функции не обнаружены._
 
 Публичные методы:
 
-- `get_azs_filters(self, *, api_version: str = 'v2') -> api_client_opti24.models.dictionaries.AzsFiltersResponse`
-- `get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: dict[str, Any] | None = None, id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.dictionaries.AzsListV1Response`
-- `get_azs_list_v2(self, filter: dict[str, Any] | None = None, q: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.dictionaries.AzsListV2Response`
-- `get_dictionary(self, *, name: str, api_version: str = 'v1') -> api_client_opti24.models.dictionaries.DictionaryResponse`
+- `get_azs_filters(self, *, api_version: str | None = None) -> api_client_opti24.models.dictionaries.AzsFiltersResponse`
+- `get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: dict[str, Any] | None = None, id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.dictionaries.AzsListV1Response`
+- `get_azs_list_v2(self, filter: dict[str, Any] | None = None, q: str | None = None, api_version: str | None = None) -> api_client_opti24.models.dictionaries.AzsListV2Response`
+- `get_dictionary(self, *, name: str, api_version: str | None = None) -> api_client_opti24.models.dictionaries.DictionaryResponse`
 
 ## `api_client_opti24.services.ewallet`
 
@@ -7603,9 +2670,9 @@ _Публичные классы и функции не обнаружены._
 
 Публичные методы:
 
-- `move_to_card(self, *, contract_id: str | None = None, card_id: str, amount: float, api_version: str = 'v1') -> api_client_opti24.models.ewallet.MoveToCardResponse`
-- `move_to_contract(self, *, contract_id: str | None = None, card_id: str, amount: float, api_version: str = 'v1') -> api_client_opti24.models.ewallet.MoveToContractResponse`
-- `set_card_product(self, *, contract_id: str | None = None, card_ids: list[str], product: str, api_version: str = 'v1') -> api_client_opti24.models.ewallet.SetCardProductResponse`
+- `move_to_card(self, *, contract_id: str | None = None, card_id: str, amount: float, api_version: str | None = None) -> api_client_opti24.models.ewallet.MoveToCardResponse`
+- `move_to_contract(self, *, contract_id: str | None = None, card_id: str, amount: float, api_version: str | None = None) -> api_client_opti24.models.ewallet.MoveToContractResponse`
+- `set_card_product(self, *, contract_id: str | None = None, card_ids: list[str], product: str, api_version: str | None = None) -> api_client_opti24.models.ewallet.SetCardProductResponse`
 
 ## `api_client_opti24.services.final_prices`
 
@@ -7619,8 +2686,8 @@ _Публичные классы и функции не обнаружены._
 
 Публичные методы:
 
-- `check_purchase(self, *, card_id: str, poi_id: str, goods: list[dict[str, typing.Any]], api_version: str = 'v2') -> api_client_opti24.models.final_prices.CheckPurchaseResponse`
-- `get_final_prices(self, *, card_id: str, poi_id: str, goods: list[str], api_version: str = 'v2') -> api_client_opti24.models.final_prices.FinalPricesResponse`
+- `check_purchase(self, *, card_id: str, poi_id: str, goods: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.final_prices.CheckPurchaseResponse`
+- `get_final_prices(self, *, card_id: str, poi_id: str, goods: list[str], api_version: str | None = None) -> api_client_opti24.models.final_prices.FinalPricesResponse`
 
 ## `api_client_opti24.services.invites`
 
@@ -7639,11 +2706,11 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `create_invite(self, *, data: dict[str, typing.Any], with_send: bool = True, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteResponse`
-- `delete_invite(self, *, invite_id: str, use_post: bool = False, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
-- `get_invites(self, *, role: str | None = None, user_id: str | None = None, sort: str | None = None, status: str | None = None, q: str | None = None, page: int | None = None, on_page: int | None = None, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteList`
-- `prolong_invite(self, *, invite_id: str, with_send: bool = True, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteBoolResponse`
-- `resend_invite(self, *, invite_id: str, api_version: str = 'v2') -> api_client_opti24.models.invites.InviteResponse`
+- `create_invite(self, *, data: dict[str, typing.Any], with_send: bool = True, api_version: str | None = None) -> api_client_opti24.models.invites.InviteResponse`
+- `delete_invite(self, *, invite_id: str, use_post: bool = False, api_version: str | None = None) -> api_client_opti24.models.invites.InviteBoolResponse`
+- `get_invites(self, *, role: str | None = None, user_id: str | None = None, sort: str | None = None, status: str | None = None, q: str | None = None, page: int | None = None, on_page: int | None = None, api_version: str | None = None) -> api_client_opti24.models.invites.InviteList`
+- `prolong_invite(self, *, invite_id: str, with_send: bool = True, api_version: str | None = None) -> api_client_opti24.models.invites.InviteBoolResponse`
+- `resend_invite(self, *, invite_id: str, api_version: str | None = None) -> api_client_opti24.models.invites.InviteResponse`
 
 ## `api_client_opti24.services.limits`
 
@@ -7662,9 +2729,9 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.limits.LimitsResponse`
-- `remove_limit(self, *, contract_id: str, limit_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.limits.RemoveLimitResponse`
-- `set_limit(self, *, limits: list[dict[str, typing.Any]], api_version: str = 'v1') -> api_client_opti24.models.limits.SetLimitResponse`
+- `get_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.limits.LimitsResponse`
+- `remove_limit(self, *, contract_id: str, limit_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.limits.RemoveLimitResponse`
+- `set_limit(self, *, limits: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.limits.SetLimitResponse`
 
 ## `api_client_opti24.services.region_limits`
 
@@ -7678,9 +2745,9 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_region_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RegionLimitResponse`
-- `remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.region_limits.RemoveRegionLimit`
-- `set_region_limit(self, *, region_limits: list[dict[str, typing.Any]], api_version: str = 'v1') -> dict[str, typing.Any]`
+- `get_region_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.region_limits.RegionLimitResponse`
+- `remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.region_limits.RemoveRegionLimit`
+- `set_region_limit(self, *, region_limits: list[dict[str, typing.Any]], api_version: str | None = None) -> dict[str, typing.Any]`
 
 ## `api_client_opti24.services.reports`
 
@@ -7703,13 +2770,13 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `download_report_file(self, *, job_id: str, api_version: str = 'v2') -> bytes`
-- `download_report_file_v1(self, *, job_id: str, archive: bool = False, api_version: str = 'v1') -> bytes`
-- `get_report_job_list_v1(self, *, api_version: str = 'v1') -> api_client_opti24.models.reports.ReportV1JobList`
-- `get_report_jobs(self, *, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportJobList`
-- `get_reports(self, *, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportList`
-- `order_report(self, *, report_id: str, format: str, params: dict[str, typing.Any], emails: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.reports.ReportOrderResponse`
-- `order_report_v1(self, *, contract_id: str, start: str, end: str, report_format: str, email: str | None = None, cards_list: list[str] | None = None, group_id: list[str] | None = None, archive: bool = False, api_version: str = 'v1') -> api_client_opti24.models.reports.ReportV1OrderResponse`
+- `download_report_file(self, *, job_id: str, api_version: str | None = None) -> bytes`
+- `download_report_file_v1(self, *, job_id: str, archive: bool = False, api_version: str | None = None) -> bytes`
+- `get_report_job_list_v1(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportV1JobList`
+- `get_report_jobs(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportJobList`
+- `get_reports(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportList`
+- `order_report(self, *, report_id: str, format: str, params: dict[str, typing.Any], emails: str | None = None, api_version: str | None = None) -> api_client_opti24.models.reports.ReportOrderResponse`
+- `order_report_v1(self, *, contract_id: str, start: str, end: str, report_format: str, email: str | None = None, cards_list: list[str] | None = None, group_id: list[str] | None = None, archive: bool = False, api_version: str | None = None) -> api_client_opti24.models.reports.ReportV1OrderResponse`
 
 ## `api_client_opti24.services.restrictions`
 
@@ -7723,9 +2790,9 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_restrictions(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionGetResponse`
-- `remove_restriction(self, *, contract_id: str, restriction_id: str, group_id: str | None = None, api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionRemoveResponse`
-- `set_restriction(self, *, restrictions: list[dict[str, typing.Any]], api_version: str = 'v1') -> api_client_opti24.models.restrictions.RestrictionSetResponse`
+- `get_restrictions(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionGetResponse`
+- `remove_restriction(self, *, contract_id: str, restriction_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionRemoveResponse`
+- `set_restriction(self, *, restrictions: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionSetResponse`
 
 ## `api_client_opti24.services.templates`
 
@@ -7744,22 +2811,22 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `create_template(self, contract_id: str, type_: str, name: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateCreateResponse`
-- `create_template_georestriction(self, template_id: str, payload: dict[str, typing.Any], api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
-- `create_template_limit(self, template_id: str, payload: dict[str, typing.Any], api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
-- `create_template_restriction(self, template_id: str, payload: dict[str, typing.Any], api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
-- `delete_template(self, template_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateDeleteResponse`
-- `delete_template_georestriction(self, template_id: str, georestriction_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateGeoRestrictionDeleteResponse`
-- `delete_template_limit(self, template_id: str, limit_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateLimitDeleteResponse`
-- `delete_template_restriction(self, template_id: str, restriction_id: str, api_version: str = 'v2', use_post: bool = False) -> api_client_opti24.models.templates.TemplateRestrictionDeleteResponse`
-- `get_template_georestrictions(self, template_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateGeoRestrictionListResponse`
-- `get_template_limits(self, template_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitListResponse`
-- `get_template_restrictions(self, template_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateRestrictionListResponse`
-- `get_templates(self, contract_id: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplatesListResponse`
-- `update_template(self, template_id: str, contract_id: str, type_: str, name: str, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateCreateResponse`
-- `update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict[str, typing.Any], api_version: str = 'v2', use_post: bool = True) -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
-- `update_template_limit(self, *, template_id: str, limit_id: str, limits: list[dict[str, typing.Any]], use_post: bool = True, api_version: str = 'v2') -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
-- `update_template_restriction(self, template_id: str, restriction_id: str, payload: dict[str, typing.Any], api_version: str = 'v2', use_post: bool = True) -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
+- `create_template(self, contract_id: str, type_: str, name: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateCreateResponse`
+- `create_template_georestriction(self, template_id: str, payload: dict[str, typing.Any], api_version: str | None = None) -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
+- `create_template_limit(self, template_id: str, payload: dict[str, typing.Any], api_version: str | None = None) -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
+- `create_template_restriction(self, template_id: str, payload: dict[str, typing.Any], api_version: str | None = None) -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
+- `delete_template(self, template_id: str, api_version: str | None = None, use_post: bool = False) -> api_client_opti24.models.templates.TemplateDeleteResponse`
+- `delete_template_georestriction(self, template_id: str, georestriction_id: str, api_version: str | None = None, use_post: bool = False) -> api_client_opti24.models.templates.TemplateGeoRestrictionDeleteResponse`
+- `delete_template_limit(self, template_id: str, limit_id: str, api_version: str | None = None, use_post: bool = False) -> api_client_opti24.models.templates.TemplateLimitDeleteResponse`
+- `delete_template_restriction(self, template_id: str, restriction_id: str, api_version: str | None = None, use_post: bool = False) -> api_client_opti24.models.templates.TemplateRestrictionDeleteResponse`
+- `get_template_georestrictions(self, template_id: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateGeoRestrictionListResponse`
+- `get_template_limits(self, template_id: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateLimitListResponse`
+- `get_template_restrictions(self, template_id: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateRestrictionListResponse`
+- `get_templates(self, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplatesListResponse`
+- `update_template(self, template_id: str, contract_id: str, type_: str, name: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateCreateResponse`
+- `update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict[str, typing.Any], api_version: str | None = None, use_post: bool = True) -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
+- `update_template_limit(self, *, template_id: str, limit_id: str, limits: list[dict[str, typing.Any]], use_post: bool = True, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
+- `update_template_restriction(self, template_id: str, restriction_id: str, payload: dict[str, typing.Any], api_version: str | None = None, use_post: bool = True) -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
 
 ## `api_client_opti24.services.transactions`
 
@@ -7773,10 +2840,10 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `get_card_transactions_v2(self, *, card_id: str, contract_id: str | None = None, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
-- `get_transaction_detail(self, *, transaction_id: str, contract_id: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.transactions.TransactionDetailResponse`
-- `get_transactions_v1(self, *, contract_id: str, card_id: str | None = None, count: int = 20, api_version: str = 'v1', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionV1], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV1Response`
-- `get_transactions_v2(self, *, contract_id: str, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str = 'v2', filter_fn: Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
+- `get_card_transactions_v2(self, *, card_id: str, contract_id: str | None = None, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str | None = None, filter_fn: collections.abc.Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
+- `get_transaction_detail(self, *, transaction_id: str, contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.transactions.TransactionDetailResponse`
+- `get_transactions_v1(self, *, contract_id: str, card_id: str | None = None, count: int = 20, api_version: str | None = None, filter_fn: collections.abc.Callable[[api_client_opti24.models.transactions.TransactionV1], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV1Response`
+- `get_transactions_v2(self, *, contract_id: str, date_from: str, date_to: str, page_limit: int = 100, page_offset: int = 0, api_version: str | None = None, filter_fn: collections.abc.Callable[[api_client_opti24.models.transactions.TransactionItemV2], bool] | None = None, sort_by: str | None = None, reverse: bool = False) -> api_client_opti24.models.transactions.TransactionsV2Response`
 
 ## `api_client_opti24.services.users`
 
@@ -7790,13 +2857,13 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `attach_card(self, *, user_id: str, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
-- `attach_contracts(self, *, user_id: str, contracts: list[dict[str, typing.Any]], api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
-- `create_user(self, *, uuid: str, mobile: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserCreateResponse`
-- `delete_user(self, *, user_id: str, use_post: bool = False, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
-- `detach_card(self, *, user_id: str, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
-- `detach_contracts(self, *, user_id: str, contracts: list[str], api_version: str = 'v2') -> api_client_opti24.models.users.UserBoolResponse`
-- `get_users(self, *, sort: str | None = None, page: int | None = None, on_page: int | None = None, q: str | None = None, filter: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.users.UserListResponse`
+- `attach_card(self, *, user_id: str, card_id: str, api_version: str | None = None) -> api_client_opti24.models.users.UserBoolResponse`
+- `attach_contracts(self, *, user_id: str, contracts: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.users.UserBoolResponse`
+- `create_user(self, *, uuid: str, mobile: str, api_version: str | None = None) -> api_client_opti24.models.users.UserCreateResponse`
+- `delete_user(self, *, user_id: str, use_post: bool = False, api_version: str | None = None) -> api_client_opti24.models.users.UserBoolResponse`
+- `detach_card(self, *, user_id: str, card_id: str, api_version: str | None = None) -> api_client_opti24.models.users.UserBoolResponse`
+- `detach_contracts(self, *, user_id: str, contracts: list[str], api_version: str | None = None) -> api_client_opti24.models.users.UserBoolResponse`
+- `get_users(self, *, sort: str | None = None, page: int | None = None, on_page: int | None = None, q: str | None = None, filter: dict[str, Any] | None = None, api_version: str | None = None) -> api_client_opti24.models.users.UserListResponse`
 
 ## `api_client_opti24.services.virtual_cards`
 
@@ -7810,15 +2877,15 @@ Invites – функционал регистрации пользователе
 
 Публичные методы:
 
-- `confirm_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
-- `create_virtual_card(self, user_id: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
-- `delete_mpc(self, card_id: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.SimpleActionResponse`
-- `generate_payment_qr(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
-- `get_mpc_qr_list(self, *, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCListResponse`
-- `init_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
-- `release_virtual_card(self, *, type_: str | None = None, template_id: str | None = None, user_id: str | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
-- `reset_mpc(self, card_id: str, type_: str, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.ResetMPCResponse`
-- `update_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str = 'v2') -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `confirm_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `create_virtual_card(self, user_id: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
+- `delete_mpc(self, card_id: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.SimpleActionResponse`
+- `generate_payment_qr(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `get_mpc_qr_list(self, *, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.MPCListResponse`
+- `init_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
+- `release_virtual_card(self, *, type_: str | None = None, template_id: str | None = None, user_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
+- `reset_mpc(self, card_id: str, type_: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.ResetMPCResponse`
+- `update_mpc(self, *, card_id: str, payload: dict[str, Any] | None = None, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.MPCPayloadResponse`
 
 ## `api_client_opti24.session`
 
@@ -7847,7 +2914,7 @@ SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 's
 
 ### `SessionState`
 
-Enum where members are also (and must be) strings
+Описание отсутствует.
 
 Сигнатура: `SessionState(*values)`
 
@@ -7857,36 +2924,7 @@ Enum where members are also (and must be) strings
 
 ### `AsyncHTTPClient`
 
-Base class for protocol classes.
-
-Protocol classes are defined as::
-
-    class Proto(Protocol):
-        def meth(self) -> int:
-            ...
-
-Such classes are primarily used with static type checkers that recognize
-structural subtyping (static duck-typing).
-
-For example::
-
-    class C:
-        def meth(self) -> int:
-            return 0
-
-    def func(x: Proto) -> int:
-        return x.meth()
-
-    func(C())  # Passes static type check
-
-See PEP 544 for details. Protocol classes decorated with
-@typing.runtime_checkable act as simple-minded runtime protocols that check
-only the presence of given attributes, ignoring their type signatures.
-Protocol classes can be generic, they are defined as::
-
-    class GenProto[T](Protocol):
-        def meth(self) -> T:
-            ...
+Описание отсутствует.
 
 Сигнатура: `AsyncHTTPClient(*args, **kwargs)`
 
@@ -7900,14 +2938,13 @@ Protocol classes can be generic, they are defined as::
 
 Описание отсутствует.
 
-Сигнатура: `AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, auth_recovery: 'AuthRecovery | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'LoggerLike | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = <function sleep>, monotonic: 'Callable[[], float]' = <built-in function monotonic>)`
+Сигнатура: `AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'LoggerLike | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = <function sleep>, monotonic: 'Callable[[], float]' = <built-in function monotonic>)`
 
 Публичные методы:
 
 - `aclose(self) -> 'None'`
-- `request(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, retry_auth: 'bool' = True, timeout: 'float | None' = None, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, **kwargs: 'Any') -> 'DecodedPayload'`
+- `request(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, timeout: 'float | None' = None, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, **kwargs: 'Any') -> 'DecodedPayload'`
 - `request_stream(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, *, method_name: 'str | None' = None, **kwargs: 'Any') -> 'bytes'`
-- `set_auth_recovery(self, auth_recovery: 'AuthRecovery') -> 'None'`
 
 ## `api_client_opti24.utils`
 

@@ -12,6 +12,11 @@ class MethodRegistry:
     def register(self, spec: EndpointSpec) -> None:
         if spec.name in self._specs:
             raise ValueError(f"Method '{spec.name}' is already registered")
+        route_keys = [(route.name, route.api_version) for route in spec.iter_routes()]
+        if len(route_keys) != len(set(route_keys)):
+            raise ValueError(f"Method '{spec.name}' contains duplicate named routes")
+        if not spec.supports(spec.default_version):
+            raise ValueError(f"Method '{spec.name}' default version is not listed as supported")
         self._specs[spec.name] = spec
 
     def get(self, name: str) -> EndpointSpec:

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from ..decorators import api_method
 from ..models.restrictions import (
@@ -16,14 +16,14 @@ class RestrictionsService(_BaseService):
     """
 
     # ---------------- Запрос ----------------
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_restrictions(
         self,
         *,
         contract_id: str,
-        card_id: Optional[str] = None,
-        group_id: Optional[str] = None,
-        api_version: str = "v1",
+        card_id: str | None = None,
+        group_id: str | None = None,
+        api_version: str | None = None,
     ) -> RestrictionGetResponse:
         """
         Получение списка товарных ограничителей по договору, карте или группе карт.
@@ -35,10 +35,8 @@ class RestrictionsService(_BaseService):
             params["group_id"] = group_id
 
         raw = await self._request(
-            "get",
-            "restriction",
+            "get_restrictions",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
 
@@ -46,12 +44,12 @@ class RestrictionsService(_BaseService):
         return RestrictionGetResponse(**raw)
 
     # ---------------- Установка ----------------
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def set_restriction(
         self,
         *,
         restrictions: list[dict[str, Any]],
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> RestrictionSetResponse:
         """
         Установка или изменение товарного ограничителя по карте или группе карт.
@@ -63,10 +61,8 @@ class RestrictionsService(_BaseService):
         body = {"restriction": to_json_param(restrictions)}
 
         raw = await self._request(
-            "post",
-            "setRestriction",
+            "set_restriction",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 
@@ -74,14 +70,14 @@ class RestrictionsService(_BaseService):
         return RestrictionSetResponse(**raw)
 
     # ---------------- Удаление ----------------
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def remove_restriction(
         self,
         *,
         contract_id: str,
         restriction_id: str,
-        group_id: Optional[str] = None,
-        api_version: str = "v1",
+        group_id: str | None = None,
+        api_version: str | None = None,
     ) -> RestrictionRemoveResponse:
         """
         Удаление товарного ограничителя по карте или группе карт.
@@ -94,10 +90,8 @@ class RestrictionsService(_BaseService):
             body["group_id"] = group_id
 
         raw = await self._request(
-            "post",
-            "removeRestriction",
+            "remove_restriction",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 

@@ -26,23 +26,10 @@ def mock_client():
             super().__init__(*service_dependencies(session_manager))
             self.session_id = "fake-session"
 
-        async def auth_user(self, *args, **kwargs):
-            """Заглушка авторизации"""
-            self.session_id = "fake-session"
-
-        def _headers(self, include_session: bool = False, content_type_json: bool = False):
-            """Фейковый генератор заголовков"""
-            headers = {"api_key": "fake-api-key"}
-            if include_session:
-                headers["session_id"] = self.session_id
-            if content_type_json:
-                headers["Content-Type"] = "application/json"
-            return headers
-
-        async def _request(self, method, endpoint, api_version="v1", **kwargs):
-            self._called.append((method, endpoint, api_version, kwargs))
+        async def _request(self, operation, api_version="v1", **kwargs):
+            self._called.append((operation, api_version, kwargs))
             # Заглушки ответов для тестов ↓
-            if endpoint == "cards" and api_version == "v2":
+            if operation == "get_cards_v2":
                 return {
                     "status": {"code": 200},
                     "data": {
@@ -71,7 +58,7 @@ def mock_client():
                     },
                     "timestamp": 1710000000,
                 }
-            elif endpoint == "cards" and api_version == "v1":
+            elif operation == "get_cards_v1":
                 return {
                     "status": {"code": 200},
                     "data": {
@@ -101,7 +88,7 @@ def mock_client():
                     },
                     "timestamp": 1710000000,
                 }
-            elif "drivers" in endpoint:
+            elif operation == "get_card_drivers":
                 return {
                     "status": {"code": 200},
                     "data": {
@@ -123,17 +110,17 @@ def mock_client():
                     },
                     "timestamp": 1710000000,
                 }
-            elif endpoint == "blockCard":
+            elif operation == "block_card":
                 return {
                     "status": {"code": 200},
                     "data": ["517945", "517946"],
                     "timestamp": 1710000000,
                 }
-            elif endpoint == "setCardComment":
-                return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-            elif "verifyPIN" in endpoint:
-                return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-            elif "resetPIN" in endpoint:
+            elif (
+                operation == "set_card_comment"
+                or operation == "verify_pin"
+                or operation == "reset_pin"
+            ):
                 return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
             else:
                 return {

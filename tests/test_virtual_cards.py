@@ -20,18 +20,15 @@ class DummyClient(VirtualCardsService):
         self.session_id = "mock-session"
         self._called = []
 
-    def _headers(self, include_session: bool = False, content_type_json: bool = False):
-        return {"X-Mock": "true"}
-
-    async def _request(self, method, endpoint, api_version="v2", headers=None, **kwargs):
-        self._called.append((method, endpoint, api_version, kwargs))
-        if endpoint == "MPC":
+    async def _request(self, operation, api_version="v2", **kwargs):
+        self._called.append((operation, api_version, kwargs))
+        if operation == "get_mpc_qr_list":
             return {
                 "status": {"code": 200},
                 "data": [{"id": "1-MPC", "card_id": "1-CARD", "state": "Active"}],
                 "timestamp": 1710000000,
             }
-        if endpoint == "cards/release":
+        if operation == "release_virtual_card":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -43,22 +40,22 @@ class DummyClient(VirtualCardsService):
                 },
                 "timestamp": 1710000000,
             }
-        if endpoint in {
-            "cards/1-CARD/pay",
-            "cards/1-CARD/initMPC",
-            "cards/1-CARD/confirmMPC",
-            "cards/1-CARD/updateMPC",
+        if operation in {
+            "generate_payment_qr",
+            "init_mpc",
+            "confirm_mpc",
+            "update_mpc",
         }:
             return {
                 "status": {"code": 200},
-                "data": {"ok": True, "endpoint": endpoint},
+                "data": {"ok": True, "operation": operation},
                 "timestamp": 1710000000,
             }
-        if endpoint == "cards/1-CARD/deleteMPC":
+        if operation == "delete_mpc":
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        if endpoint == "cards/1-CARD/resetMPC":
+        if operation == "reset_mpc":
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        if endpoint == "cards":
+        if operation == "create_virtual_card":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -70,7 +67,7 @@ class DummyClient(VirtualCardsService):
                 },
                 "timestamp": 1710000000,
             }
-        raise AssertionError(f"Unexpected request: {method} {endpoint}")
+        raise AssertionError(f"Unexpected request: {operation}")
 
 
 @pytest.mark.asyncio

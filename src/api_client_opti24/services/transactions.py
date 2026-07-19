@@ -1,4 +1,5 @@
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from .. import utils
 from ..decorators import api_method
@@ -23,8 +24,8 @@ class TransactionsService(_BaseService):
         self,
         items: list[Any],
         *,
-        filter_fn: Optional[Callable[..., Any]] = None,
-        sort_by: Optional[str] = None,
+        filter_fn: Callable[..., Any] | None = None,
+        sort_by: str | None = None,
         reverse: bool = False,
     ) -> list[Any]:
         """
@@ -49,16 +50,16 @@ class TransactionsService(_BaseService):
 
     # ---------------- v1: Транзакции ---------------- #
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_transactions_v1(
         self,
         *,
         contract_id: str,
-        card_id: Optional[str] = None,
+        card_id: str | None = None,
         count: int = 20,
-        api_version: str = "v1",
-        filter_fn: Optional[Callable[[TransactionV1], bool]] = None,
-        sort_by: Optional[str] = None,
+        api_version: str | None = None,
+        filter_fn: Callable[[TransactionV1], bool] | None = None,
+        sort_by: str | None = None,
         reverse: bool = False,
     ) -> TransactionsV1Response:
         """
@@ -76,10 +77,8 @@ class TransactionsService(_BaseService):
             params["card_id"] = card_id
 
         raw = await self._request(
-            "get",
-            "transactions",
+            "get_transactions_v1",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
 
@@ -95,7 +94,7 @@ class TransactionsService(_BaseService):
 
     # ---------------- v2: Транзакции по договору ---------------- #
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_transactions_v2(
         self,
         *,
@@ -104,9 +103,9 @@ class TransactionsService(_BaseService):
         date_to: str,
         page_limit: int = 100,
         page_offset: int = 0,
-        api_version: str = "v2",
-        filter_fn: Optional[Callable[[TransactionItemV2], bool]] = None,
-        sort_by: Optional[str] = None,
+        api_version: str | None = None,
+        filter_fn: Callable[[TransactionItemV2], bool] | None = None,
+        sort_by: str | None = None,
         reverse: bool = False,
     ) -> TransactionsV2Response:
         """
@@ -129,10 +128,8 @@ class TransactionsService(_BaseService):
         }
 
         raw = await self._request(
-            "get",
-            "transactions",
+            "get_transactions_v2",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
 
@@ -148,19 +145,19 @@ class TransactionsService(_BaseService):
 
     # ---------------- v2: Транзакции по карте ---------------- #
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_card_transactions_v2(
         self,
         *,
         card_id: str,
-        contract_id: Optional[str] = None,
+        contract_id: str | None = None,
         date_from: str,
         date_to: str,
         page_limit: int = 100,
         page_offset: int = 0,
-        api_version: str = "v2",
-        filter_fn: Optional[Callable[[TransactionItemV2], bool]] = None,
-        sort_by: Optional[str] = None,
+        api_version: str | None = None,
+        filter_fn: Callable[[TransactionItemV2], bool] | None = None,
+        sort_by: str | None = None,
         reverse: bool = False,
     ) -> TransactionsV2Response:
         """
@@ -173,9 +170,7 @@ class TransactionsService(_BaseService):
         """
         utils.validate_month_span(date_from, date_to)
 
-        cid = contract_id or self.contract_id
-        if not cid:
-            raise ValueError("contract_id обязателен для get_card_transactions_v2")
+        cid = await self._resolve_contract_id(contract_id)
 
         params = {
             "contract_id": cid,
@@ -186,10 +181,9 @@ class TransactionsService(_BaseService):
         }
 
         raw = await self._request(
-            "get",
-            f"cards/{card_id}/transactions",
+            "get_card_transactions_v2",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"card_id": card_id},
             params=params,
         )
 
@@ -205,13 +199,13 @@ class TransactionsService(_BaseService):
 
     # ---------------- v2: Детали транзакции ---------------- #
 
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_transaction_detail(
         self,
         *,
         transaction_id: str,
-        contract_id: Optional[str] = None,
-        api_version: str = "v2",
+        contract_id: str | None = None,
+        api_version: str | None = None,
     ) -> TransactionDetailResponse:
         """
         Получение детальной информации по транзакции (v2).
@@ -219,15 +213,12 @@ class TransactionsService(_BaseService):
         :param transaction_id: ID транзакции
         :param contract_id: Идентификатор договора
         """
-        cid = contract_id or self.contract_id
-        if not cid:
-            raise ValueError("contract_id обязателен для get_transaction_detail")
+        cid = await self._resolve_contract_id(contract_id)
 
         raw = await self._request(
-            "get",
-            f"transactions/{transaction_id}",
+            "get_transaction_detail",
             api_version=api_version,
-            headers=self._headers(include_session=True),
+            path_params={"transaction_id": transaction_id},
             params={"contract_id": cid},
         )
 

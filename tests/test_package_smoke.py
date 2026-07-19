@@ -8,7 +8,8 @@ import pytest
 
 import api_client_opti24 as sdk
 from api_client_opti24 import APIClient, __version__
-from api_client_opti24.config import APISettings
+from api_client_opti24.config import APISettings, ConnectionSettings
+from api_client_opti24.credentials import StaticCredentialsProvider
 from api_client_opti24.registry import build_default_registry
 
 SERVICE_TYPES = {
@@ -55,7 +56,7 @@ def test_package_root_exports_client() -> None:
 
 
 def test_package_root_exports_version() -> None:
-    assert __version__ == "2.0.0"
+    assert __version__ == "2.1.0"
 
 
 def test_settings_factory_is_available() -> None:
@@ -131,8 +132,30 @@ async def test_credentials_provider_does_not_require_placeholder_credentials() -
         credentials_provider=ExternalCredentialsProvider(),
     )
 
-    assert client.settings.login is None
-    assert client.settings.password is None
+    assert type(client.settings).__name__ == ConnectionSettings.__name__
+    assert not hasattr(client.settings, "api_key")
+    assert not hasattr(client.settings, "login")
+    assert not hasattr(client.settings, "password")
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_client_accepts_safe_settings_and_combined_credentials_provider(tmp_path) -> None:
+    settings = ConnectionSettings(
+        base_url="https://example.invalid/vip/",
+        logger_file=str(tmp_path / "sdk.log"),
+        request_log_file=str(tmp_path / "requests.jsonl"),
+    )
+    provider = StaticCredentialsProvider(
+        api_key="demo-key",
+        login="demo-login",
+        password="demo-password",
+    )
+
+    client = APIClient(settings=settings, credentials_provider=provider)
+
+    assert client.settings is settings
+    assert not hasattr(client.settings, "api_key")
     await client.aclose()
 
 
@@ -214,7 +237,10 @@ async def test_client_accepts_settings_object(tmp_path) -> None:
 
     client = APIClient(settings=settings)
 
-    assert client.settings is settings
+    assert type(client.settings).__name__ == ConnectionSettings.__name__
+    assert client.settings is not settings
+    assert client.settings.base_url == settings.base_url
+    assert not hasattr(client.settings, "api_key")
     await client.aclose()
 
 

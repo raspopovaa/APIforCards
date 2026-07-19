@@ -23,14 +23,14 @@ class EwalletService(_BaseService):
     # Изменить тип продукта карты
     # ============================================================
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def set_card_product(
         self,
         *,
         contract_id: str | None = None,
         card_ids: list[str],
         product: str,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> SetCardProductResponse:
         """
         Изменить тип карты (лимитная ↔ электронный кошелёк).
@@ -44,10 +44,7 @@ class EwalletService(_BaseService):
         Returns:
             SetCardProductResponse: Результат изменения продукта карт.
         """
-        cid = contract_id or self.contract_id
-        if not cid:
-            self.logger.debug("contract_id обязателен для move_to_contract")
-            raise ValueError("contract_id обязателен для set_card_product")
+        cid = await self._resolve_contract_id(contract_id)
 
         body = {
             "contract_id": cid,
@@ -56,10 +53,8 @@ class EwalletService(_BaseService):
         }
 
         data = await self._request(
-            "post",
-            "setCardProduct",
+            "set_card_product",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 
@@ -69,14 +64,14 @@ class EwalletService(_BaseService):
     # Перевести деньги с договора на кошелёк
     # ============================================================
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def move_to_card(
         self,
         *,
         contract_id: str | None = None,
         card_id: str,
         amount: float,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> MoveToCardResponse:
         """
         Перевести деньги со счёта договора на электронный кошелёк карты.
@@ -90,18 +85,13 @@ class EwalletService(_BaseService):
         Returns:
             MoveToCardResponse: Результат перевода.
         """
-        cid = contract_id or self.contract_id
-        if not cid:
-            self.logger.debug("contract_id обязателен для move_to_contract")
-            raise ValueError("contract_id обязателен для move_to_card")
+        cid = await self._resolve_contract_id(contract_id)
 
         body = {"contract_id": cid, "card_id": card_id, "amount": amount}
 
         data = await self._request(
-            "post",
-            "moveToCard",
+            "move_to_card",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 
@@ -111,14 +101,14 @@ class EwalletService(_BaseService):
     # Перевести деньги с кошелька на договор
     # ============================================================
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def move_to_contract(
         self,
         *,
         contract_id: str | None = None,
         card_id: str,
         amount: float,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> MoveToContractResponse:
         """
         Перевести деньги с электронного кошелька карты обратно на договор.
@@ -132,18 +122,13 @@ class EwalletService(_BaseService):
         Returns:
             MoveToContractResponse: Результат перевода.
         """
-        cid = contract_id or self.contract_id
-        if not cid:
-            self.logger.debug("contract_id обязателен для move_to_contract")
-            raise ValueError("contract_id обязателен для move_to_contract")
+        cid = await self._resolve_contract_id(contract_id)
 
         body = {"contract_id": cid, "card_id": card_id, "amount": amount}
 
         data = await self._request(
-            "post",
-            "moveToContract",
+            "move_to_contract",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 

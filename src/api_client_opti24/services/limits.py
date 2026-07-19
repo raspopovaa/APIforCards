@@ -1,5 +1,5 @@
 import json
-from typing import Any, Optional
+from typing import Any
 
 from ..decorators import api_method
 from ..models.limits import (
@@ -22,14 +22,14 @@ class LimitsService(_BaseService):
 
     # ------------------- GET /limit -------------------
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_limits(
         self,
         *,
         contract_id: str,
-        card_id: Optional[str] = None,
-        group_id: Optional[str] = None,
-        api_version: str = "v1",
+        card_id: str | None = None,
+        group_id: str | None = None,
+        api_version: str | None = None,
     ) -> LimitsResponse:
         """
         Получить список продуктовых лимитов по договору, карте или группе карт.
@@ -49,10 +49,8 @@ class LimitsService(_BaseService):
             params["group_id"] = group_id
 
         raw = await self._request(
-            "get",
-            "limit",
+            "get_limits",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
 
@@ -61,12 +59,12 @@ class LimitsService(_BaseService):
 
     # ------------------- POST /setLimit -------------------
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def set_limit(
         self,
         *,
         limits: list[dict[str, Any]],
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> SetLimitResponse:
         """
         Для изменения уже ранее созданного лимита, требуется передавать в запросе его ID.
@@ -79,10 +77,8 @@ class LimitsService(_BaseService):
         body = {"limit": json.dumps(limits, ensure_ascii=False)}
 
         raw = await self._request(
-            "post",
-            "setLimit",
+            "set_limit",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 
@@ -91,14 +87,14 @@ class LimitsService(_BaseService):
 
     # ------------------- POST /removeLimit -------------------
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def remove_limit(
         self,
         *,
         contract_id: str,
         limit_id: str,
-        group_id: Optional[str] = None,
-        api_version: str = "v1",
+        group_id: str | None = None,
+        api_version: str | None = None,
     ) -> RemoveLimitResponse:
         """
         Удалить продуктовый лимит по карте или группе карт.
@@ -118,10 +114,8 @@ class LimitsService(_BaseService):
             body["group_id"] = group_id
 
         raw = await self._request(
-            "post",
-            "removeLimit",
+            "remove_limit",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 

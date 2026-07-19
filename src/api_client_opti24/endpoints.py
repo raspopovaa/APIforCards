@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from string import Formatter
+from urllib.parse import quote
 
 from .policies import IDEMPOTENT_HTTP_METHODS, SAFE_HTTP_METHODS, RetryClass
+from .service_base import PathParams
 
 
 @dataclass(frozen=True, slots=True)
@@ -11,9 +14,40 @@ class RouteVariant:
     endpoint: str
     api_version: str
     demo_available: bool
+    name: str = "default"
 
     def supports(self, version: str) -> bool:
         return self.api_version == version
+
+    def render(self, path_params: PathParams | None = None) -> str:
+        values = dict(path_params or {})
+        fields: set[str] = set()
+        for _, field_name, format_spec, conversion in Formatter().parse(self.endpoint):
+            if field_name is None:
+                continue
+            if format_spec or conversion is not None:
+                raise ValueError("Route templates cannot use conversions or format specifiers")
+            fields.add(field_name)
+        if set(values) != fields:
+            missing = sorted(fields - set(values))
+            unexpected = sorted(set(values) - fields)
+            details = []
+            if missing:
+                details.append("missing: " + ", ".join(missing))
+            if unexpected:
+                details.append("unexpected: " + ", ".join(unexpected))
+            raise ValueError(
+                f"Invalid path parameters for route '{self.name}': " + "; ".join(details)
+            )
+        encoded: dict[str, str] = {}
+        for name, value in values.items():
+            raw_value = str(value)
+            if raw_value in {".", ".."} or any(
+                separator in raw_value for separator in ("/", "\\", "?", "#")
+            ):
+                raise ValueError(f"Unsafe path parameter: {name}")
+            encoded[name] = quote(raw_value, safe="")
+        return self.endpoint.format_map(encoded)
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +60,7 @@ class EndpointSpec:
     default_version: str
     demo_available: bool
     idempotent: bool
+    requires_session: bool = True
     timeout_class: str = "default"
     retry_class: str = RetryClass.SAFE.value
     route_variants: tuple[RouteVariant, ...] = ()
@@ -39,8 +74,28 @@ class EndpointSpec:
             endpoint=self.endpoint,
             api_version=self.default_version,
             demo_available=self.demo_available,
+            name="default",
         )
         return (primary_route, *self.route_variants)
+
+    def resolve_route(
+        self,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+    ) -> RouteVariant:
+        version = api_version or self.default_version
+        matches = [
+            route
+            for route in self.iter_routes()
+            if route.name == route_name and route.supports(version)
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                f"Operation '{self.name}' has no unique route "
+                f"name={route_name!r} version={version!r}"
+            )
+        return matches[0]
 
 
 def route(
@@ -49,8 +104,9 @@ def route(
     version: str,
     *,
     demo: bool,
+    name: str,
 ) -> RouteVariant:
-    return RouteVariant(http_method, path, version, demo)
+    return RouteVariant(http_method.upper(), path, version, demo, name)
 
 
 def endpoint(
@@ -63,6 +119,7 @@ def endpoint(
     demo: bool = True,
     timeout: str = "default",
     retry: str | None = None,
+    requires_session: bool = True,
     variants: tuple[RouteVariant, ...] = (),
 ) -> EndpointSpec:
     normalized_method = http_method.upper()
@@ -74,10 +131,13 @@ def endpoint(
         domain=domain,
         http_method=normalized_method,
         endpoint=path,
-        supported_versions=(version,),
+        supported_versions=tuple(
+            dict.fromkeys((version, *(item.api_version for item in variants)))
+        ),
         default_version=version,
         demo_available=demo,
         idempotent=normalized_method in IDEMPOTENT_HTTP_METHODS,
+        requires_session=requires_session,
         timeout_class=timeout,
         retry_class=retry_class,
         route_variants=variants,
@@ -87,7 +147,16 @@ def endpoint(
 ENDPOINT_SPECS = (
     endpoint("attach_card", "users", "POST", "users/{user_id}/attachCard", "v2"),
     endpoint("attach_contracts", "users", "POST", "users/{user_id}/attachContracts", "v2"),
-    endpoint("auth_user", "auth", "POST", "authUser", "v1", timeout="auth", retry="network_only"),
+    endpoint(
+        "auth_user",
+        "auth",
+        "POST",
+        "authUser",
+        "v1",
+        timeout="auth",
+        retry="network_only",
+        requires_session=False,
+    ),
     endpoint("block_card", "cards", "POST", "blockCard", "v1"),
     endpoint(
         "check_purchase", "final_prices", "POST", "cards/{card_id}/checkPurchase", "v2", demo=False
@@ -102,7 +171,7 @@ ENDPOINT_SPECS = (
         "invites",
         "v2",
         demo=False,
-        variants=(route("POST", "invites_free", "v2", demo=True),),
+        variants=(route("POST", "invites_free", "v2", demo=True, name="without_send"),),
     ),
     endpoint("create_template", "templates", "POST", "vc/templates", "v2"),
     endpoint(
@@ -124,9 +193,39 @@ ENDPOINT_SPECS = (
     ),
     endpoint("create_user", "users", "POST", "users", "v2"),
     endpoint("create_virtual_card", "virtual_cards", "POST", "cards", "v2", demo=False),
-    endpoint("delete_invite", "invites", "DELETE", "invites/{invite_id}", "v2"),
+    endpoint(
+        "delete_invite",
+        "invites",
+        "DELETE",
+        "invites/{invite_id}",
+        "v2",
+        variants=(
+            route(
+                "POST",
+                "invites/{invite_id}",
+                "v2",
+                demo=True,
+                name="post_override",
+            ),
+        ),
+    ),
     endpoint("delete_mpc", "virtual_cards", "POST", "cards/{card_id}/deleteMPC", "v2", demo=False),
-    endpoint("delete_template", "templates", "DELETE", "vc/templates/{template_id}", "v2"),
+    endpoint(
+        "delete_template",
+        "templates",
+        "DELETE",
+        "vc/templates/{template_id}",
+        "v2",
+        variants=(
+            route(
+                "POST",
+                "vc/templates/{template_id}",
+                "v2",
+                demo=True,
+                name="post_override",
+            ),
+        ),
+    ),
     endpoint(
         "delete_template_georestriction",
         "templates",
@@ -139,6 +238,14 @@ ENDPOINT_SPECS = (
                 "vc/templates/{template_id}/georestrictions/{georestrictions_id}",
                 "v2",
                 demo=True,
+                name="plural_id",
+            ),
+            route(
+                "POST",
+                "vc/templates/{template_id}/georestrictions/{georestriction_id}",
+                "v2",
+                demo=True,
+                name="post_override",
             ),
         ),
     ),
@@ -148,6 +255,15 @@ ENDPOINT_SPECS = (
         "DELETE",
         "vc/templates/{template_id}/limits/{limit_id}",
         "v2",
+        variants=(
+            route(
+                "POST",
+                "vc/templates/{template_id}/limits/{limit_id}",
+                "v2",
+                demo=True,
+                name="post_override",
+            ),
+        ),
     ),
     endpoint(
         "delete_template_restriction",
@@ -161,10 +277,25 @@ ENDPOINT_SPECS = (
                 "vc/templates/{template_id}/restrictions/{restrictions_id}",
                 "v2",
                 demo=True,
+                name="plural_id",
+            ),
+            route(
+                "POST",
+                "vc/templates/{template_id}/restrictions/{restriction_id}",
+                "v2",
+                demo=True,
+                name="post_override",
             ),
         ),
     ),
-    endpoint("delete_user", "users", "DELETE", "users/{user_id}", "v2"),
+    endpoint(
+        "delete_user",
+        "users",
+        "DELETE",
+        "users/{user_id}",
+        "v2",
+        variants=(route("POST", "users/{user_id}", "v2", demo=True, name="post_override"),),
+    ),
     endpoint("detach_card", "users", "POST", "users/{user_id}/detachCard", "v2"),
     endpoint("detach_contracts", "users", "POST", "users/{user_id}/detachContracts", "v2"),
     endpoint(
@@ -311,7 +442,15 @@ ENDPOINT_SPECS = (
         "invites/{invite_id}/prolong",
         "v2",
         demo=False,
-        variants=(route("POST", "invites/{invite_id}/prolong_free", "v2", demo=True),),
+        variants=(
+            route(
+                "POST",
+                "invites/{invite_id}/prolong_free",
+                "v2",
+                demo=True,
+                name="without_send",
+            ),
+        ),
     ),
     endpoint("release_virtual_card", "virtual_cards", "POST", "cards/release", "v2", demo=False),
     endpoint("remove_card_group", "card_group", "POST", "removeCardGroup", "v1"),
@@ -335,7 +474,7 @@ ENDPOINT_SPECS = (
         "POST",
         "vc/templates/{template_id}",
         "v2",
-        variants=(route("PUT", "vc/templates/{template_id}", "v2", demo=True),),
+        variants=(route("PUT", "vc/templates/{template_id}", "v2", demo=True, name="put"),),
     ),
     endpoint(
         "update_template_georestriction",
@@ -349,12 +488,14 @@ ENDPOINT_SPECS = (
                 "vc/templates/{template_id}/georestrictions/{georestriction_id}",
                 "v2",
                 demo=True,
+                name="put",
             ),
             route(
                 "PUT",
                 "vc/templates/{template_id}/georestrictions/{georestrictions_id}",
                 "v2",
                 demo=True,
+                name="put_plural_id",
             ),
         ),
     ),
@@ -364,7 +505,15 @@ ENDPOINT_SPECS = (
         "POST",
         "vc/templates/{template_id}/limits/{limit_id}",
         "v2",
-        variants=(route("PUT", "vc/templates/{template_id}/limits/{limit_id}", "v2", demo=True),),
+        variants=(
+            route(
+                "PUT",
+                "vc/templates/{template_id}/limits/{limit_id}",
+                "v2",
+                demo=True,
+                name="put",
+            ),
+        ),
     ),
     endpoint(
         "update_template_restriction",
@@ -374,10 +523,18 @@ ENDPOINT_SPECS = (
         "v2",
         variants=(
             route(
-                "PUT", "vc/templates/{template_id}/restrictions/{restriction_id}", "v2", demo=True
+                "PUT",
+                "vc/templates/{template_id}/restrictions/{restriction_id}",
+                "v2",
+                demo=True,
+                name="put",
             ),
             route(
-                "PUT", "vc/templates/{template_id}/restrictions/{restrictions_id}", "v2", demo=True
+                "PUT",
+                "vc/templates/{template_id}/restrictions/{restrictions_id}",
+                "v2",
+                demo=True,
+                name="put_plural_id",
             ),
         ),
     ),

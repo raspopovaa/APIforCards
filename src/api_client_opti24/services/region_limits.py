@@ -14,14 +14,14 @@ class RegionLimitsService(_BaseService):
     Методы для работы с региональными лимитами (v1).
     """
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_region_limits(
         self,
         *,
         contract_id: str,
         card_id: str | None = None,
         group_id: str | None = None,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> RegionLimitResponse:
         """
         Получение списка региональных лимитов по договору, карте или группе карт.
@@ -33,20 +33,18 @@ class RegionLimitsService(_BaseService):
             params["group_id"] = group_id
 
         raw = await self._request(
-            "get",
-            "regionLimit",
+            "get_region_limits",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
         return RegionLimitResponse(**raw)
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def set_region_limit(
         self,
         *,
         region_limits: list[dict[str, Any]],
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> dict[str, Any]:
         """
         Установка/изменение регионального лимита по карте или группе карт.
@@ -55,21 +53,19 @@ class RegionLimitsService(_BaseService):
         body = {"region_limit": to_json_param(region_limits)}
 
         return await self._request(
-            "post",
-            "setRegionLimit",
+            "set_region_limit",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def remove_region_limit(
         self,
         *,
         contract_id: str,
         regionlimit_id: str,
         group_id: str | None = None,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> RemoveRegionLimit:
         """
         Удаление регионального лимита по карте или группе карт.
@@ -79,10 +75,8 @@ class RegionLimitsService(_BaseService):
             body["group_id"] = group_id
 
         raw = await self._request(
-            "post",
-            "removeRegionLimit",
+            "remove_region_limit",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
         return RemoveRegionLimit(**raw)

@@ -29,21 +29,16 @@ class AuthService(_BaseService):
         self.__credentials_provider = credentials_provider
         self.__clock = clock
 
-    @api_method(require_session=True, default_version="v1")
-    async def logoff(self, api_version: str = "v1") -> dict[str, object]:
-        response = await self._request(
-            "get",
-            "logoff",
-            api_version=api_version,
-            headers=self._headers(include_session=True),
-        )
+    @api_method
+    async def logoff(self, api_version: str | None = None) -> dict[str, object]:
+        response = await self._request("logoff", api_version=api_version)
         self.__session_mutator.reset()
         return response
 
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_info(
         self,
-        api_version: str = "v1",
+        api_version: str | None = None,
         period: str | None = None,
     ) -> GetInfoResponse:
         """Получение статистических данных по вызовам всех методов."""
@@ -51,20 +46,18 @@ class AuthService(_BaseService):
             now = self.__clock.now()
             period = now.strftime("%Y-%m-%d %H:%M:%S")
         data = await self._request(
-            "get",
-            "info",
+            "get_info",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params={"period": period},
         )
 
         return GetInfoResponse(**data)
 
-    @api_method(require_session=False, default_version="v1")
+    @api_method
     async def auth_user(
         self,
         *,
-        api_version: str = "v1",
+        api_version: str | None = None,
         contract_id: str | None = None,
         contract_number: str | None = None,
     ) -> AuthUserResponse:
@@ -72,10 +65,8 @@ class AuthService(_BaseService):
         payload = {"login": login, "password": hash_password(password)}
 
         data = await self._request(
-            "post",
-            "authUser",
+            "auth_user",
             api_version=api_version,
-            headers=self._headers(),
             data=payload,
         )
 

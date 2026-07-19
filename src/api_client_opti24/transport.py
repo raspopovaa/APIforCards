@@ -10,7 +10,6 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from .errors import NotAuthenticatedError
 from .logger import LoggerLike
 from .logger import logger as default_logger
 from .policies import (
@@ -37,7 +36,6 @@ class AsyncHTTPClient(Protocol):
     async def aclose(self) -> None: ...
 
 
-AuthRecovery = Callable[[], Awaitable[Mapping[str, str]]]
 AsyncSleep = Callable[[float], Awaitable[None]]
 
 
@@ -48,7 +46,6 @@ class AsyncTransport:
         default_timeout: float = 30.0,
         *,
         http_client: AsyncHTTPClient | None = None,
-        auth_recovery: AuthRecovery | None = None,
         retry_policy: RetryPolicy | None = None,
         rate_limit_policy: RateLimitPolicy | None = None,
         allow_insecure_http: bool = False,
@@ -64,7 +61,6 @@ class AsyncTransport:
         )
         self.client = http_client or httpx.AsyncClient(timeout=default_timeout)
         self._owns_http_client = http_client is None
-        self._auth_recovery = auth_recovery
         self.logger: LoggerLike = logger or default_logger
         self.response_decoder = response_decoder or ResponseDecoder(logger=self.logger)
         self.retry_policy = retry_policy or RetryPolicy()
@@ -75,9 +71,6 @@ class AsyncTransport:
         self._auth_limit_lock = asyncio.Lock()
         self._last_request_started_at: float | None = None
         self._last_auth_request_started_at: float | None = None
-
-    def set_auth_recovery(self, auth_recovery: AuthRecovery) -> None:
-        self._auth_recovery = auth_recovery
 
     @staticmethod
     def _normalize_base_url(
@@ -181,7 +174,6 @@ class AsyncTransport:
         endpoint: str,
         api_version: str = "v1",
         headers: Mapping[str, str] | None = None,
-        retry_auth: bool = True,
         timeout: float | None = None,
         method_name: str | None = None,
         retry_class: str | RetryClass | None = None,
@@ -244,28 +236,7 @@ class AsyncTransport:
                         await self._sleep(backoff_seconds)
                         continue
 
-                    try:
-                        return self._handle_response(resp, endpoint, method_name=method_name)
-                    except NotAuthenticatedError:
-                        if not retry_auth:
-                            raise
-
-                        if self._auth_recovery is None:
-                            raise
-
-                        refreshed_headers = dict(await self._auth_recovery())
-                        return await self.request(
-                            method,
-                            endpoint,
-                            api_version=api_version,
-                            headers=refreshed_headers,
-                            retry_auth=False,
-                            timeout=timeout,
-                            method_name=method_name,
-                            retry_class=resolved_retry_class,
-                            idempotent=resolved_idempotent,
-                            **kwargs,
-                        )
+                    return self._handle_response(resp, endpoint, method_name=method_name)
 
                 raise RuntimeError("Rate limit retry loop exhausted unexpectedly")
 

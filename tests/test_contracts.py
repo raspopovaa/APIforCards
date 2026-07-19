@@ -23,11 +23,8 @@ class MockContractClient(ContractsService):
         super().__init__(*service_dependencies(session_manager))
         self.session_id = "mock-session"
 
-    def _headers(self, include_session: bool = False, content_type_json: bool = False):
-        return {"X-Mock": "true"}
-
-    async def _request(self, method, endpoint, api_version="v1", headers=None, **kwargs):
-        if endpoint == "getPartContractData":
+    async def _request(self, operation, api_version="v1", **kwargs):
+        if operation == "get_contract_data":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -86,7 +83,7 @@ class MockContractClient(ContractsService):
                 },
                 "timestamp": 1710000000,
             }
-        elif endpoint == "getPayments":
+        elif operation == "get_payments":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -108,39 +105,37 @@ class MockContractClient(ContractsService):
                 },
                 "timestamp": 1710000000,
             }
-        elif endpoint == "documents":
-            if method == "get":
-                return {
-                    "status": {"code": 200},
-                    "data": {
-                        "total_count": 1,
-                        "result": [
-                            {
-                                "id": "DOC1",
-                                "name": "УПД",
-                                "name_doc": "Invoice",
-                                "number": "DOC-1",
-                                "date": 1710000000,
-                                "total": 500.0,
-                                "vat": 100.0,
-                                "sum": 400.0,
-                                "currency": "руб.",
-                                "consignee": "Demo",
-                                "contract_id": "1-1FLKAJQ",
-                                "contract_name": "C12345",
-                            }
-                        ],
-                    },
-                    "timestamp": 1710000000,
-                }
-            elif method == "post":
-                return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        elif endpoint == "orderCards":
+        elif operation == "get_documents":
+            return {
+                "status": {"code": 200},
+                "data": {
+                    "total_count": 1,
+                    "result": [
+                        {
+                            "id": "DOC1",
+                            "name": "УПД",
+                            "name_doc": "Invoice",
+                            "number": "DOC-1",
+                            "date": 1710000000,
+                            "total": 500.0,
+                            "vat": 100.0,
+                            "sum": 400.0,
+                            "currency": "руб.",
+                            "consignee": "Demo",
+                            "contract_id": "1-1FLKAJQ",
+                            "contract_name": "C12345",
+                        }
+                    ],
+                },
+                "timestamp": 1710000000,
+            }
+        elif (
+            operation == "order_documents_email"
+            or operation == "order_cards"
+            or operation == "order_invoice"
+        ):
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-
-        elif endpoint == "invoice":
-            return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        elif endpoint == "invoices":
+        elif operation == "get_invoices":
             return {
                 "status": {"code": 200},
                 "data": {

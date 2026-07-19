@@ -36,11 +36,12 @@ APIClient SDK — асинхронная Python-библиотека для ра
   Главная точка входа. Собирает инфраструктуру и типизированный `ServiceContainer`.
 
 - [executor.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/executor.py)
-  Выполняет JSON/stream-запросы, применяет metadata из registry и проверяет тип ответа.
+  Выполняет операции по имени, выбирает маршрут из registry, управляет сессией,
+  применяет metadata и проверяет тип ответа.
 
 - [service_base.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/service_base.py)
   Содержит узкие протоколы `RequestExecutor`, read-only `SessionContext`,
-  `SessionGate`, внутренний `SessionMutator` и `CredentialsProvider`.
+  `SessionGate`, `SessionRecovery`, внутренний `SessionMutator` и `CredentialsProvider`.
 
 - [authentication.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/authentication.py)
   Изолирует credentials и координирует первичную авторизацию и re-auth.
@@ -49,10 +50,12 @@ APIClient SDK — асинхронная Python-библиотека для ра
   Явно собирает 16 сервисов и предоставляет типизированные свойства без runtime-магии.
 
 - [transport.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/transport.py)  
-  Независимый HTTP-слой с внедряемыми client, decoder, logger, clock и policy.
+  Независимый HTTP-слой без зависимости от авторизации, с внедряемыми client,
+  decoder, logger, clock и policy.
 
 - [endpoints.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/endpoints.py)
-  Декларативный каталог `EndpointSpec` для всех маршрутов без AST и runtime-import сервисов.
+  Декларативный каталог `EndpointSpec` для всех маршрутов, безопасного рендеринга
+  path-параметров и выбора POST/PUT/DELETE-вариантов.
 
 - [response.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/response.py)
   Единое декодирование JSON, бинарных ответов и API-ошибок.
@@ -64,7 +67,8 @@ APIClient SDK — асинхронная Python-библиотека для ра
   Предоставляет поиск и группировку декларативных endpoint-спецификаций.
 
 - [modeling.py](https://github.com/raspopovaa/APIforCards/blob/main/src/api_client_opti24/modeling.py)  
-  Совместимый stdlib-only слой моделей и адаптер `decode_model` для постепенной миграции.
+  Тонкий адаптер над Pydantic v2: строгие request-модели, расширяемые response-модели
+  и совместимые `decode_model()`/`describe()`.
 
 Публичные доменные пространства имён:
 
@@ -81,7 +85,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 
 ## 📦 Установка
 
-Пакет `api-client-opti24==2.0.0` опубликован на TestPyPI и поддерживает
+Пакет `api-client-opti24==2.1.0` опубликован на TestPyPI и поддерживает
 `Python >=3.11,<3.15`. Зависимости лучше устанавливать из основного PyPI
 отдельно: это исключает случайную подмену зависимостей пакетами из тестового
 индекса.
@@ -90,9 +94,9 @@ APIClient SDK — асинхронная Python-библиотека для ра
 
 ```bash
 uv venv --python 3.11
-uv pip install "httpx>=0.27.0,<1.0"
+uv pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 uv pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.0.0
+  --no-deps api-client-opti24==2.1.0
 ```
 
 ### Вариант 2: pip
@@ -100,16 +104,16 @@ uv pip install --index-url https://test.pypi.org/simple/ \
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
-python -m pip install "httpx>=0.27.0,<1.0"
+python -m pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 python -m pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.0.0
+  --no-deps api-client-opti24==2.1.0
 ```
 
 Проверка версии и публичных импортов:
 
 ```bash
 .venv/bin/python -c \
-  "from api_client_opti24 import APIClient, APISettings, __version__; print(__version__, APIClient.__name__, APISettings.__name__)"
+  "from api_client_opti24 import APIClient, ConnectionSettings, __version__; print(__version__, APIClient.__name__, ConnectionSettings.__name__)"
 ```
 
 Локальная установка репозитория для разработки:
@@ -130,13 +134,19 @@ python -m pip install -e ".[dev]"
 import asyncio
 from pathlib import Path
 
-from api_client_opti24 import APIClient, APISettings
+from api_client_opti24 import (
+    APIClient,
+    ConnectionSettings,
+    EnvironmentCredentialsProvider,
+)
 
 
 async def main() -> None:
-    settings = APISettings.from_env(env_file=Path(__file__).with_name(".env"))
+    env_file = Path(__file__).with_name(".env")
+    settings = ConnectionSettings.from_env(env_file=env_file)
+    credentials = EnvironmentCredentialsProvider.from_env(env_file=env_file)
 
-    async with APIClient(settings=settings) as client:
+    async with APIClient(settings=settings, credentials_provider=credentials) as client:
         auth = await client.auth.auth_user()
         try:
             info = await client.auth.get_info()
@@ -181,6 +191,12 @@ LOGGER_FILE=./api.log
 LOG_LEVEL=INFO
 ```
 
+`ConnectionSettings` содержит только несекретные параметры. API key, логин и
+пароль загружаются отдельным `EnvironmentCredentialsProvider` либо передаются
+через `StaticCredentialsProvider`. `APISettings` сохранён для совместимости со
+старыми интеграциями, но `APIClient.settings` всегда содержит безопасный
+`ConnectionSettings` без credentials.
+
 `API_BASE_URL` должен быть полным абсолютным адресом и начинаться с `https://`
 (либо с `http://` для локального тестового сервера). Пустой адрес и значение без
 протокола отклоняются при создании клиента с понятной ошибкой.
@@ -197,7 +213,7 @@ LOG_LEVEL=INFO
 
 - **♻️ Policy-driven retry** для безопасных запросов и авторизации
 - **🔐 Re-auth** при потере сессии
-- **📚 Типизированные модели** на stdlib-совместимом modeling layer
+- **📚 Типизированные модели** на Pydantic v2
 - **🧾 Описание полей** через `Field(..., description=...)`
 - **🧪 Покрытие тестами** для моделей, transport, session и registry
 - **⚖️ Policy “спека vs реальность”** в спорных местах
@@ -210,8 +226,8 @@ LOG_LEVEL=INFO
 - Запросы изменения данных не повторяются после сетевой ошибки: результат операции
   мог сохраниться на сервере, поэтому автоматический retry создаёт риск дубля.
 - Авторизация имеет отдельный интервал не менее 5 секунд между попытками.
-- Политики можно заменить через `APISettings.retry_policy` и
-  `APISettings.rate_limit_policy`, а transport — внедрить в `APIClient` для тестов.
+- Политики можно заменить через `ConnectionSettings.retry_policy` и
+  `ConnectionSettings.rate_limit_policy`, а transport — внедрить в `APIClient` для тестов.
 - Решение о повторе учитывает одновременно `EndpointSpec.retry_class` и
   `EndpointSpec.idempotent`.
 
@@ -220,6 +236,8 @@ LOG_LEVEL=INFO
 - SDK не пишет request/response payload, URL с идентификаторами и текст исключения в лог.
 - Ключи, сессии, пароли, телефоны, email и идентификаторы очищаются logger-фильтром.
 - Внешний logger получает тот же фильтр автоматически через dependency injection.
+- Каждый клиент владеет только своими handlers; файлы открываются в append-режиме.
+- `request_log_file` содержит JSONL-аудит без URL, payload и объектных идентификаторов.
 - Raw payload ошибки доступен в `APIError.context` и должен обрабатываться как
   чувствительная информация; его не следует отправлять в общие журналы.
 - Секреты следует передавать через окружение или secret manager и никогда не
@@ -238,6 +256,9 @@ SDK теперь обрабатывает ошибки в двух слоях:
 
 - HTTP-статус ответа
 - внутренний `status.code` из payload API
+
+Успешный API-код не маскирует ошибочный HTTP-статус: оба уровня должны
+свидетельствовать об успехе.
 
 Это важно для случаев, когда API возвращает `HTTP 200`, но внутри тела ответа приходит бизнес-ошибка, например `401 notAuthenticated`.
 
@@ -270,18 +291,21 @@ SDK теперь обрабатывает ошибки в двух слоях:
 Это особенно важно для методов, где один Python-метод поддерживает несколько HTTP-маршрутов.
 В текущем каталоге описано `89` уникальных `EndpointSpec`; registry не читает
 исходники через AST и не импортирует сервисы динамически.
+Сервисы передают executor только имя операции и параметры пути; HTTP-метод,
+шаблон URL, версия по умолчанию, session policy, timeout и retry берутся из registry.
 
 ## 🧠 Модели и описание данных
 
-Вместо обязательной зависимости от `pydantic` используется собственный слой
-моделей поверх `dataclasses` стандартной библиотеки:
+Модели используют Pydantic v2 через небольшой совместимый адаптер:
 
 - `BaseModel`
 - `Field`
 - `field_validator`
-- nested parsing
+- проверка типов содержимого `dict`, длины tuple и вложенных моделей
 - `model_validate()` и `model_dump()`
-- адаптер `decode_model()` для постепенной замены modeling framework
+- сохранение дополнительных полей response для совместимости с расширениями API
+- запрет дополнительных полей в request-моделях
+- адаптер `decode_model()`
 - `describe()`
 
 Пример интроспекции:
@@ -367,7 +391,7 @@ uv run pytest
 python -m pytest
 ```
 
-Сейчас набор из `97` тестов покрывает:
+Сейчас набор из `125` тестов покрывает:
 
 - auth
 - cards
@@ -406,7 +430,7 @@ uv publish --publish-url https://test.pypi.org/legacy/
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.0.0
+  --no-deps api-client-opti24==2.1.0
 ```
 
 ## 🤖 GitHub Actions
@@ -425,8 +449,8 @@ pip install --index-url https://test.pypi.org/simple/ \
 - запускает матрицу `Python 3.11` и `Python 3.14`
 - устанавливает зависимости через `pip install -e ".[dev]"`
 - запускает `pytest`
-- блокирует критические ошибки Ruff
-- проверяет Black для всего `src` и `tests`
+- запускает полную конфигурацию Ruff для `src`, `tests` и `scripts`
+- проверяет Black для `src`, `tests` и `scripts`
 - запускает `mypy --strict` для всех source-файлов SDK
 
 ## ▶️ Demo-скрипт
@@ -499,8 +523,8 @@ uv run black .
 uv run mypy src
 ```
 
-Весь SDK проходит строгий `mypy`; modeling framework помечен через
-`dataclass_transform`, поэтому типы моделей проверяются без специальных плагинов.
+Весь SDK проходит строгий `mypy`; преобразование и проверку runtime-данных
+выполняет Pydantic v2.
 
 ## ⚠️ Ограничения
 
@@ -515,16 +539,16 @@ uv run mypy src
 |---------------|-------------------------------|-----------|
 | Возможности | `client.py`, `services/`, `service_groups.py` | Все 89 endpoint-методов доступны только через композиционные доменные сервисы |
 | Архитектура | `client.py`, `executor.py`, `service_base.py`, `service_groups.py` | Сервисы не хранят `APIClient`; зависимости разделены узкими протоколами |
-| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.0.0`, диапазон Python и публичные импорты совпадают |
+| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.1.0`, диапазон Python и публичные импорты совпадают |
 | Быстрый старт | `config.py`, `auth.py`, `cards.py`, модели auth/cards | Сигнатуры и используемые поля ответа проверены |
-| Конфигурация | `config.py`, `.env.example`, `env.py` | Все перечисленные переменные поддерживаются |
+| Конфигурация | `config.py`, `credentials.py`, `.env.example`, `env.py` | Безопасные connection settings отделены от providers секретов |
 | Retry и безопасность | `policies.py`, `transport.py`, `logger.py`, `utils.py` | Retry зависит от idempotency; удалённый HTTP запрещён; логи очищаются |
 | Ошибки API | `errors.py`, `response.py` | HTTP/API-коды и перечисленные классы ошибок обрабатываются |
-| Registry и DEMO | `endpoints.py`, `registry.py` | Зарегистрировано 89 уникальных спецификаций и route aliases |
-| Модели | `modeling.py`, `models/` | Поддерживаются Field, validators, nested parsing, dump/validate/describe |
+| Registry и DEMO | `endpoints.py`, `registry.py`, `tests/contracts/endpoints.json` | 89 спецификаций и вся metadata проверяются snapshot-тестом |
+| Модели | `modeling.py`, `models/` | Pydantic проверяет контейнеры и request extras; response extras сохраняются |
 | Документация | `scripts/generate_api_docs.py`, `scripts/build_docs_site.py`, `docs/` | Генераторы и статический сайт присутствуют |
 | Политика спецификации | `docs/spec-compatibility.md`, модели и тесты | Зафиксированы известные расхождения и принятые решения |
-| Тестирование | `tests/`, настройки pytest в `pyproject.toml` | Полный набор содержит 102 теста |
+| Тестирование | `tests/`, настройки pytest в `pyproject.toml` | Полный набор содержит 125 тестов |
 | Публикация | `pyproject.toml`, `uv.lock` | Сборка выполняется через `uv build`, публикация — `uv publish` |
 | GitHub Actions | `.github/workflows/` | CI, Docs и Pages соответствуют описанию |
 | Demo-скрипт | `examples/demo_async.py` | Асинхронный цветной сценарий существует и учитывает rate limit |

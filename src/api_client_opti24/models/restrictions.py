@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from ..modeling import BaseModel, Field
 
@@ -9,20 +9,20 @@ class RestrictionItem(BaseModel):
     """
 
     id: str = Field(..., description="ID ограничителя")
-    card_id: Optional[str] = Field(None, description="ID карты, если ограничитель задан для карты")
-    group_id: Optional[str] = Field(
+    card_id: str | None = Field(None, description="ID карты, если ограничитель задан для карты")
+    group_id: str | None = Field(
         None, description="ID группы карт, если ограничитель задан для группы"
     )
     contract_id: str = Field(..., description="ID договора")
-    productType: Optional[str] = Field(None, description="ID типа продукта (например, '1-CK231')")
-    productGroup: Optional[str] = Field(None, description="ID группы продуктов (если применимо)")
-    productTypeName: Optional[str] = Field(None, description="Название типа продукта")
-    productGroupName: Optional[str] = Field(None, description="Название группы продуктов")
+    productType: str | None = Field(None, description="ID типа продукта (например, '1-CK231')")
+    productGroup: str | None = Field(None, description="ID группы продуктов (если применимо)")
+    productTypeName: str | None = Field(None, description="Название типа продукта")
+    productGroupName: str | None = Field(None, description="Название группы продуктов")
     restriction_type: int = Field(
         ...,
         description="Тип ограничения (1 – Разрешающий ограничитель, 2 – Запрещающий ограничитель)",
     )
-    date: Optional[str] = Field(
+    date: str | None = Field(
         None, description="Дата установки ограничителя (в формате MM/DD/YYYY HH:mm:ss)"
     )
 
@@ -61,4 +61,4 @@ class RestrictionRemoveResponse(BaseModel):
 
     status: dict[str, Any] = Field(..., description="Статус выполнения (например, {'code': 200})")
     data: bool = Field(..., description="Результат операции (True — успешно)")
-    timestamp: int = Field(None, description="Временная метка ответа (Unix time)")
+    timestamp: int | None = Field(None, description="Временная метка ответа (Unix time)")

@@ -19,12 +19,9 @@ class DummyClient(UsersService):
         super().__init__(*service_dependencies(session_manager))
         self.session_id = "mock-session"
 
-    def _headers(self, include_session: bool = False, content_type_json: bool = False):
-        return {"X-Mock": "true"}
-
-    async def _request(self, method, endpoint, api_version="v2", headers=None, **kwargs):
+    async def _request(self, operation, api_version="v2", **kwargs):
         # Эмуляция API для users
-        if endpoint == "users" and method == "get":
+        if operation == "get_users":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -45,19 +42,13 @@ class DummyClient(UsersService):
                 },
                 "timestamp": 1710000000,
             }
-        if endpoint == "users" and method == "post":
+        if operation == "create_user":
             return {"status": {"code": 200}, "data": "1-USER", "timestamp": 1710000000}
-        if endpoint.endswith("/attachContracts"):
+        if operation in {"attach_contracts", "detach_contracts"}:
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        if endpoint.endswith("/attachCard"):
+        if operation in {"attach_card", "detach_card"}:
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        if method == "delete" and endpoint.startswith("users/"):
-            return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        if (
-            method == "post"
-            and endpoint.startswith("users/")
-            and kwargs.get("data", {}).get("_method") == "DELETE"
-        ):
+        if operation == "delete_user":
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
         return {"status": {"code": 200}, "data": {}, "timestamp": 1710000000}
 

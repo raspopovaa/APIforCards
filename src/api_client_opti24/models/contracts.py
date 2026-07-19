@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from ..modeling import BaseModel, Field
 
@@ -21,8 +21,8 @@ class BalanceData(BaseModel):
     consumption_for_prev_month_volume: str = Field(
         ..., description="Объем потребления в предыдущем месяце (в литрах)"
     )
-    last_payment_sum: Optional[str] = Field(None, description="Сумма последнего платежа")
-    last_payment_date: Optional[str] = Field(None, description="Дата последнего платежа")
+    last_payment_sum: str | None = Field(None, description="Сумма последнего платежа")
+    last_payment_date: str | None = Field(None, description="Дата последнего платежа")
     currency: str = Field(..., description="Валюта договора")
 
 
@@ -40,8 +40,8 @@ class ContractData(BaseModel):
     region: str = Field(..., description="Регион заключения")
     fin_institution: str = Field(..., description="Финансовый институт")
     invoice_scheme: str = Field(..., description="Подключение инвойсирования")
-    invoice_period: Optional[str] = Field(None, description="Дни выставления счетов")
-    invoice_pmt_delay: Optional[str] = Field(None, description="Количество дней на оплату инвойса")
+    invoice_period: str | None = Field(None, description="Дни выставления счетов")
+    invoice_pmt_delay: str | None = Field(None, description="Количество дней на оплату инвойса")
     contract_status: str = Field(..., description="ID статуса договора")
     contract_status_name: str = Field(..., description="Значение статуса договора")
     pay_scheme: str = Field(..., description="Условия оплаты")
@@ -50,14 +50,12 @@ class ContractData(BaseModel):
     )
     auto_pay: str = Field(..., description="Признак разрешения для подключения автосписания с р/с")
     auto_pay_type: str = Field(..., description="Тип подключения автоматического платежа")
-    credit_limit: Optional[str] = Field(None, description="Кредитный лимит")
+    credit_limit: str | None = Field(None, description="Кредитный лимит")
     current_amount_limiter: str = Field(..., description="Накопленная сумма по контракту")
-    balance_amount_limiter: Optional[str] = Field(
+    balance_amount_limiter: str | None = Field(
         None, description="Доступная сумма по контракту (max – current)"
     )
-    max_amount_limiter: Optional[str] = Field(
-        None, description="Ограничение лимита на сумму договора"
-    )
+    max_amount_limiter: str | None = Field(None, description="Ограничение лимита на сумму договора")
     date_open: str = Field(..., description="Дата заключения договора")
     effective_date: str = Field(..., description="Дата вступления в силу")
     end_date: str = Field(..., description="Дата окончания")
@@ -76,8 +74,8 @@ class ManagerData(BaseModel):
     email: str = Field(..., description="Email менеджера")
     first_name: str = Field(..., description="Имя менеджера")
     last_name: str = Field(..., description="Фамилия менеджера")
-    middle_name: Optional[str] = Field(None, description="Отчество менеджера")
-    work_phone: Optional[str] = Field(None, description="Рабочий телефон менеджера")
+    middle_name: str | None = Field(None, description="Отчество менеджера")
+    work_phone: str | None = Field(None, description="Рабочий телефон менеджера")
 
 
 class CardsData(BaseModel):
@@ -85,9 +83,7 @@ class CardsData(BaseModel):
 
     cards_quantity_all: str = Field(..., description="Число карт договора")
     cards_quantity_active: str = Field(..., description="Число активных карт договора")
-    card_groups_quantity_all: Optional[str] = Field(
-        None, description="Число групп карт на договоре"
-    )
+    card_groups_quantity_all: str | None = Field(None, description="Число групп карт на договоре")
 
 
 class ContractResponse(BaseModel):
@@ -97,12 +93,12 @@ class ContractResponse(BaseModel):
     template_id: str = Field(..., description="ID шаблона виртуальных карт")
     status: str = Field(..., description="Статус Way4")
     status_crm: str = Field(..., description="Статус CRM")
-    payment_term_id: Optional[str] = Field(None, description="ID справочника условия оплаты")
-    payment_scheme_id: Optional[str] = Field(None, description="ID справочника схема оплаты")
+    payment_term_id: str | None = Field(None, description="ID справочника условия оплаты")
+    payment_scheme_id: str | None = Field(None, description="ID справочника схема оплаты")
     is_dealer: bool = Field(..., description="Признак дилерский")
     balanceData: BalanceData = Field(..., description="Данные по расходу и балансу договора")
     contractData: ContractData = Field(..., description="Данные договора")
-    managerData: Optional[ManagerData] = Field(None, description="Данные по менеджеру договора")
+    managerData: ManagerData | None = Field(None, description="Данные по менеджеру договора")
     cardsData: CardsData = Field(
         ..., description="Данные по количеству карт и групп карт на договоре"
     )

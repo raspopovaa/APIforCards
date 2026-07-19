@@ -1,5 +1,5 @@
 import json
-from typing import Any, Optional
+from typing import Any
 
 from ..decorators import api_method
 from ..models import (
@@ -19,12 +19,12 @@ class CardGroupsService(_BaseService):
     # -------------------------------
     # Получение списка групп карт
     # -------------------------------
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_card_groups(
         self,
         *,
         contract_id: str,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> CardGroupListResponse:
         """
         Получить список групп карт по договору.
@@ -32,10 +32,8 @@ class CardGroupsService(_BaseService):
         params = {"contract_id": contract_id}
 
         raw = await self._request(
-            method="get",
-            endpoint="cardGroups",
+            "get_card_groups",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
         return CardGroupListResponse(**raw)
@@ -43,14 +41,14 @@ class CardGroupsService(_BaseService):
     # -------------------------------
     # Создание или изменение группы
     # -------------------------------
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def set_card_group(
         self,
         *,
         contract_id: str,
         name: str,
-        group_id: Optional[str] = None,
-        api_version: str = "v1",
+        group_id: str | None = None,
+        api_version: str | None = None,
     ) -> SetCardGroupResponse:
         """
         Создать новую или изменить существующую группу карт.
@@ -65,10 +63,8 @@ class CardGroupsService(_BaseService):
             body["id"] = group_id
 
         raw = await self._request(
-            method="post",
-            endpoint="setCardGroup",
+            "set_card_group",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
         return SetCardGroupResponse(**raw)
@@ -76,14 +72,14 @@ class CardGroupsService(_BaseService):
     # -------------------------------
     # Добавление карт в группу
     # -------------------------------
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def set_cards_to_group(
         self,
         *,
         contract_id: str,
         group_id: str,
         cards_list: list[dict[str, Any]],
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> SetCardsToGroupResponse:
         """
         Добавление карт в группу.
@@ -101,10 +97,8 @@ class CardGroupsService(_BaseService):
         }
 
         raw = await self._request(
-            method="post",
-            endpoint="setCardsToGroup",
+            "set_cards_to_group",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
         return SetCardsToGroupResponse(**raw)
@@ -112,13 +106,13 @@ class CardGroupsService(_BaseService):
     # -------------------------------
     # Удаление группы карт
     # -------------------------------
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def remove_card_group(
         self,
         *,
         contract_id: str,
         group_id: str,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> RemoveCardGroupResponse:
         """
         Удалить группу карт по ID.
@@ -130,10 +124,8 @@ class CardGroupsService(_BaseService):
         body = {"contract_id": contract_id, "group_id": group_id}
 
         raw = await self._request(
-            method="post",
-            endpoint="removeCardGroup",
+            "remove_card_group",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             data=body,
         )
         return RemoveCardGroupResponse(**raw)

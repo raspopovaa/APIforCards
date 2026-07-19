@@ -1,6 +1,6 @@
 from typing import Any
 
-from ..modeling import BaseModel, Field
+from ..modeling import BaseModel, Field, StrictRequestModel
 
 
 class FinalPriceItem(BaseModel):
@@ -35,7 +35,7 @@ class PurchaseGoodItem(BaseModel):
     price: float = Field(..., description="Цена за единицу товара")
 
 
-class CheckPurchaseRequest(BaseModel):
+class CheckPurchaseRequest(StrictRequestModel):
     """Параметры запроса для проверки покупки"""
 
     poi_id: str = Field(..., description="ID точки продажи (АЗС)")

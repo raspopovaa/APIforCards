@@ -4,40 +4,36 @@ from typing import Any
 
 
 class NoopRequestExecutor:
-    def headers(
+    async def execute(
         self,
-        include_session: bool = False,
-        content_type_json: bool = False,
-    ) -> dict[str, str]:
-        del include_session, content_type_json
-        return {}
-
-    async def request(
-        self,
-        method: str,
-        endpoint: str,
+        operation: str,
         *,
-        api_version: str = "v1",
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: object = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        del kwargs
-        raise AssertionError(f"Unexpected request: {api_version} {method} {endpoint}")
+        del route_name, path_params, kwargs
+        raise AssertionError(f"Unexpected request: {api_version} {operation}")
 
-    async def request_stream(
+    async def execute_stream(
         self,
-        method: str,
-        endpoint: str,
+        operation: str,
         *,
-        api_version: str = "v1",
-        headers: dict[str, str] | None = None,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: object = None,
         **kwargs: Any,
     ) -> bytes:
-        del headers, kwargs
-        raise AssertionError(f"Unexpected stream request: {api_version} {method} {endpoint}")
+        del route_name, path_params, kwargs
+        raise AssertionError(f"Unexpected stream request: {api_version} {operation}")
 
 
 class StubSessionGate:
     async def ensure_authenticated(self) -> str:
+        return "test-session"
+
+    async def recover(self) -> str:
         return "test-session"
 
 

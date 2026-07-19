@@ -20,11 +20,8 @@ class DummyTemplatesClient(TemplatesService):
     def contract_id(self):
         return self.session_manager.contract_id
 
-    def _headers(self, include_session: bool = False):
-        return {"session_id": self.session_id} if include_session else {}
-
-    async def _request(self, method, endpoint, **kwargs):
-        self.calls.append((method, endpoint, kwargs))
+    async def _request(self, operation, **kwargs):
+        self.calls.append((operation, kwargs))
         return {"data": "limit-1"}
 
 
@@ -46,9 +43,10 @@ async def test_update_template_limit_does_not_mutate_input() -> None:
         use_post=True,
     )
 
-    method, endpoint, kwargs = client.calls[-1]
+    operation, kwargs = client.calls[-1]
     assert response.data == "limit-1"
-    assert method == "post"
-    assert endpoint == "vc/templates/template-1/limits/limit-1"
+    assert operation == "update_template_limit"
+    assert kwargs["route_name"] == "default"
+    assert kwargs["path_params"] == {"template_id": "template-1", "limit_id": "limit-1"}
     assert kwargs["json"][0]["_method"] == "PUT"
     assert "_method" not in limits[0]

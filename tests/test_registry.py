@@ -1,11 +1,19 @@
+import ast
+import json
+from pathlib import Path
+
 import pytest
 
+from api_client_opti24.contracts import serialize_registry_contract
 from api_client_opti24.registry import (
     EndpointSpec,
     MethodRegistry,
     MethodSpec,
+    RouteVariant,
     build_default_registry,
 )
+
+ENDPOINT_CONTRACT_PATH = Path(__file__).with_name("contracts") / "endpoints.json"
 
 
 def test_registry_covers_all_declared_endpoints():
@@ -14,6 +22,12 @@ def test_registry_covers_all_declared_endpoints():
     assert len(registry.list_all()) == 89
     assert all(spec.name != "list_qr_mpc" for spec in registry.list_all())
     assert MethodSpec is EndpointSpec
+
+
+def test_registry_matches_versioned_endpoint_contract_snapshot():
+    expected = json.loads(ENDPOINT_CONTRACT_PATH.read_text(encoding="utf-8"))
+
+    assert serialize_registry_contract(build_default_registry()) == expected
 
 
 def test_registry_contains_default_versions_for_supported_methods():
@@ -97,6 +111,45 @@ def test_registry_contains_explicit_auth_metadata():
 
     assert auth.http_method == "POST"
     assert auth.endpoint == "authUser"
+    assert auth.requires_session is False
+
+
+def test_registry_routes_render_only_exact_safe_path_parameters():
+    route = build_default_registry().get("get_card_drivers").resolve_route()
+
+    assert route.render({"card_id": "card 1"}) == "cards/card%201/drivers"
+    with pytest.raises(ValueError, match="missing: card_id"):
+        route.render()
+    with pytest.raises(ValueError, match="unexpected: extra"):
+        route.render({"card_id": "card-1", "extra": "value"})
+    with pytest.raises(ValueError, match="Unsafe path parameter"):
+        route.render({"card_id": "../admin"})
+
+
+def test_services_call_their_explicit_registry_operation() -> None:
+    service_directory = Path("src/api_client_opti24/services")
+    operations: set[str] = set()
+
+    for service_file in service_directory.glob("*.py"):
+        tree = ast.parse(service_file.read_text(encoding="utf-8"))
+        for function in (node for node in ast.walk(tree) if isinstance(node, ast.AsyncFunctionDef)):
+            calls = [
+                node
+                for node in ast.walk(function)
+                if isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr in {"_request", "_request_stream"}
+            ]
+            if not calls:
+                continue
+            assert len(calls) == 1, f"{service_file.name}:{function.name} must execute once"
+            operation_arg = calls[0].args[0]
+            assert isinstance(operation_arg, ast.Constant)
+            assert operation_arg.value == function.name
+            assert all(keyword.arg != "headers" for keyword in calls[0].keywords)
+            operations.add(function.name)
+
+    assert operations == {spec.name for spec in build_default_registry().list_all()}
 
 
 def test_registry_rejects_duplicate_method_names():
@@ -115,3 +168,20 @@ def test_registry_rejects_duplicate_method_names():
 
     with pytest.raises(ValueError, match="already registered"):
         registry.register(spec)
+
+
+def test_registry_rejects_duplicate_named_routes():
+    spec = MethodSpec(
+        name="duplicate-routes",
+        domain="test",
+        http_method="GET",
+        endpoint="items",
+        supported_versions=("v1",),
+        default_version="v1",
+        demo_available=True,
+        idempotent=True,
+        route_variants=(RouteVariant("GET", "other-items", "v1", True, "default"),),
+    )
+
+    with pytest.raises(ValueError, match="duplicate named routes"):
+        MethodRegistry().register(spec)

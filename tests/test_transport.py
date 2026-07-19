@@ -219,52 +219,6 @@ async def test_request_retries_explicitly_idempotent_operation(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_request_uses_injected_auth_recovery(monkeypatch):
-    recovered = 0
-    seen_headers = []
-
-    async def recover_auth():
-        nonlocal recovered
-        recovered += 1
-        return {"session_id": "new-session"}
-
-    transport = AsyncTransport(
-        base_url="https://example.com",
-        auth_recovery=recover_auth,
-        retry_policy=RetryPolicy(network_attempts=1, rate_limit_attempts=1),
-    )
-    responses = iter(
-        [
-            DummyResp(
-                200,
-                json_data={
-                    "status": {
-                        "code": 401,
-                        "errors": [{"type": "notAuthenticated", "message": "Session expired"}],
-                    }
-                },
-            ),
-            DummyResp(200, json_data={"status": {"code": 200}, "data": True}),
-        ]
-    )
-
-    async def fake_request(method, url, headers=None, timeout=None, **kwargs):
-        seen_headers.append(headers)
-        return next(responses)
-
-    monkeypatch.setattr(transport.client, "request", fake_request)
-
-    result = await transport.request("get", "info", headers={"session_id": "old-session"})
-
-    assert result["data"] is True
-    assert recovered == 1
-    assert seen_headers == [
-        {"session_id": "old-session"},
-        {"session_id": "new-session"},
-    ]
-
-
-@pytest.mark.asyncio
 async def test_rate_limiter_spaces_requests_without_real_sleep(monkeypatch):
     now = 0.0
     sleep_calls = []

@@ -42,7 +42,7 @@ class ResponseDecoder:
             error_type,
         )
         raise build_api_error(
-            status_code=(api_status_code if api_status_code is not None else response.status_code),
+            status_code=response.status_code,
             body=body,
             endpoint=endpoint,
             method_name=method_name,
@@ -80,6 +80,6 @@ class ResponseDecoder:
 
     @staticmethod
     def _is_success(http_status_code: int, api_status_code: int | None) -> bool:
-        if api_status_code is not None:
-            return 200 <= api_status_code < 300
-        return 200 <= http_status_code < 300
+        http_success = 200 <= http_status_code < 300
+        api_success = api_status_code is None or 200 <= api_status_code < 300
+        return http_success and api_success

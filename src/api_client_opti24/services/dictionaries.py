@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from ..decorators import api_method
 from ..models.dictionaries import (
@@ -16,14 +16,14 @@ class DictionariesService(_BaseService):
     # ==========================================================
     # 🔹 Получение списка торговых точек (v1)
     # ==========================================================
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_azs_list_v1(
         self,
         page: int = 1,
         onpage: int = 10,
-        filter: Optional[dict[str, Any]] = None,
-        id: Optional[str] = None,
-        api_version: str = "v1",
+        filter: dict[str, Any] | None = None,
+        id: str | None = None,
+        api_version: str | None = None,
     ) -> AzsListV1Response:
         """
         Получение списка торговых точек (АЗС, версия 1)
@@ -39,10 +39,8 @@ class DictionariesService(_BaseService):
             params["id"] = id
 
         data = await self._request(
-            "get",
-            "AZS",
+            "get_azs_list_v1",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
 
@@ -51,12 +49,12 @@ class DictionariesService(_BaseService):
     # ==========================================================
     # 🔹 Получение списка торговых точек (v2)
     # ==========================================================
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_azs_list_v2(
         self,
-        filter: Optional[dict[str, Any]] = None,
-        q: Optional[str] = None,
-        api_version: str = "v2",
+        filter: dict[str, Any] | None = None,
+        q: str | None = None,
+        api_version: str | None = None,
     ) -> AzsListV2Response:
         """
         Получение списка торговых точек (АЗС, версия 2)
@@ -72,10 +70,8 @@ class DictionariesService(_BaseService):
             params["q"] = q
 
         data = await self._request(
-            "get",
-            "azs",
+            "get_azs_list_v2",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
         return AzsListV2Response(**data)
@@ -83,11 +79,11 @@ class DictionariesService(_BaseService):
     # ==========================================================
     # 🔹 Получение списка фильтров торговых точек
     # ==========================================================
-    @api_method(require_session=True, default_version="v2")
+    @api_method
     async def get_azs_filters(
         self,
         *,
-        api_version: str = "v2",
+        api_version: str | None = None,
     ) -> AzsFiltersResponse:
         """
         Получить список доступных фильтров для поиска торговых точек (АЗС)
@@ -95,10 +91,8 @@ class DictionariesService(_BaseService):
         self.logger.info("Получение списка фильтров торговых точек")
 
         data = await self._request(
-            "get",
-            "azs/filters",
+            "get_azs_filters",
             api_version=api_version,
-            headers=self._headers(include_session=True),
         )
 
         # У метода data — это словарь с результатом фильтров
@@ -108,12 +102,12 @@ class DictionariesService(_BaseService):
     # ==========================================================
     # 🔹 Получение общего справочника
     # ==========================================================
-    @api_method(require_session=True, default_version="v1")
+    @api_method
     async def get_dictionary(
         self,
         *,
         name: str,
-        api_version: str = "v1",
+        api_version: str | None = None,
     ) -> DictionaryResponse:
         """
         Получить общий справочник по имени.
@@ -141,10 +135,8 @@ class DictionariesService(_BaseService):
         params = {"name": name}
 
         data = await self._request(
-            "get",
-            "getDictionary",
+            "get_dictionary",
             api_version=api_version,
-            headers=self._headers(include_session=True),
             params=params,
         )
 

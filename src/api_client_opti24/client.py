@@ -1,14 +1,19 @@
 import logging
 from types import TracebackType
 
-from .authentication import AuthenticationCoordinator, build_credentials_provider
-from .config import APISettings
+from .authentication import AuthenticationCoordinator
+from .config import APISettings, ConnectionSettings
+from .credentials import StaticCredentialsProvider
 from .executor import DefaultRequestExecutor, Transport
-from .logger import LoggerLike, configure_logger, ensure_sanitizing_filter
-from .logger import logger as default_logger
+from .logger import (
+    LoggerLike,
+    ManagedLogger,
+    create_client_logger,
+    ensure_sanitizing_filter,
+)
 from .registry import MethodRegistry, build_default_registry
 from .runtime import Clock, SystemClock
-from .service_base import CredentialsProvider
+from .service_base import APIKeyProvider, CredentialsProvider
 from .service_groups import ServiceContainer, _ServiceFacade
 from .services.auth import AuthService
 from .session import SessionManager
@@ -23,48 +28,50 @@ class APIClient(_ServiceFacade):
         login: str | None = None,
         password: str | None = None,
         *,
-        settings: APISettings | None = None,
+        settings: ConnectionSettings | APISettings | None = None,
         transport: Transport | None = None,
         session_manager: SessionManager | None = None,
         registry: MethodRegistry | None = None,
         logger: logging.Logger | None = None,
         clock: Clock | None = None,
         credentials_provider: CredentialsProvider | None = None,
+        api_key_provider: APIKeyProvider | None = None,
     ) -> None:
+        legacy_api_key: str | None = None
+        legacy_login: str | None = None
+        legacy_password: str | None = None
         if settings is None:
-            connection_settings = {
-                "base_url": base_url,
-                "api_key": api_key,
-            }
-            missing = [name for name, value in connection_settings.items() if value is None]
-            if credentials_provider is None:
-                credentials = {"login": login, "password": password}
-                missing.extend(name for name, value in credentials.items() if value is None)
-            if missing:
-                raise ValueError("Missing APIClient settings: " + ", ".join(sorted(missing)))
-            assert base_url is not None
-            assert api_key is not None
-            settings = APISettings(
-                base_url=base_url,
-                api_key=api_key,
-                login=login,
-                password=password,
-            )
+            if base_url is None:
+                raise ValueError("Missing APIClient setting: base_url")
+            connection_settings = ConnectionSettings(base_url=base_url)
+            legacy_api_key = api_key
+            legacy_login = login
+            legacy_password = password
         elif any(value is not None for value in (base_url, api_key, login, password)):
             raise ValueError("Pass either settings or individual credentials, not both")
+        elif isinstance(settings, APISettings):
+            connection_settings = settings.connection_settings()
+            legacy_api_key = settings.api_key
+            legacy_login = settings.login
+            legacy_password = settings.password
+        else:
+            connection_settings = settings
 
-        self.settings = settings
-        self.logger: LoggerLike = logger or default_logger
+        self.settings: ConnectionSettings = connection_settings
+        self.__managed_logger: ManagedLogger | None = None
         if logger is not None:
+            self.logger: LoggerLike = logger
             ensure_sanitizing_filter(logger)
+        else:
+            self.__managed_logger = create_client_logger(
+                log_level=self.settings.log_level,
+                logger_file=self.settings.logger_file,
+                request_log_file=self.settings.request_log_file,
+            )
+            self.logger = self.__managed_logger.logger
         self.clock = clock or SystemClock()
         self.session_manager: SessionManager = session_manager or SessionManager()
         self.registry = registry or build_default_registry()
-        if logger is None:
-            configure_logger(
-                log_level=self.settings.log_level,
-                logger_file=self.settings.logger_file,
-            )
         self.transport: Transport = transport or AsyncTransport(
             self.settings.base_url,
             default_timeout=self.settings.timeouts.default,
@@ -74,30 +81,40 @@ class APIClient(_ServiceFacade):
             logger=self.logger,
             clock=self.clock,
         )
+        auth_credentials = credentials_provider
+        if auth_credentials is None:
+            if not legacy_login or not legacy_password:
+                raise ValueError(
+                    "Missing authentication settings: login, password; "
+                    "pass credentials_provider or legacy credentials"
+                )
+            provider_api_key = legacy_api_key
+            if provider_api_key is None and api_key_provider is not None:
+                provider_api_key = api_key_provider.get_api_key()
+            if not provider_api_key:
+                raise ValueError("Missing API key; pass api_key_provider or legacy api_key")
+            auth_credentials = StaticCredentialsProvider(
+                api_key=provider_api_key,
+                login=legacy_login,
+                password=legacy_password,
+            )
+        resolved_api_key = self._resolve_api_key(
+            api_key_provider=api_key_provider,
+            credentials_provider=auth_credentials,
+            legacy_api_key=legacy_api_key,
+        )
+        self.authentication = AuthenticationCoordinator(self.session_manager)
         self.request_executor = DefaultRequestExecutor(
-            api_key=settings.api_key,
+            api_key=resolved_api_key,
             transport=self.transport,
             session_context=self.session_manager,
+            session_gate=self.authentication,
+            session_recovery=self.authentication,
             registry=self.registry,
-            timeouts=settings.timeouts,
+            timeouts=self.settings.timeouts,
             logger=self.logger,
             clock=self.clock,
         )
-        self.authentication = AuthenticationCoordinator(
-            self.session_manager,
-            self.request_executor,
-        )
-        auth_credentials = credentials_provider
-        if auth_credentials is None:
-            if not settings.login or not settings.password:
-                raise ValueError(
-                    "Missing authentication settings: login, password; "
-                    "provide them in APISettings or pass credentials_provider"
-                )
-            auth_credentials = build_credentials_provider(
-                settings.login,
-                settings.password,
-            )
         auth_service = AuthService(
             self.request_executor,
             self.session_manager,
@@ -115,10 +132,31 @@ class APIClient(_ServiceFacade):
             auth=auth_service,
         )
         self.authentication.bind(self.services.auth.auth_user)
-        self.transport.set_auth_recovery(self.authentication.recover)
+
+    @staticmethod
+    def _resolve_api_key(
+        *,
+        api_key_provider: APIKeyProvider | None,
+        credentials_provider: CredentialsProvider,
+        legacy_api_key: str | None,
+    ) -> str:
+        if api_key_provider is not None:
+            return api_key_provider.get_api_key()
+        provider_method = getattr(credentials_provider, "get_api_key", None)
+        if callable(provider_method):
+            return str(provider_method())
+        if legacy_api_key:
+            return legacy_api_key
+        raise ValueError(
+            "Missing API key; pass api_key_provider or a combined credentials provider"
+        )
 
     async def aclose(self) -> None:
-        await self.transport.aclose()
+        try:
+            await self.transport.aclose()
+        finally:
+            if self.__managed_logger is not None:
+                self.__managed_logger.close()
 
     async def __aenter__(self) -> "APIClient":
         return self

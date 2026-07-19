@@ -27,15 +27,9 @@ class DummyClient(AuthService):
             logging.getLogger("auth-service-test"),
         )
 
-    def _headers(self, include_session: bool = False):
-        headers = {"api_key": "FAKE_API_KEY"}
-        if include_session and self.session_id:
-            headers["session_id"] = self.session_id
-        return headers
-
-    async def _request(self, method, endpoint, **kwargs):
-        self.calls.append((method, endpoint, kwargs))
-        if endpoint == "authUser":
+    async def _request(self, operation, **kwargs):
+        self.calls.append((operation, kwargs))
+        if operation == "auth_user":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -50,9 +44,9 @@ class DummyClient(AuthService):
                 },
                 "timestamp": 1710000000,
             }
-        elif endpoint == "logoff":
+        elif operation == "logoff":
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        elif endpoint == "info":
+        elif operation == "get_info":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -70,7 +64,7 @@ class DummyClient(AuthService):
                 "timestamp": 1710000000,
             }
         else:
-            raise ValueError(f"Unexpected endpoint: {endpoint}")
+            raise ValueError(f"Unexpected operation: {operation}")
 
     @property
     def session_id(self):
@@ -131,8 +125,8 @@ async def test_get_info_returns_data():
 
     assert result.status.code == 200
     assert result.data.client_info.ContractName == "Demo Client"
-    _, endpoint, kwargs = client.calls[-1]
-    assert endpoint == "info"
+    operation, kwargs = client.calls[-1]
+    assert operation == "get_info"
     assert kwargs["params"]["period"] == "2026-07-19 12:30:00"
 
 
@@ -143,6 +137,6 @@ async def test_get_info_uses_explicit_period():
 
     await client.get_info(period="2025-01-15 12:30:00")
 
-    _, endpoint, kwargs = client.calls[-1]
-    assert endpoint == "info"
+    operation, kwargs = client.calls[-1]
+    assert operation == "get_info"
     assert kwargs["params"]["period"] == "2025-01-15 12:30:00"

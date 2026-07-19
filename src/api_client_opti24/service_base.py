@@ -1,37 +1,32 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Mapping
 from typing import Any, Protocol, TypeAlias
 
 from .logger import LoggerLike
 
 JSONPayload: TypeAlias = dict[str, Any]
-AuthenticateCallback: TypeAlias = Callable[[], Awaitable[object]]
+PathParams: TypeAlias = Mapping[str, str | int]
 
 
 class RequestExecutor(Protocol):
-    def headers(
+    async def execute(
         self,
-        include_session: bool = False,
-        content_type_json: bool = False,
-    ) -> dict[str, str]: ...
-
-    async def request(
-        self,
-        method: str,
-        endpoint: str,
+        operation: str,
         *,
-        api_version: str = "v1",
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> JSONPayload: ...
 
-    async def request_stream(
+    async def execute_stream(
         self,
-        method: str,
-        endpoint: str,
+        operation: str,
         *,
-        api_version: str = "v1",
-        headers: dict[str, str] | None = None,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> bytes: ...
 
@@ -46,6 +41,10 @@ class SessionContext(Protocol):
 
 class SessionGate(Protocol):
     async def ensure_authenticated(self) -> str: ...
+
+
+class SessionRecovery(Protocol):
+    async def recover(self) -> str: ...
 
 
 class SessionMutator(SessionContext, Protocol):
@@ -67,16 +66,13 @@ class CredentialsProvider(Protocol):
     def get_credentials(self) -> tuple[str, str]: ...
 
 
-class AuthenticationSession(SessionMutator, Protocol):
-    async def ensure_authenticated(self, authenticate: AuthenticateCallback) -> str: ...
+class APIKeyProvider(Protocol):
+    def get_api_key(self) -> str: ...
 
 
 class ServiceMethodContext(Protocol):
     @property
     def logger(self) -> LoggerLike: ...
-
-    @property
-    def session_gate(self) -> SessionGate: ...
 
 
 class _BaseService:
@@ -97,48 +93,47 @@ class _BaseService:
         return self.__logger
 
     @property
-    def session_gate(self) -> SessionGate:
-        return self.__session_gate
-
-    @property
     def contract_id(self) -> str | None:
         return self.__session_context.contract_id
 
-    def _headers(
-        self,
-        include_session: bool = False,
-        content_type_json: bool = False,
-    ) -> dict[str, str]:
-        return self.__request_executor.headers(include_session, content_type_json)
+    async def _resolve_contract_id(self, contract_id: str | None) -> str:
+        if contract_id:
+            return contract_id
+        await self.__session_gate.ensure_authenticated()
+        if self.__session_context.contract_id is None:
+            raise ValueError("contract_id is required when no default contract is selected")
+        return self.__session_context.contract_id
 
     async def _request(
         self,
-        method: str,
-        endpoint: str,
+        operation: str,
         *,
-        api_version: str = "v1",
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> JSONPayload:
-        return await self.__request_executor.request(
-            method,
-            endpoint,
+        return await self.__request_executor.execute(
+            operation,
             api_version=api_version,
+            route_name=route_name,
+            path_params=path_params,
             **kwargs,
         )
 
     async def _request_stream(
         self,
-        method: str,
-        endpoint: str,
+        operation: str,
         *,
-        api_version: str = "v1",
-        headers: dict[str, str] | None = None,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> bytes:
-        return await self.__request_executor.request_stream(
-            method,
-            endpoint,
+        return await self.__request_executor.execute_stream(
+            operation,
             api_version=api_version,
-            headers=headers,
+            route_name=route_name,
+            path_params=path_params,
             **kwargs,
         )

@@ -1,6 +1,6 @@
-from typing import Any, Optional
+from typing import Any
 
-from ..modeling import BaseModel, Field
+from ..modeling import BaseModel, Field, StrictRequestModel
 
 # === Общие модели ===
 
@@ -8,21 +8,21 @@ from ..modeling import BaseModel, Field
 class ReportParameterMenuValue(BaseModel):
     """Значения меню для параметра отчета."""
 
-    labels: Optional[str] = Field(None, description="Отображаемое имя пункта меню")
-    values: Optional[str] = Field(None, description="Значение пункта меню")
+    labels: str | None = Field(None, description="Отображаемое имя пункта меню")
+    values: str | None = Field(None, description="Значение пункта меню")
 
 
 class ReportParameter(BaseModel):
     """Параметр отчета (например, дата, карта, договор)."""
 
     name: str = Field(..., description="Имя параметра, используемое в запросах")
-    value: Optional[Any] = Field(None, description="Значение параметра")
-    label: Optional[str] = Field(None, description="Отображаемое название параметра")
-    default_value: Optional[str] = Field(None, description="Значение по умолчанию")
-    menu_values: Optional[list[ReportParameterMenuValue]] = Field(
+    value: Any | None = Field(None, description="Значение параметра")
+    label: str | None = Field(None, description="Отображаемое название параметра")
+    default_value: str | None = Field(None, description="Значение по умолчанию")
+    menu_values: list[ReportParameterMenuValue] | None = Field(
         None, description="Список возможных значений для выбора из меню"
     )
-    type: Optional[str] = Field(None, description="Тип параметра (например, date, Contract, Group)")
+    type: str | None = Field(None, description="Тип параметра (например, date, Contract, Group)")
 
 
 class ReportItem(BaseModel):
@@ -49,21 +49,21 @@ class ReportList(BaseModel):
 class ReportOrderParams(BaseModel):
     """Параметры заказа отчета."""
 
-    start_date: Optional[str] = Field(None, description="Дата начала периода")
-    end_date: Optional[str] = Field(None, description="Дата окончания периода")
-    id_agreement: Optional[str] = Field(None, description="Список ID договоров")
-    id_card: Optional[list[str]] = Field(None, description="Список карт")
-    card_group_code: Optional[list[str]] = Field(None, description="Список групп карт")
-    id_client: Optional[list[str]] = Field(None, description="Список клиентов")
-    additional: Optional[dict[str, Any]] = Field(None, description="Дополнительные параметры")
+    start_date: str | None = Field(None, description="Дата начала периода")
+    end_date: str | None = Field(None, description="Дата окончания периода")
+    id_agreement: str | None = Field(None, description="Список ID договоров")
+    id_card: list[str] | None = Field(None, description="Список карт")
+    card_group_code: list[str] | None = Field(None, description="Список групп карт")
+    id_client: list[str] | None = Field(None, description="Список клиентов")
+    additional: dict[str, Any] | None = Field(None, description="Дополнительные параметры")
 
 
-class ReportOrderRequest(BaseModel):
+class ReportOrderRequest(StrictRequestModel):
     """Тело запроса для заказа отчета (v2)."""
 
     id: str = Field(..., description="Идентификатор отчета")
     format: str = Field(..., description="Формат отчета (pdf, xlsx и т.д.)")
-    emails: Optional[str] = Field(None, description="Email-адреса для отправки отчета")
+    emails: str | None = Field(None, description="Email-адреса для отправки отчета")
     params: ReportOrderParams = Field(..., description="Параметры отчета")
 
 
@@ -82,22 +82,20 @@ class ReportJobItem(BaseModel):
     """Элемент списка заказанных отчетов."""
 
     date: str = Field(..., description="Дата создания заказа отчета")
-    client_id: Optional[str] = Field(None, description="ID клиента")
-    user_id: Optional[str] = Field(None, description="ID пользователя")
-    contract_id: Optional[str] = Field(None, description="ID договора")
-    contract_name: Optional[str] = Field(None, description="Название договора")
+    client_id: str | None = Field(None, description="ID клиента")
+    user_id: str | None = Field(None, description="ID пользователя")
+    contract_id: str | None = Field(None, description="ID договора")
+    contract_name: str | None = Field(None, description="Название договора")
     job_id: str = Field(..., description="Идентификатор задания (Job ID)")
     report_name: str = Field(..., description="Название отчета")
     report_format: str = Field(..., description="Формат отчета (pdf, xlsx и т.д.)")
-    available_after: Optional[int] = Field(
-        None, description="Количество секунд до доступности отчета"
-    )
+    available_after: int | None = Field(None, description="Количество секунд до доступности отчета")
 
 
 class ReportJobList(BaseModel):
     """Ответ со списком заказанных отчетов (v1/v2)."""
 
-    total_count: Optional[int] = Field(None, description="Количество найденных отчетов")
+    total_count: int | None = Field(None, description="Количество найденных отчетов")
     result: list[ReportJobItem] = Field(..., description="Список заказанных отчетов")
 
 
@@ -107,12 +105,12 @@ class ReportJobList(BaseModel):
 class ReportFileResponse(BaseModel):
     """Ответ при генерации файла отчета."""
 
-    content: Optional[bytes] = Field(
+    content: bytes | None = Field(
         None, description="Бинарное содержимое файла (application/octet-stream)"
     )
-    format: Optional[str] = Field(None, description="Формат файла (pdf, xlsx, csv и т.д.)")
-    filename: Optional[str] = Field(None, description="Имя файла отчета")
-    size: Optional[int] = Field(None, description="Размер файла в байтах")
+    format: str | None = Field(None, description="Формат файла (pdf, xlsx, csv и т.д.)")
+    filename: str | None = Field(None, description="Имя файла отчета")
+    size: int | None = Field(None, description="Размер файла в байтах")
 
 
 # === v1 методы ===
@@ -128,9 +126,9 @@ class ReportV1JobItem(BaseModel):
     """Элемент списка ранее заказанных отчетов (v1)."""
 
     date: str = Field(..., description="Дата создания отчета")
-    client_id: Optional[str] = Field(None, description="ID клиента")
-    user_id: Optional[str] = Field(None, description="ID пользователя")
-    contract_id: Optional[str] = Field(None, description="ID договора")
+    client_id: str | None = Field(None, description="ID клиента")
+    user_id: str | None = Field(None, description="ID пользователя")
+    contract_id: str | None = Field(None, description="ID договора")
     job_id: str = Field(..., description="Идентификатор задания (Job ID)")
     report_name: str = Field(..., description="Название отчета")
     report_format: str = Field(..., description="Формат отчета (pdf, xlsx, xml и т.д.)")

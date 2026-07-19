@@ -1,6 +1,6 @@
-from typing import Any, Optional
+from typing import Any
 
-from ..modeling import BaseModel, Field
+from ..modeling import BaseModel, Field, StrictRequestModel
 
 # ======== Общие структуры ========
 
@@ -38,7 +38,7 @@ class SimpleActionResponse(BaseModel):
 # ======== Подтверждение выпуска ВК (через СМС) ========
 
 
-class ConfirmVirtualCardRequest(BaseModel):
+class ConfirmVirtualCardRequest(StrictRequestModel):
     card_id: str = Field(..., description="ID виртуальной карты для подтверждения выпуска")
     code: str = Field(..., description="Код подтверждения из СМС")
 
@@ -52,7 +52,7 @@ class ConfirmVirtualCardResponse(BaseModel):
 # ======== Повторная отправка СМС-кода ========
 
 
-class ResendSMSRequest(BaseModel):
+class ResendSMSRequest(StrictRequestModel):
     card_id: str = Field(
         ...,
         description="ID виртуальной карты, для которой нужно повторно отправить СМС-код",
@@ -77,7 +77,7 @@ class DeleteMPCResponse(BaseModel):
 # ======== Сброс МПК ========
 
 
-class ResetMPCRequest(BaseModel):
+class ResetMPCRequest(StrictRequestModel):
     type: str = Field(..., description="Тип операции сброса ('ResetCounterCode' и т.п.)")
 
 
@@ -90,9 +90,9 @@ class ResetMPCResponse(BaseModel):
 # ======== Перезапуск выпуска (повторная генерация ВК) ========
 
 
-class RerunVirtualCardReleaseRequest(BaseModel):
+class RerunVirtualCardReleaseRequest(StrictRequestModel):
     card_id: str = Field(..., description="ID виртуальной карты для перезапуска выпуска")
-    reason: Optional[str] = Field(None, description="Причина перезапуска выпуска (опционально)")
+    reason: str | None = Field(None, description="Причина перезапуска выпуска (опционально)")
 
 
 class RerunVirtualCardReleaseResponse(BaseModel):

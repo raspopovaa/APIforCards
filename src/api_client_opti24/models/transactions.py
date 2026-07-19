@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from ..modeling import BaseModel, Field
 
@@ -61,13 +61,13 @@ class TransactionItemV2(BaseModel):
 
     id: int = Field(..., description="ID транзакции")
     timestamp: datetime = Field(..., description="Время транзакции (локальное)")
-    utc_time: Optional[datetime] = Field(None, description="Время транзакции в UTC")
+    utc_time: datetime | None = Field(None, description="Время транзакции в UTC")
     card_id: str = Field(..., description="ID карты")
     poi_id: str = Field(..., description="ID точки продаж (АЗС)")
     terminal_id: str = Field(..., description="ID терминала")
     type: str = Field(..., description="Тип операции (P — покупка, R — возврат)")
     product_id: str = Field(..., description="ID продукта")
-    product_name: Optional[str] = Field(None, description="Наименование продукта")
+    product_name: str | None = Field(None, description="Наименование продукта")
     product_category_id: str = Field(..., description="Категория продукта (например, НП)")
     currency: str = Field(..., description="Код валюты (например, RUR)")
     check_id: int = Field(..., description="Номер чека")

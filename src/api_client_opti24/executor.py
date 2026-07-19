@@ -1,21 +1,28 @@
 from __future__ import annotations
 
-from typing import Any, Protocol
+from collections.abc import Awaitable, Callable, Mapping
+from typing import Any, Protocol, TypeVar
 
 from .config import TimeoutPolicy
-from .decorators import get_current_api_method_name
+from .endpoints import EndpointSpec, RouteVariant
+from .errors import NotAuthenticatedError
 from .logger import LoggerLike
-from .registry import MethodRegistry, MethodSpec
+from .registry import MethodRegistry
 from .response import DecodedPayload
 from .runtime import Clock
-from .service_base import JSONPayload, SessionContext
-from .transport import AuthRecovery
+from .service_base import (
+    JSONPayload,
+    PathParams,
+    SessionContext,
+    SessionGate,
+    SessionRecovery,
+)
 from .utils import sanitize_for_logging
+
+ResultT = TypeVar("ResultT")
 
 
 class Transport(Protocol):
-    def set_auth_recovery(self, auth_recovery: AuthRecovery) -> None: ...
-
     async def request(
         self,
         method: str,
@@ -31,7 +38,7 @@ class Transport(Protocol):
         endpoint: str,
         *,
         api_version: str = "v1",
-        headers: dict[str, str] | None = None,
+        headers: Mapping[str, str] | None = None,
         **kwargs: Any,
     ) -> bytes: ...
 
@@ -45,6 +52,8 @@ class DefaultRequestExecutor:
         api_key: str,
         transport: Transport,
         session_context: SessionContext,
+        session_gate: SessionGate,
+        session_recovery: SessionRecovery,
         registry: MethodRegistry,
         timeouts: TimeoutPolicy,
         logger: LoggerLike,
@@ -53,6 +62,8 @@ class DefaultRequestExecutor:
         self.__api_key = api_key
         self.__transport = transport
         self.__session_context = session_context
+        self.__session_gate = session_gate
+        self.__session_recovery = session_recovery
         self.__registry = registry
         self.__timeouts = timeouts
         self.__logger = logger
@@ -73,90 +84,184 @@ class DefaultRequestExecutor:
         }
         if include_session and self.__session_context.session_id:
             headers["session_id"] = self.__session_context.session_id
-        if self.__session_context.contract_id:
-            headers["contract_id"] = self.__session_context.contract_id
+            if self.__session_context.contract_id:
+                headers["contract_id"] = self.__session_context.contract_id
         self.__logger.debug("Prepared headers: %s", sanitize_for_logging(headers))
         return headers
 
-    def _resolve_method_spec(
+    def _resolve_operation(
         self,
-        endpoint: str,
-        api_version: str,
-        http_method: str | None = None,
-    ) -> MethodSpec | None:
-        return self.__registry.find_by_endpoint(
-            endpoint,
-            api_version,
-            http_method=http_method,
-        )
-
-    def _current_method_spec(
-        self,
-        endpoint: str,
-        api_version: str,
-        http_method: str,
-    ) -> MethodSpec | None:
-        method_name = get_current_api_method_name()
-        if method_name is not None:
-            try:
-                return self.__registry.get(method_name)
-            except KeyError:
-                pass
-        return self._resolve_method_spec(endpoint, api_version, http_method=http_method)
-
-    async def request(
-        self,
-        method: str,
-        endpoint: str,
+        operation: str,
         *,
-        api_version: str = "v1",
-        **kwargs: Any,
-    ) -> JSONPayload:
-        spec = self._current_method_spec(endpoint, api_version, method)
+        api_version: str | None,
+        route_name: str,
+        path_params: PathParams | None,
+    ) -> tuple[EndpointSpec, RouteVariant, str]:
+        spec = self.__registry.get(operation)
+        route = spec.resolve_route(api_version=api_version, route_name=route_name)
+        return spec, route, route.render(path_params)
 
-        timeout_class = spec.timeout_class if spec is not None else "default"
-        self.__logger.debug(
-            "Preparing API request operation=%s version=%s",
-            spec.name if spec is not None else "unregistered",
-            api_version,
+    def _request_headers(
+        self,
+        spec: EndpointSpec,
+        kwargs: dict[str, Any],
+    ) -> dict[str, str]:
+        custom_headers = kwargs.pop("headers", None)
+        if custom_headers is not None and not isinstance(custom_headers, Mapping):
+            raise TypeError("headers must be a mapping of strings")
+        headers = dict(custom_headers or {})
+        headers.update(
+            self.headers(
+                include_session=spec.requires_session,
+                content_type_json="json" in kwargs,
+            )
         )
+        return headers
+
+    async def _ensure_session(self, spec: EndpointSpec) -> None:
+        if spec.requires_session:
+            await self.__session_gate.ensure_authenticated()
+
+    def _audit(
+        self,
+        event: str,
+        spec: EndpointSpec,
+        route: RouteVariant,
+        *,
+        recovered: bool = False,
+    ) -> None:
+        self.__logger.info(
+            "API request audit",
+            extra={
+                "request_audit": True,
+                "event": event,
+                "operation": spec.name,
+                "api_version": route.api_version,
+                "route_name": route.name,
+                "http_method": route.http_method,
+                "recovered": recovered,
+            },
+        )
+
+    async def _run_with_recovery(
+        self,
+        spec: EndpointSpec,
+        route: RouteVariant,
+        request: Callable[[bool], Awaitable[ResultT]],
+    ) -> ResultT:
+        self._audit("started", spec, route)
+        try:
+            result = await request(False)
+        except NotAuthenticatedError:
+            if not spec.requires_session:
+                self._audit("failed", spec, route)
+                raise
+            self._audit("session_recovery", spec, route)
+            await self.__session_recovery.recover()
+            try:
+                result = await request(True)
+            except Exception:
+                self._audit("failed", spec, route, recovered=True)
+                raise
+            self._audit("completed", spec, route, recovered=True)
+            return result
+        except Exception:
+            self._audit("failed", spec, route)
+            raise
+        self._audit("completed", spec, route)
+        return result
+
+    async def _request_json(
+        self,
+        spec: EndpointSpec,
+        route: RouteVariant,
+        endpoint: str,
+        kwargs: dict[str, Any],
+    ) -> JSONPayload:
         result = await self.__transport.request(
-            method,
+            route.http_method,
             endpoint,
-            api_version=api_version,
-            timeout=self.__timeouts.resolve(timeout_class),
-            method_name=spec.name if spec is not None else None,
-            retry_class=spec.retry_class if spec is not None else None,
-            idempotent=spec.idempotent if spec is not None else None,
+            api_version=route.api_version,
+            headers=self._request_headers(spec, kwargs),
+            timeout=self.__timeouts.resolve(spec.timeout_class),
+            method_name=spec.name,
+            retry_class=spec.retry_class,
+            idempotent=spec.idempotent,
             **kwargs,
         )
         if not isinstance(result, dict):
             self.__logger.error(
                 "Unexpected API response operation=%s response_type=%s",
-                spec.name if spec is not None else "unregistered",
+                spec.name,
                 type(result).__name__,
             )
             raise TypeError("Expected API response to be a JSON object")
         self.__logger.debug("Received response type: %s", type(result).__name__)
         return result
 
-    async def request_stream(
+    async def execute(
         self,
-        method: str,
-        endpoint: str,
+        operation: str,
         *,
-        api_version: str = "v1",
-        headers: dict[str, str] | None = None,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        **kwargs: Any,
+    ) -> JSONPayload:
+        spec, route, endpoint = self._resolve_operation(
+            operation,
+            api_version=api_version,
+            route_name=route_name,
+            path_params=path_params,
+        )
+        await self._ensure_session(spec)
+        self.__logger.debug(
+            "Preparing API request operation=%s version=%s route=%s",
+            spec.name,
+            route.api_version,
+            route.name,
+        )
+        return await self._run_with_recovery(
+            spec,
+            route,
+            lambda _recovered: self._request_json(spec, route, endpoint, dict(kwargs)),
+        )
+
+    async def _request_bytes(
+        self,
+        spec: EndpointSpec,
+        route: RouteVariant,
+        endpoint: str,
+        kwargs: dict[str, Any],
+    ) -> bytes:
+        return await self.__transport.request_stream(
+            route.http_method,
+            endpoint,
+            api_version=route.api_version,
+            headers=self._request_headers(spec, kwargs),
+            timeout=self.__timeouts.resolve(spec.timeout_class),
+            method_name=spec.name,
+            **kwargs,
+        )
+
+    async def execute_stream(
+        self,
+        operation: str,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> bytes:
-        spec = self._current_method_spec(endpoint, api_version, method)
-        timeout_class = spec.timeout_class if spec is not None else "default"
-        return await self.__transport.request_stream(
-            method,
-            endpoint,
+        spec, route, endpoint = self._resolve_operation(
+            operation,
             api_version=api_version,
-            headers=headers,
-            timeout=self.__timeouts.resolve(timeout_class),
-            method_name=spec.name if spec is not None else None,
-            **kwargs,
+            route_name=route_name,
+            path_params=path_params,
+        )
+        await self._ensure_session(spec)
+        return await self._run_with_recovery(
+            spec,
+            route,
+            lambda _recovered: self._request_bytes(spec, route, endpoint, dict(kwargs)),
         )
