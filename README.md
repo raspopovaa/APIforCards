@@ -100,84 +100,27 @@ python -m pip install -e ".[dev]"
 
 Перед запуском настройте `.env` или переменные окружения `API_BASE_URL`, `API_KEY`, `API_LOGIN`, `API_PASSWORD`.
 
-Пример использует только стандартные ANSI-коды, поэтому дополнительные пакеты
-для цвета не нужны. Секреты и полные идентификаторы в терминал не выводятся.
-
 ```python
 import asyncio
-import os
-import sys
 from pathlib import Path
 
-from api_client_opti24 import APIClient, APISettings, __version__
-
-
-USE_COLOR = "NO_COLOR" not in os.environ and (
-    sys.stdout.isatty() or os.getenv("FORCE_COLOR") == "1"
-)
-
-
-class Color:
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    CYAN = "\033[36m"
-
-
-def paint(value: object, *styles: str) -> str:
-    text = str(value)
-    if not USE_COLOR:
-        return text
-    return f"{''.join(styles)}{text}{Color.RESET}"
-
-
-def show(label: str, value: object, color: str = Color.GREEN) -> None:
-    print(f"{paint(label + ':', Color.BOLD, Color.CYAN)} {paint(value, color)}")
-
-
-def mask(value: str, visible: int = 4) -> str:
-    if len(value) <= visible:
-        return "*" * len(value)
-    return f"{'*' * (len(value) - visible)}{value[-visible:]}"
+from api_client_opti24 import APIClient, APISettings
 
 
 async def main() -> None:
     settings = APISettings.from_env(env_file=Path(__file__).with_name(".env"))
 
     async with APIClient(settings=settings) as client:
-        authenticated = False
+        auth = await client.auth_user()
         try:
-            show("SDK", __version__, Color.YELLOW)
-
-            auth = await client.auth_user()
-            authenticated = True
-            contracts = auth.data.contracts
-            show("Авторизация", "успешна")
-            show("Доступно договоров", len(contracts), Color.YELLOW)
-
-            if not contracts:
-                show("Результат", "договоры не найдены", Color.RED)
-                return
-
-            contract = contracts[0]
-            client.contract_id = contract.id
-            show("Выбран договор", mask(contract.number), Color.YELLOW)
-
             info = await client.get_info()
-            show("Запросов по тарифу", info.data.client_info.Queries)
-
             cards = await client.cards.get_cards_v2(page=1, onpage=5)
-            show("Карт найдено", cards.total_count)
-            statuses = [item.status_name or item.status for item in cards.result[:3]]
-            show("Статусы первых карт", statuses or "нет данных")
-        except Exception as exc:
-            show("Ошибка", f"{type(exc).__name__}: {exc}", Color.RED)
-            raise
+
+            print("Договоров:", len(auth.data.contracts))
+            print("Запросов по тарифу:", info.data.client_info.Queries)
+            print("Карт найдено:", cards.total_count)
         finally:
-            if authenticated:
-                await client.logoff()
+            await client.logoff()
 
 
 if __name__ == "__main__":
@@ -187,8 +130,6 @@ if __name__ == "__main__":
 Этот пример требует реального доступа к API. Сохраните его как `test.py`, а
 `.env` разместите рядом: путь определяется через
 `Path(__file__).with_name(".env")` и не зависит от рабочей директории IDE.
-Цвет можно отключить переменной `NO_COLOR=1` или принудительно включить в IDE
-через `FORCE_COLOR=1`.
 
 ## 📖 Конфигурация
 
