@@ -57,6 +57,23 @@ class CardGroupsService(_BaseService):
             contract_id: Идентификатор договора.
             name: Название группы карт.
             group_id: (опционально) ID группы для изменения.
+
+        Типовой сценарий:
+            Создать группу для отдельного подразделения, затем добавить карты
+            через ``set_cards_to_group``.
+
+        Пример вызова:
+        ```python
+        group = await client.card_groups.set_card_group(
+            contract_id="contract-id",
+            name="Служебные автомобили",
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {"contract_id": "contract-id", "name": "Служебные автомобили"}
+        ```
         """
         body = {"contract_id": contract_id, "name": name}
         if group_id:

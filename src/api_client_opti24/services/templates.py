@@ -48,7 +48,26 @@ class TemplatesService(_BaseService):
     async def create_template(
         self, contract_id: str, type_: str, name: str, api_version: str | None = None
     ) -> TemplateCreateResponse:
-        """Создать новый шаблон ВК"""
+        """Создать новый шаблон виртуальной карты.
+
+        Типовой сценарий:
+            Создать базовый шаблон, затем добавить к нему лимиты и ограничения
+            перед выпуском виртуальной карты.
+
+        Пример вызова:
+        ```python
+        template = await client.templates.create_template(
+            contract_id="contract-id",
+            type_="wallet",
+            name="Командировки",
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {"contract_id": "contract-id", "type": "wallet", "name": "Командировки"}
+        ```
+        """
         payload = {"contract_id": contract_id, "type": type_, "name": name}
         self.logger.info("Creating virtual card template")
         data = await self._request(

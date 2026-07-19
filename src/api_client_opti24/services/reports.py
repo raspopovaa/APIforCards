@@ -56,6 +56,36 @@ class ReportsService(_BaseService):
     ) -> ReportOrderResponse:
         """
         Заказать отчет (на email или по ссылке).
+
+        Типовой сценарий:
+            Сначала получить идентификатор отчёта через ``get_reports``, затем
+            заказать формирование и отслеживать задачу через ``get_report_jobs``.
+
+        Пример вызова:
+        ```python
+        job = await client.reports.order_report(
+            report_id="report-id",
+            format="xlsx",
+            params={
+                "contract_id": "contract-id",
+                "date_from": "2026-01-01",
+                "date_to": "2026-01-31",
+            },
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {
+          "id": "report-id",
+          "format": "xlsx",
+          "params": {
+            "contract_id": "contract-id",
+            "date_from": "2026-01-01",
+            "date_to": "2026-01-31"
+          }
+        }
+        ```
         """
         body = {"id": report_id, "format": format, "params": params}
         if emails:

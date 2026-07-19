@@ -13,6 +13,7 @@
 |---|---|
 | [Установка и быстрый запуск](getting-started.md) | Установить пакет и выполнить первый запрос |
 | [Конфигурация](configuration.md) | Настроить URL, credentials, timeout, retry и rate limit |
+| [Типовые сценарии](scenarios.md) | Собрать вызовы SDK в безопасные прикладные последовательности |
 | [Методы API](methods.md) | Найти вызов SDK, маршрут, DEMO-доступность и тарификацию |
 | [Ошибки и retry](errors.md) | Обработать HTTP/API-ошибки и безопасные повторы |
 | [API Reference](api-reference.md) | Посмотреть сигнатуры сервисов и модели данных |
@@ -48,5 +49,6 @@ transactions = await client.transactions.get_transactions_v2()
 - [Архитектура SDK](architecture.md)
 - [Информационная безопасность](security.md)
 - [Совместимость со спецификацией](spec-compatibility.md)
+- [Версионирование документации](versioning.md)
 - [Исходный код на GitHub](https://github.com/raspopovaa/APIforCards)
 - [Пакет 2.2.1 на TestPyPI](https://test.pypi.org/project/api-client-opti24/2.2.1/)

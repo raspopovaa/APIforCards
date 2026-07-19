@@ -84,6 +84,25 @@ class EwalletService(_BaseService):
 
         Returns:
             MoveToCardResponse: Результат перевода.
+
+        Типовой сценарий:
+            Пополнить электронный кошелёк конкретной карты перед поездкой.
+            Операция изменяет баланс и не должна повторяться вслепую после
+            неопределённого сетевого результата.
+
+        Пример вызова:
+        ```python
+        transfer = await client.ewallet.move_to_card(
+            contract_id="contract-id",
+            card_id="card-id",
+            amount=2500.0,
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {"contract_id": "contract-id", "card_id": "card-id", "amount": 2500.0}
+        ```
         """
         cid = await self._resolve_contract_id(contract_id)
 

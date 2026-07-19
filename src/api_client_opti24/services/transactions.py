@@ -116,6 +116,34 @@ class TransactionsService(_BaseService):
         :param date_to: Конец периода (YYYY-MM-DD)
         :param page_limit: Количество записей на странице
         :param page_offset: Смещение страницы
+
+        Типовой сценарий:
+            Загрузить страницу транзакций за период не более одного месяца,
+            затем при необходимости применить локальную фильтрацию и сортировку.
+
+        Пример вызова:
+        ```python
+        transactions = await client.transactions.get_transactions_v2(
+            contract_id="contract-id",
+            date_from="2026-01-01",
+            date_to="2026-01-31",
+            page_limit=100,
+            page_offset=0,
+            sort_by="date",
+            reverse=True,
+        )
+        ```
+
+        Пример query-параметров:
+        ```json
+        {
+          "contract_id": "contract-id",
+          "date_from": "2026-01-01",
+          "date_to": "2026-01-31",
+          "page_limit": 100,
+          "page_offset": 0
+        }
+        ```
         """
         utils.validate_month_span(date_from, date_to)
 

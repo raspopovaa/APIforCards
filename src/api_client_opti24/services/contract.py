@@ -93,7 +93,26 @@ class ContractsService(_BaseService):
     async def order_invoice(
         self, amount: float, email: str, api_version: str | None = None
     ) -> InvoiceOrderResponse:
-        """Заказ счёта на оплату."""
+        """Заказать счёт на оплату и отправить его на email.
+
+        Типовой сценарий:
+            Сформировать счёт на заданную сумму после проверки адреса
+            получателя. Повтор запроса выполняйте только после проверки статуса
+            предыдущей операции.
+
+        Пример вызова:
+        ```python
+        invoice = await client.contracts.order_invoice(
+            amount=15000.0,
+            email="billing@example.org",
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {"sum": 15000.0, "email": "billing@example.org"}
+        ```
+        """
         payload = {"sum": amount, "email": email}
         self.logger.debug("Ordering invoice")
         data = await self._request(

@@ -70,6 +70,32 @@ class LimitsService(_BaseService):
         Для изменения уже ранее созданного лимита, требуется передавать в запросе его ID.
         Для договора нельзя выставить продуктовый лимит, можно для карты или группы карт.
         :param limits: список лимитов в виде словарей (см. документацию API)
+
+        Типовой сценарий:
+            Ограничить дневной расход конкретной карты. Для изменения ранее
+            созданного лимита добавьте его ``id`` в тот же словарь.
+
+        Пример вызова:
+        ```python
+        result = await client.limits.set_limit(
+            limits=[{
+                "contract_id": "contract-id",
+                "card_id": "card-id",
+                "sum": {"currency": "810", "value": 5000.0},
+                "time": {"number": 1, "type": 1},
+            }]
+        )
+        ```
+
+        Пример логического payload до сериализации поля ``limit``:
+        ```json
+        {
+          "contract_id": "contract-id",
+          "card_id": "card-id",
+          "sum": {"currency": "810", "value": 5000.0},
+          "time": {"number": 1, "type": 1}
+        }
+        ```
         """
         if not limits:
             raise ValueError("Не переданы данные лимита (limits)")

@@ -336,6 +336,7 @@ print(AuthUserResponse.describe())
 - [каталог методов, DEMO-доступность и тарификация](https://raspopovaa.github.io/APIforCards/methods/)
 - [API Reference](https://raspopovaa.github.io/APIforCards/api-reference/)
 - [архитектура и безопасность](https://raspopovaa.github.io/APIforCards/architecture/)
+- [типовые сценарии](https://raspopovaa.github.io/APIforCards/scenarios/)
 
 API Reference и каталог методов генерируются из кода и runtime registry. Для
 локальной проверки выполните:
@@ -344,10 +345,12 @@ API Reference и каталог методов генерируются из к�
 uv run python scripts/generate_api_docs.py
 uv run python scripts/generate_method_catalog.py
 uv run python scripts/build_docs_site.py
+uv run mike serve
 ```
 
 Строгая сборка создаётся в `site/`. Workflow `Docs` проверяет её в pull request,
-а workflow `Pages` собирает и публикует сайт после push в `main`.
+а workflow `Pages` публикует текущую линию `major.minor` и сохраняет предыдущие
+версии в `gh-pages`. Alias `latest` всегда указывает на актуальную линию SDK.
 
 ## 📌 Политика по спецификации
 

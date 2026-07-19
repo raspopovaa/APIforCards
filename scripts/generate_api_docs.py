@@ -111,6 +111,16 @@ def render_model_block(cls: type[BaseModel]) -> str:
     return "```text\n" + "\n".join(lines) + "\n```"
 
 
+def render_method(method_name: str, method: object) -> list[str]:
+    lines = [f"#### `{method_name}`", ""]
+    lines.append(f"Сигнатура: `{method_name}{format_signature(method)}`")
+    lines.append("")
+    description = clean_docstring(method)
+    if description:
+        lines.extend((description, ""))
+    return lines
+
+
 def render_class(cls: type) -> list[str]:
     lines = [f"### `{cls.__name__}`", ""]
     description = clean_docstring(cls)
@@ -130,8 +140,7 @@ def render_class(cls: type) -> list[str]:
         lines.append("Публичные методы:")
         lines.append("")
         for method_name, method in methods:
-            lines.append(f"- `{method_name}{format_signature(method)}`")
-        lines.append("")
+            lines.extend(render_method(method_name, method))
 
     return lines
 

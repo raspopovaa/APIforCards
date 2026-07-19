@@ -30,6 +30,11 @@ class AuthService(_BaseService):
 
     @api_method
     async def logoff(self, api_version: str | None = None) -> dict[str, object]:
+        """Завершить серверную сессию и очистить локальное состояние клиента.
+
+        Вызывайте метод в ``finally`` или используйте контекстный менеджер
+        ``APIClient``. Session ID не следует выводить в логи.
+        """
         response = await self._request("logoff", api_version=api_version)
         self.__session_mutator.reset()
         return response
@@ -60,6 +65,22 @@ class AuthService(_BaseService):
         contract_id: str | None = None,
         contract_number: str | None = None,
     ) -> AuthUserResponse:
+        """Авторизоваться и выбрать договор для последующих запросов.
+
+        Типовой сценарий:
+            Выполнить авторизацию в начале интеграционного сценария и сохранить
+            только идентификатор выбранного договора. Session ID SDK хранит и
+            обновляет самостоятельно.
+
+        Пример вызова:
+        ```python
+        auth = await client.auth.auth_user(contract_number="TEST-001")
+        contract_id = auth.data.contracts[0].id
+        ```
+
+        Payload формируется из ``CredentialsProvider`` и выбранного договора;
+        логин, пароль и session ID не должны попадать в журналирование.
+        """
         return await self.__authenticator.authenticate(
             api_version=api_version,
             contract_id=contract_id,

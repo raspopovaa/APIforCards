@@ -54,6 +54,32 @@ class RestrictionsService(_BaseService):
         """
         Установка или изменение товарного ограничителя по карте или группе карт.
         Для изменения ограничителя необходимо передавать его ID.
+
+        Типовой сценарий:
+            Разрешить карте покупки только выбранного типа продукта. Для
+            изменения существующего ограничителя добавьте его ``id``.
+
+        Пример вызова:
+        ```python
+        result = await client.restrictions.set_restriction(
+            restrictions=[{
+                "contract_id": "contract-id",
+                "card_id": "card-id",
+                "productType": "product-type-id",
+                "restriction_type": 1,
+            }]
+        )
+        ```
+
+        Пример логического payload до сериализации поля ``restriction``:
+        ```json
+        {
+          "contract_id": "contract-id",
+          "card_id": "card-id",
+          "productType": "product-type-id",
+          "restriction_type": 1
+        }
+        ```
         """
         if not restrictions:
             raise ValueError("Список restrictions не может быть пустым")

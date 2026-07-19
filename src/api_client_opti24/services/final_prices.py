@@ -21,6 +21,24 @@ class FinalPricesService(_BaseService):
     ) -> FinalPricesResponse:
         """
         Получение финальных цен на АЗС по карте (POST /vip/v2/cards/{card_id}/calculatePrices)
+
+        Типовой сценарий:
+            Перед оплатой получить персональные цены для выбранной карты,
+            торговой точки и перечня товаров.
+
+        Пример вызова:
+        ```python
+        prices = await client.final_prices.get_final_prices(
+            card_id="card-id",
+            poi_id="poi-id",
+            goods=["fuel-code-1", "fuel-code-2"],
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {"poi_id": "poi-id", "goods": ["fuel-code-1", "fuel-code-2"]}
+        ```
         """
         payload = {"poi_id": poi_id, "goods": goods}
         self.logger.info("Requesting final prices")

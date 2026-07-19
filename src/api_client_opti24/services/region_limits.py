@@ -49,6 +49,33 @@ class RegionLimitsService(_BaseService):
         """
         Установка/изменение регионального лимита по карте или группе карт.
         Для изменения лимита необходимо передавать его ID.
+
+        Типовой сценарий:
+            Разрешить обслуживание карты только в выбранной стране или регионе.
+
+        Пример вызова:
+        ```python
+        result = await client.region_limits.set_region_limit(
+            region_limits=[{
+                "contract_id": "contract-id",
+                "card_id": "card-id",
+                "country": "RUS",
+                "region": "54",
+                "limit_type": 1,
+            }]
+        )
+        ```
+
+        Пример логического payload до сериализации поля ``region_limit``:
+        ```json
+        {
+          "contract_id": "contract-id",
+          "card_id": "card-id",
+          "country": "RUS",
+          "region": "54",
+          "limit_type": 1
+        }
+        ```
         """
         body = {"region_limit": to_json_param(region_limits)}
 

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -42,8 +44,24 @@ jobs:
       - name: Generate method catalog
         run: python scripts/generate_method_catalog.py
 
-      - name: Build static site
-        run: python scripts/build_docs_site.py
+      - name: Determine documentation version
+        run: |
+          version=$(python -c 'import tomllib; value = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]; print(".".join(value.split(".")[:2]))')
+          echo "DOCS_VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Build versioned documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mike deploy --update-aliases --alias-type=redirect "$DOCS_VERSION" latest
+          mike set-default --push latest
+
+      - name: Export versioned site
+        run: |
+          git fetch origin gh-pages
+          rm -rf site
+          mkdir site
+          git archive origin/gh-pages | tar -x -C site
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

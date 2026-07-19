@@ -53,6 +53,25 @@ DOMAIN_SERVICES = {
     "virtual_cards": "virtual_cards",
 }
 
+DOCUMENTED_SCENARIOS = {
+    "auth": "auth_user",
+    "card_group": "set_card_group",
+    "cards": "block_card",
+    "contract": "order_invoice",
+    "dictionaries": "get_azs_list_v2",
+    "ewallet": "move_to_card",
+    "final_prices": "get_final_prices",
+    "invites": "create_invite",
+    "limits": "set_limit",
+    "region_limits": "set_region_limit",
+    "reports": "order_report",
+    "restrictions": "set_restriction",
+    "templates": "create_template",
+    "transactions": "get_transactions_v2",
+    "users": "create_user",
+    "virtual_cards": "release_virtual_card",
+}
+
 
 def test_package_root_exports_client() -> None:
     assert APIClient.__name__ == "APIClient"
@@ -213,6 +232,20 @@ async def test_all_registered_methods_exist_only_on_domain_services(tmp_path) ->
         assert not hasattr(client, spec.name)
 
     await client.aclose()
+
+
+def test_registered_service_methods_have_docstrings_and_domain_scenarios() -> None:
+    registry = build_default_registry()
+
+    for spec in registry.list_all():
+        service_type = getattr(sdk, SERVICE_TYPES[DOMAIN_SERVICES[spec.domain]])
+        assert inspect.getdoc(getattr(service_type, spec.name)), spec.name
+
+    for domain, operation_name in DOCUMENTED_SCENARIOS.items():
+        service_type = getattr(sdk, SERVICE_TYPES[DOMAIN_SERVICES[domain]])
+        docstring = inspect.getdoc(getattr(service_type, operation_name)) or ""
+        assert "Типовой сценарий" in docstring, operation_name
+        assert "Пример" in docstring, operation_name
 
 
 @pytest.mark.asyncio

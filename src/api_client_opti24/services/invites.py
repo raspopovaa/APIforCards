@@ -77,6 +77,31 @@ class InvitesService(_BaseService):
 
         with_send=True  → POST /v2/invites  (с отправкой SMS/Email)
         with_send=False → POST /v2/invites_free (без отправки)
+
+        Типовой сценарий:
+            Зарегистрировать водителя и передать ему приглашение. Если доставку
+            выполняет внешняя система, используйте ``with_send=False``.
+
+        Пример вызова:
+        ```python
+        invite = await client.invites.create_invite(
+            data={
+                "role": "Driver",
+                "mobile": "79990000000",
+                "contracts": [{"sid": "contract-id"}],
+            },
+            with_send=False,
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {
+          "role": "Driver",
+          "mobile": "79990000000",
+          "contracts": [{"sid": "contract-id"}]
+        }
+        ```
         """
         raw = await self._request(
             "create_invite",

@@ -63,6 +63,24 @@ class VirtualCardsService(_BaseService):
         - type (например, "wallet")
         - template_id (ID шаблона ВК)
         - user_id (ID пользователя)
+
+        Типовой сценарий:
+            Выпустить карту пользователю по заранее настроенному шаблону лимитов
+            и ограничений.
+
+        Пример вызова:
+        ```python
+        card = await client.virtual_cards.release_virtual_card(
+            type_="wallet",
+            template_id="template-id",
+            user_id="user-id",
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {"type": "wallet", "template_id": "template-id", "user_id": "user-id"}
+        ```
         """
         payload = {}
         if type_:

@@ -150,10 +150,29 @@ class CardsService(_BaseService):
         api_version: str | None = None,
     ) -> IDListResponse:
         """Блокировка или разблокировка топливных карт.
-        :param contract_id: Идентификатор договора
-        :param card_ids: Список идентификаторов карт
-        :param block: True для блокировки, False для разблокировки
-        return: Объект IDListResponse с результатом операции"""
+
+        Типовой сценарий:
+            Немедленно заблокировать одну или несколько утраченных карт. Для
+            обратной операции передайте ``block=False``.
+
+        Пример вызова:
+        ```python
+        result = await client.cards.block_card(
+            contract_id="contract-id",
+            card_ids=["card-id-1", "card-id-2"],
+            block=True,
+        )
+        ```
+
+        Пример payload:
+        ```json
+        {
+          "contract_id": "contract-id",
+          "card_id": ["card-id-1", "card-id-2"],
+          "block": "true"
+        }
+        ```
+        """
 
         payload = {
             "contract_id": contract_id,

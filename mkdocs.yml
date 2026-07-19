@@ -41,6 +41,15 @@ plugins:
       lang:
         - ru
         - en
+  - mike:
+      canonical_version: latest
+      alias_type: redirect
+
+extra:
+  version:
+    provider: mike
+    default: latest
+    alias: true
 
 markdown_extensions:
   - admonition
@@ -59,6 +68,7 @@ nav:
   - Начало работы:
       - Установка и запуск: getting-started.md
       - Конфигурация: configuration.md
+      - Типовые сценарии: scenarios.md
       - Ошибки и retry: errors.md
   - Методы API: methods.md
   - API Reference: api-reference.md
@@ -66,3 +76,4 @@ nav:
       - Архитектура: architecture.md
       - Безопасность: security.md
       - Совместимость: spec-compatibility.md
+      - Версионирование: versioning.md
