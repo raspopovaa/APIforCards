@@ -89,7 +89,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 
 ## 📦 Установка
 
-Пакет `api-client-opti24==2.2.0` опубликован на TestPyPI и поддерживает
+Пакет `api-client-opti24==2.2.1` опубликован на TestPyPI и поддерживает
 `Python >=3.11,<3.15`. Зависимости лучше устанавливать из основного PyPI
 отдельно: это исключает случайную подмену зависимостей пакетами из тестового
 индекса.
@@ -100,7 +100,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 uv venv --python 3.11
 uv pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 uv pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.2.0
+  --no-deps api-client-opti24==2.2.1
 ```
 
 ### Вариант 2: pip
@@ -110,7 +110,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 python -m pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.2.0
+  --no-deps api-client-opti24==2.2.1
 ```
 
 Проверка версии и публичных импортов:
@@ -411,7 +411,7 @@ uv publish --publish-url https://test.pypi.org/legacy/
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.2.0
+  --no-deps api-client-opti24==2.2.1
 ```
 
 ## 🤖 GitHub Actions
@@ -520,7 +520,7 @@ uv run mypy src
 |---------------|-------------------------------|-----------|
 | Возможности | `client.py`, `services/`, `service_groups.py` | Все 89 endpoint-методов доступны только через композиционные доменные сервисы |
 | Архитектура | `client.py`, `executor.py`, `service_base.py`, `service_groups.py` | Сервисы не хранят `APIClient`; зависимости разделены узкими протоколами |
-| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.2.0`, диапазон Python и публичные импорты совпадают |
+| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.2.1`, диапазон Python и публичные импорты совпадают |
 | Быстрый старт | `config.py`, `auth.py`, `cards.py`, модели auth/cards | Сигнатуры и используемые поля ответа проверены |
 | Конфигурация | `config.py`, `credentials.py`, `.env.example`, `env.py` | Безопасные connection settings отделены от providers секретов |
 | Retry и безопасность | `policies.py`, `transport.py`, `logger.py`, `utils.py` | Retry зависит от idempotency; удалённый HTTP запрещён; логи очищаются |
