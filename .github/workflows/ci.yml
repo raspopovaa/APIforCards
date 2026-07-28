@@ -37,38 +37,10 @@ jobs:
         run: python scripts/audit_spec_contract.py --mode verified
 
       - name: Run full lint checks
-        run: |
-          mkdir -p artifacts/ruff
-          set +e
-          ruff check src tests scripts tools --output-format=concise > artifacts/ruff/report.txt 2>&1
-          status=$?
-          cat artifacts/ruff/report.txt
-          exit "$status"
-
-      - name: Upload Ruff diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ruff-diagnostics-${{ matrix.python-version }}
-          path: artifacts/ruff/report.txt
-          if-no-files-found: error
+        run: ruff check src tests scripts tools
 
       - name: Check formatting
-        run: |
-          mkdir -p artifacts/black
-          set +e
-          black --check src tests scripts tools > artifacts/black/report.txt 2>&1
-          status=$?
-          cat artifacts/black/report.txt
-          exit "$status"
-
-      - name: Upload Black diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: black-diagnostics-${{ matrix.python-version }}
-          path: artifacts/black/report.txt
-          if-no-files-found: error
+        run: black --check src tests scripts tools
 
       - name: Type-check SDK
         run: mypy src/api_client_opti24
