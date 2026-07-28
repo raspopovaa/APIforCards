@@ -23,7 +23,7 @@ jobs:
 
       - name: Materialize audited sources
         run: |
-          cat .contract-audit-bundle.part.* > /tmp/contract-audit-bundle.b64
+          cat .contract-audit-bundle.part.* | tr -d '[:space:]' > /tmp/contract-audit-bundle.b64
           test "$(wc -c < /tmp/contract-audit-bundle.b64)" -eq 61028
           printf '%s  %s\n' \
             '8cb0915b01b5b8eb7d761f31f476be8d860e06ee8815268a16c3b0853c52ee55' \
