@@ -12,6 +12,7 @@ jobs:
   finalize:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout branch
