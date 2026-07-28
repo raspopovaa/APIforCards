@@ -28,9 +28,9 @@ def contract_catalog():
 
 
 def test_runtime_registry_matches_normalized_contracts(contract_catalog):
-    runtime = {
-        spec.name for spec in build_default_registry().list_all()
-    } - set(contract_catalog.manifest.excluded_operations)
+    runtime = {spec.name for spec in build_default_registry().list_all()} - set(
+        contract_catalog.manifest.excluded_operations
+    )
     assert runtime == set(contract_catalog.operations)
 
 

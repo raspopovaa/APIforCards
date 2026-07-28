@@ -40,10 +40,7 @@ def main() -> int:
     result = audit_catalog(catalog)
     markdown_path, json_path = write_reports(result, args.output_dir)
     summary = result.summary()
-    print(
-        "Contract audit: "
-        + ", ".join(f"{name}={value}" for name, value in summary.items())
-    )
+    print("Contract audit: " + ", ".join(f"{name}={value}" for name, value in summary.items()))
     print(f"Markdown report: {markdown_path}")
     print(f"JSON report: {json_path}")
     infrastructure_codes = {

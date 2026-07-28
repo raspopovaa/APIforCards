@@ -36,7 +36,4 @@ def test_corrected_fixture_does_not_hide_source_correction():
     payload = json.loads(variant.fixture.read_text(encoding="utf-8"))
     assert "goods" in payload["data"]
     assert "gooods" not in payload["data"]
-    assert any(
-        correction["path"] == "data.gooods"
-        for correction in variant.fixture_corrections
-    )
+    assert any(correction["path"] == "data.gooods" for correction in variant.fixture_corrections)

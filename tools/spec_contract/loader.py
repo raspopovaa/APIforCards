@@ -98,7 +98,9 @@ def load_catalog(contract_root: Path, *, repository_root: Path | None = None) ->
         raise ValueError(f"Unexpected contract source version: {source_version!r}")
 
     domain_files = manifest_value.get("domain_files", [])
-    if not isinstance(domain_files, list) or not all(isinstance(item, str) for item in domain_files):
+    if not isinstance(domain_files, list) or not all(
+        isinstance(item, str) for item in domain_files
+    ):
         raise ValueError("Manifest domain_files must be a string list")
 
     common_response_fields = tuple(

@@ -247,9 +247,9 @@ def audit_catalog(catalog: ContractCatalog) -> AuditResult:
     try:
         from api_client_opti24.registry import build_default_registry
 
-        runtime_operations = {
-            spec.name for spec in build_default_registry().list_all()
-        } - set(catalog.manifest.excluded_operations)
+        runtime_operations = {spec.name for spec in build_default_registry().list_all()} - set(
+            catalog.manifest.excluded_operations
+        )
         normalized_operations = set(catalog.operations)
         for name in sorted(runtime_operations - normalized_operations):
             result.add(
