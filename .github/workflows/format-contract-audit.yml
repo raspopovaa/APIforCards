@@ -1,0 +1,49 @@
+name: Format contract audit
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]' && github.head_ref == 'agent/api-1160-contract-audit'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/api-1160-contract-audit
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Black
+        run: python -m pip install 'black>=24.3.0'
+
+      - name: Format contract audit sources
+        run: |
+          black \
+            scripts/audit_spec_contract.py \
+            tests/contract/test_contract_fixtures.py \
+            tests/contract/test_contract_runtime.py \
+            tools/spec_contract/loader.py \
+            tools/spec_contract/comparator.py
+
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            scripts/audit_spec_contract.py \
+            tests/contract/test_contract_fixtures.py \
+            tests/contract/test_contract_runtime.py \
+            tools/spec_contract/loader.py \
+            tools/spec_contract/comparator.py
+          git commit -m "style: format contract audit sources"
+          git push origin HEAD:agent/api-1160-contract-audit
