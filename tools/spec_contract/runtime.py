@@ -5,7 +5,7 @@ import importlib
 import inspect
 import pkgutil
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from types import UnionType
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
@@ -38,7 +38,7 @@ class ResolvedField:
     generic: bool
 
 
-@lru_cache(maxsize=None)
+@cache
 def resolve_object(dotted_path: str) -> Any:
     module_name, _, attribute_path = dotted_path.rpartition(".")
     if not module_name or not attribute_path:
@@ -49,7 +49,7 @@ def resolve_object(dotted_path: str) -> Any:
     return value
 
 
-@lru_cache(maxsize=None)
+@cache
 def resolve_service_class(service: str) -> type:
     try:
         path = SERVICE_CLASS_PATHS[service]
@@ -61,7 +61,7 @@ def resolve_service_class(service: str) -> type:
     return value
 
 
-@lru_cache(maxsize=None)
+@cache
 def resolve_service_method(service: str, operation: str) -> Any:
     service_class = resolve_service_class(service)
     method = getattr(service_class, operation, None)
