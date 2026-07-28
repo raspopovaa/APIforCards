@@ -1,0 +1,100 @@
+name: Finalize Documentation Release
+
+on:
+  push:
+    branches:
+      - agent/unified-sdk-documentation
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/unified-sdk-documentation
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Synchronize release version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              Path("pyproject.toml"): [('version = "2.2.2"', 'version = "2.2.3"')],
+              Path("uv.lock"): [
+                  ('name = "api-client-opti24"\nversion = "2.2.2"',
+                   'name = "api-client-opti24"\nversion = "2.2.3"')
+              ],
+              Path("tests/test_package_smoke.py"): [
+                  ('assert __version__ == "2.2.1"', 'assert __version__ == "2.2.3"')
+              ],
+          }
+
+          for path, pairs in replacements.items():
+              text = path.read_text(encoding="utf-8")
+              for old, new in pairs:
+                  if old not in text:
+                      raise SystemExit(f"Expected text not found in {path}: {old!r}")
+                  text = text.replace(old, new, 1)
+              path.write_text(text, encoding="utf-8")
+
+          for path in (
+              Path("README.md"),
+              Path("docs/index.md"),
+              Path("docs/getting-started.md"),
+              Path("docs/versioning.md"),
+          ):
+              text = path.read_text(encoding="utf-8")
+              path.write_text(text.replace("2.2.2", "2.2.3"), encoding="utf-8")
+          PY
+
+      - name: Generate documentation
+        run: python scripts/generate_docs.py
+
+      - name: Format changed Python files
+        run: |
+          ruff check --fix scripts/generate_docs.py tests/test_documentation_generator.py tests/test_package_smoke.py
+          black scripts/generate_docs.py tests/test_documentation_generator.py tests/test_package_smoke.py
+
+      - name: Run full test suite
+        run: pytest
+
+      - name: Verify external API contract
+        run: python scripts/verify_external_contract.py specifications/api-methods.yaml
+
+      - name: Run lint checks
+        run: ruff check src tests scripts
+
+      - name: Check formatting
+        run: black --check src tests scripts
+
+      - name: Type-check SDK
+        run: mypy src/api_client_opti24
+
+      - name: Build documentation in strict mode
+        run: mkdocs build --strict
+
+      - name: Commit generated documentation and release metadata
+        run: |
+          rm .github/workflows/finalize-docs-release.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Finalize SDK documentation release 2.2.3"
+          git push origin HEAD:agent/unified-sdk-documentation
