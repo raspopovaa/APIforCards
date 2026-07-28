@@ -29,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Synchronize release version
+      - name: Synchronize release version and generator
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -42,6 +42,13 @@ jobs:
               ],
               Path("tests/test_package_smoke.py"): [
                   ('assert __version__ == "2.2.1"', 'assert __version__ == "2.2.3"')
+              ],
+              Path("scripts/generate_docs.py"): [
+                  (
+                      'clean_docstring(model) or "Модель данных SDK.",',
+                      'inspect.cleandoc(vars(model).get("__doc__") or "") '
+                      'or "Модель данных SDK.",',
+                  )
               ],
           }
 
