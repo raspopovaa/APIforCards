@@ -5,6 +5,9 @@ on:
     branches:
       - main
   workflow_dispatch:
+  pull_request_target:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -17,6 +20,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'pull_request_target' || startsWith(github.head_ref, 'docs-release/')
     runs-on: ubuntu-latest
 
     steps:
@@ -57,13 +61,16 @@ jobs:
           mike deploy --push --update-aliases --alias-type=redirect "$DOCS_VERSION" latest
           mike set-default --push latest
 
-      - name: Verify published Pydantic documentation
+      - name: Verify published documentation
         run: |
           git fetch origin gh-pages --depth=1
           git show "origin/gh-pages:$DOCS_VERSION/methods/cards/index.html" | grep -Fq "Pydantic-модель"
           git show "origin/gh-pages:$DOCS_VERSION/methods/cards/index.html" | grep -Fq "Поля возвращаемой модели"
           git show "origin/gh-pages:$DOCS_VERSION/data-types/cards/CardInfo/index.html" | grep -Fq "Что проверяет Pydantic"
           git show "origin/gh-pages:$DOCS_VERSION/data-types/final_prices/CheckPurchaseRequest/index.html" | grep -Fq "не означает, что каждый метод SDK автоматически создаёт её"
+          git show "origin/gh-pages:$DOCS_VERSION/methods/ewallet/index.html" | grep -Fq "Сумма перевода"
+          git show "origin/gh-pages:$DOCS_VERSION/methods/contracts/index.html" | grep -Fq "Сумма счёта в рублях"
+          git show "origin/gh-pages:$DOCS_VERSION/methods/templates/index.html" | grep -Fq "Имя шаблона ВК, уникальное в рамках договора"
 
       - name: Export versioned site
         run: |
