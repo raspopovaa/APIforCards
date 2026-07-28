@@ -22,17 +22,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Generate API documentation
-        run: python scripts/generate_api_docs.py
+      - name: Generate documentation
+        run: python scripts/generate_docs.py
 
-      - name: Generate method catalog
-        run: python scripts/generate_method_catalog.py
+      - name: Run documentation contract tests
+        run: pytest -q tests/test_documentation_generator.py
 
-      - name: Verify generated Markdown is committed
-        run: git diff --exit-code -- docs/api-reference.md docs/methods.md
+      - name: Verify generated documentation is committed
+        run: git diff --exit-code -- docs/
 
-      - name: Build documentation site
-        run: python scripts/build_docs_site.py
+      - name: Build documentation site in strict mode
+        run: mkdocs build --strict
 
       - name: Upload documentation site
         uses: actions/upload-artifact@v4
