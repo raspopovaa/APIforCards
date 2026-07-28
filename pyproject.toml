@@ -66,6 +66,7 @@ fixable = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["ARG001", "ARG002"]
+"scripts/audit_spec_contract.py" = ["E402"]
 "scripts/documentation_generator.py" = ["E402"]
 "scripts/export_endpoint_contracts.py" = ["E402"]
 "scripts/generate_api_docs.py" = ["E402"]
