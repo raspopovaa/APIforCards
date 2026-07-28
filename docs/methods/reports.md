@@ -21,7 +21,11 @@
 
 ### Возвращаемое значение
 
-`bytes`
+**Тип после валидации:** `bytes`
+
+**Pydantic-модель:** нет.
+
+SDK возвращает значение указанного Python-типа; отдельная модель ответа не применяется.
 
 Возвращает бинарное содержимое файла отчета.
 
@@ -59,7 +63,11 @@ print(result)
 
 ### Возвращаемое значение
 
-`bytes`
+**Тип после валидации:** `bytes`
+
+**Pydantic-модель:** нет.
+
+SDK возвращает значение указанного Python-типа; отдельная модель ответа не применяется.
 
 ### Пример
 
@@ -89,7 +97,20 @@ print(result)
 
 ### Возвращаемое значение
 
-`ReportV1JobList`
+**Тип после валидации:** `ReportV1JobList`
+
+**Pydantic-модель:** [`ReportV1JobList`](../data-types/reports/ReportV1JobList.md)
+
+Ответ передаётся в `ReportV1JobList.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `jobs` | `list[ReportV1JobItem]` | `array[object (ReportV1JobItem)]` | Да | Нет | Массив заказанных отчетов |
+
+**Вложенные модели:**
+- [`ReportV1JobItem`](../data-types/reports/ReportV1JobItem.md)
 
 ### Пример
 
@@ -117,7 +138,21 @@ print(result)
 
 ### Возвращаемое значение
 
-`ReportJobList`
+**Тип после валидации:** `ReportJobList`
+
+**Pydantic-модель:** [`ReportJobList`](../data-types/reports/ReportJobList.md)
+
+Ответ передаётся в `ReportJobList.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `total_count` | `int \| None` | `integer \| null` | Нет | Да | Количество найденных отчетов |
+| `result` | `list[ReportJobItem]` | `array[object (ReportJobItem)]` | Да | Нет | Список заказанных отчетов |
+
+**Вложенные модели:**
+- [`ReportJobItem`](../data-types/reports/ReportJobItem.md)
 
 ### Пример
 
@@ -145,7 +180,21 @@ print(result)
 
 ### Возвращаемое значение
 
-`ReportList`
+**Тип после валидации:** `ReportList`
+
+**Pydantic-модель:** [`ReportList`](../data-types/reports/ReportList.md)
+
+Ответ передаётся в `ReportList.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `total_count` | `int` | `integer` | Да | Нет | Количество доступных отчетов |
+| `result` | `list[ReportItem]` | `array[object (ReportItem)]` | Да | Нет | Массив отчетов |
+
+**Вложенные модели:**
+- [`ReportItem`](../data-types/reports/ReportItem.md)
 
 ### Пример
 
@@ -177,7 +226,17 @@ print(result)
 
 ### Возвращаемое значение
 
-`ReportOrderResponse`
+**Тип после валидации:** `ReportOrderResponse`
+
+**Pydantic-модель:** [`ReportOrderResponse`](../data-types/reports/ReportOrderResponse.md)
+
+Ответ передаётся в `ReportOrderResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `job_id` | `list[str]` | `array[string]` | Да | Нет | Идентификаторы созданных заданий на генерацию отчета |
 
 ### Пример
 
@@ -216,7 +275,17 @@ print(result)
 
 ### Возвращаемое значение
 
-`ReportV1OrderResponse`
+**Тип после валидации:** `ReportV1OrderResponse`
+
+**Pydantic-модель:** [`ReportV1OrderResponse`](../data-types/reports/ReportV1OrderResponse.md)
+
+Ответ передаётся в `ReportV1OrderResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `report_ids` | `list[str]` | `array[string]` | Да | Нет | ID заказанных отчетов |
 
 ### Пример
 

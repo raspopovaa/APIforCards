@@ -23,7 +23,22 @@
 
 ### Возвращаемое значение
 
-`RegionLimitResponse`
+**Тип после валидации:** `RegionLimitResponse`
+
+**Pydantic-модель:** [`RegionLimitResponse`](../data-types/region_limits/RegionLimitResponse.md)
+
+Ответ передаётся в `RegionLimitResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
+| `data` | `RegionLimitList` | `object (RegionLimitList)` | Да | Нет | Данные с лимитами |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+
+**Вложенные модели:**
+- [`RegionLimitList`](../data-types/region_limits/RegionLimitList.md)
 
 ### Пример
 
@@ -55,7 +70,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`RemoveRegionLimit`
+**Тип после валидации:** `RemoveRegionLimit`
+
+**Pydantic-модель:** [`RemoveRegionLimit`](../data-types/region_limits/RemoveRegionLimit.md)
+
+Ответ передаётся в `RemoveRegionLimit.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (True — успешно) |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа |
 
 ### Пример
 
@@ -87,7 +114,11 @@ print(result)
 
 ### Возвращаемое значение
 
-`dict[str, Any]`
+**Тип после валидации:** `dict[str, Any]`
+
+**Pydantic-модель:** нет.
+
+SDK возвращает значение указанного Python-типа; отдельная модель ответа не применяется.
 
 ### Пример
 

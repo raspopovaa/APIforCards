@@ -23,7 +23,21 @@
 
 ### Возвращаемое значение
 
-`RestrictionGetResponse`
+**Тип после валидации:** `RestrictionGetResponse`
+
+**Pydantic-модель:** [`RestrictionGetResponse`](../data-types/restrictions/RestrictionGetResponse.md)
+
+Ответ передаётся в `RestrictionGetResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `data` | `RestrictionList` | `object (RestrictionList)` | Да | Нет | Данные с ограничителями |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (Unix time) |
+
+**Вложенные модели:**
+- [`RestrictionList`](../data-types/restrictions/RestrictionList.md)
 
 ### Пример
 
@@ -55,7 +69,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`RestrictionRemoveResponse`
+**Тип после валидации:** `RestrictionRemoveResponse`
+
+**Pydantic-модель:** [`RestrictionRemoveResponse`](../data-types/restrictions/RestrictionRemoveResponse.md)
+
+Ответ передаётся в `RestrictionRemoveResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения (например, {'code': 200}) |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (True — успешно) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Временная метка ответа (Unix time) |
 
 ### Пример
 
@@ -87,7 +113,18 @@ print(result)
 
 ### Возвращаемое значение
 
-`RestrictionSetResponse`
+**Тип после валидации:** `RestrictionSetResponse`
+
+**Pydantic-модель:** [`RestrictionSetResponse`](../data-types/restrictions/RestrictionSetResponse.md)
+
+Ответ передаётся в `RestrictionSetResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `data` | `list[str]` | `array[string]` | Да | Нет | Список ID созданных или изменённых ограничителей |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (Unix time) |
 
 ### Пример
 

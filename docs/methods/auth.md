@@ -22,7 +22,23 @@
 
 ### Возвращаемое значение
 
-`AuthUserResponse`
+**Тип после валидации:** `AuthUserResponse`
+
+**Pydantic-модель:** [`AuthUserResponse`](../data-types/auth/AuthUserResponse.md)
+
+Ответ передаётся в `AuthUserResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `StatusResponse` | `object (StatusResponse)` | Да | Нет | Статус ответа API |
+| `data` | `AuthUserData` | `object (AuthUserData)` | Да | Нет | Данные авторизованного пользователя |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени (unix timestamp) |
+
+**Вложенные модели:**
+- [`StatusResponse`](../data-types/auth/StatusResponse.md)
+- [`AuthUserData`](../data-types/auth/AuthUserData.md)
 
 Возвращает типизированные данные авторизации, включая идентификатор сессии и доступные договоры.
 
@@ -53,7 +69,23 @@ print(result)
 
 ### Возвращаемое значение
 
-`GetInfoResponse`
+**Тип после валидации:** `GetInfoResponse`
+
+**Pydantic-модель:** [`GetInfoResponse`](../data-types/auth/GetInfoResponse.md)
+
+Ответ передаётся в `GetInfoResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `StatusResponse` | `object (StatusResponse)` | Да | Нет | Статус ответа API |
+| `data` | `InfoData` | `object (InfoData)` | Да | Нет | Детализированные данные о статистике |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка (UNIX timestamp) |
+
+**Вложенные модели:**
+- [`StatusResponse`](../data-types/auth/StatusResponse.md)
+- [`InfoData`](../data-types/auth/InfoData.md)
 
 ### Пример
 
@@ -81,7 +113,11 @@ print(result)
 
 ### Возвращаемое значение
 
-`dict[str, object]`
+**Тип после валидации:** `dict[str, object]`
+
+**Pydantic-модель:** нет.
+
+SDK возвращает значение указанного Python-типа; отдельная модель ответа не применяется.
 
 ### Пример
 

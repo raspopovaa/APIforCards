@@ -23,7 +23,19 @@
 
 ### Возвращаемое значение
 
-`TemplateCreateResponse`
+**Тип после валидации:** `TemplateCreateResponse`
+
+**Pydantic-модель:** [`TemplateCreateResponse`](../data-types/templates/TemplateCreateResponse.md)
+
+Ответ передаётся в `TemplateCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `str` | `string` | Да | Нет | ID созданного шаблона |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -56,7 +68,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateGeoRestrictionCreateResponse`
+**Тип после валидации:** `TemplateGeoRestrictionCreateResponse`
+
+**Pydantic-модель:** [`TemplateGeoRestrictionCreateResponse`](../data-types/templates/TemplateGeoRestrictionCreateResponse.md)
+
+Ответ передаётся в `TemplateGeoRestrictionCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `str` | `string` | Да | Нет | ID созданного геоограничителя шаблона |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -88,7 +112,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateLimitCreateResponse`
+**Тип после валидации:** `TemplateLimitCreateResponse`
+
+**Pydantic-модель:** [`TemplateLimitCreateResponse`](../data-types/templates/TemplateLimitCreateResponse.md)
+
+Ответ передаётся в `TemplateLimitCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `str` | `string` | Да | Нет | ID созданного лимита шаблона |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -120,7 +156,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateRestrictionCreateResponse`
+**Тип после валидации:** `TemplateRestrictionCreateResponse`
+
+**Pydantic-модель:** [`TemplateRestrictionCreateResponse`](../data-types/templates/TemplateRestrictionCreateResponse.md)
+
+Ответ передаётся в `TemplateRestrictionCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `str` | `string` | Да | Нет | ID созданного ограничителя шаблона |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -152,7 +200,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateDeleteResponse`
+**Тип после валидации:** `TemplateDeleteResponse`
+
+**Pydantic-модель:** [`TemplateDeleteResponse`](../data-types/templates/TemplateDeleteResponse.md)
+
+Ответ передаётся в `TemplateDeleteResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true — успешно, false — ошибка) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -185,7 +245,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateGeoRestrictionDeleteResponse`
+**Тип после валидации:** `TemplateGeoRestrictionDeleteResponse`
+
+**Pydantic-модель:** [`TemplateGeoRestrictionDeleteResponse`](../data-types/templates/TemplateGeoRestrictionDeleteResponse.md)
+
+Ответ передаётся в `TemplateGeoRestrictionDeleteResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `bool` | `boolean` | Да | Нет | Результат удаления геоограничителя (true — успешно) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -219,7 +291,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateLimitDeleteResponse`
+**Тип после валидации:** `TemplateLimitDeleteResponse`
+
+**Pydantic-модель:** [`TemplateLimitDeleteResponse`](../data-types/templates/TemplateLimitDeleteResponse.md)
+
+Ответ передаётся в `TemplateLimitDeleteResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `bool` | `boolean` | Да | Нет | Результат удаления лимита (true — успешно) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -253,7 +337,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateRestrictionDeleteResponse`
+**Тип после валидации:** `TemplateRestrictionDeleteResponse`
+
+**Pydantic-модель:** [`TemplateRestrictionDeleteResponse`](../data-types/templates/TemplateRestrictionDeleteResponse.md)
+
+Ответ передаётся в `TemplateRestrictionDeleteResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `bool` | `boolean` | Да | Нет | Результат удаления ограничителя |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -285,7 +381,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateGeoRestrictionListResponse`
+**Тип после валидации:** `TemplateGeoRestrictionListResponse`
+
+**Pydantic-модель:** [`TemplateGeoRestrictionListResponse`](../data-types/templates/TemplateGeoRestrictionListResponse.md)
+
+Ответ передаётся в `TemplateGeoRestrictionListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `TemplateGeoRestrictionListData` | `object (TemplateGeoRestrictionListData)` | Да | Нет | Основные данные списка геоограничителей |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
+
+**Вложенные модели:**
+- [`TemplateGeoRestrictionListData`](../data-types/templates/TemplateGeoRestrictionListData.md)
 
 ### Пример
 
@@ -315,7 +426,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateLimitListResponse`
+**Тип после валидации:** `TemplateLimitListResponse`
+
+**Pydantic-модель:** [`TemplateLimitListResponse`](../data-types/templates/TemplateLimitListResponse.md)
+
+Ответ передаётся в `TemplateLimitListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `TemplateLimitListData` | `object (TemplateLimitListData)` | Да | Нет | Основные данные списка лимитов |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
+
+**Вложенные модели:**
+- [`TemplateLimitListData`](../data-types/templates/TemplateLimitListData.md)
 
 ### Пример
 
@@ -345,7 +471,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateRestrictionListResponse`
+**Тип после валидации:** `TemplateRestrictionListResponse`
+
+**Pydantic-модель:** [`TemplateRestrictionListResponse`](../data-types/templates/TemplateRestrictionListResponse.md)
+
+Ответ передаётся в `TemplateRestrictionListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `TemplateRestrictionListData` | `object (TemplateRestrictionListData)` | Да | Нет | Основные данные списка ограничителей |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
+
+**Вложенные модели:**
+- [`TemplateRestrictionListData`](../data-types/templates/TemplateRestrictionListData.md)
 
 ### Пример
 
@@ -375,7 +516,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplatesListResponse`
+**Тип после валидации:** `TemplatesListResponse`
+
+**Pydantic-модель:** [`TemplatesListResponse`](../data-types/templates/TemplatesListResponse.md)
+
+Ответ передаётся в `TemplatesListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа (код, сообщение и т.д.) |
+| `data` | `TemplatesListData` | `object (TemplatesListData)` | Да | Нет | Основные данные списка шаблонов |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
+
+**Вложенные модели:**
+- [`TemplatesListData`](../data-types/templates/TemplatesListData.md)
 
 ### Пример
 
@@ -408,7 +564,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateCreateResponse`
+**Тип после валидации:** `TemplateCreateResponse`
+
+**Pydantic-модель:** [`TemplateCreateResponse`](../data-types/templates/TemplateCreateResponse.md)
+
+Ответ передаётся в `TemplateCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `str` | `string` | Да | Нет | ID созданного шаблона |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -444,7 +612,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateGeoRestrictionCreateResponse`
+**Тип после валидации:** `TemplateGeoRestrictionCreateResponse`
+
+**Pydantic-модель:** [`TemplateGeoRestrictionCreateResponse`](../data-types/templates/TemplateGeoRestrictionCreateResponse.md)
+
+Ответ передаётся в `TemplateGeoRestrictionCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `str` | `string` | Да | Нет | ID созданного геоограничителя шаблона |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -483,7 +663,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateLimitCreateResponse`
+**Тип после валидации:** `TemplateLimitCreateResponse`
+
+**Pydantic-модель:** [`TemplateLimitCreateResponse`](../data-types/templates/TemplateLimitCreateResponse.md)
+
+Ответ передаётся в `TemplateLimitCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `str` | `string` | Да | Нет | ID созданного лимита шаблона |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 
@@ -519,7 +711,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`TemplateRestrictionCreateResponse`
+**Тип после валидации:** `TemplateRestrictionCreateResponse`
+
+**Pydantic-модель:** [`TemplateRestrictionCreateResponse`](../data-types/templates/TemplateRestrictionCreateResponse.md)
+
+Ответ передаётся в `TemplateRestrictionCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус ответа |
+| `data` | `str` | `string` | Да | Нет | ID созданного ограничителя шаблона |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (Unix) |
 
 ### Пример
 

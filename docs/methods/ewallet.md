@@ -23,7 +23,22 @@
 
 ### Возвращаемое значение
 
-`MoveToCardResponse`
+**Тип после валидации:** `MoveToCardResponse`
+
+**Pydantic-модель:** [`MoveToCardResponse`](../data-types/ewallet/MoveToCardResponse.md)
+
+Ответ передаётся в `MoveToCardResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `Status` | `object (Status)` | Да | Нет | Статус выполнения операции. |
+| `data` | `bool` | `boolean` | Да | Нет | Результат выполнения операции (true — успешно). |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (UNIX timestamp). |
+
+**Вложенные модели:**
+- [`Status`](../data-types/ewallet/Status.md)
 
 ### Пример
 
@@ -56,7 +71,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`MoveToContractResponse`
+**Тип после валидации:** `MoveToContractResponse`
+
+**Pydantic-модель:** [`MoveToContractResponse`](../data-types/ewallet/MoveToContractResponse.md)
+
+Ответ передаётся в `MoveToContractResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `Status` | `object (Status)` | Да | Нет | Статус выполнения операции. |
+| `data` | `bool` | `boolean` | Да | Нет | Результат выполнения операции (true — успешно). |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (UNIX timestamp). |
+
+**Вложенные модели:**
+- [`Status`](../data-types/ewallet/Status.md)
 
 ### Пример
 
@@ -89,7 +119,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`SetCardProductResponse`
+**Тип после валидации:** `SetCardProductResponse`
+
+**Pydantic-модель:** [`SetCardProductResponse`](../data-types/ewallet/SetCardProductResponse.md)
+
+Ответ передаётся в `SetCardProductResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `Status` | `object (Status)` | Да | Нет | Статус выполнения операции. |
+| `data` | `list[str]` | `array[string]` | Да | Нет | Список идентификаторов карт, у которых изменён продукт. |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (UNIX timestamp). |
+
+**Вложенные модели:**
+- [`Status`](../data-types/ewallet/Status.md)
 
 ### Пример
 

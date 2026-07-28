@@ -78,7 +78,66 @@ def test_generated_output_is_idempotent_and_has_required_sections() -> None:
     for path, content in method_pages.items():
         assert "### Параметры" in content, path
         assert "### Возвращаемое значение" in content, path
+        assert "**Тип после валидации:**" in content, path
         assert "### Пример" in content, path
+
+
+def test_method_return_models_are_expanded() -> None:
+    generator = load_generator()
+    output = generator.build_all()
+    cards_page = output[generator.METHODS_PATH / "cards.md"]
+
+    assert "**Pydantic-модель:**" in cards_page
+    assert "#### Поля возвращаемой модели" in cards_page
+    assert "| Поле | Тип после валидации | JSON-тип |" in cards_page
+    assert "Ответ передаётся в `" in cards_page
+    assert "**Вложенные модели:**" in cards_page
+    assert "../data-types/cards/" in cards_page
+
+
+def test_model_pages_describe_actual_pydantic_validation() -> None:
+    generator = load_generator()
+    output = generator.build_all()
+    card_info = output[generator.DATA_TYPES_PATH / "cards" / "CardInfo.md"]
+
+    assert "## Поведение модели" in card_info
+    assert "## Поля и проверки" in card_info
+    assert "Тип после валидации" in card_info
+    assert "JSON-тип" in card_info
+    assert "Ограничения схемы" in card_info
+    assert "Что проверяет Pydantic" in card_info
+    assert "Дополнительные поля (`extra`)" in card_info
+    assert "Число → строка" in card_info
+    assert "`date_expired`" in card_info
+    assert "date-time" in card_info
+    assert "Граница проверки" in card_info
+
+
+def test_custom_field_validators_are_documented() -> None:
+    generator = load_generator()
+    output = generator.build_all()
+    card_detail = output[generator.DATA_TYPES_PATH / "cards" / "CardDetail.md"]
+
+    assert "## Пользовательские валидаторы" in card_detail
+    assert "`empty_str_to_none`" in card_detail
+    assert "`date_last_usage, date_released`" in card_detail
+    assert "before" in card_detail
+
+
+def test_documented_schema_matches_pydantic_json_schema() -> None:
+    generator = load_generator()
+    output = generator.build_all()
+    card_info = output[generator.DATA_TYPES_PATH / "cards" / "CardInfo.md"]
+
+    models = {model.__name__: model for model in generator.model_types()}
+    schema = models["CardInfo"].model_json_schema(by_alias=False)
+    date_schema = schema["properties"]["date_expired"]
+    formats = {
+        branch.get("format") for branch in date_schema.get("anyOf", []) if isinstance(branch, dict)
+    }
+
+    assert "date-time" in formats
+    assert "формат: 'date-time'" in card_info
 
 
 def test_generated_python_examples_are_syntactically_valid() -> None:
@@ -102,3 +161,13 @@ def test_qr_operations_are_not_documented() -> None:
         assert operation_name.lower() not in combined
     assert "confirmmpc" not in combined
     assert "resetmpc" not in combined
+
+
+def test_request_models_do_not_claim_automatic_sdk_validation() -> None:
+    generator = load_generator()
+    output = generator.build_all()
+    request_page = output[generator.DATA_TYPES_PATH / "final_prices" / "CheckPurchaseRequest.md"]
+
+    assert "явно создаёт `CheckPurchaseRequest`" in request_page
+    assert "не означает, что каждый метод SDK автоматически создаёт её" in request_page
+    assert "фактический входной контракт" in request_page

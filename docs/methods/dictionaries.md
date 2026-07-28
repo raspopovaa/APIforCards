@@ -20,7 +20,22 @@
 
 ### Возвращаемое значение
 
-`AzsFiltersResponse`
+**Тип после валидации:** `AzsFiltersResponse`
+
+**Pydantic-модель:** [`AzsFiltersResponse`](../data-types/dictionaries/AzsFiltersResponse.md)
+
+Ответ передаётся в `AzsFiltersResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус выполнения запроса |
+| `data` | `list[AzsFilterItem] \| None` | `array[object (AzsFilterItem)] \| null` | Нет | Да | Список доступных фильтров торговых точек |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (timestamp) |
+
+**Вложенные модели:**
+- [`AzsFilterItem`](../data-types/dictionaries/AzsFilterItem.md)
 
 ### Пример
 
@@ -52,7 +67,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`AzsListV1Response`
+**Тип после валидации:** `AzsListV1Response`
+
+**Pydantic-модель:** [`AzsListV1Response`](../data-types/dictionaries/AzsListV1Response.md)
+
+Ответ передаётся в `AzsListV1Response.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус выполнения запроса |
+| `data` | `AzsListV1Data \| None` | `object (AzsListV1Data) \| null` | Нет | Да | Основные данные торговых точек (v1) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Временная метка (UNIX-время запроса) |
+
+**Вложенные модели:**
+- [`AzsListV1Data`](../data-types/dictionaries/AzsListV1Data.md)
 
 ### Пример
 
@@ -84,7 +114,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`AzsListV2Response`
+**Тип после валидации:** `AzsListV2Response`
+
+**Pydantic-модель:** [`AzsListV2Response`](../data-types/dictionaries/AzsListV2Response.md)
+
+Ответ передаётся в `AzsListV2Response.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Да | Да | Информация о статусе запроса |
+| `data` | `AzsListV2Data \| None` | `object (AzsListV2Data) \| null` | Да | Да | Основные данные торговых точек |
+| `timestamp` | `int \| None` | `integer \| null` | Да | Да | Метка времени запроса |
+
+**Вложенные модели:**
+- [`AzsListV2Data`](../data-types/dictionaries/AzsListV2Data.md)
 
 ### Пример
 
@@ -113,7 +158,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`DictionaryResponse`
+**Тип после валидации:** `DictionaryResponse`
+
+**Pydantic-модель:** [`DictionaryResponse`](../data-types/dictionaries/DictionaryResponse.md)
+
+Ответ передаётся в `DictionaryResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус выполнения запроса |
+| `data` | `DictionaryData \| None` | `object (DictionaryData) \| null` | Нет | Да | Основные данные справочника |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Временная метка (UNIX-время запроса) |
+
+**Вложенные модели:**
+- [`DictionaryData`](../data-types/dictionaries/DictionaryData.md)
 
 ### Пример
 
