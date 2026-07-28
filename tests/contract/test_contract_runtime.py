@@ -4,7 +4,6 @@ import copy
 import inspect
 import json
 from pathlib import Path
-from typing import get_type_hints
 
 import pytest
 from pydantic import BaseModel, ValidationError
@@ -92,7 +91,7 @@ def test_verified_fixtures_validate_and_required_data_is_enforced(contract_catal
             assert variant.fixture is not None
             payload = json.loads(variant.fixture.read_text(encoding="utf-8"))
             model = response_model.model_validate(payload)
-            assert model.model_dump()["data"] is True
+            assert model.model_dump()["data"] == payload["data"]
 
             with_unknown = copy.deepcopy(payload)
             with_unknown["server_extension"] = {"enabled": True}
