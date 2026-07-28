@@ -1,9 +1,6 @@
 name: Materialize contract audit
 
 on:
-  push:
-    branches:
-      - agent/api-1160-contract-audit
   pull_request:
     branches:
       - main
@@ -12,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  materialize:
+  diagnose:
     if: github.actor != 'github-actions[bot]' && github.head_ref == 'agent/api-1160-contract-audit'
     runs-on: ubuntu-latest
     steps:
@@ -21,26 +18,28 @@ jobs:
         with:
           ref: agent/api-1160-contract-audit
 
-      - name: Materialize audited sources
+      - name: Record bundle diagnostics
         run: |
+          : > .contract-audit-diagnostic
+          for part in .contract-audit-bundle.part.*; do
+            normalized="/tmp/$(basename "$part").normalized"
+            tr -d '[:space:]' < "$part" > "$normalized"
+            printf '%s %s %s\n' \
+              "$(basename "$part")" \
+              "$(wc -c < "$normalized")" \
+              "$(sha256sum "$normalized" | cut -d' ' -f1)" \
+              >> .contract-audit-diagnostic
+          done
           cat .contract-audit-bundle.part.* | tr -d '[:space:]' > /tmp/contract-audit-bundle.b64
-          test "$(wc -c < /tmp/contract-audit-bundle.b64)" -eq 61028
-          printf '%s  %s\n' \
-            '8cb0915b01b5b8eb7d761f31f476be8d860e06ee8815268a16c3b0853c52ee55' \
-            '/tmp/contract-audit-bundle.b64' | sha256sum -c -
-          base64 --decode /tmp/contract-audit-bundle.b64 > /tmp/contract-audit-bundle.tar.gz
-          printf '%s  %s\n' \
-            'ad48135b4caa05e116d3b324963e5e09557a5ec24829089609f54efc07b30b84' \
-            '/tmp/contract-audit-bundle.tar.gz' | sha256sum -c -
-          tar -xzf /tmp/contract-audit-bundle.tar.gz
-          rm -f .contract-audit-bundle.tar.gz.b64
-          rm -f .contract-audit-bundle.part.*
-          rm .github/workflows/materialize-contract-audit.yml
+          printf 'combined %s %s\n' \
+            "$(wc -c < /tmp/contract-audit-bundle.b64)" \
+            "$(sha256sum /tmp/contract-audit-bundle.b64 | cut -d' ' -f1)" \
+            >> .contract-audit-diagnostic
 
-      - name: Commit materialized sources
+      - name: Commit diagnostics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Add API 1.1.60 contract audit"
+          git add .contract-audit-diagnostic
+          git commit -m "chore: record contract bundle diagnostics"
           git push origin HEAD:agent/api-1160-contract-audit
