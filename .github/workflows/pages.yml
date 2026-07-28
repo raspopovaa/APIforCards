@@ -66,8 +66,8 @@ jobs:
       - name: Verify published version
         run: |
           git fetch origin gh-pages --depth=1
-          git show "origin/gh-pages:$DOCS_VERSION/methods/index.html" | grep -q "82 операций"
-          git show "origin/gh-pages:$DOCS_VERSION/methods/auth/index.html" | grep -q "Тип возвращаемого значения"
+          git show "origin/gh-pages:$DOCS_VERSION/methods/index.html" | grep -Fq "82 операций"
+          git show "origin/gh-pages:$DOCS_VERSION/methods/auth/index.html" | grep -Fq "Возвращаемое значение"
 
       - name: Export versioned site
         run: |
