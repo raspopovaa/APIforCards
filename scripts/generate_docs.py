@@ -91,7 +91,11 @@ def clean_docstring(obj: object) -> str:
 def first_paragraph(value: str) -> str:
     if not value:
         return "Описание отсутствует."
-    return re.split(r"\n\s*\n|\n:param|\n:return|\n:raises", value, maxsplit=1)[0].strip()
+    return re.split(
+        r"\n\s*\n|\n:param|\n:return|\n:raises",
+        value,
+        maxsplit=1,
+    )[0].strip()
 
 
 def parse_param_docs(docstring: str) -> dict[str, str]:
@@ -190,6 +194,8 @@ def model_types() -> list[type[BaseModel]]:
                 continue
             if obj.__module__ != module.__name__:
                 continue
+            if "MPC" in obj.__name__ or "QR" in obj.__name__:
+                continue
             models[f"{obj.__module__}.{obj.__qualname__}"] = obj
     return sorted(models.values(), key=lambda item: (item.__module__, item.__name__))
 
@@ -266,7 +272,9 @@ def render_method_page(
     lines = [
         f"# `client.{service_name}`",
         "",
-        domain_meta.get("description") or clean_docstring(service_cls) or "Методы сервиса SDK.",
+        domain_meta.get("description")
+        or clean_docstring(service_cls)
+        or "Методы сервиса SDK.",
         "",
     ]
 
@@ -302,7 +310,14 @@ def render_method_page(
         response_description = op_meta.get("response")
         if response_description:
             lines.extend([str(response_description), ""])
-        lines.extend(["### Пример", "", *render_example(service_name, spec.name, method), ""])
+        lines.extend(
+            [
+                "### Пример",
+                "",
+                *render_example(service_name, spec.name, method),
+                "",
+            ]
+        )
 
     return "\n".join(lines).rstrip() + "\n"
 
@@ -317,7 +332,8 @@ def render_catalog(grouped: dict[str, list[Any]], metadata: dict[str, Any]) -> s
         "моделей SDK и метаданных спецификации.",
         "",
         '!!! info "Покрытие"',
-        f"    Опубликовано **{documented_count} операций** из {registry_count}, зарегистрированных в SDK.",
+        f"    Опубликовано **{documented_count} операций** из {registry_count}, "
+        "зарегистрированных в SDK.",
         "    Методы МПК/QR временно исключены до отдельного решения по QR-спецификации.",
         "",
         "| Сервис | Операций | Назначение |",
@@ -348,7 +364,12 @@ def render_catalog(grouped: dict[str, list[Any]], metadata: dict[str, Any]) -> s
 
 
 def render_model(model: type[BaseModel]) -> str:
-    lines = [f"# `{model.__name__}`", "", clean_docstring(model) or "Модель данных SDK.", ""]
+    lines = [
+        f"# `{model.__name__}`",
+        "",
+        clean_docstring(model) or "Модель данных SDK.",
+        "",
+    ]
     lines.extend(
         [
             "| Поле | Python-тип | Обязательное | Alias | Описание |",
