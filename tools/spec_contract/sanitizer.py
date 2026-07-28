@@ -26,12 +26,19 @@ def find_sensitive_values(value: Any, *, path: str = "$") -> list[str]:
                 findings.append(f"{child_path}: session identifier is not replaced")
             if "email" in low and isinstance(item, str) and not item.endswith("@example.com"):
                 findings.append(f"{child_path}: email is not anonymized")
-            if ("phone" in low or low == "mobile") and isinstance(item, str):
-                if item != "79990000000":
-                    findings.append(f"{child_path}: phone is not anonymized")
-            if low in {"card_number", "number_card", "number"} and isinstance(item, str):
-                if _CARD_RE.fullmatch(item) and item != "7000000000000000":
-                    findings.append(f"{child_path}: card number is not anonymized")
+            if (
+                ("phone" in low or low == "mobile")
+                and isinstance(item, str)
+                and item != "79990000000"
+            ):
+                findings.append(f"{child_path}: phone is not anonymized")
+            if (
+                low in {"card_number", "number_card", "number"}
+                and isinstance(item, str)
+                and _CARD_RE.fullmatch(item)
+                and item != "7000000000000000"
+            ):
+                findings.append(f"{child_path}: card number is not anonymized")
             findings.extend(find_sensitive_values(item, path=child_path))
         return findings
     if isinstance(value, list):
