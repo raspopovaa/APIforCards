@@ -37,7 +37,21 @@ jobs:
         run: python scripts/audit_spec_contract.py --mode verified
 
       - name: Run full lint checks
-        run: ruff check src tests scripts tools
+        run: |
+          mkdir -p artifacts/ruff
+          set +e
+          ruff check src tests scripts tools --output-format=concise > artifacts/ruff/report.txt 2>&1
+          status=$?
+          cat artifacts/ruff/report.txt
+          exit "$status"
+
+      - name: Upload Ruff diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-diagnostics-${{ matrix.python-version }}
+          path: artifacts/ruff/report.txt
+          if-no-files-found: error
 
       - name: Check formatting
         run: black --check src tests scripts tools
