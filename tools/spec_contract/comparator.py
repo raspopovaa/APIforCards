@@ -141,19 +141,22 @@ def _compare_field(
                 actual=actual_type,
             )
         )
-    if field.required is not None and resolved.required is not None:
-        if field.required != resolved.required:
-            result.add(
-                _issue(
-                    operation,
-                    code="response_required_mismatch",
-                    severity="error",
-                    message="Обязательность поля отличается от спецификации.",
-                    path=field.path,
-                    expected=str(field.required),
-                    actual=str(resolved.required),
-                )
+    if (
+        field.required is not None
+        and resolved.required is not None
+        and field.required != resolved.required
+    ):
+        result.add(
+            _issue(
+                operation,
+                code="response_required_mismatch",
+                severity="error",
+                message="Обязательность поля отличается от спецификации.",
+                path=field.path,
+                expected=str(field.required),
+                actual=str(resolved.required),
             )
+        )
 
 
 def _audit_request_signature(
