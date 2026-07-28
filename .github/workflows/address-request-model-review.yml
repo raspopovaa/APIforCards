@@ -1,0 +1,110 @@
+name: Address request model documentation review
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  address-review:
+    if: github.head_ref == 'docs/pydantic-validation-details'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout documentation branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Clarify request model validation scope
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('scripts/pydantic_docs.py')
+          text = path.read_text(encoding='utf-8')
+          old = '''    model_kind = "request" if issubclass(model, StrictRequestModel) else "response/data"
+
+    lines = [
+        f"# `{model.__name__}`",
+        "",
+        description,
+        "",
+        '!!! info "Назначение Pydantic"',
+        f"    Тип модели: **{model_kind}**. Данные проверяются вызовом "
+        f"`{model.__name__}.model_validate(payload)`. При несовпадении типов или отсутствии "
+        "обязательного поля Pydantic формирует `ValidationError`.",
+'''
+          new = '''    is_request_model = issubclass(model, StrictRequestModel)
+    model_kind = "request" if is_request_model else "response/data"
+    if is_request_model:
+        validation_notice = (
+            f"    Тип модели: **{model_kind}**. Правила ниже применяются, когда вызывающий код "
+            f"явно создаёт `{model.__name__}` или вызывает "
+            f"`{model.__name__}.model_validate(payload)`. Наличие request-модели не означает, "
+            "что каждый метод SDK автоматически создаёт её: фактический входной контракт "
+            "определяется сигнатурой соответствующего сервисного метода."
+        )
+    else:
+        validation_notice = (
+            f"    Тип модели: **{model_kind}**. Ответ API проверяется этой моделью напрямую "
+            "или рекурсивно как часть родительской response-модели. При несовпадении типов "
+            "или отсутствии обязательного поля Pydantic формирует `ValidationError`."
+        )
+
+    lines = [
+        f"# `{model.__name__}`",
+        "",
+        description,
+        "",
+        '!!! info "Назначение Pydantic"',
+        validation_notice,
+'''
+          if old not in text:
+              raise SystemExit('Expected request-model documentation block was not found')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+
+          test_path = Path('tests/test_documentation_generator.py')
+          tests = test_path.read_text(encoding='utf-8')
+          addition = '''\n\ndef test_request_models_do_not_claim_automatic_sdk_validation() -> None:\n    generator = load_generator()\n    output = generator.build_all()\n    request_page = output[\n        generator.DATA_TYPES_PATH / "final_prices" / "CheckPurchaseRequest.md"\n    ]\n\n    assert "явно создаёт `CheckPurchaseRequest`" in request_page\n    assert "не означает, что каждый метод SDK автоматически создаёт её" in request_page\n    assert "фактический входной контракт" in request_page\n'''
+          if 'test_request_models_do_not_claim_automatic_sdk_validation' not in tests:
+              test_path.write_text(tests.rstrip() + addition + '\n', encoding='utf-8')
+          PY
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Format and generate
+        run: |
+          ruff check scripts/pydantic_docs.py tests/test_documentation_generator.py --fix
+          black scripts/pydantic_docs.py tests/test_documentation_generator.py
+          python scripts/generate_docs.py
+
+      - name: Verify
+        run: |
+          pytest -q
+          python scripts/verify_external_contract.py specifications/api-methods.yaml
+          ruff check src tests scripts
+          black --check src tests scripts
+          mypy src/api_client_opti24
+          mkdocs build --strict
+
+      - name: Commit review fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/address-request-model-review.yml
+          git add docs scripts tests
+          git commit -m 'docs: clarify request model validation scope'
+          git push origin HEAD:${{ github.head_ref }}
