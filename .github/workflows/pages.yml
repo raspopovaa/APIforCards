@@ -105,3 +105,45 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Checkout deployment branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: deployment-marker
+          fetch-depth: 1
+
+      - name: Record successful deployment
+        working-directory: deployment-marker
+        env:
+          DEPLOYED_RUN_ID: ${{ github.run_id }}
+          DEPLOYED_SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+          DEPLOYED_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          Path("deployment-status.json").write_text(
+              json.dumps(
+                  {
+                      "run_id": os.environ["DEPLOYED_RUN_ID"],
+                      "source_sha": os.environ["DEPLOYED_SHA"],
+                      "page_url": os.environ["DEPLOYED_URL"],
+                      "docs_version": "2.2",
+                  },
+                  ensure_ascii=False,
+                  indent=2,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add deployment-status.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record successful Pages deployment"
+            git push origin HEAD:gh-pages
+          fi
