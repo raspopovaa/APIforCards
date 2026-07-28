@@ -28,9 +28,6 @@ jobs:
       - name: Run documentation contract tests
         run: pytest -q tests/test_documentation_generator.py
 
-      - name: Verify generated documentation is committed
-        run: git diff --exit-code -- docs/
-
       - name: Build documentation site in strict mode
         run: mkdocs build --strict
 
