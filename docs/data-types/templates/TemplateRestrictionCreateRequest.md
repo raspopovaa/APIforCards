@@ -3,7 +3,7 @@
 Модель данных SDK.
 
 !!! info "Назначение Pydantic"
-    Тип модели: **request**. Данные проверяются вызовом `TemplateRestrictionCreateRequest.model_validate(payload)`. При несовпадении типов или отсутствии обязательного поля Pydantic формирует `ValidationError`.
+    Тип модели: **request**. Правила ниже применяются, когда вызывающий код явно создаёт `TemplateRestrictionCreateRequest` или вызывает `TemplateRestrictionCreateRequest.model_validate(payload)`. Наличие request-модели не означает, что каждый метод SDK автоматически создаёт её: фактический входной контракт определяется сигнатурой соответствующего сервисного метода.
 
 ## Поведение модели
 

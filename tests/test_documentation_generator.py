@@ -161,3 +161,13 @@ def test_qr_operations_are_not_documented() -> None:
         assert operation_name.lower() not in combined
     assert "confirmmpc" not in combined
     assert "resetmpc" not in combined
+
+
+def test_request_models_do_not_claim_automatic_sdk_validation() -> None:
+    generator = load_generator()
+    output = generator.build_all()
+    request_page = output[generator.DATA_TYPES_PATH / "final_prices" / "CheckPurchaseRequest.md"]
+
+    assert "явно создаёт `CheckPurchaseRequest`" in request_page
+    assert "не означает, что каждый метод SDK автоматически создаёт её" in request_page
+    assert "фактический входной контракт" in request_page

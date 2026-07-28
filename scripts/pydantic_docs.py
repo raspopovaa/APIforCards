@@ -283,7 +283,22 @@ def render_model_page(model: type[BaseModel], format_type: Any) -> str:
         "forbid": "Дополнительные поля запрещены и вызывают ValidationError.",
         "ignore": "Дополнительные поля игнорируются.",
     }.get(extra, f"Режим дополнительных полей: {extra}.")
-    model_kind = "request" if issubclass(model, StrictRequestModel) else "response/data"
+    is_request_model = issubclass(model, StrictRequestModel)
+    model_kind = "request" if is_request_model else "response/data"
+    if is_request_model:
+        validation_notice = (
+            f"    Тип модели: **{model_kind}**. Правила ниже применяются, когда вызывающий код "
+            f"явно создаёт `{model.__name__}` или вызывает "
+            f"`{model.__name__}.model_validate(payload)`. Наличие request-модели не означает, "
+            "что каждый метод SDK автоматически создаёт её: фактический входной контракт "
+            "определяется сигнатурой соответствующего сервисного метода."
+        )
+    else:
+        validation_notice = (
+            f"    Тип модели: **{model_kind}**. Ответ API проверяется этой моделью напрямую "
+            "или рекурсивно как часть родительской response-модели. При несовпадении типов "
+            "или отсутствии обязательного поля Pydantic формирует `ValidationError`."
+        )
 
     lines = [
         f"# `{model.__name__}`",
@@ -291,9 +306,7 @@ def render_model_page(model: type[BaseModel], format_type: Any) -> str:
         description,
         "",
         '!!! info "Назначение Pydantic"',
-        f"    Тип модели: **{model_kind}**. Данные проверяются вызовом "
-        f"`{model.__name__}.model_validate(payload)`. При несовпадении типов или отсутствии "
-        "обязательного поля Pydantic формирует `ValidationError`.",
+        validation_notice,
         "",
         "## Поведение модели",
         "",

@@ -3,7 +3,7 @@
 Ответ на установку или изменение ограничителя (POST /setRestriction).
 
 !!! info "Назначение Pydantic"
-    Тип модели: **response/data**. Данные проверяются вызовом `RestrictionSetResponse.model_validate(payload)`. При несовпадении типов или отсутствии обязательного поля Pydantic формирует `ValidationError`.
+    Тип модели: **response/data**. Ответ API проверяется этой моделью напрямую или рекурсивно как часть родительской response-модели. При несовпадении типов или отсутствии обязательного поля Pydantic формирует `ValidationError`.
 
 ## Поведение модели
 
