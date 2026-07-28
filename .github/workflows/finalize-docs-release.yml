@@ -77,10 +77,10 @@ jobs:
       - name: Generate documentation
         run: python scripts/generate_docs.py
 
-      - name: Format changed Python files
+      - name: Format and autofix checked Python files
         run: |
-          ruff check --fix scripts/generate_docs.py tests/test_documentation_generator.py tests/test_package_smoke.py
-          black scripts/generate_docs.py tests/test_documentation_generator.py tests/test_package_smoke.py
+          ruff check --fix src tests scripts
+          black src tests scripts
 
       - name: Run full test suite
         run: pytest
