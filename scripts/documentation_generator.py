@@ -21,10 +21,11 @@ METADATA_PATH = PROJECT_ROOT / "specifications" / "documentation.yaml"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
+from pydantic_docs import render_model_page, render_return_details
+
 from api_client_opti24.modeling import BaseModel
 from api_client_opti24.registry import build_default_registry
 from api_client_opti24.service_groups import ServiceContainer
-from pydantic_docs import render_model_page, render_return_details
 
 PACKAGE_NAME = "api_client_opti24"
 EXCLUDED_MODULES = {"api_client_opti24.logger"}

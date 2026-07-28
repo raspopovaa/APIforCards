@@ -22,7 +22,20 @@
 
 ### Возвращаемое значение
 
-`InviteResponse`
+**Тип после валидации:** `InviteResponse`
+
+**Pydantic-модель:** [`InviteResponse`](../data-types/invites/InviteResponse.md)
+
+Ответ передаётся в `InviteResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `data` | `InviteActionResult` | `object (InviteActionResult)` | Да | Нет | — |
+
+**Вложенные модели:**
+- [`InviteActionResult`](../data-types/invites/InviteActionResult.md)
 
 ### Пример
 
@@ -54,7 +67,17 @@ print(result)
 
 ### Возвращаемое значение
 
-`InviteBoolResponse`
+**Тип после валидации:** `InviteBoolResponse`
+
+**Pydantic-модель:** [`InviteBoolResponse`](../data-types/invites/InviteBoolResponse.md)
+
+Ответ передаётся в `InviteBoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `data` | `bool` | `boolean` | Да | Нет | — |
 
 ### Пример
 
@@ -91,7 +114,21 @@ print(result)
 
 ### Возвращаемое значение
 
-`InviteList`
+**Тип после валидации:** `InviteList`
+
+**Pydantic-модель:** [`InviteList`](../data-types/invites/InviteList.md)
+
+Ответ передаётся в `InviteList.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `total_count` | `int` | `integer` | Да | Нет | Общее количество приглашений |
+| `result` | `list[InviteItem]` | `array[object (InviteItem)]` | Да | Нет | Список приглашений |
+
+**Вложенные модели:**
+- [`InviteItem`](../data-types/invites/InviteItem.md)
 
 ### Пример
 
@@ -121,7 +158,17 @@ print(result)
 
 ### Возвращаемое значение
 
-`InviteBoolResponse`
+**Тип после валидации:** `InviteBoolResponse`
+
+**Pydantic-модель:** [`InviteBoolResponse`](../data-types/invites/InviteBoolResponse.md)
+
+Ответ передаётся в `InviteBoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `data` | `bool` | `boolean` | Да | Нет | — |
 
 ### Пример
 
@@ -152,7 +199,20 @@ print(result)
 
 ### Возвращаемое значение
 
-`InviteResponse`
+**Тип после валидации:** `InviteResponse`
+
+**Pydantic-модель:** [`InviteResponse`](../data-types/invites/InviteResponse.md)
+
+Ответ передаётся в `InviteResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `data` | `InviteActionResult` | `object (InviteActionResult)` | Да | Нет | — |
+
+**Вложенные модели:**
+- [`InviteActionResult`](../data-types/invites/InviteActionResult.md)
 
 ### Пример
 

@@ -21,7 +21,33 @@
 
 ### Возвращаемое значение
 
-`ContractResponse`
+**Тип после валидации:** `ContractResponse`
+
+**Pydantic-модель:** [`ContractResponse`](../data-types/contracts/ContractResponse.md)
+
+Ответ передаётся в `ContractResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `mpc` | `bool` | `boolean` | Да | Нет | Разрешен ли выпуск виртуальных карт |
+| `template_id` | `str` | `string` | Да | Нет | ID шаблона виртуальных карт |
+| `status` | `str` | `string` | Да | Нет | Статус Way4 |
+| `status_crm` | `str` | `string` | Да | Нет | Статус CRM |
+| `payment_term_id` | `str \| None` | `string \| null` | Нет | Да | ID справочника условия оплаты |
+| `payment_scheme_id` | `str \| None` | `string \| null` | Нет | Да | ID справочника схема оплаты |
+| `is_dealer` | `bool` | `boolean` | Да | Нет | Признак дилерский |
+| `balanceData` | `BalanceData` | `object (BalanceData)` | Да | Нет | Данные по расходу и балансу договора |
+| `contractData` | `ContractData` | `object (ContractData)` | Да | Нет | Данные договора |
+| `managerData` | `ManagerData \| None` | `object (ManagerData) \| null` | Нет | Да | Данные по менеджеру договора |
+| `cardsData` | `CardsData` | `object (CardsData)` | Да | Нет | Данные по количеству карт и групп карт на договоре |
+
+**Вложенные модели:**
+- [`BalanceData`](../data-types/contracts/BalanceData.md)
+- [`ContractData`](../data-types/contracts/ContractData.md)
+- [`ManagerData`](../data-types/contracts/ManagerData.md)
+- [`CardsData`](../data-types/contracts/CardsData.md)
 
 ### Пример
 
@@ -54,7 +80,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`DocumentsResponse`
+**Тип после валидации:** `DocumentsResponse`
+
+**Pydantic-модель:** [`DocumentsResponse`](../data-types/contracts/DocumentsResponse.md)
+
+Ответ передаётся в `DocumentsResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
+| `data` | `DocumentsData` | `object (DocumentsData)` | Да | Нет | Основные данные — список документов |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+
+**Вложенные модели:**
+- [`DocumentsData`](../data-types/contracts/DocumentsData.md)
 
 ### Пример
 
@@ -86,7 +127,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`InvoicesResponse`
+**Тип после валидации:** `InvoicesResponse`
+
+**Pydantic-модель:** [`InvoicesResponse`](../data-types/contracts/InvoicesResponse.md)
+
+Ответ передаётся в `InvoicesResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
+| `data` | `InvoicesData` | `object (InvoicesData)` | Да | Нет | Основные данные — список счетов |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+
+**Вложенные модели:**
+- [`InvoicesData`](../data-types/contracts/InvoicesData.md)
 
 ### Пример
 
@@ -115,7 +171,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`PaymentsResponse`
+**Тип после валидации:** `PaymentsResponse`
+
+**Pydantic-модель:** [`PaymentsResponse`](../data-types/contracts/PaymentsResponse.md)
+
+Ответ передаётся в `PaymentsResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект с кодом статуса ответа сервера, например {'code': 200} |
+| `data` | `PaymentsData` | `object (PaymentsData)` | Да | Нет | Основная часть ответа с данными о платежах |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа сервера в формате Unix timestamp |
+
+**Вложенные модели:**
+- [`PaymentsData`](../data-types/contracts/PaymentsData.md)
 
 ### Пример
 
@@ -146,7 +217,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`OrderCardsResponse`
+**Тип после валидации:** `OrderCardsResponse`
+
+**Pydantic-модель:** [`OrderCardsResponse`](../data-types/contracts/OrderCardsResponse.md)
+
+Ответ передаётся в `OrderCardsResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции: true — заказ выполнен успешно |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
 
 ### Пример
 
@@ -179,7 +262,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`DocumentsOrderResponse`
+**Тип после валидации:** `DocumentsOrderResponse`
+
+**Pydantic-модель:** [`DocumentsOrderResponse`](../data-types/contracts/DocumentsOrderResponse.md)
+
+Ответ передаётся в `DocumentsOrderResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
+| `data` | `bool` | `boolean` | Да | Нет | Признак успешной отправки (true — заказ выполнен) |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
 
 ### Пример
 
@@ -212,7 +307,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`InvoiceOrderResponse`
+**Тип после валидации:** `InvoiceOrderResponse`
+
+**Pydantic-модель:** [`InvoiceOrderResponse`](../data-types/contracts/InvoiceOrderResponse.md)
+
+Ответ передаётся в `InvoiceOrderResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
+| `data` | `bool` | `boolean` | Да | Нет | Признак успешного создания счёта |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
 
 ### Пример
 

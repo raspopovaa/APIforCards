@@ -22,7 +22,19 @@
 
 ### Возвращаемое значение
 
-`UserBoolResponse`
+**Тип после валидации:** `UserBoolResponse`
+
+**Pydantic-модель:** [`UserBoolResponse`](../data-types/users/UserBoolResponse.md)
+
+Ответ передаётся в `UserBoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
 
 ### Пример
 
@@ -54,7 +66,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`UserBoolResponse`
+**Тип после валидации:** `UserBoolResponse`
+
+**Pydantic-модель:** [`UserBoolResponse`](../data-types/users/UserBoolResponse.md)
+
+Ответ передаётся в `UserBoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
 
 ### Пример
 
@@ -88,7 +112,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`UserCreateResponse`
+**Тип после валидации:** `UserCreateResponse`
+
+**Pydantic-модель:** [`UserCreateResponse`](../data-types/users/UserCreateResponse.md)
+
+Ответ передаётся в `UserCreateResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `str` | `string` | Да | Нет | ID созданного пользователя |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
 
 ### Пример
 
@@ -123,7 +159,19 @@ await client.users.delete_user(user_id="1-FK485FK")
 
 ### Возвращаемое значение
 
-`UserBoolResponse`
+**Тип после валидации:** `UserBoolResponse`
+
+**Pydantic-модель:** [`UserBoolResponse`](../data-types/users/UserBoolResponse.md)
+
+Ответ передаётся в `UserBoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
 
 ### Пример
 
@@ -155,7 +203,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`UserBoolResponse`
+**Тип после валидации:** `UserBoolResponse`
+
+**Pydantic-модель:** [`UserBoolResponse`](../data-types/users/UserBoolResponse.md)
+
+Ответ передаётся в `UserBoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
 
 ### Пример
 
@@ -187,7 +247,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`UserBoolResponse`
+**Тип после валидации:** `UserBoolResponse`
+
+**Pydantic-модель:** [`UserBoolResponse`](../data-types/users/UserBoolResponse.md)
+
+Ответ передаётся в `UserBoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
 
 ### Пример
 
@@ -222,7 +294,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`UserListResponse`
+**Тип после валидации:** `UserListResponse`
+
+**Pydantic-модель:** [`UserListResponse`](../data-types/users/UserListResponse.md)
+
+Ответ передаётся в `UserListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса (например {'code': 200}) |
+| `data` | `UserList \| None` | `object (UserList) \| null` | Нет | Да | Основные данные ответа |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Временная метка ответа |
+
+**Вложенные модели:**
+- [`UserList`](../data-types/users/UserList.md)
 
 ### Пример
 

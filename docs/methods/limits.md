@@ -23,7 +23,22 @@
 
 ### Возвращаемое значение
 
-`LimitsResponse`
+**Тип после валидации:** `LimitsResponse`
+
+**Pydantic-модель:** [`LimitsResponse`](../data-types/limits/LimitsResponse.md)
+
+Ответ передаётся в `LimitsResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения (например, {'code': 200}) |
+| `data` | `LimitsData` | `object (LimitsData)` | Да | Нет | Данные с лимитами |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа |
+
+**Вложенные модели:**
+- [`LimitsData`](../data-types/limits/LimitsData.md)
 
 ### Пример
 
@@ -55,7 +70,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`RemoveLimitResponse`
+**Тип после валидации:** `RemoveLimitResponse`
+
+**Pydantic-модель:** [`RemoveLimitResponse`](../data-types/limits/RemoveLimitResponse.md)
+
+Ответ передаётся в `RemoveLimitResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Результат операции (True — успешно) |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа |
 
 ### Пример
 
@@ -86,7 +113,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`SetLimitResponse`
+**Тип после валидации:** `SetLimitResponse`
+
+**Pydantic-модель:** [`SetLimitResponse`](../data-types/limits/SetLimitResponse.md)
+
+Ответ передаётся в `SetLimitResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
+| `data` | `list[str]` | `array[string]` | Да | Нет | ID созданных/обновлённых лимитов |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа |
 
 ### Пример
 

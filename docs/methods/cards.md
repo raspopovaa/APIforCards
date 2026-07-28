@@ -23,7 +23,19 @@
 
 ### Возвращаемое значение
 
-`IDListResponse`
+**Тип после валидации:** `IDListResponse`
+
+**Pydantic-модель:** [`IDListResponse`](../data-types/cards/IDListResponse.md)
+
+Ответ передаётся в `IDListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
+| `data` | `list[str]` | `array[string]` | Да | Нет | ID карт, которые были заблокированы/разблокированы |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
 
 ### Пример
 
@@ -56,7 +68,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`CardDetailResponse`
+**Тип после валидации:** `CardDetailResponse`
+
+**Pydantic-модель:** [`CardDetailResponse`](../data-types/cards/CardDetailResponse.md)
+
+Ответ передаётся в `CardDetailResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
+| `data` | `CardDetailData` | `object (CardDetailData)` | Да | Нет | Основные данные |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+
+**Вложенные модели:**
+- [`CardDetailData`](../data-types/cards/CardDetailData.md)
 
 ### Пример
 
@@ -88,7 +115,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`CardDriversResponse`
+**Тип после валидации:** `CardDriversResponse`
+
+**Pydantic-модель:** [`CardDriversResponse`](../data-types/cards/CardDriversResponse.md)
+
+Ответ передаётся в `CardDriversResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
+| `data` | `CardDriversData` | `object (CardDriversData)` | Да | Нет | Основные данные |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+
+**Вложенные модели:**
+- [`CardDriversData`](../data-types/cards/CardDriversData.md)
 
 ### Пример
 
@@ -120,7 +162,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`CardGroupResponse`
+**Тип после валидации:** `CardGroupResponse`
+
+**Pydantic-модель:** [`CardGroupResponse`](../data-types/cards/CardGroupResponse.md)
+
+Ответ передаётся в `CardGroupResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
+| `data` | `CardGroupData` | `object (CardGroupData)` | Да | Нет | Основные данные |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+
+**Вложенные модели:**
+- [`CardGroupData`](../data-types/cards/CardGroupData.md)
 
 ### Пример
 
@@ -152,7 +209,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`CardsListResponse`
+**Тип после валидации:** `CardsListResponse`
+
+**Pydantic-модель:** [`CardsListResponse`](../data-types/cards/CardsListResponse.md)
+
+Ответ передаётся в `CardsListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект со статусом ответа (например, {'code': 200}) |
+| `data` | `CardsListData` | `object (CardsListData)` | Да | Нет | Основные данные ответа |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка сервера (UNIX-timestamp) |
+
+**Вложенные модели:**
+- [`CardsListData`](../data-types/cards/CardsListData.md)
 
 ### Пример
 
@@ -193,7 +265,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`CardsV2Response`
+**Тип после валидации:** `CardsV2Response`
+
+**Pydantic-модель:** [`CardsV2Response`](../data-types/cards/CardsV2Response.md)
+
+Ответ передаётся в `CardsV2Response.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса (например {'code': 200}) |
+| `data` | `CardsV2Data` | `object (CardsV2Data)` | Да | Нет | Основные данные (список карт) |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+
+**Вложенные модели:**
+- [`CardsV2Data`](../data-types/cards/CardsV2Data.md)
 
 ### Пример
 
@@ -227,7 +314,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`BoolResponse`
+**Тип после валидации:** `BoolResponse`
+
+**Pydantic-модель:** [`BoolResponse`](../data-types/cards/BoolResponse.md)
+
+Ответ передаётся в `BoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Флаг результата операции (True — успех) |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
 
 ### Пример
 
@@ -261,7 +360,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`BoolResponse`
+**Тип после валидации:** `BoolResponse`
+
+**Pydantic-модель:** [`BoolResponse`](../data-types/cards/BoolResponse.md)
+
+Ответ передаётся в `BoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Флаг результата операции (True — успех) |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
 
 ### Пример
 
@@ -297,7 +408,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`BoolResponse`
+**Тип после валидации:** `BoolResponse`
+
+**Pydantic-модель:** [`BoolResponse`](../data-types/cards/BoolResponse.md)
+
+Ответ передаётся в `BoolResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
+| `data` | `bool` | `boolean` | Да | Нет | Флаг результата операции (True — успех) |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
 
 ### Пример
 

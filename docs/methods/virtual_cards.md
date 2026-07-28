@@ -21,7 +21,23 @@
 
 ### Возвращаемое значение
 
-`VirtualCardResponse`
+**Тип после валидации:** `VirtualCardResponse`
+
+**Pydantic-модель:** [`VirtualCardResponse`](../data-types/virtual_cards/VirtualCardResponse.md)
+
+Ответ передаётся в `VirtualCardResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `StatusModel` | `object (StatusModel)` | Да | Нет | Статус ответа от сервера |
+| `data` | `VirtualCardData` | `object (VirtualCardData)` | Да | Нет | Информация о выпущенной виртуальной карте |
+| `timestamp` | `int` | `integer` | Да | Нет | Время ответа сервера в формате Unix Timestamp |
+
+**Вложенные модели:**
+- [`StatusModel`](../data-types/virtual_cards/StatusModel.md)
+- [`VirtualCardData`](../data-types/virtual_cards/VirtualCardData.md)
 
 ### Пример
 
@@ -57,7 +73,23 @@ print(result)
 
 ### Возвращаемое значение
 
-`VirtualCardResponse`
+**Тип после валидации:** `VirtualCardResponse`
+
+**Pydantic-модель:** [`VirtualCardResponse`](../data-types/virtual_cards/VirtualCardResponse.md)
+
+Ответ передаётся в `VirtualCardResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `StatusModel` | `object (StatusModel)` | Да | Нет | Статус ответа от сервера |
+| `data` | `VirtualCardData` | `object (VirtualCardData)` | Да | Нет | Информация о выпущенной виртуальной карте |
+| `timestamp` | `int` | `integer` | Да | Нет | Время ответа сервера в формате Unix Timestamp |
+
+**Вложенные модели:**
+- [`StatusModel`](../data-types/virtual_cards/StatusModel.md)
+- [`VirtualCardData`](../data-types/virtual_cards/VirtualCardData.md)
 
 ### Пример
 

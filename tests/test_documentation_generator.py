@@ -133,9 +133,7 @@ def test_documented_schema_matches_pydantic_json_schema() -> None:
     schema = models["CardInfo"].model_json_schema(by_alias=False)
     date_schema = schema["properties"]["date_expired"]
     formats = {
-        branch.get("format")
-        for branch in date_schema.get("anyOf", [])
-        if isinstance(branch, dict)
+        branch.get("format") for branch in date_schema.get("anyOf", []) if isinstance(branch, dict)
     }
 
     assert "date-time" in formats

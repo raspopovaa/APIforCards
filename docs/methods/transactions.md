@@ -29,7 +29,22 @@
 
 ### Возвращаемое значение
 
-`TransactionsV2Response`
+**Тип после валидации:** `TransactionsV2Response`
+
+**Pydantic-модель:** [`TransactionsV2Response`](../data-types/transactions/TransactionsV2Response.md)
+
+Ответ передаётся в `TransactionsV2Response.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
+| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Данные ответа |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+
+**Вложенные модели:**
+- [`TransactionsV2Data`](../data-types/transactions/TransactionsV2Data.md)
 
 ### Пример
 
@@ -65,7 +80,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`TransactionDetailResponse`
+**Тип после валидации:** `TransactionDetailResponse`
+
+**Pydantic-модель:** [`TransactionDetailResponse`](../data-types/transactions/TransactionDetailResponse.md)
+
+Ответ передаётся в `TransactionDetailResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
+| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Информация по одной транзакции |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+
+**Вложенные модели:**
+- [`TransactionsV2Data`](../data-types/transactions/TransactionsV2Data.md)
 
 ### Пример
 
@@ -100,7 +130,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`TransactionsV1Response`
+**Тип после валидации:** `TransactionsV1Response`
+
+**Pydantic-модель:** [`TransactionsV1Response`](../data-types/transactions/TransactionsV1Response.md)
+
+Ответ передаётся в `TransactionsV1Response.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
+| `data` | `TransactionsV1Data` | `object (TransactionsV1Data)` | Да | Нет | Данные ответа |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+
+**Вложенные модели:**
+- [`TransactionsV1Data`](../data-types/transactions/TransactionsV1Data.md)
 
 ### Пример
 
@@ -139,7 +184,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`TransactionsV2Response`
+**Тип после валидации:** `TransactionsV2Response`
+
+**Pydantic-модель:** [`TransactionsV2Response`](../data-types/transactions/TransactionsV2Response.md)
+
+Ответ передаётся в `TransactionsV2Response.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
+| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Данные ответа |
+| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+
+**Вложенные модели:**
+- [`TransactionsV2Data`](../data-types/transactions/TransactionsV2Data.md)
 
 ### Пример
 

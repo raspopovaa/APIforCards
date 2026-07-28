@@ -9,6 +9,5 @@ if str(SCRIPTS_PATH) not in sys.path:
 
 from documentation_generator import *  # noqa: F403
 
-
 if __name__ == "__main__":
     main()  # noqa: F405

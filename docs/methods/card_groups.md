@@ -21,7 +21,22 @@
 
 ### Возвращаемое значение
 
-`CardGroupListResponse`
+**Тип после валидации:** `CardGroupListResponse`
+
+**Pydantic-модель:** [`CardGroupListResponse`](../data-types/card_group/CardGroupListResponse.md)
+
+Ответ передаётся в `CardGroupListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Информация о статусе запроса (код и описание) |
+| `data` | `CardGroupListData` | `object (CardGroupListData)` | Да | Нет | Основные данные ответа |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (UNIX timestamp) |
+
+**Вложенные модели:**
+- [`CardGroupListData`](../data-types/card_group/CardGroupListData.md)
 
 ### Пример
 
@@ -52,7 +67,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`RemoveCardGroupResponse`
+**Тип после валидации:** `RemoveCardGroupResponse`
+
+**Pydantic-модель:** [`RemoveCardGroupResponse`](../data-types/card_group/RemoveCardGroupResponse.md)
+
+Ответ передаётся в `RemoveCardGroupResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Информация о статусе запроса (код и описание) |
+| `data` | `bool` | `boolean` | Да | Нет | Флаг успешного выполнения операции |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (UNIX timestamp) |
 
 ### Пример
 
@@ -85,7 +112,22 @@ print(result)
 
 ### Возвращаемое значение
 
-`SetCardGroupResponse`
+**Тип после валидации:** `SetCardGroupResponse`
+
+**Pydantic-модель:** [`SetCardGroupResponse`](../data-types/card_group/SetCardGroupResponse.md)
+
+Ответ передаётся в `SetCardGroupResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Информация о статусе запроса (код и описание) |
+| `data` | `SetCardGroupData` | `object (SetCardGroupData)` | Да | Нет | Информация о созданной/обновлённой группе |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (UNIX timestamp) |
+
+**Вложенные модели:**
+- [`SetCardGroupData`](../data-types/card_group/SetCardGroupData.md)
 
 ### Пример
 
@@ -118,7 +160,19 @@ print(result)
 
 ### Возвращаемое значение
 
-`SetCardsToGroupResponse`
+**Тип после валидации:** `SetCardsToGroupResponse`
+
+**Pydantic-модель:** [`SetCardsToGroupResponse`](../data-types/card_group/SetCardsToGroupResponse.md)
+
+Ответ передаётся в `SetCardsToGroupResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `dict[str, Any]` | `object` | Да | Нет | Информация о статусе запроса (код и описание) |
+| `data` | `bool` | `boolean` | Да | Нет | Флаг успешного выполнения операции |
+| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (UNIX timestamp) |
 
 ### Пример
 
