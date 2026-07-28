@@ -42,7 +42,7 @@ jobs:
         run: pytest -q
 
       - name: Verify external API contract
-        run: python scripts/verify_external_contract.py
+        run: python scripts/verify_external_contract.py specifications/api-methods.yaml
 
       - name: Run lint
         run: ruff check src tests scripts
