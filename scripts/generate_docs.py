@@ -5,10 +5,9 @@ import inspect
 import pkgutil
 import re
 import sys
-from dataclasses import fields, is_dataclass
 from pathlib import Path
-from types import ModuleType
-from typing import Any, get_args, get_origin, get_type_hints
+from types import UnionType
+from typing import Any, Union, get_args, get_origin, get_type_hints
 
 import yaml
 
@@ -28,6 +27,19 @@ from api_client_opti24.service_groups import ServiceContainer
 
 PACKAGE_NAME = "api_client_opti24"
 EXCLUDED_MODULES = {"api_client_opti24.logger"}
+
+# QR/MPC methods remain implemented in the SDK, but their specification must not
+# be used in public documentation until the product owner explicitly enables it.
+EXCLUDED_OPERATIONS = {
+    "get_mpc_qr_list",
+    "delete_mpc",
+    "reset_mpc",
+    "generate_payment_qr",
+    "init_mpc",
+    "confirm_mpc",
+    "update_mpc",
+}
+
 SERVICE_NAMES = {
     "auth": "auth",
     "card_group": "card_groups",
@@ -51,6 +63,7 @@ SERVICE_NAMES = {
 def load_metadata() -> dict[str, Any]:
     if not METADATA_PATH.exists():
         return {"domains": {}, "operations": {}, "parameters": {}}
+
     value = yaml.safe_load(METADATA_PATH.read_text(encoding="utf-8")) or {}
     return {
         "domains": value.get("domains", {}),
@@ -99,23 +112,28 @@ def format_type(annotation: Any) -> str:
         return "None"
     if isinstance(annotation, str):
         return annotation
+
     origin = get_origin(annotation)
     args = get_args(annotation)
+    if origin in {Union, UnionType}:
+        return " | ".join(format_type(arg) for arg in args)
+    if origin is list:
+        return f"list[{', '.join(format_type(arg) for arg in args)}]"
+    if origin is dict:
+        return f"dict[{', '.join(format_type(arg) for arg in args)}]"
+    if origin is tuple:
+        return f"tuple[{', '.join(format_type(arg) for arg in args)}]"
     if origin is not None:
         name = getattr(origin, "__name__", str(origin).replace("typing.", ""))
-        if origin is list:
-            name = "list"
-        elif origin is dict:
-            name = "dict"
-        elif origin is tuple:
-            name = "tuple"
         return f"{name}[{', '.join(format_type(arg) for arg in args)}]"
+
     return getattr(annotation, "__name__", str(annotation).replace("typing.", ""))
 
 
 def example_value(name: str, annotation: Any, default: Any) -> str:
     if default is not inspect.Signature.empty and default is not None:
         return repr(default)
+
     type_text = format_type(annotation)
     if name == "contract_id":
         return '"contract-id"'
@@ -147,6 +165,22 @@ def public_service_methods(cls: type) -> dict[str, object]:
     }
 
 
+def documented_specs() -> list[Any]:
+    return [
+        spec
+        for spec in build_default_registry().list_all()
+        if spec.name not in EXCLUDED_OPERATIONS
+    ]
+
+
+def grouped_specs() -> dict[str, list[Any]]:
+    grouped: dict[str, list[Any]] = {}
+    for spec in documented_specs():
+        service_name = SERVICE_NAMES[spec.domain]
+        grouped.setdefault(service_name, []).append(spec)
+    return grouped
+
+
 def model_types() -> list[type[BaseModel]]:
     models: dict[str, type[BaseModel]] = {}
     for module_name in iter_package_modules(f"{PACKAGE_NAME}.models"):
@@ -160,22 +194,36 @@ def model_types() -> list[type[BaseModel]]:
     return sorted(models.values(), key=lambda item: (item.__module__, item.__name__))
 
 
+def parameter_description(
+    name: str,
+    doc_params: dict[str, str],
+    metadata: dict[str, Any],
+) -> str:
+    common = metadata.get("parameters", {})
+    description = doc_params.get(name) or common.get(name)
+    if description:
+        return str(description)
+    if name == "api_version":
+        return "Версия API. Обычно определяется SDK автоматически."
+    return "Параметр публичного метода SDK."
+
+
 def render_parameters(method: object, metadata: dict[str, Any]) -> list[str]:
     signature = inspect.signature(method)
     hints = get_type_hints(method)
     doc_params = parse_param_docs(clean_docstring(method))
-    common = metadata.get("parameters", {})
     lines = [
         "| Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |",
         "|---|---|:---:|---|---|",
     ]
+
     for name, parameter in signature.parameters.items():
         if name == "self":
             continue
         annotation = hints.get(name, parameter.annotation)
         required = parameter.default is inspect.Signature.empty
         default = "—" if required else f"`{parameter.default!r}`"
-        description = doc_params.get(name) or common.get(name) or "Служебный параметр SDK."
+        description = parameter_description(name, doc_params, metadata)
         lines.append(
             f"| `{name}` | `{format_type(annotation)}` | "
             f"{'Да' if required else 'Нет'} | {default} | {description} |"
@@ -187,14 +235,15 @@ def render_example(service_name: str, method_name: str, method: object) -> list[
     signature = inspect.signature(method)
     hints = get_type_hints(method)
     arguments: list[str] = []
+
     for name, parameter in signature.parameters.items():
         if name in {"self", "api_version"}:
             continue
         if parameter.default is not inspect.Signature.empty and parameter.default is None:
             continue
-        arguments.append(
-            f"    {name}={example_value(name, hints.get(name, parameter.annotation), parameter.default)},"
-        )
+        value = example_value(name, hints.get(name, parameter.annotation), parameter.default)
+        arguments.append(f"    {name}={value},")
+
     return [
         "```python",
         f"result = await client.{service_name}.{method_name}(",
@@ -215,15 +264,14 @@ def render_method_page(
     operations_meta = metadata.get("operations", {})
     domain_meta = metadata.get("domains", {}).get(service_name, {})
     lines = [
-        f"# `{service_name}`",
+        f"# `client.{service_name}`",
         "",
         domain_meta.get("description") or clean_docstring(service_cls) or "Методы сервиса SDK.",
         "",
     ]
+
     for spec in sorted(specs, key=lambda item: item.name):
-        method = methods.get(spec.name)
-        if method is None:
-            continue
+        method = methods[spec.name]
         op_meta = operations_meta.get(spec.name, {})
         docstring = clean_docstring(method)
         return_type = get_type_hints(method).get("return", inspect.Signature.empty)
@@ -255,19 +303,22 @@ def render_method_page(
         if response_description:
             lines.extend([str(response_description), ""])
         lines.extend(["### Пример", "", *render_example(service_name, spec.name, method), ""])
+
     return "\n".join(lines).rstrip() + "\n"
 
 
 def render_catalog(grouped: dict[str, list[Any]], metadata: dict[str, Any]) -> str:
-    registry = build_default_registry()
+    registry_count = len(build_default_registry().list_all())
+    documented_count = sum(len(specs) for specs in grouped.values())
     lines = [
         "# Методы API",
         "",
         "Документация генерируется из runtime registry, публичных сигнатур, type hints, "
         "моделей SDK и метаданных спецификации.",
         "",
-        "!!! info \"Покрытие\"",
-        f"    SDK содержит **{len(registry.list_all())} операций**.",
+        '!!! info "Покрытие"',
+        f"    Опубликовано **{documented_count} операций** из {registry_count}, зарегистрированных в SDK.",
+        "    Методы МПК/QR временно исключены до отдельного решения по QR-спецификации.",
         "",
         "| Сервис | Операций | Назначение |",
         "|---|---:|---|",
@@ -279,6 +330,7 @@ def render_catalog(grouped: dict[str, list[Any]], metadata: dict[str, Any]) -> s
             f"| [`client.{service_name}`](methods/{service_name}.md) | "
             f"{len(grouped[service_name])} | {description} |"
         )
+
     lines.extend(
         [
             "",
@@ -303,12 +355,12 @@ def render_model(model: type[BaseModel]) -> str:
             "|---|---|:---:|---|---|",
         ]
     )
-    description = model.describe()
-    for field_name, item in description.items():
+    for field_name, item in model.describe().items():
+        alias = item.get("alias") or "—"
         lines.append(
             f"| `{field_name}` | `{item.get('type', 'Any')}` | "
-            f"{'Да' if item.get('required') else 'Нет'} | "
-            f"`{item.get('alias')}` | {item.get('description') or '—'} |"
+            f"{'Да' if item.get('required') else 'Нет'} | `{alias}` | "
+            f"{item.get('description') or '—'} |"
         )
     lines.append("")
     return "\n".join(lines)
@@ -320,6 +372,7 @@ def render_model_index(models: list[type[BaseModel]]) -> str:
     for model in models:
         module = model.__module__.rsplit(".", 1)[-1]
         by_module.setdefault(module, []).append(model)
+
     for module, values in sorted(by_module.items()):
         lines.extend([f"## `{module}`", ""])
         for model in values:
@@ -345,6 +398,7 @@ def render_api_reference() -> str:
 def validate(grouped: dict[str, list[Any]], models: list[type[BaseModel]]) -> None:
     services = service_classes()
     errors: list[str] = []
+
     for service_name, specs in grouped.items():
         cls = services.get(service_name)
         if cls is None:
@@ -361,6 +415,7 @@ def validate(grouped: dict[str, list[Any]], models: list[type[BaseModel]]) -> No
                 errors.append(f"{service_name}.{spec.name}: missing return annotation")
             if not clean_docstring(method):
                 errors.append(f"{service_name}.{spec.name}: missing docstring")
+
     if not models:
         errors.append("no public models found")
     if errors:
@@ -369,11 +424,7 @@ def validate(grouped: dict[str, list[Any]], models: list[type[BaseModel]]) -> No
 
 def build_all() -> dict[Path, str]:
     metadata = load_metadata()
-    registry = build_default_registry()
-    grouped: dict[str, list[Any]] = {}
-    for spec in registry.list_all():
-        service_name = SERVICE_NAMES[spec.domain]
-        grouped.setdefault(service_name, []).append(spec)
+    grouped = grouped_specs()
     models = model_types()
     validate(grouped, models)
     services = service_classes()
@@ -382,9 +433,13 @@ def build_all() -> dict[Path, str]:
         DOCS_PATH / "api-reference.md": render_api_reference(),
         DATA_TYPES_PATH / "index.md": render_model_index(models),
     }
+
     for service_name, specs in grouped.items():
         output[METHODS_PATH / f"{service_name}.md"] = render_method_page(
-            service_name, services[service_name], specs, metadata
+            service_name,
+            services[service_name],
+            specs,
+            metadata,
         )
     for model in models:
         module = model.__module__.rsplit(".", 1)[-1]
