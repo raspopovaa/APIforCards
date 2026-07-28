@@ -1,0 +1,34 @@
+name: Materialize contract audit
+
+on:
+  push:
+    branches:
+      - agent/api-1160-contract-audit
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/api-1160-contract-audit
+
+      - name: Materialize audited sources
+        run: |
+          base64 --decode .contract-audit-bundle.tar.gz.b64 > /tmp/contract-audit-bundle.tar.gz
+          tar -xzf /tmp/contract-audit-bundle.tar.gz
+          rm .contract-audit-bundle.tar.gz.b64
+          rm .github/workflows/materialize-contract-audit.yml
+
+      - name: Commit materialized sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add API 1.1.60 contract audit"
+          git push origin HEAD:agent/api-1160-contract-audit
