@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import inspect
 import sys
 from pathlib import Path
 
@@ -171,3 +172,35 @@ def test_request_models_do_not_claim_automatic_sdk_validation() -> None:
     assert "явно создаёт `CheckPurchaseRequest`" in request_page
     assert "не означает, что каждый метод SDK автоматически создаёт её" in request_page
     assert "фактический входной контракт" in request_page
+
+
+def test_approved_spec_parameter_descriptions_are_applied() -> None:
+    generator = load_generator()
+    metadata = generator.load_metadata()
+    operations = metadata["operations"]
+    approved = {
+        (operation, parameter): description
+        for operation, operation_meta in operations.items()
+        for parameter, description in operation_meta.get("parameters", {}).items()
+    }
+
+    assert len(approved) == 69
+    assert approved[("move_to_card", "amount")] == "Сумма перевода."
+
+    services = generator.service_classes()
+    specs = {spec.name: spec for spec in generator.documented_specs()}
+    for (operation, parameter), expected in approved.items():
+        spec = specs[operation]
+        service_name = generator.SERVICE_NAMES[spec.domain]
+        method = generator.public_service_methods(services[service_name])[operation]
+        assert parameter in inspect.signature(method).parameters, f"{operation}.{parameter}"
+        doc_params = generator.parse_param_docs(generator.clean_docstring(method))
+        actual = generator.parameter_description(
+            parameter, doc_params, metadata, operations[operation]
+        )
+        assert actual == expected
+        assert actual != "Параметр публичного метода SDK."
+
+    output = generator.build_all()
+    ewallet_page = output[generator.METHODS_PATH / "ewallet.md"]
+    assert "| `amount` | `float` | Да | — | Сумма перевода. |" in ewallet_page
