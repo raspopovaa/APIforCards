@@ -2,15 +2,18 @@ name: Publish TestPyPI
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
-      - "test-release/**"
+      - main
 
 permissions:
   contents: read
 
 jobs:
   build:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.head_ref, 'test-release/')
     runs-on: ubuntu-latest
 
     steps:
@@ -34,11 +37,14 @@ jobs:
           path: dist/
 
   publish:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.head_ref, 'test-release/')
     runs-on: ubuntu-latest
     needs: build
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/api-client-opti24
+      url: https://test.pypi.org/project/api-client-opti24/
     permissions:
       id-token: write
 
@@ -53,3 +59,4 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
