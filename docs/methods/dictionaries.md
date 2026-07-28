@@ -61,8 +61,8 @@ print(result)
 |---|---|:---:|---|---|
 | `page` | `int` | Нет | `1` | Номер страницы результата. |
 | `onpage` | `int` | Нет | `10` | Количество элементов на странице. |
-| `filter` | `dict[str, Any] | None` | Нет | `None` | Параметр публичного метода SDK. |
-| `id` | `str | None` | Нет | `None` | Параметр публичного метода SDK. |
+| `filter` | `dict[str, Any] | None` | Нет | `None` | JSON-объект для фильтрации списка торговых точек. |
+| `id` | `str | None` | Нет | `None` | ID торговой точки для получения одной детальной записи. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -108,7 +108,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `filter` | `dict[str, Any] | None` | Нет | `None` | Параметр публичного метода SDK. |
+| `filter` | `dict[str, Any] | None` | Нет | `None` | JSON-объект для фильтрации списка торговых точек. |
 | `q` | `str | None` | Нет | `None` | Строка полнотекстового поиска. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
@@ -153,7 +153,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `name` | `str` | Да | — | Параметр публичного метода SDK. |
+| `name` | `str` | Да | — | Наименование справочника: `CardStatus`, `ContractStatus`, `Country`, `Currency`, `Goods`, `PaymentScheme`, `PaymentTerm`, `ProductGroup`, `ProductType`, `POIType`, `Region`, `Services`, `Unit`, `Office`, `POIPartner` или `DiscountScheme`. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение

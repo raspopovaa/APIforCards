@@ -20,8 +20,8 @@
 | `contract_id` | `str | None` | Нет | `None` | Идентификатор договора (если не указан, берётся из сессии) |
 | `date_from` | `str` | Да | — | Начало периода (YYYY-MM-DD) |
 | `date_to` | `str` | Да | — | Конец периода (YYYY-MM-DD) |
-| `page_limit` | `int` | Нет | `100` | Параметр публичного метода SDK. |
-| `page_offset` | `int` | Нет | `0` | Параметр публичного метода SDK. |
+| `page_limit` | `int` | Нет | `100` | Количество транзакций на странице; по спецификации — 500, если параметр не указан. |
+| `page_offset` | `int` | Нет | `0` | Количество транзакций, которые нужно пропустить. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 | `filter_fn` | `Callable[[<class 'api_client_opti24.models.transactions.TransactionItemV2'>], bool] | None` | Нет | `None` | Параметр публичного метода SDK. |
 | `sort_by` | `str | None` | Нет | `None` | Параметр публичного метода SDK. |

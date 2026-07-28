@@ -17,6 +17,7 @@ DOCS_PATH = PROJECT_ROOT / "docs"
 METHODS_PATH = DOCS_PATH / "methods"
 DATA_TYPES_PATH = DOCS_PATH / "data-types"
 METADATA_PATH = PROJECT_ROOT / "specifications" / "documentation.yaml"
+PARAMETER_METADATA_PATH = PROJECT_ROOT / "specifications" / "parameter-descriptions-1.1.60.yaml"
 
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
@@ -67,9 +68,15 @@ def load_metadata() -> dict[str, Any]:
         return {"domains": {}, "operations": {}, "parameters": {}}
 
     value = yaml.safe_load(METADATA_PATH.read_text(encoding="utf-8")) or {}
+    operations = value.get("operations", {})
+    if PARAMETER_METADATA_PATH.exists():
+        parameter_value = yaml.safe_load(PARAMETER_METADATA_PATH.read_text(encoding="utf-8")) or {}
+        for operation, operation_meta in parameter_value.get("operations", {}).items():
+            target = operations.setdefault(operation, {})
+            target.setdefault("parameters", {}).update(operation_meta.get("parameters", {}))
     return {
         "domains": value.get("domains", {}),
-        "operations": value.get("operations", {}),
+        "operations": operations,
         "parameters": value.get("parameters", {}),
     }
 
@@ -204,9 +211,11 @@ def parameter_description(
     name: str,
     doc_params: dict[str, str],
     metadata: dict[str, Any],
+    operation_meta: dict[str, Any] | None = None,
 ) -> str:
+    operation_parameters = (operation_meta or {}).get("parameters", {})
     common = metadata.get("parameters", {})
-    description = doc_params.get(name) or common.get(name)
+    description = operation_parameters.get(name) or doc_params.get(name) or common.get(name)
     if description:
         return str(description)
     if name == "api_version":
@@ -214,7 +223,11 @@ def parameter_description(
     return "Параметр публичного метода SDK."
 
 
-def render_parameters(method: object, metadata: dict[str, Any]) -> list[str]:
+def render_parameters(
+    method: object,
+    metadata: dict[str, Any],
+    operation_meta: dict[str, Any] | None = None,
+) -> list[str]:
     signature = inspect.signature(method)
     hints = get_type_hints(method)
     doc_params = parse_param_docs(clean_docstring(method))
@@ -229,7 +242,7 @@ def render_parameters(method: object, metadata: dict[str, Any]) -> list[str]:
         annotation = hints.get(name, parameter.annotation)
         required = parameter.default is inspect.Signature.empty
         default = "—" if required else f"`{parameter.default!r}`"
-        description = parameter_description(name, doc_params, metadata)
+        description = parameter_description(name, doc_params, metadata, operation_meta)
         lines.append(
             f"| `{name}` | `{format_type(annotation)}` | "
             f"{'Да' if required else 'Нет'} | {default} | {description} |"
@@ -297,7 +310,7 @@ def render_method_page(
                 "",
                 "### Параметры",
                 "",
-                *render_parameters(method, metadata),
+                *render_parameters(method, metadata, op_meta),
                 "",
                 "### Возвращаемое значение",
                 "",
@@ -401,8 +414,13 @@ def render_api_reference() -> str:
     )
 
 
-def validate(grouped: dict[str, list[Any]], models: list[type[BaseModel]]) -> None:
+def validate(
+    grouped: dict[str, list[Any]],
+    models: list[type[BaseModel]],
+    metadata: dict[str, Any],
+) -> None:
     services = service_classes()
+    operations_meta = metadata.get("operations", {})
     errors: list[str] = []
 
     for service_name, specs in grouped.items():
@@ -421,6 +439,15 @@ def validate(grouped: dict[str, list[Any]], models: list[type[BaseModel]]) -> No
                 errors.append(f"{service_name}.{spec.name}: missing return annotation")
             if not clean_docstring(method):
                 errors.append(f"{service_name}.{spec.name}: missing docstring")
+            declared_parameters = operations_meta.get(spec.name, {}).get("parameters", {})
+            unknown_parameters = set(declared_parameters) - set(
+                inspect.signature(method).parameters
+            )
+            if unknown_parameters:
+                errors.append(
+                    f"{service_name}.{spec.name}: metadata contains unknown parameters "
+                    f"{sorted(unknown_parameters)}"
+                )
 
     if not models:
         errors.append("no public models found")
@@ -432,7 +459,7 @@ def build_all() -> dict[Path, str]:
     metadata = load_metadata()
     grouped = grouped_specs()
     models = model_types()
-    validate(grouped, models)
+    validate(grouped, models, metadata)
     services = service_classes()
     output: dict[Path, str] = {
         DOCS_PATH / "methods.md": render_catalog(grouped, metadata),
