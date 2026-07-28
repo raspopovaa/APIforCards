@@ -30,10 +30,10 @@ jobs:
             'ad48135b4caa05e116d3b324963e5e09557a5ec24829089609f54efc07b30b84' \
             '/tmp/contract-audit-bundle.tar.gz' | sha256sum -c -
           tar -xzf /tmp/contract-audit-bundle.tar.gz
+          git checkout HEAD -- .github/workflows/ci.yml
           rm -f .contract-audit-bundle.tar.gz.b64
           rm -f .contract-audit-bundle.part.*
           rm -f .contract-audit-diagnostic
-          rm .github/workflows/materialize-contract-audit.yml
 
       - name: Commit materialized sources
         run: |
