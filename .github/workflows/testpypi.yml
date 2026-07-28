@@ -2,6 +2,9 @@ name: Publish TestPyPI
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - "test-release/**"
 
 permissions:
   contents: read
