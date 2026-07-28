@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import sys
 from pathlib import Path
 
 import pytest
@@ -11,9 +12,11 @@ GENERATOR_PATH = PROJECT_ROOT / "scripts" / "generate_docs.py"
 
 
 def load_generator():
-    spec = importlib.util.spec_from_file_location("generate_docs", GENERATOR_PATH)
+    module_name = "generate_docs"
+    spec = importlib.util.spec_from_file_location(module_name, GENERATOR_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -69,7 +72,9 @@ def test_generated_output_is_idempotent_and_has_required_sections() -> None:
     assert generator.DATA_TYPES_PATH / "index.md" in first
 
     method_pages = {
-        path: content for path, content in first.items() if path.parent == generator.METHODS_PATH
+        path: content
+        for path, content in first.items()
+        if path.parent == generator.METHODS_PATH
     }
     assert method_pages
     for path, content in method_pages.items():
