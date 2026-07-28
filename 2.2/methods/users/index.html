@@ -2754,7 +2754,7 @@
 <td><code>list[dict[str, Any]]</code></td>
 <td style="text-align: center;">Да</td>
 <td>—</td>
-<td>Параметр публичного метода SDK.</td>
+<td>Список договоров для прикрепления к пользователю. Для каждого договора указываются <code>sid</code> — ID договора, <code>template_id</code> — ID шаблона ВК, <code>use_mpc</code> — разрешение выпуска МПК (<code>true</code>/<code>false</code>).</td>
 </tr>
 <tr>
 <td><code>api_version</code></td>
@@ -2857,14 +2857,14 @@
 <td><code>str</code></td>
 <td style="text-align: center;">Да</td>
 <td>—</td>
-<td>Параметр публичного метода SDK.</td>
+<td>Внутренний ID водителя в системе клиента.</td>
 </tr>
 <tr>
 <td><code>mobile</code></td>
 <td><code>str</code></td>
 <td style="text-align: center;">Да</td>
 <td>—</td>
-<td>Параметр публичного метода SDK.</td>
+<td>Телефон водителя, используемый как логин.</td>
 </tr>
 <tr>
 <td><code>api_version</code></td>
@@ -3191,7 +3191,7 @@ await client.users.delete_user(user_id="1-FK485FK")</p>
 <td><code>list[str]</code></td>
 <td style="text-align: center;">Да</td>
 <td>—</td>
-<td>Параметр публичного метода SDK.</td>
+<td>Список ID договоров, которые нужно открепить от пользователя.</td>
 </tr>
 <tr>
 <td><code>api_version</code></td>
@@ -3306,7 +3306,7 @@ await client.users.delete_user(user_id="1-FK485FK")</p>
 <td><code>int | None</code></td>
 <td style="text-align: center;">Нет</td>
 <td><code>None</code></td>
-<td>Параметр публичного метода SDK.</td>
+<td>Количество элементов на странице.</td>
 </tr>
 <tr>
 <td><code>q</code></td>
@@ -3320,7 +3320,7 @@ await client.users.delete_user(user_id="1-FK485FK")</p>
 <td><code>dict[str, Any] | None</code></td>
 <td style="text-align: center;">Нет</td>
 <td><code>None</code></td>
-<td>Параметр публичного метода SDK.</td>
+<td>Объект фильтрации пользователей, например <code>{"role": "Driver", "active": true}</code>.</td>
 </tr>
 <tr>
 <td><code>api_version</code></td>
