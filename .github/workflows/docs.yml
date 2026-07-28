@@ -25,6 +25,12 @@ jobs:
       - name: Generate documentation
         run: python scripts/generate_docs.py
 
+      - name: Upload generated Markdown
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-documentation
+          path: docs/
+
       - name: Run documentation contract tests
         run: pytest -q tests/test_documentation_generator.py
 
