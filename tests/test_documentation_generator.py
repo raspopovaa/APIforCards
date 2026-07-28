@@ -5,8 +5,6 @@ import importlib.util
 import sys
 from pathlib import Path
 
-import pytest
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 GENERATOR_PATH = PROJECT_ROOT / "scripts" / "generate_docs.py"
 
@@ -21,35 +19,37 @@ def load_generator():
     return module
 
 
-def test_generator_covers_every_registry_operation() -> None:
+def test_generator_covers_every_publishable_registry_operation() -> None:
     generator = load_generator()
     registry = generator.build_default_registry()
-    grouped = {}
-    for operation in registry.list_all():
-        service_name = generator.SERVICE_NAMES[operation.domain]
-        grouped.setdefault(service_name, []).append(operation)
+    publishable = {
+        operation.name
+        for operation in registry.list_all()
+        if operation.name not in generator.EXCLUDED_OPERATIONS
+    }
+    documented = {operation.name for operation in generator.documented_specs()}
+
+    assert documented == publishable
+    assert len(registry.list_all()) == 89
+    assert not documented.intersection(generator.EXCLUDED_OPERATIONS)
 
     services = generator.service_classes()
     missing = []
-    for service_name, operations in grouped.items():
+    for operation in generator.documented_specs():
+        service_name = generator.SERVICE_NAMES[operation.domain]
         methods = generator.public_service_methods(services[service_name])
-        missing.extend(
-            f"{service_name}.{operation.name}"
-            for operation in operations
-            if operation.name not in methods
-        )
+        if operation.name not in methods:
+            missing.append(f"{service_name}.{operation.name}")
 
     assert not missing, "Undocumented operations: " + ", ".join(missing)
-    assert len(registry.list_all()) == 89
 
 
-def test_every_operation_has_docstring_and_return_annotation() -> None:
+def test_every_documented_operation_has_docstring_and_return_annotation() -> None:
     generator = load_generator()
-    registry = generator.build_default_registry()
     services = generator.service_classes()
     errors = []
 
-    for operation in registry.list_all():
+    for operation in generator.documented_specs():
         service_name = generator.SERVICE_NAMES[operation.domain]
         method = generator.public_service_methods(services[service_name]).get(operation.name)
         if method is None:
@@ -99,5 +99,8 @@ def test_qr_operations_are_not_documented() -> None:
     generator = load_generator()
     output = generator.build_all()
     combined = "\n".join(output.values()).lower()
-    assert "list_qr_mpc" not in combined
+
+    for operation_name in generator.EXCLUDED_OPERATIONS:
+        assert operation_name.lower() not in combined
     assert "confirmmpc" not in combined
+    assert "resetmpc" not in combined
