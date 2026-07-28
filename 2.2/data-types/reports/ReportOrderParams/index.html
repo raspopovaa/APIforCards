@@ -1421,6 +1421,36 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поведение модели
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поля и проверки
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1441,68 +1471,149 @@
 
 <h1 id="reportorderparams"><code>ReportOrderParams</code><a class="headerlink" href="#reportorderparams" title="Permanent link">&para;</a></h1>
 <p>Параметры заказа отчета.</p>
+<div class="admonition info">
+<p class="admonition-title">Назначение Pydantic</p>
+<p>Тип модели: <strong>response/data</strong>. Ответ API проверяется этой моделью напрямую или рекурсивно как часть родительской response-модели. При несовпадении типов или отсутствии обязательного поля Pydantic формирует <code>ValidationError</code>.</p>
+</div>
+<h2 id="_1">Поведение модели<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Настройка</th>
+<th>Значение</th>
+<th>Фактическое поведение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Дополнительные поля (<code>extra</code>)</td>
+<td><code>allow</code></td>
+<td>Дополнительные поля разрешены и сохраняются в модели.</td>
+</tr>
+<tr>
+<td>Проверка default</td>
+<td><code>True</code></td>
+<td>Значения по умолчанию также проходят валидацию.</td>
+</tr>
+<tr>
+<td>Заполнение по имени поля</td>
+<td><code>True</code></td>
+<td>Разрешено использовать имя поля наряду с alias.</td>
+</tr>
+<tr>
+<td>Число → строка</td>
+<td><code>True</code></td>
+<td>Для строковых полей числовые значения могут быть преобразованы в строку.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">Поля и проверки<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Поле</th>
-<th>Python-тип</th>
+<th>Тип после валидации</th>
+<th>JSON-тип</th>
 <th style="text-align: center;">Обязательное</th>
+<th style="text-align: center;"><code>None</code></th>
+<th>По умолчанию</th>
 <th>Alias</th>
+<th>Ограничения схемы</th>
+<th>Что проверяет Pydantic</th>
 <th>Описание</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>start_date</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Дата начала периода</td>
 </tr>
 <tr>
 <td><code>end_date</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Дата окончания периода</td>
 </tr>
 <tr>
 <td><code>id_agreement</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Список ID договоров</td>
 </tr>
 <tr>
 <td><code>id_card</code></td>
-<td><code>list[str] | None</code></td>
+<td><code>list[str] \| None</code></td>
+<td><code>array[string] \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: list[str], None</td>
 <td>Список карт</td>
 </tr>
 <tr>
 <td><code>card_group_code</code></td>
-<td><code>list[str] | None</code></td>
+<td><code>list[str] \| None</code></td>
+<td><code>array[string] \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: list[str], None</td>
 <td>Список групп карт</td>
 </tr>
 <tr>
 <td><code>id_client</code></td>
-<td><code>list[str] | None</code></td>
+<td><code>list[str] \| None</code></td>
+<td><code>array[string] \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: list[str], None</td>
 <td>Список клиентов</td>
 </tr>
 <tr>
 <td><code>additional</code></td>
-<td><code>dict[str, Any] | None</code></td>
+<td><code>dict[str, Any] \| None</code></td>
+<td><code>object \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: dict[str, Any], None</td>
 <td>Дополнительные параметры</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Граница проверки</p>
+<p>Значения, упомянутые только в тексте описания, не считаются жёстким ограничением. Например, фраза «Y или N» проверяется только тогда, когда в модели задан <code>Literal</code>, Enum, ограничение <code>Field</code> или пользовательский валидатор.</p>
+</div>
 
 
 

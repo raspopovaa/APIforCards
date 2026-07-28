@@ -1421,6 +1421,47 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поведение модели
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поля и проверки
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Вложенные модели
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1441,243 +1482,456 @@
 
 <h1 id="azsitemv1"><code>AzsItemV1</code><a class="headerlink" href="#azsitemv1" title="Permanent link">&para;</a></h1>
 <p>Информация о торговой точке (v1)</p>
+<div class="admonition info">
+<p class="admonition-title">Назначение Pydantic</p>
+<p>Тип модели: <strong>response/data</strong>. Ответ API проверяется этой моделью напрямую или рекурсивно как часть родительской response-модели. При несовпадении типов или отсутствии обязательного поля Pydantic формирует <code>ValidationError</code>.</p>
+</div>
+<h2 id="_1">Поведение модели<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Настройка</th>
+<th>Значение</th>
+<th>Фактическое поведение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Дополнительные поля (<code>extra</code>)</td>
+<td><code>allow</code></td>
+<td>Дополнительные поля разрешены и сохраняются в модели.</td>
+</tr>
+<tr>
+<td>Проверка default</td>
+<td><code>True</code></td>
+<td>Значения по умолчанию также проходят валидацию.</td>
+</tr>
+<tr>
+<td>Заполнение по имени поля</td>
+<td><code>True</code></td>
+<td>Разрешено использовать имя поля наряду с alias.</td>
+</tr>
+<tr>
+<td>Число → строка</td>
+<td><code>True</code></td>
+<td>Для строковых полей числовые значения могут быть преобразованы в строку.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">Поля и проверки<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Поле</th>
-<th>Python-тип</th>
+<th>Тип после валидации</th>
+<th>JSON-тип</th>
 <th style="text-align: center;">Обязательное</th>
+<th style="text-align: center;"><code>None</code></th>
+<th>По умолчанию</th>
 <th>Alias</th>
+<th>Ограничения схемы</th>
+<th>Что проверяет Pydantic</th>
 <th>Описание</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>id</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>ID торговой точки (АЗС)</td>
 </tr>
 <tr>
 <td><code>siebelId</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>ID торговой точки в CRM</td>
 </tr>
 <tr>
 <td><code>contractNumber</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Код торговой точки (договор)</td>
 </tr>
 <tr>
 <td><code>contractName</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Название торговой точки</td>
 </tr>
 <tr>
 <td><code>status</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Статус точки (257 – работает, 258 – не работает)</td>
 </tr>
 <tr>
 <td><code>countryCode</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Код страны</td>
 </tr>
 <tr>
 <td><code>regionCode</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Код региона</td>
 </tr>
 <tr>
 <td><code>secessionGPN</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Отделение ГПН по географии</td>
 </tr>
 <tr>
 <td><code>belongsTo</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Название владельца или оператора</td>
 </tr>
 <tr>
 <td><code>partner</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>ID партнера</td>
 </tr>
 <tr>
 <td><code>ownType</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Тип собственности (Own / FRAN и др.)</td>
 </tr>
 <tr>
 <td><code>locationType</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Тип расположения (ROAD и т.д.)</td>
 </tr>
 <tr>
 <td><code>brand</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Бренд торговой точки</td>
 </tr>
 <tr>
 <td><code>openDate</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Дата открытия точки</td>
 </tr>
 <tr>
 <td><code>closeDate</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Дата закрытия (если закрыта)</td>
 </tr>
 <tr>
 <td><code>latitude</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Координата широты</td>
 </tr>
 <tr>
 <td><code>longitude</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Координата долготы</td>
 </tr>
 <tr>
 <td><code>type</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Тип торговой точки (АЗС, СТО и т.д.)</td>
 </tr>
 <tr>
 <td><code>timeZone</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Часовой пояс точки</td>
 </tr>
 <tr>
 <td><code>services</code></td>
-<td><code>list[int] | None</code></td>
+<td><code>list[int] \| None</code></td>
+<td><code>array[integer] \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>factory: list()</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: list[int], None</td>
 <td>Массив ID услуг</td>
 </tr>
 <tr>
 <td><code>terminals</code></td>
-<td><code>list[TerminalV1] | None</code></td>
+<td><code>list[TerminalV1] \| None</code></td>
+<td><code>array[object (TerminalV1)] \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>factory: list()</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: list[TerminalV1], None</td>
 <td>Список терминалов торговой точки</td>
 </tr>
 <tr>
 <td><code>address</code></td>
-<td><code>AddressV1 | None</code></td>
+<td><code>AddressV1 \| None</code></td>
+<td><code>object (AddressV1) \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: AddressV1, None</td>
 <td>Адрес торговой точки</td>
 </tr>
 <tr>
 <td><code>prices</code></td>
-<td><code>list[PriceItemV1] | None</code></td>
+<td><code>list[PriceItemV1] \| None</code></td>
+<td><code>array[object (PriceItemV1)] \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>factory: list()</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: list[PriceItemV1], None</td>
 <td>Цены товаров на точке</td>
 </tr>
 <tr>
 <td><code>searchTxt</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Строка поиска</td>
 </tr>
 <tr>
 <td><code>phone</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Контактный телефон</td>
 </tr>
 <tr>
 <td><code>height_post</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Высота поста (в метрах)</td>
 </tr>
 <tr>
 <td><code>working_time</code></td>
-<td><code>list[WorkingTimeV1] | None</code></td>
+<td><code>list[WorkingTimeV1] \| None</code></td>
+<td><code>array[object (WorkingTimeV1)] \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>factory: list()</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: list[WorkingTimeV1], None</td>
 <td>Режим работы</td>
 </tr>
 <tr>
 <td><code>only_virtual_card</code></td>
-<td><code>bool | None</code></td>
+<td><code>bool \| None</code></td>
+<td><code>boolean \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: bool, None</td>
 <td>Принимаются ли только виртуальные карты</td>
 </tr>
 <tr>
 <td><code>accept_cards</code></td>
-<td><code>bool | None</code></td>
+<td><code>bool \| None</code></td>
+<td><code>boolean \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: bool, None</td>
 <td>Принимаются ли карты</td>
 </tr>
 <tr>
 <td><code>hidden_on_map</code></td>
-<td><code>bool | None</code></td>
+<td><code>bool \| None</code></td>
+<td><code>boolean \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: bool, None</td>
 <td>Скрыта ли точка на карте</td>
 </tr>
 <tr>
 <td><code>active</code></td>
-<td><code>bool | None</code></td>
+<td><code>bool \| None</code></td>
+<td><code>boolean \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: bool, None</td>
 <td>Активна ли торговая точка</td>
 </tr>
 <tr>
 <td><code>POIType</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Тип торговой точки (POI-код)</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Граница проверки</p>
+<p>Значения, упомянутые только в тексте описания, не считаются жёстким ограничением. Например, фраза «Y или N» проверяется только тогда, когда в модели задан <code>Literal</code>, Enum, ограничение <code>Field</code> или пользовательский валидатор.</p>
+</div>
+<h2 id="_3">Вложенные модели<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../TerminalV1/"><code>TerminalV1</code></a></li>
+<li><a href="../AddressV1/"><code>AddressV1</code></a></li>
+<li><a href="../PriceItemV1/"><code>PriceItemV1</code></a></li>
+<li><a href="../WorkingTimeV1/"><code>WorkingTimeV1</code></a></li>
+</ul>
 
 
 

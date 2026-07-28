@@ -1421,6 +1421,36 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поведение модели
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поля и проверки
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1441,13 +1471,55 @@
 
 <h1 id="contractdata"><code>ContractData</code><a class="headerlink" href="#contractdata" title="Permanent link">&para;</a></h1>
 <p>Основные данные договора</p>
+<div class="admonition info">
+<p class="admonition-title">Назначение Pydantic</p>
+<p>Тип модели: <strong>response/data</strong>. Ответ API проверяется этой моделью напрямую или рекурсивно как часть родительской response-модели. При несовпадении типов или отсутствии обязательного поля Pydantic формирует <code>ValidationError</code>.</p>
+</div>
+<h2 id="_1">Поведение модели<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Настройка</th>
+<th>Значение</th>
+<th>Фактическое поведение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Дополнительные поля (<code>extra</code>)</td>
+<td><code>allow</code></td>
+<td>Дополнительные поля разрешены и сохраняются в модели.</td>
+</tr>
+<tr>
+<td>Проверка default</td>
+<td><code>True</code></td>
+<td>Значения по умолчанию также проходят валидацию.</td>
+</tr>
+<tr>
+<td>Заполнение по имени поля</td>
+<td><code>True</code></td>
+<td>Разрешено использовать имя поля наряду с alias.</td>
+</tr>
+<tr>
+<td>Число → строка</td>
+<td><code>True</code></td>
+<td>Для строковых полей числовые значения могут быть преобразованы в строку.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">Поля и проверки<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Поле</th>
-<th>Python-тип</th>
+<th>Тип после валидации</th>
+<th>JSON-тип</th>
 <th style="text-align: center;">Обязательное</th>
+<th style="text-align: center;"><code>None</code></th>
+<th>По умолчанию</th>
 <th>Alias</th>
+<th>Ограничения схемы</th>
+<th>Что проверяет Pydantic</th>
 <th>Описание</th>
 </tr>
 </thead>
@@ -1455,215 +1527,369 @@
 <tr>
 <td><code>contract_id</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>ID договора</td>
 </tr>
 <tr>
 <td><code>way_id</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>ID договора в процессинге</td>
 </tr>
 <tr>
 <td><code>contract_number</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Номер договора</td>
 </tr>
 <tr>
 <td><code>unique_payment_id</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Уникальный идентификатор платежа (УИП)</td>
 </tr>
 <tr>
 <td><code>client</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>ID клиента</td>
 </tr>
 <tr>
 <td><code>client_category</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Категория клиента</td>
 </tr>
 <tr>
 <td><code>contract_category</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Категория договора</td>
 </tr>
 <tr>
 <td><code>country</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Страна заключения</td>
 </tr>
 <tr>
 <td><code>region</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Регион заключения</td>
 </tr>
 <tr>
 <td><code>fin_institution</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Финансовый институт</td>
 </tr>
 <tr>
 <td><code>invoice_scheme</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Подключение инвойсирования</td>
 </tr>
 <tr>
 <td><code>invoice_period</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Дни выставления счетов</td>
 </tr>
 <tr>
 <td><code>invoice_pmt_delay</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Количество дней на оплату инвойса</td>
 </tr>
 <tr>
 <td><code>contract_status</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>ID статуса договора</td>
 </tr>
 <tr>
 <td><code>contract_status_name</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Значение статуса договора</td>
 </tr>
 <tr>
 <td><code>pay_scheme</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Условия оплаты</td>
 </tr>
 <tr>
 <td><code>discount_scheme</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Схема расчета скидки (код из справочника DiscountScheme)</td>
 </tr>
 <tr>
 <td><code>auto_pay</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Признак разрешения для подключения автосписания с р/с</td>
 </tr>
 <tr>
 <td><code>auto_pay_type</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Тип подключения автоматического платежа</td>
 </tr>
 <tr>
 <td><code>credit_limit</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Кредитный лимит</td>
 </tr>
 <tr>
 <td><code>current_amount_limiter</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Накопленная сумма по контракту</td>
 </tr>
 <tr>
 <td><code>balance_amount_limiter</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Доступная сумма по контракту (max – current)</td>
 </tr>
 <tr>
 <td><code>max_amount_limiter</code></td>
-<td><code>str | None</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
 <td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
 <td>Ограничение лимита на сумму договора</td>
 </tr>
 <tr>
 <td><code>date_open</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Дата заключения договора</td>
 </tr>
 <tr>
 <td><code>effective_date</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Дата вступления в силу</td>
 </tr>
 <tr>
 <td><code>end_date</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Дата окончания</td>
 </tr>
 <tr>
 <td><code>date_expire</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Дата закрытия</td>
 </tr>
 <tr>
 <td><code>product_type</code></td>
 <td><code>bool</code></td>
+<td><code>boolean</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как bool.</td>
 <td>Признак универсального топливного продукта (false – старый продукт, true – УТП)</td>
 </tr>
 <tr>
 <td><code>type_code</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Тип договора</td>
 </tr>
 <tr>
 <td><code>supplier_name</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Имя поставщика</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Граница проверки</p>
+<p>Значения, упомянутые только в тексте описания, не считаются жёстким ограничением. Например, фраза «Y или N» проверяется только тогда, когда в модели задан <code>Literal</code>, Enum, ограничение <code>Field</code> или пользовательский валидатор.</p>
+</div>
 
 
 

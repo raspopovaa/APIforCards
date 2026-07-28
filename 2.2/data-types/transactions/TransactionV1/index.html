@@ -1421,6 +1421,47 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поведение модели
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поля и проверки
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Вложенные модели
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1441,13 +1482,55 @@
 
 <h1 id="transactionv1"><code>TransactionV1</code><a class="headerlink" href="#transactionv1" title="Permanent link">&para;</a></h1>
 <p>Транзакция для версии v1.</p>
+<div class="admonition info">
+<p class="admonition-title">Назначение Pydantic</p>
+<p>Тип модели: <strong>response/data</strong>. Ответ API проверяется этой моделью напрямую или рекурсивно как часть родительской response-модели. При несовпадении типов или отсутствии обязательного поля Pydantic формирует <code>ValidationError</code>.</p>
+</div>
+<h2 id="_1">Поведение модели<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Настройка</th>
+<th>Значение</th>
+<th>Фактическое поведение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Дополнительные поля (<code>extra</code>)</td>
+<td><code>allow</code></td>
+<td>Дополнительные поля разрешены и сохраняются в модели.</td>
+</tr>
+<tr>
+<td>Проверка default</td>
+<td><code>True</code></td>
+<td>Значения по умолчанию также проходят валидацию.</td>
+</tr>
+<tr>
+<td>Заполнение по имени поля</td>
+<td><code>True</code></td>
+<td>Разрешено использовать имя поля наряду с alias.</td>
+</tr>
+<tr>
+<td>Число → строка</td>
+<td><code>True</code></td>
+<td>Для строковых полей числовые значения могут быть преобразованы в строку.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">Поля и проверки<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Поле</th>
-<th>Python-тип</th>
+<th>Тип после валидации</th>
+<th>JSON-тип</th>
 <th style="text-align: center;">Обязательное</th>
+<th style="text-align: center;"><code>None</code></th>
+<th>По умолчанию</th>
 <th>Alias</th>
+<th>Ограничения схемы</th>
+<th>Что проверяет Pydantic</th>
 <th>Описание</th>
 </tr>
 </thead>
@@ -1455,103 +1538,182 @@
 <tr>
 <td><code>id</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>ID транзакции</td>
 </tr>
 <tr>
 <td><code>time</code></td>
 <td><code>datetime</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>формат: 'date-time'</td>
+<td>Значение преобразуется и проверяется как datetime.</td>
 <td>Дата и время транзакции</td>
 </tr>
 <tr>
 <td><code>host_date</code></td>
 <td><code>datetime</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>формат: 'date-time'</td>
+<td>Значение преобразуется и проверяется как datetime.</td>
 <td>Дата и время на хосте</td>
 </tr>
 <tr>
 <td><code>currency</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Код валюты (например, 810)</td>
 </tr>
 <tr>
 <td><code>card_id</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>ID карты</td>
 </tr>
 <tr>
 <td><code>service_center</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>ID сервисного центра (АЗС)</td>
 </tr>
 <tr>
 <td><code>card_number</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Номер карты</td>
 </tr>
 <tr>
 <td><code>base_cost</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Базовая стоимость транзакции</td>
 </tr>
 <tr>
 <td><code>cost</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Фактическая стоимость с учётом скидок</td>
 </tr>
 <tr>
 <td><code>discount</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Размер скидки</td>
 </tr>
 <tr>
 <td><code>discount_cost</code></td>
 <td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как str.</td>
 <td>Стоимость после применения скидки</td>
 </tr>
 <tr>
 <td><code>incoming</code></td>
 <td><code>bool</code></td>
+<td><code>boolean</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение преобразуется и проверяется как bool.</td>
 <td>Признак входящей транзакции</td>
 </tr>
 <tr>
 <td><code>request</code></td>
 <td><code>RequestInfo</code></td>
+<td><code>object (RequestInfo)</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Вложенный объект рекурсивно проверяется моделью RequestInfo.</td>
 <td>Информация о типе операции</td>
 </tr>
 <tr>
 <td><code>transaction_items</code></td>
 <td><code>list[TransactionItem]</code></td>
+<td><code>array[object (TransactionItem)]</code></td>
 <td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Проверяется как список; каждый элемент проверяется как TransactionItem.</td>
 <td>Список товаров в транзакции</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Граница проверки</p>
+<p>Значения, упомянутые только в тексте описания, не считаются жёстким ограничением. Например, фраза «Y или N» проверяется только тогда, когда в модели задан <code>Literal</code>, Enum, ограничение <code>Field</code> или пользовательский валидатор.</p>
+</div>
+<h2 id="_3">Вложенные модели<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../RequestInfo/"><code>RequestInfo</code></a></li>
+<li><a href="../TransactionItem/"><code>TransactionItem</code></a></li>
+</ul>
 
 
 
