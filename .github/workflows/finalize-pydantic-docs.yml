@@ -38,14 +38,23 @@ jobs:
       - name: Generate documentation
         run: python scripts/generate_docs.py
 
-      - name: Run complete verification
-        run: |
-          pytest -q
-          python scripts/verify_external_contract.py
-          ruff check src tests scripts
-          black --check src tests scripts
-          mypy src/api_client_opti24
-          mkdocs build --strict
+      - name: Run tests
+        run: pytest -q
+
+      - name: Verify external API contract
+        run: python scripts/verify_external_contract.py
+
+      - name: Run lint
+        run: ruff check src tests scripts
+
+      - name: Check formatting
+        run: black --check src tests scripts
+
+      - name: Type-check SDK
+        run: mypy src/api_client_opti24
+
+      - name: Build documentation strictly
+        run: mkdocs build --strict
 
       - name: Commit generated documentation
         run: |
