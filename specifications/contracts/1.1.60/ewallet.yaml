@@ -7,6 +7,12 @@ operations:
     verification: verified
     service: ewallet
     request_model: null
+    decisions:
+    - path: response_required_mismatch:timestamp
+      status: accepted
+      reason: Спецификация 1.1.60 помечает timestamp необязательным, текущая Pydantic-модель требует поле, а нормализованный пример успешного ответа содержит timestamp. Расхождение зафиксировано без изменения runtime-поведения SDK.
+      spec_type: optional uint
+      model_type: required int
     variants:
     - route_name: default
       source_section: Изменить тип продукта карты
@@ -37,6 +43,12 @@ operations:
     verification: verified
     service: ewallet
     request_model: null
+    decisions:
+    - path: response_required_mismatch:timestamp
+      status: accepted
+      reason: Спецификация 1.1.60 помечает timestamp необязательным, текущая Pydantic-модель требует поле, а нормализованный пример успешного ответа содержит timestamp. Расхождение зафиксировано без изменения runtime-поведения SDK.
+      spec_type: optional uint
+      model_type: required int
     variants:
     - route_name: default
       source_section: Перевести деньги с договора на кошелек
@@ -67,6 +79,12 @@ operations:
     verification: verified
     service: ewallet
     request_model: null
+    decisions:
+    - path: response_required_mismatch:timestamp
+      status: accepted
+      reason: Спецификация 1.1.60 помечает timestamp необязательным, текущая Pydantic-модель требует поле, а нормализованный пример успешного ответа содержит timestamp. Расхождение зафиксировано без изменения runtime-поведения SDK.
+      spec_type: optional uint
+      model_type: required int
     variants:
     - route_name: default
       source_section: Перевести деньги с кошелька на договор
