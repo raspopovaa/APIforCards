@@ -72,9 +72,7 @@ def test_generated_output_is_idempotent_and_has_required_sections() -> None:
     assert generator.DATA_TYPES_PATH / "index.md" in first
 
     method_pages = {
-        path: content
-        for path, content in first.items()
-        if path.parent == generator.METHODS_PATH
+        path: content for path, content in first.items() if path.parent == generator.METHODS_PATH
     }
     assert method_pages
     for path, content in method_pages.items():

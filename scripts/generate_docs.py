@@ -171,9 +171,7 @@ def public_service_methods(cls: type) -> dict[str, object]:
 
 def documented_specs() -> list[Any]:
     return [
-        spec
-        for spec in build_default_registry().list_all()
-        if spec.name not in EXCLUDED_OPERATIONS
+        spec for spec in build_default_registry().list_all() if spec.name not in EXCLUDED_OPERATIONS
     ]
 
 
@@ -272,9 +270,7 @@ def render_method_page(
     lines = [
         f"# `client.{service_name}`",
         "",
-        domain_meta.get("description")
-        or clean_docstring(service_cls)
-        or "Методы сервиса SDK.",
+        domain_meta.get("description") or clean_docstring(service_cls) or "Методы сервиса SDK.",
         "",
     ]
 
@@ -367,7 +363,7 @@ def render_model(model: type[BaseModel]) -> str:
     lines = [
         f"# `{model.__name__}`",
         "",
-        clean_docstring(model) or "Модель данных SDK.",
+        inspect.cleandoc(vars(model).get("__doc__") or "") or "Модель данных SDK.",
         "",
     ]
     lines.extend(
