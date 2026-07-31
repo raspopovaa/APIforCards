@@ -37,6 +37,7 @@ class AsyncHTTPClient(Protocol):
 
 
 AsyncSleep = Callable[[float], Awaitable[None]]
+SendOnce = Callable[[], Awaitable[httpx.Response]]
 
 
 class AsyncTransport:
@@ -54,7 +55,7 @@ class AsyncTransport:
         clock: Clock | None = None,
         sleep: AsyncSleep = asyncio.sleep,
         monotonic: Callable[[], float] = time.monotonic,
-    ):
+    ) -> None:
         self.base_url = self._normalize_base_url(
             base_url,
             allow_insecure_http=allow_insecure_http,
@@ -168,19 +169,15 @@ class AsyncTransport:
             method_name=method_name,
         )
 
-    async def request(
+    async def _execute_with_policy(
         self,
+        *,
         method: str,
-        endpoint: str,
-        api_version: str = "v1",
-        headers: Mapping[str, str] | None = None,
-        timeout: float | None = None,
-        method_name: str | None = None,
-        retry_class: str | RetryClass | None = None,
-        idempotent: bool | None = None,
-        **kwargs: Any,
-    ) -> DecodedPayload:
-        url = self._build_url(api_version, endpoint)
+        retry_class: str | RetryClass | None,
+        idempotent: bool | None,
+        method_name: str | None,
+        send_once: SendOnce,
+    ) -> httpx.Response:
         normalized_method = method.upper()
         resolved_retry_class = retry_class or (
             RetryClass.SAFE.value
@@ -207,27 +204,24 @@ class AsyncTransport:
                 for rate_attempt in range(1, rate_limit_attempts + 1):
                     await self._wait_for_rate_limit()
                     await self._wait_for_auth_limit(resolved_retry_class)
-                    resp = await self.client.request(
-                        method,
-                        url,
-                        headers=headers,
-                        timeout=timeout,
-                        **kwargs,
-                    )
+                    response = await send_once()
                     self.logger.info(
                         "HTTP method=%s operation=%s status=%s",
-                        method.upper(),
+                        normalized_method,
                         method_name or "unregistered",
-                        resp.status_code,
+                        response.status_code,
                     )
 
-                    if resp.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
+                    if (
+                        response.status_code in {429, 509}
+                        and rate_attempt < rate_limit_attempts
+                    ):
                         backoff_seconds = (
                             self.retry_policy.rate_limit_backoff_seconds * rate_attempt
                         )
                         self.logger.warning(
                             "Rate limit method=%s operation=%s attempt=%s/%s backoff=%.2fs",
-                            method,
+                            normalized_method,
                             method_name or "unregistered",
                             rate_attempt,
                             rate_limit_attempts,
@@ -236,7 +230,7 @@ class AsyncTransport:
                         await self._sleep(backoff_seconds)
                         continue
 
-                    return self._handle_response(resp, endpoint, method_name=method_name)
+                    return response
 
                 raise RuntimeError("Rate limit retry loop exhausted unexpectedly")
 
@@ -246,7 +240,7 @@ class AsyncTransport:
 
                 self.logger.warning(
                     "Network error method=%s operation=%s attempt=%s/%s backoff=%.2fs",
-                    method,
+                    normalized_method,
                     method_name or "unregistered",
                     network_attempt,
                     network_attempts,
@@ -257,7 +251,40 @@ class AsyncTransport:
                     network_backoff * 2,
                     self.retry_policy.network_backoff_max_seconds,
                 )
+
         raise RuntimeError("Network retry loop exhausted unexpectedly")
+
+    async def request(
+        self,
+        method: str,
+        endpoint: str,
+        api_version: str = "v1",
+        headers: Mapping[str, str] | None = None,
+        timeout: float | None = None,
+        method_name: str | None = None,
+        retry_class: str | RetryClass | None = None,
+        idempotent: bool | None = None,
+        **kwargs: Any,
+    ) -> DecodedPayload:
+        url = self._build_url(api_version, endpoint)
+
+        async def send_once() -> httpx.Response:
+            return await self.client.request(
+                method,
+                url,
+                headers=headers,
+                timeout=timeout,
+                **kwargs,
+            )
+
+        response = await self._execute_with_policy(
+            method=method,
+            retry_class=retry_class,
+            idempotent=idempotent,
+            method_name=method_name,
+            send_once=send_once,
+        )
+        return self._handle_response(response, endpoint, method_name=method_name)
 
     async def request_stream(
         self,
@@ -265,20 +292,39 @@ class AsyncTransport:
         endpoint: str,
         api_version: str = "v1",
         headers: Mapping[str, str] | None = None,
+        timeout: float | None = None,
         *,
         method_name: str | None = None,
+        retry_class: str | RetryClass | None = None,
+        idempotent: bool | None = None,
         **kwargs: Any,
     ) -> bytes:
         parsed = urlsplit(endpoint)
         if parsed.scheme or parsed.netloc:
             raise ValueError("stream endpoint must be relative to the configured base_url")
         url = self._build_url(api_version, endpoint)
-        await self._wait_for_rate_limit()
-        async with self.client.stream(method, url, headers=headers, **kwargs) as resp:
-            content = await resp.aread()
-            return self.response_decoder.decode_bytes(
-                resp,
-                content,
+
+        async def send_once() -> httpx.Response:
+            async with self.client.stream(
+                method,
                 url,
-                method_name=method_name,
-            )
+                headers=headers,
+                timeout=timeout,
+                **kwargs,
+            ) as response:
+                await response.aread()
+                return response
+
+        response = await self._execute_with_policy(
+            method=method,
+            retry_class=retry_class,
+            idempotent=idempotent,
+            method_name=method_name,
+            send_once=send_once,
+        )
+        return self.response_decoder.decode_bytes(
+            response,
+            response.content,
+            url,
+            method_name=method_name,
+        )
