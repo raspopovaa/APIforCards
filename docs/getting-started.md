@@ -5,7 +5,8 @@
 - Python `>=3.11,<3.15`;
 - доступ к API из разрешённой сети;
 - API key, логин и пароль;
-- HTTPS URL стенда с путём `/vip/`.
+- HTTPS URL стенда с путём `/vip/`;
+- ID или номер договора, если пользователю доступно несколько договоров.
 
 ## Установка через uv
 
@@ -79,10 +80,10 @@ async def main() -> None:
         settings=settings,
         credentials_provider=credentials,
     ) as client:
-        auth = await client.auth.auth_user()
+        await client.auth.auth_user(contract_number="TEST-001")
         try:
             cards = await client.cards.get_cards_v2(page=1, onpage=5)
-            print("Договоров:", len(auth.data.contracts))
+            print("Выбранный договор:", client.contract_id)
             print("Карт найдено:", cards.total_count)
         finally:
             await client.auth.logoff()
@@ -91,6 +92,21 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
+Единственный доступный договор SDK выбирает автоматически. Если сервер возвращает
+несколько договоров, передайте `contract_id` или `contract_number`. Без явного
+выбора SDK возвращает `ContractSelectionError` и не выбирает первый элемент
+списка неявно.
+
+Можно установить предпочтительный договор до первого защищённого вызова:
+
+```python
+client.contract_id = "contract-id"
+cards = await client.cards.get_cards_v2()
+```
+
+Lazy authentication и последующий re-auth сохранят этот договор только при его
+наличии в актуальном ответе сервера.
 
 !!! warning "Доступ к стенду"
     Пример выполняет реальные сетевые запросы. Если API принимает запросы только
