@@ -4,7 +4,7 @@
 
 ## `client.auth.auth_user()`
 
-Авторизовать пользователя и открыть сессию SDK.
+Авторизовать пользователя, открыть сессию SDK и выбрать договор.
 
 ### Маршрут
 
@@ -17,8 +17,18 @@
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
-| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
-| `contract_number` | `str | None` | Нет | `None` | Параметр публичного метода SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Точный идентификатор договора, который должен стать активным. |
+| `contract_number` | `str | None` | Нет | `None` | Точный номер договора, который должен стать активным. |
+
+`contract_id` и `contract_number` нельзя передавать одновременно.
+
+Правила выбора договора:
+
+1. отсутствие договоров допускает сессию без `contract_id`;
+2. единственный договор выбирается автоматически;
+3. при нескольких договорах требуется `contract_id` или `contract_number`;
+4. отсутствующее или неоднозначное совпадение вызывает `ContractSelectionError`;
+5. SDK не выбирает первый договор по порядку ответа.
 
 ### Возвращаемое значение
 
@@ -40,15 +50,26 @@
 - [`StatusResponse`](../data-types/auth/StatusResponse.md)
 - [`AuthUserData`](../data-types/auth/AuthUserData.md)
 
-Возвращает типизированные данные авторизации, включая идентификатор сессии и доступные договоры.
+Возвращает типизированные данные авторизации, включая идентификатор сессии и доступные договоры. Активный договор доступен через `client.contract_id`.
 
 ### Пример
 
 ```python
 result = await client.auth.auth_user(
+    contract_number="TEST-001",
 )
-print(result)
+print(client.contract_id)
+print(result.data.user_id)
 ```
+
+Предпочтительный договор также можно установить до первого защищённого вызова:
+
+```python
+client.contract_id = "contract-id"
+cards = await client.cards.get_cards_v2()
+```
+
+Lazy authentication и re-auth используют и повторно проверяют этот ID.
 
 ## `client.auth.get_info()`
 
@@ -90,8 +111,7 @@ print(result)
 ### Пример
 
 ```python
-result = await client.auth.get_info(
-)
+result = await client.auth.get_info()
 print(result)
 ```
 
@@ -122,7 +142,5 @@ SDK возвращает значение указанного Python-типа; 
 ### Пример
 
 ```python
-result = await client.auth.logoff(
-)
+result = await client.auth.logoff()
 print(result)
-```
