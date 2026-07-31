@@ -1643,7 +1643,8 @@
 <li>Python <code>&gt;=3.11,&lt;3.15</code>;</li>
 <li>доступ к API из разрешённой сети;</li>
 <li>API key, логин и пароль;</li>
-<li>HTTPS URL стенда с путём <code>/vip/</code>.</li>
+<li>HTTPS URL стенда с путём <code>/vip/</code>;</li>
+<li>ID или номер договора, если пользователю доступно несколько договоров.</li>
 </ul>
 <h2 id="uv">Установка через uv<a class="headerlink" href="#uv" title="Permanent link">&para;</a></h2>
 <p>Зависимости устанавливаются из основного PyPI, а библиотека — из TestPyPI.
@@ -1697,10 +1698,10 @@
 <a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>        <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
 <a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>        <span class="n">credentials_provider</span><span class="o">=</span><span class="n">credentials</span><span class="p">,</span>
 <a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="n">auth</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">auth_user</span><span class="p">()</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">auth_user</span><span class="p">(</span><span class="n">contract_number</span><span class="o">=</span><span class="s2">&quot;TEST-001&quot;</span><span class="p">)</span>
 <a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>        <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>            <span class="n">cards</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">cards</span><span class="o">.</span><span class="n">get_cards_v2</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">onpage</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Договоров:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">auth</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">contracts</span><span class="p">))</span>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Выбранный договор:&quot;</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">contract_id</span><span class="p">)</span>
 <a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Карт найдено:&quot;</span><span class="p">,</span> <span class="n">cards</span><span class="o">.</span><span class="n">total_count</span><span class="p">)</span>
 <a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>        <span class="k">finally</span><span class="p">:</span>
 <a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">logoff</span><span class="p">()</span>
@@ -1709,6 +1710,16 @@
 <a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
 </code></pre></div>
+<p>Единственный доступный договор SDK выбирает автоматически. Если сервер возвращает
+несколько договоров, передайте <code>contract_id</code> или <code>contract_number</code>. Без явного
+выбора SDK возвращает <code>ContractSelectionError</code> и не выбирает первый элемент
+списка неявно.</p>
+<p>Можно установить предпочтительный договор до первого защищённого вызова:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">client</span><span class="o">.</span><span class="n">contract_id</span> <span class="o">=</span> <span class="s2">&quot;contract-id&quot;</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">cards</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">cards</span><span class="o">.</span><span class="n">get_cards_v2</span><span class="p">()</span>
+</code></pre></div>
+<p>Lazy authentication и последующий re-auth сохранят этот договор только при его
+наличии в актуальном ответе сервера.</p>
 <div class="admonition warning">
 <p class="admonition-title">Доступ к стенду</p>
 <p>Пример выполняет реальные сетевые запросы. Если API принимает запросы только

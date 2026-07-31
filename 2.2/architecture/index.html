@@ -1371,6 +1371,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Однократное разрешение операции
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#endpoints" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1382,21 +1393,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dependency-injection" class="md-nav__link">
+  <a href="#dependency-injection-composition-root" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Dependency injection
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Наблюдаемость
+        Dependency injection и composition root
       
     </span>
   </a>
@@ -1407,7 +1407,18 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Композиционные сервисы
+        Авторизация и выбор договора
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transport-execution-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transport и единая execution policy
       
     </span>
   </a>
@@ -1416,6 +1427,28 @@
       
         <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Наблюдаемость
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Композиционные сервисы
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         Модели данных
@@ -1430,6 +1463,17 @@
     <span class="md-ellipsis">
       
         Контракт endpoints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Архитектурные инварианты
       
     </span>
   </a>
@@ -1574,6 +1618,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Однократное разрешение операции
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#endpoints" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1585,21 +1640,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dependency-injection" class="md-nav__link">
+  <a href="#dependency-injection-composition-root" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Dependency injection
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Наблюдаемость
+        Dependency injection и composition root
       
     </span>
   </a>
@@ -1610,7 +1654,18 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Композиционные сервисы
+        Авторизация и выбор договора
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transport-execution-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transport и единая execution policy
       
     </span>
   </a>
@@ -1619,6 +1674,28 @@
       
         <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Наблюдаемость
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Композиционные сервисы
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         Модели данных
@@ -1633,6 +1710,17 @@
     <span class="md-ellipsis">
       
         Контракт endpoints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Архитектурные инварианты
       
     </span>
   </a>
@@ -1662,65 +1750,118 @@
 <h1 id="sdk">Архитектура SDK<a class="headerlink" href="#sdk" title="Permanent link">&para;</a></h1>
 <h2 id="request-pipeline">Request pipeline<a class="headerlink" href="#request-pipeline" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Доменный метод явно передаёт executor имя операции и параметры пути.</li>
-<li><code>DefaultRequestExecutor</code> применяет session/recovery policy операции.</li>
-<li><code>OperationExecutor</code> получает декларативный <code>EndpointSpec</code> из registry,
-   выбирает route variant, безопасно кодирует path-параметры и передаёт timeout,
-   <code>retry_class</code> и <code>idempotent</code> в transport.</li>
-<li>Transport независимо применяет rate limit и сетевой retry.</li>
+<li>Доменный метод передаёт executor имя операции, route name, версию и параметры пути.</li>
+<li><code>OperationExecutor.resolve()</code> один раз получает декларативный <code>EndpointSpec</code>,
+   выбирает <code>RouteVariant</code> и безопасно формирует endpoint. Результат хранится во
+   внутреннем immutable-объекте <code>_ResolvedOperation</code>.</li>
+<li><code>DefaultRequestExecutor</code> использует тот же resolved-объект для session policy,
+   request audit, первой попытки и повторной попытки после re-auth. Повторного
+   обращения к registry и повторного render path-параметров нет.</li>
+<li><code>OperationExecutor</code> формирует headers и передаёт timeout, <code>retry_class</code> и
+   <code>idempotent</code> в transport.</li>
+<li><code>AsyncTransport</code> применяет единый retry/rate-limit pipeline как для JSON, так и
+   для бинарных ответов. Различается только выполнение одной HTTP-попытки и
+   декодирование результата.</li>
 <li><code>ResponseDecoder</code> требует успешные HTTP-код и <code>payload.status.code</code>.</li>
 <li>Executor проверяет, что JSON-ответ является объектом, а доменный сервис
    преобразует его в типизированную модель.</li>
 </ol>
+<h2 id="_1">Однократное разрешение операции<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Registry остаётся единственным источником HTTP-контракта. Внешний executor больше
+не получает registry напрямую: он использует результат, подготовленный
+<code>OperationExecutor.resolve()</code>. Это гарантирует, что audit, session recovery и
+фактический HTTP-запрос относятся к одному и тому же route.</p>
+<p>Низкоуровневые вызовы, в частности <code>auth_user</code>, сохраняют метод
+<code>OperationExecutor.execute()</code>. Он является короткой обёрткой над <code>resolve()</code> и
+<code>execute_resolved()</code> и не запускает автоматический re-auth.</p>
 <h2 id="endpoints">Декларативные endpoints<a class="headerlink" href="#endpoints" title="Permanent link">&para;</a></h2>
-<p>Все маршруты находятся в <code>endpoints.py</code>. Registry не использует AST,
-<code>inspect</code>, динамический импорт сервисов или соглашения об именовании методов.
-<code>MethodSpec</code> сохранён как alias <code>EndpointSpec</code> для обратной совместимости.
-Сервисы не содержат HTTP-методов и endpoint-строк: operation-centric executor
-является единственной точкой разрешения маршрута.
-Внешний код и признак тарификации объявляются непосредственно в соответствующем
-вызове <code>endpoint()</code> или <code>route()</code>, поэтому отдельного внутреннего metadata-overlay
-нет.</p>
-<h2 id="dependency-injection">Dependency injection<a class="headerlink" href="#dependency-injection" title="Permanent link">&para;</a></h2>
-<p><code>APIClient</code> принимает <code>transport</code>, <code>session_manager</code>, <code>registry</code>, <code>logger</code> и
-<code>clock</code>. Функция <code>compose_client_runtime()</code> статически собирает authenticator,
-coordinator, оба executor и сервисы; двухфазной настройки через <code>bind()</code> нет.
-<code>AsyncTransport</code> отдельно принимает HTTP client, response decoder,
-политики, logger и clock. Transport не знает об <code>APIClient</code>, session manager или
-re-auth.</p>
+<p>Все маршруты находятся в <code>endpoints.py</code>. Registry не использует AST, <code>inspect</code>,
+динамический импорт сервисов или соглашения об именовании методов. <code>MethodSpec</code>
+сохранён как alias <code>EndpointSpec</code> для обратной совместимости.</p>
+<p>Сервисы не содержат HTTP-методов и endpoint-строк: operation-centric executor
+является единственной точкой разрешения маршрута. Внешний код и признак
+тарификации объявляются непосредственно в соответствующем вызове <code>endpoint()</code>
+или <code>route()</code>.</p>
+<p>Значения path-параметров кодируются, а разделители пути, query/fragment symbols и
+dot-segments запрещены.</p>
+<h2 id="dependency-injection-composition-root">Dependency injection и composition root<a class="headerlink" href="#dependency-injection-composition-root" title="Permanent link">&para;</a></h2>
+<p><code>APIClient</code> принимает <code>transport</code>, <code>session_manager</code>, <code>registry</code>, <code>logger</code>,
+<code>clock</code>, <code>credentials_provider</code> и <code>api_key_provider</code>. Внутренний
+<code>_resolve_inputs()</code> сводит legacy-параметры, settings и providers к трём готовым
+объектам:</p>
+<ul>
+<li><code>ConnectionSettings</code>;</li>
+<li><code>CredentialsProvider</code>;</li>
+<li><code>APIKeyProvider</code>.</li>
+</ul>
+<p>Промежуточный объект не хранит строки API key, логина или пароля. После
+разрешения входов конструктор создаёт только принадлежащие клиенту ресурсы и
+передаёт их в <code>compose_client_runtime()</code>.</p>
+<p>Функция <code>compose_client_runtime()</code> статически собирает authenticator, coordinator,
+оба executor и сервисы; двухфазной настройки через <code>bind()</code> и DI-фреймворка нет.</p>
 <p>Публичный <code>client.settings</code> имеет тип <code>ConnectionSettings</code> и не содержит API key,
 логин или пароль. Секреты находятся в отдельных <code>APIKeyProvider</code> и
-<code>CredentialsProvider</code>; единый <code>StaticCredentialsProvider</code> реализует оба узких
-контракта. <code>OperationExecutor</code> хранит только <code>APIKeyProvider</code> и запрашивает ключ
-непосредственно перед каждым запросом, поэтому ротация в secret manager не требует
-пересоздания клиента. <code>DefaultAuthenticator</code> — единственный компонент, который
-получает логин и пароль. Legacy <code>APISettings</code> преобразуется в безопасные настройки
-в composition root и не сохраняется клиентом.</p>
+<code>CredentialsProvider</code>. <code>OperationExecutor</code> запрашивает API key непосредственно
+перед каждым запросом, поэтому ротация в secret manager не требует пересоздания
+клиента. <code>DefaultAuthenticator</code> — единственный компонент, который получает логин
+и пароль.</p>
 <p>Сервисы зависят только от узких протоколов <code>RequestExecutor</code>, read-only
 <code>SessionContext</code>, <code>SessionGate</code> и logger. Они не могут изменять состояние сессии.
-<code>SessionGate</code> также используется асинхронным resolver договора, если вызывающий
-код не передал <code>contract_id</code> явно.
-Только <code>DefaultAuthenticator</code> получает <code>SessionMutator</code> и <code>CredentialsProvider</code>,
-а <code>AuthService</code> делегирует ему <code>auth_user</code>. Ни один доменный сервис не хранит
-ссылку на <code>APIClient</code>, его настройки или transport.</p>
-<p><code>AuthenticationCoordinator</code> получает готовый authenticator в конструкторе и
-реализует <code>SessionGate</code> и <code>SessionRecovery</code>. Auth-операция выполняется через
-низкоуровневый <code>OperationExecutor</code> и помечена в registry как не
-требующая сессии, поэтому её <code>401</code> возвращается вызывающему коду без рекурсивного
-re-auth. Пароль не передаётся остальным сервисам.</p>
-<p>Потоковые и JSON-запросы используют только маршруты registry и настроенный
-<code>base_url</code>. Значения path-параметров кодируются, а разделители пути и dot-segments
-запрещены. API key и session ID не могут быть отправлены на другой origin.</p>
-<h2 id="_1">Наблюдаемость<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+Только <code>DefaultAuthenticator</code> получает <code>SessionMutator</code> и
+<code>CredentialsProvider</code>.</p>
+<h2 id="_2">Авторизация и выбор договора<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p><code>SessionManager</code> сериализует первоначальную авторизацию через <code>asyncio.Lock</code>,
+чтобы конкурентные защищённые запросы не создавали auth stampede.</p>
+<p>Выбор договора выполняется по строгим правилам:</p>
+<ol>
+<li>одновременно передавать <code>contract_id</code> и <code>contract_number</code> нельзя;</li>
+<li>явно переданный ID или номер должен иметь ровно одно совпадение;</li>
+<li>отсутствие договоров допускает сессию без <code>contract_id</code>;</li>
+<li>единственный договор выбирается автоматически;</li>
+<li>несколько договоров требуют явного выбора и приводят к
+   <code>ContractSelectionError</code>.</li>
+</ol>
+<p>Исключение хранит доступные пары <code>(id, number)</code> в структурированном поле
+<code>available_contracts</code>, но не добавляет их в текст сообщения. Поэтому обычное
+логирование исключения не раскрывает список договоров.</p>
+<p>Предварительно выбранный <code>client.contract_id</code> передаётся в lazy authentication.
+При re-auth coordinator сохраняет ID выбранного договора, повторно проверяет его
+по актуальному ответу <code>authUser</code> и не переключается на другой договор молча.</p>
+<p>Auth-операция выполняется через низкоуровневый <code>OperationExecutor</code> и помечена в
+registry как не требующая сессии, поэтому её <code>401</code> возвращается вызывающему коду
+без рекурсивного re-auth.</p>
+<h2 id="transport-execution-policy">Transport и единая execution policy<a class="headerlink" href="#transport-execution-policy" title="Permanent link">&para;</a></h2>
+<p><code>AsyncTransport</code> отдельно принимает HTTP client, response decoder, политики,
+logger и clock. Transport не знает об <code>APIClient</code>, session manager или re-auth.</p>
+<p>JSON и binary download используют общий private policy runner. Он отвечает за:</p>
+<ul>
+<li>client-side rate limit;</li>
+<li>минимальный интервал повторной авторизации;</li>
+<li>network retry;</li>
+<li>exponential backoff;</li>
+<li>retry ответов <code>429</code> и <code>509</code>;</li>
+<li>учёт <code>retry_class</code> и idempotency.</li>
+</ul>
+<p>Конкретная HTTP-попытка остаётся разной: JSON использует <code>client.request()</code>, а
+binary download открывает <code>client.stream()</code>, полностью читает ответ и закрывает
+контекст до следующей попытки. Частичные результаты разных попыток не
+объединяются.</p>
+<p>Unsafe операции не получают автоматический retry. Повтор разрешается только
+когда endpoint metadata допускает retry и операция является идемпотентной.
+Потоковый endpoint обязан быть относительным, поэтому API key и session ID не
+могут быть отправлены на другой origin.</p>
+<h2 id="_3">Наблюдаемость<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p>Каждый экземпляр клиента создаёт собственный logger и владеет только своими
-handlers. Закрытие одного клиента не влияет на остальные. Основной файл лога и
-<code>request_log_file</code> открываются в append-режиме. Request-аудит записывается в
-JSONL и содержит только имя операции, версию, route name, HTTP-метод и результат;
-URL, path-параметры и payload в него не попадают. Внедрённый пользователем logger
-не закрывается SDK.</p>
-<h2 id="_2">Композиционные сервисы<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+handlers. Закрытие одного клиента не влияет на остальные. Если инициализация
+клиента завершается ошибкой после создания managed logger, SDK закрывает уже
+созданные handlers.</p>
+<p>Основной файл лога и <code>request_log_file</code> открываются в append-режиме. Request-аудит
+записывается в JSONL и содержит только имя операции, версию, route name,
+HTTP-метод и результат; URL, path-параметры и payload в него не попадают.
+Внедрённый пользователем logger не закрывается SDK.</p>
+<h2 id="_4">Композиционные сервисы<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>Все доменные вызовы выполняются через композиционные сервисы:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">auth</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">auth_user</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">auth</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">auth_user</span><span class="p">(</span><span class="n">contract_number</span><span class="o">=</span><span class="s2">&quot;TEST-001&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">cards</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">cards</span><span class="o">.</span><span class="n">get_cards_v2</span><span class="p">()</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">jobs</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">get_report_jobs</span><span class="p">()</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">users</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">get_users</span><span class="p">()</span>
@@ -1728,34 +1869,44 @@ URL, path-параметры и payload в него не попадают. Вн�
 <p>Каждый доменный метод объявлен непосредственно в конкретном сервисе. В SDK нет
 доменных mixin-классов и прямых методов вида <code>client.get_cards_v2()</code>.
 <code>AuthService</code> создаётся отдельно в composition root и делегирует работу с
-credentials изолированному authenticator. <code>ServiceContainer</code> не зависит от учётных данных и
-собирает остальные сервисы в одном типизированном composition root,
-а внутренний <code>_ServiceFacade</code> предоставляет явные свойства без динамического
-<code>__getattr__</code>.</p>
+credentials изолированному authenticator. <code>ServiceContainer</code> собирает остальные
+сервисы в одном типизированном composition root, а внутренний <code>_ServiceFacade</code>
+предоставляет явные свойства без динамического <code>__getattr__</code>.</p>
 <p>Доступные пространства имён: <code>auth</code>, <code>card_groups</code>, <code>cards</code>, <code>contracts</code>,
 <code>dictionaries</code>, <code>ewallet</code>, <code>final_prices</code>, <code>invites</code>, <code>limits</code>, <code>region_limits</code>,
 <code>reports</code>, <code>restrictions</code>, <code>templates</code>, <code>transactions</code>, <code>users</code> и
 <code>virtual_cards</code>.</p>
-<h2 id="_3">Модели данных<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>Локальный modeling framework заменён Pydantic v2. Совместимый <code>BaseModel</code>
-сохраняет <code>model_validate()</code>, <code>model_dump()</code>, <code>Field</code>, validators, <code>describe()</code> и
-адаптер <code>decode_model()</code>, поэтому сервисный API не изменился. Pydantic проверяет
-типы элементов <code>dict</code>, длину fixed tuple и вложенные структуры. Response-модели
-сохраняют дополнительные серверные поля для forward compatibility, а
-<code>StrictRequestModel</code> запрещает неизвестные поля во всех request DTO.</p>
+<h2 id="_5">Модели данных<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>SDK использует Pydantic v2. Совместимый <code>BaseModel</code> сохраняет
+<code>model_validate()</code>, <code>model_dump()</code>, <code>Field</code>, validators, <code>describe()</code> и адаптер
+<code>decode_model()</code>.</p>
+<p>Response-модели сохраняют дополнительные серверные поля для forward
+compatibility, а <code>StrictRequestModel</code> запрещает неизвестные поля во всех request
+DTO.</p>
 <h2 id="endpoints_1">Контракт endpoints<a class="headerlink" href="#endpoints_1" title="Permanent link">&para;</a></h2>
 <p><code>tests/contracts/endpoints.json</code> является версионируемым snapshot-контрактом для
-всех 89 операций. Contract-тест сравнивает с ним имя и домен операции, версии,
-маршруты, demo-доступность, idempotency, session policy, timeout и retry class.
-Изменение registry поэтому требует явного изменения контракта, а не проходит
-незаметно вместе с реализацией.</p>
+всех операций. Contract-тест сравнивает с ним имя и домен операции, версии,
+маршруты, demo-доступность, idempotency, session policy, timeout и retry class.</p>
 <p>Snapshot дополняется независимым текстовым контрактом
-<code>specifications/api-methods.yaml</code>, однократно преобразованным из внешней таблицы.
-Скрипт <code>scripts/verify_external_contract.py</code> выполняет строгое сопоставление
-<code>external_code → EndpointSpec/RouteVariant</code> и проверяет operation, route name,
-HTTP-метод, версию, путь, DEMO-доступность и тарификацию. Исходный Excel не
-хранится в репозитории. Известные противоречия сводной и детальной спецификаций
-перечислены непосредственно в YAML и не исправляются неявно.</p>
+<code>specifications/api-methods.yaml</code>. Скрипт <code>scripts/verify_external_contract.py</code>
+выполняет строгое сопоставление <code>external_code → EndpointSpec/RouteVariant</code> и
+проверяет operation, route name, HTTP-метод, версию, путь, DEMO-доступность и
+тарификацию.</p>
+<h2 id="_6">Архитектурные инварианты<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<p>После изменений остаются обязательными следующие правила:</p>
+<ul>
+<li>сервис передаёт только имя операции и бизнес-параметры;</li>
+<li>registry является единственным источником маршрута;</li>
+<li>операция разрешается один раз на бизнес-вызов;</li>
+<li>audit и повтор после re-auth используют тот же resolved route;</li>
+<li>JSON и binary download используют одну retry/rate-limit policy;</li>
+<li>unsafe операции не повторяются автоматически;</li>
+<li>network locks не удерживаются во время HTTP-вызова;</li>
+<li>API key получается из provider перед каждым запросом;</li>
+<li>логин и пароль доступны только authenticator;</li>
+<li><code>client.settings</code> не содержит секретов;</li>
+<li>при re-auth договор не меняется незаметно.</li>
+</ul>
 
 
 
