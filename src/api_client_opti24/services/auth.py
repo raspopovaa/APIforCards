@@ -68,14 +68,14 @@ class AuthService(_BaseService):
         """Авторизоваться и выбрать договор для последующих запросов.
 
         Типовой сценарий:
-            Выполнить авторизацию в начале интеграционного сценария и сохранить
-            только идентификатор выбранного договора. Session ID SDK хранит и
-            обновляет самостоятельно.
+            Передайте ``contract_id`` или ``contract_number``. Единственный
+            доступный договор SDK выберет автоматически. При нескольких
+            договорах без явного выбора будет вызван ``ContractSelectionError``.
 
         Пример вызова:
         ```python
-        auth = await client.auth.auth_user(contract_number="TEST-001")
-        contract_id = auth.data.contracts[0].id
+        await client.auth.auth_user(contract_number="TEST-001")
+        contract_id = client.contract_id
         ```
 
         Payload формируется из ``CredentialsProvider`` и выбранного договора;
