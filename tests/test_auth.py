@@ -2,6 +2,8 @@ import logging
 
 import pytest
 
+from api_client_opti24.authentication import _select_contract
+from api_client_opti24.errors import ContractSelectionError
 from api_client_opti24.models.auth import AuthUserResponse
 from api_client_opti24.services import AuthService
 from api_client_opti24.session import SessionManager, SessionState
@@ -27,17 +29,15 @@ class DummyClient(AuthService):
             ):
                 del inner_self, api_version
                 response = AuthUserResponse(**self._auth_payload())
-                contracts = response.data.contracts
-                selected = None
-                if contract_id:
-                    selected = next((item for item in contracts if item.id == contract_id), None)
-                elif contract_number:
-                    selected = next(
-                        (item for item in contracts if item.number == contract_number),
-                        None,
+                try:
+                    selected = _select_contract(
+                        response.data.contracts,
+                        contract_id=contract_id,
+                        contract_number=contract_number,
                     )
-                elif contracts:
-                    selected = contracts[0]
+                except ContractSelectionError:
+                    self.session_manager.invalidate()
+                    raise
                 self.session_manager.mark_authenticated(
                     response.data.session_id,
                     selected.id if selected else None,
@@ -75,9 +75,9 @@ class DummyClient(AuthService):
         self.calls.append((operation, kwargs))
         if operation == "auth_user":
             return self._auth_payload()
-        elif operation == "logoff":
+        if operation == "logoff":
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        elif operation == "get_info":
+        if operation == "get_info":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -94,8 +94,7 @@ class DummyClient(AuthService):
                 },
                 "timestamp": 1710000000,
             }
-        else:
-            raise ValueError(f"Unexpected operation: {operation}")
+        raise ValueError(f"Unexpected operation: {operation}")
 
     @property
     def session_id(self):
@@ -121,14 +120,20 @@ class DummyClient(AuthService):
 @pytest.mark.parametrize(
     "contract_id,contract_number,expected_id",
     [
-        ("1-AAA", None, "1-AAA"),  # выбор по id
-        (None, "NV0002", "1-BBB"),  # выбор по номеру
-        (None, None, "1-AAA"),  # автоселект первого по списку
+        ("1-AAA", None, "1-AAA"),
+        (None, "NV0002", "1-BBB"),
     ],
 )
-async def test_auth_user_sets_session_and_contract_id(contract_id, contract_number, expected_id):
+async def test_auth_user_sets_session_and_selected_contract(
+    contract_id,
+    contract_number,
+    expected_id,
+):
     client = DummyClient()
-    response = await client.auth_user(contract_id=contract_id, contract_number=contract_number)
+    response = await client.auth_user(
+        contract_id=contract_id,
+        contract_number=contract_number,
+    )
 
     assert isinstance(response, AuthUserResponse)
     assert client.session_id == "SESSION123"
@@ -137,9 +142,21 @@ async def test_auth_user_sets_session_and_contract_id(contract_id, contract_numb
 
 
 @pytest.mark.asyncio
+async def test_auth_user_requires_selection_when_multiple_contracts_are_available():
+    client = DummyClient()
+
+    with pytest.raises(ContractSelectionError):
+        await client.auth_user()
+
+    assert client.session_id is None
+    assert client.contract_id is None
+    assert client.session_manager.state == SessionState.INVALID
+
+
+@pytest.mark.asyncio
 async def test_logoff_returns_true():
     client = DummyClient()
-    client.session_id = "SESSION123"  # имитируем авторизацию
+    client.session_id = "SESSION123"
 
     result = await client.logoff()
 
@@ -150,7 +167,7 @@ async def test_logoff_returns_true():
 @pytest.mark.asyncio
 async def test_get_info_returns_data():
     client = DummyClient()
-    client.session_id = "SESSION123"  # имитируем авторизацию
+    client.session_id = "SESSION123"
 
     result = await client.get_info()
 
