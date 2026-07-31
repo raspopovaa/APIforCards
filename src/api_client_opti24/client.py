@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from dataclasses import dataclass
 from types import TracebackType
 from typing import cast
 
@@ -25,6 +28,13 @@ from .session import SessionManager
 from .transport import AsyncTransport
 
 
+@dataclass(frozen=True, slots=True)
+class _ResolvedClientInputs:
+    settings: ConnectionSettings
+    credentials_provider: CredentialsProvider
+    api_key_provider: APIKeyProvider
+
+
 class APIClient(_ServiceFacade):
     def __init__(
         self,
@@ -42,9 +52,77 @@ class APIClient(_ServiceFacade):
         credentials_provider: CredentialsProvider | None = None,
         api_key_provider: APIKeyProvider | None = None,
     ) -> None:
+        resolved = self._resolve_inputs(
+            base_url=base_url,
+            api_key=api_key,
+            login=login,
+            password=password,
+            settings=settings,
+            credentials_provider=credentials_provider,
+            api_key_provider=api_key_provider,
+        )
+        self.settings: ConnectionSettings = resolved.settings
+        self.__managed_logger: ManagedLogger | None = None
+
+        if logger is not None:
+            self.logger: LoggerLike = logger
+            ensure_sanitizing_filter(logger)
+        else:
+            self.__managed_logger = create_client_logger(
+                log_level=self.settings.log_level,
+                logger_file=self.settings.logger_file,
+                request_log_file=self.settings.request_log_file,
+            )
+            self.logger = self.__managed_logger.logger
+
+        try:
+            self.clock = clock or SystemClock()
+            self.session_manager = session_manager or SessionManager()
+            self.registry = registry or build_default_registry()
+            self.transport = transport or AsyncTransport(
+                self.settings.base_url,
+                default_timeout=self.settings.timeouts.default,
+                retry_policy=self.settings.retry_policy,
+                rate_limit_policy=self.settings.rate_limit_policy,
+                allow_insecure_http=self.settings.allow_insecure_http,
+                logger=self.logger,
+                clock=self.clock,
+            )
+            runtime = compose_client_runtime(
+                api_key_provider=resolved.api_key_provider,
+                credentials_provider=resolved.credentials_provider,
+                transport=self.transport,
+                session_manager=self.session_manager,
+                registry=self.registry,
+                timeouts=self.settings.timeouts,
+                logger=self.logger,
+                clock=self.clock,
+            )
+        except Exception:
+            if self.__managed_logger is not None:
+                self.__managed_logger.close()
+            raise
+
+        self.authentication: AuthenticationCoordinator = runtime.authentication
+        self.request_executor: DefaultRequestExecutor = runtime.request_executor
+        self.services: ServiceContainer = runtime.services
+
+    @classmethod
+    def _resolve_inputs(
+        cls,
+        *,
+        base_url: str | None,
+        api_key: str | None,
+        login: str | None,
+        password: str | None,
+        settings: ConnectionSettings | APISettings | None,
+        credentials_provider: CredentialsProvider | None,
+        api_key_provider: APIKeyProvider | None,
+    ) -> _ResolvedClientInputs:
         legacy_api_key: str | None = None
         legacy_login: str | None = None
         legacy_password: str | None = None
+
         if settings is None:
             if base_url is None:
                 raise ValueError("Missing APIClient setting: base_url")
@@ -62,66 +140,35 @@ class APIClient(_ServiceFacade):
         else:
             connection_settings = settings
 
-        self.settings: ConnectionSettings = connection_settings
-        self.__managed_logger: ManagedLogger | None = None
-        if logger is not None:
-            self.logger: LoggerLike = logger
-            ensure_sanitizing_filter(logger)
-        else:
-            self.__managed_logger = create_client_logger(
-                log_level=self.settings.log_level,
-                logger_file=self.settings.logger_file,
-                request_log_file=self.settings.request_log_file,
-            )
-            self.logger = self.__managed_logger.logger
-        self.clock = clock or SystemClock()
-        self.session_manager: SessionManager = session_manager or SessionManager()
-        self.registry = registry or build_default_registry()
-        self.transport: Transport = transport or AsyncTransport(
-            self.settings.base_url,
-            default_timeout=self.settings.timeouts.default,
-            retry_policy=self.settings.retry_policy,
-            rate_limit_policy=self.settings.rate_limit_policy,
-            allow_insecure_http=self.settings.allow_insecure_http,
-            logger=self.logger,
-            clock=self.clock,
-        )
-        auth_credentials = credentials_provider
-        if auth_credentials is None:
+        resolved_credentials = credentials_provider
+        if resolved_credentials is None:
             if not legacy_login or not legacy_password:
                 raise ValueError(
                     "Missing authentication settings: login, password; "
                     "pass credentials_provider or legacy credentials"
                 )
             if legacy_api_key:
-                auth_credentials = StaticCredentialsProvider(
+                resolved_credentials = StaticCredentialsProvider(
                     api_key=legacy_api_key,
                     login=legacy_login,
                     password=legacy_password,
                 )
             else:
-                auth_credentials = StaticLoginPasswordProvider(
+                resolved_credentials = StaticLoginPasswordProvider(
                     login=legacy_login,
                     password=legacy_password,
                 )
-        resolved_api_key_provider = self._resolve_api_key_provider(
+
+        resolved_api_key = cls._resolve_api_key_provider(
             api_key_provider=api_key_provider,
-            credentials_provider=auth_credentials,
+            credentials_provider=resolved_credentials,
             legacy_api_key=legacy_api_key,
         )
-        runtime = compose_client_runtime(
-            api_key_provider=resolved_api_key_provider,
-            credentials_provider=auth_credentials,
-            transport=self.transport,
-            session_manager=self.session_manager,
-            registry=self.registry,
-            timeouts=self.settings.timeouts,
-            logger=self.logger,
-            clock=self.clock,
+        return _ResolvedClientInputs(
+            settings=connection_settings,
+            credentials_provider=resolved_credentials,
+            api_key_provider=resolved_api_key,
         )
-        self.authentication: AuthenticationCoordinator = runtime.authentication
-        self.request_executor: DefaultRequestExecutor = runtime.request_executor
-        self.services: ServiceContainer = runtime.services
 
     @staticmethod
     def _resolve_api_key_provider(
