@@ -22,7 +22,22 @@ class FinalPricesService(_BaseService):
         goods: list[str],
         api_version: str | None = None,
     ) -> FinalPricesResponse:
-        """Получить финальные цены на АЗС по карте."""
+        """Получить финальные цены на АЗС по карте.
+
+        Типовой сценарий:
+            Перед покупкой получить цены для выбранной карты, торговой точки и
+            списка товарных кодов. Результат следует использовать только в
+            пределах актуального пользовательского сценария.
+
+        Пример вызова:
+        ```python
+        prices = await client.final_prices.get_final_prices(
+            card_id="card-id",
+            poi_id="poi-id",
+            goods=["fuel-code"],
+        )
+        ```
+        """
         payload = {"poi_id": poi_id, "goods": goods}
         self.logger.info("Requesting final prices")
 
