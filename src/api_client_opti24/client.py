@@ -195,7 +195,7 @@ class APIClient(_ServiceFacade):
             if self.__managed_logger is not None:
                 self.__managed_logger.close()
 
-    async def __aenter__(self) -> "APIClient":
+    async def __aenter__(self) -> APIClient:
         return self
 
     async def __aexit__(
