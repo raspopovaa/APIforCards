@@ -21,9 +21,7 @@ def _select_contract(
     contract_number: str | None,
 ) -> ContractInfo | None:
     if contract_id is not None and contract_number is not None:
-        raise ContractSelectionError(
-            "Pass either contract_id or contract_number, not both"
-        )
+        raise ContractSelectionError("Pass either contract_id or contract_number, not both")
 
     if contract_id is not None:
         matches = [item for item in contracts if item.id == contract_id]
@@ -84,9 +82,7 @@ class DefaultAuthenticator:
         contract_number: str | None = None,
     ) -> AuthUserResponse:
         if contract_id is not None and contract_number is not None:
-            raise ContractSelectionError(
-                "Pass either contract_id or contract_number, not both"
-            )
+            raise ContractSelectionError("Pass either contract_id or contract_number, not both")
 
         login, password = self.__credentials_provider.get_credentials()
         data = await self.__request_executor.execute(

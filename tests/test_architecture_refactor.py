@@ -232,9 +232,7 @@ def response(status: int, content: bytes, content_type: str = "application/octet
 
 @pytest.mark.asyncio
 async def test_stream_retries_network_error_and_closes_each_context() -> None:
-    client = FakeHTTPClient(
-        [httpx.RequestError("temporary"), response(200, b"report")]
-    )
+    client = FakeHTTPClient([httpx.RequestError("temporary"), response(200, b"report")])
     transport = AsyncTransport(
         "https://example.test/vip/",
         http_client=client,
@@ -245,16 +243,12 @@ async def test_stream_retries_network_error_and_closes_each_context() -> None:
         ),
     )
 
-    result = await transport.request_stream(
-        "GET", "reports/1", retry_class="safe", idempotent=True
-    )
+    result = await transport.request_stream("GET", "reports/1", retry_class="safe", idempotent=True)
 
     assert result == b"report"
     assert client.stream_calls == 2
     assert all(
-        context.closed
-        for context in client.contexts
-        if not isinstance(context.result, Exception)
+        context.closed for context in client.contexts if not isinstance(context.result, Exception)
     )
 
 
@@ -267,9 +261,7 @@ async def test_stream_retries_rate_limit_then_returns_bytes() -> None:
         retry_policy=RetryPolicy(rate_limit_attempts=2, rate_limit_backoff_seconds=0),
     )
 
-    result = await transport.request_stream(
-        "GET", "reports/1", retry_class="safe", idempotent=True
-    )
+    result = await transport.request_stream("GET", "reports/1", retry_class="safe", idempotent=True)
 
     assert result == b"report"
     assert client.stream_calls == 2
@@ -289,9 +281,7 @@ async def test_unsafe_stream_is_not_retried() -> None:
     )
 
     with pytest.raises(httpx.RequestError):
-        await transport.request_stream(
-            "POST", "commands", retry_class="never", idempotent=False
-        )
+        await transport.request_stream("POST", "commands", retry_class="never", idempotent=False)
 
     assert client.stream_calls == 1
 
@@ -468,9 +458,7 @@ async def test_lazy_authentication_uses_preselected_contract_once_concurrently()
     )
     coordinator = AuthenticationCoordinator(session, authenticator)
 
-    session_ids = await asyncio.gather(
-        *(coordinator.ensure_authenticated() for _ in range(20))
-    )
+    session_ids = await asyncio.gather(*(coordinator.ensure_authenticated() for _ in range(20)))
 
     assert session_ids == ["new-session"] * 20
     assert executor.calls == 1

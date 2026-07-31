@@ -212,10 +212,7 @@ class AsyncTransport:
                         response.status_code,
                     )
 
-                    if (
-                        response.status_code in {429, 509}
-                        and rate_attempt < rate_limit_attempts
-                    ):
+                    if response.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
                         backoff_seconds = (
                             self.retry_policy.rate_limit_backoff_seconds * rate_attempt
                         )

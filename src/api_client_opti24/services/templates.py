@@ -160,9 +160,7 @@ class TemplatesService(_BaseService):
             raise ValueError("Параметр 'limits' должен быть непустым списком объектов лимитов.")
         validated_limits = [_validate_limit_payload(limit) for limit in limits]
         request_limits = (
-            with_method_override(validated_limits, "PUT")
-            if use_post
-            else validated_limits
+            with_method_override(validated_limits, "PUT") if use_post else validated_limits
         )
         self.logger.info(
             "Updating template limit item_count=%d post_fallback=%s",
@@ -238,9 +236,7 @@ class TemplatesService(_BaseService):
         request = TemplateRestrictionCreateRequest.model_validate(payload)
         validated_payload = _dump_request(request)
         request_payload = (
-            with_method_override(validated_payload, "PUT")
-            if use_post
-            else validated_payload
+            with_method_override(validated_payload, "PUT") if use_post else validated_payload
         )
         self.logger.info("Updating template restriction post_fallback=%s", use_post)
         data = await self._request(
@@ -312,9 +308,7 @@ class TemplatesService(_BaseService):
         request = TemplateGeoRestrictionCreateRequest.model_validate(payload)
         validated_payload = _dump_request(request)
         request_payload = (
-            with_method_override(validated_payload, "PUT")
-            if use_post
-            else validated_payload
+            with_method_override(validated_payload, "PUT") if use_post else validated_payload
         )
         self.logger.info("Updating template geo restriction post_fallback=%s", use_post)
         data = await self._request(
