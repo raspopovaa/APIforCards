@@ -7,18 +7,19 @@
 ## Авторизация и получение карт
 
 ```python
-auth = await client.auth.auth_user(contract_number="TEST-001")
-contract_id = auth.data.contracts[0].id
+await client.auth.auth_user(contract_number="TEST-001")
 
 cards = await client.cards.get_cards_v2(
-    contract_id=contract_id,
+    contract_id=client.contract_id,
     status="Active",
     page=1,
     onpage=20,
 )
 ```
 
-SDK хранит session ID самостоятельно. Не выводите его в терминал и не передавайте
+Единственный договор выбирается автоматически. При нескольких договорах передайте
+`contract_id` или `contract_number`; SDK не выбирает первый договор по порядку.
+Session ID SDK хранит самостоятельно. Не выводите его в терминал и не передавайте
 в telemetry.
 
 ## Защита утраченной карты
@@ -80,7 +81,9 @@ report_file = await client.reports.download_report_file(job_id="job-id")
 ```
 
 Формирование файла выполняется асинхронно на стороне API. Не запускайте частый
-polling: учитывайте rate limit и ожидаемое время подготовки отчёта.
+polling: учитывайте rate limit и ожидаемое время подготовки отчёта. Binary download
+использует ту же retry-политику, что и JSON, но только для безопасных и
+идемпотентных операций.
 
 ## Приглашение и виртуальная карта
 
