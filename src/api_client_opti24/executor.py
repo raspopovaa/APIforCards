@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
+from dataclasses import dataclass
 from typing import Any, Protocol, TypeVar
 
 from .config import TimeoutPolicy
@@ -46,6 +47,13 @@ class Transport(Protocol):
     async def aclose(self) -> None: ...
 
 
+@dataclass(frozen=True, slots=True)
+class _ResolvedOperation:
+    spec: EndpointSpec
+    route: RouteVariant
+    endpoint: str
+
+
 class OperationExecutor:
     def __init__(
         self,
@@ -89,17 +97,17 @@ class OperationExecutor:
         self.__logger.debug("Prepared headers: %s", sanitize_for_logging(headers))
         return headers
 
-    def _resolve_operation(
+    def resolve(
         self,
         operation: str,
         *,
-        api_version: str | None,
-        route_name: str,
-        path_params: PathParams | None,
-    ) -> tuple[EndpointSpec, RouteVariant, str]:
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+    ) -> _ResolvedOperation:
         spec = self.__registry.get(operation)
         route = spec.resolve_route(api_version=api_version, route_name=route_name)
-        return spec, route, route.render(path_params)
+        return _ResolvedOperation(spec=spec, route=route, endpoint=route.render(path_params))
 
     def _request_headers(
         self,
@@ -118,28 +126,27 @@ class OperationExecutor:
         )
         return headers
 
-    async def _request_json(
+    async def execute_resolved(
         self,
-        spec: EndpointSpec,
-        route: RouteVariant,
-        endpoint: str,
-        kwargs: dict[str, Any],
+        resolved: _ResolvedOperation,
+        **kwargs: Any,
     ) -> JSONPayload:
+        request_kwargs = dict(kwargs)
         result = await self.__transport.request(
-            route.http_method,
-            endpoint,
-            api_version=route.api_version,
-            headers=self._request_headers(spec, kwargs),
-            timeout=self.__timeouts.resolve(spec.timeout_class),
-            method_name=spec.name,
-            retry_class=spec.retry_class,
-            idempotent=spec.idempotent,
-            **kwargs,
+            resolved.route.http_method,
+            resolved.endpoint,
+            api_version=resolved.route.api_version,
+            headers=self._request_headers(resolved.spec, request_kwargs),
+            timeout=self.__timeouts.resolve(resolved.spec.timeout_class),
+            method_name=resolved.spec.name,
+            retry_class=resolved.spec.retry_class,
+            idempotent=resolved.spec.idempotent,
+            **request_kwargs,
         )
         if not isinstance(result, dict):
             self.__logger.error(
                 "Unexpected API response operation=%s response_type=%s",
-                spec.name,
+                resolved.spec.name,
                 type(result).__name__,
             )
             raise TypeError("Expected API response to be a JSON object")
@@ -155,7 +162,7 @@ class OperationExecutor:
         path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> JSONPayload:
-        spec, route, endpoint = self._resolve_operation(
+        resolved = self.resolve(
             operation,
             api_version=api_version,
             route_name=route_name,
@@ -163,27 +170,28 @@ class OperationExecutor:
         )
         self.__logger.debug(
             "Preparing API request operation=%s version=%s route=%s",
-            spec.name,
-            route.api_version,
-            route.name,
+            resolved.spec.name,
+            resolved.route.api_version,
+            resolved.route.name,
         )
-        return await self._request_json(spec, route, endpoint, dict(kwargs))
+        return await self.execute_resolved(resolved, **kwargs)
 
-    async def _request_bytes(
+    async def execute_stream_resolved(
         self,
-        spec: EndpointSpec,
-        route: RouteVariant,
-        endpoint: str,
-        kwargs: dict[str, Any],
+        resolved: _ResolvedOperation,
+        **kwargs: Any,
     ) -> bytes:
+        request_kwargs = dict(kwargs)
         return await self.__transport.request_stream(
-            route.http_method,
-            endpoint,
-            api_version=route.api_version,
-            headers=self._request_headers(spec, kwargs),
-            timeout=self.__timeouts.resolve(spec.timeout_class),
-            method_name=spec.name,
-            **kwargs,
+            resolved.route.http_method,
+            resolved.endpoint,
+            api_version=resolved.route.api_version,
+            headers=self._request_headers(resolved.spec, request_kwargs),
+            timeout=self.__timeouts.resolve(resolved.spec.timeout_class),
+            method_name=resolved.spec.name,
+            retry_class=resolved.spec.retry_class,
+            idempotent=resolved.spec.idempotent,
+            **request_kwargs,
         )
 
     async def execute_stream(
@@ -195,13 +203,13 @@ class OperationExecutor:
         path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> bytes:
-        spec, route, endpoint = self._resolve_operation(
+        resolved = self.resolve(
             operation,
             api_version=api_version,
             route_name=route_name,
             path_params=path_params,
         )
-        return await self._request_bytes(spec, route, endpoint, dict(kwargs))
+        return await self.execute_stream_resolved(resolved, **kwargs)
 
 
 class DefaultRequestExecutor:
@@ -211,13 +219,11 @@ class DefaultRequestExecutor:
         operation_executor: OperationExecutor,
         session_gate: SessionGate,
         session_recovery: SessionRecovery,
-        registry: MethodRegistry,
         logger: LoggerLike,
     ) -> None:
         self.__operation_executor = operation_executor
         self.__session_gate = session_gate
         self.__session_recovery = session_recovery
-        self.__registry = registry
         self.__logger = logger
 
     def headers(
@@ -233,8 +239,7 @@ class DefaultRequestExecutor:
     def _audit(
         self,
         event: str,
-        spec: EndpointSpec,
-        route: RouteVariant,
+        resolved: _ResolvedOperation,
         *,
         recovered: bool = False,
     ) -> None:
@@ -243,40 +248,39 @@ class DefaultRequestExecutor:
             extra={
                 "request_audit": True,
                 "event": event,
-                "operation": spec.name,
-                "api_version": route.api_version,
-                "route_name": route.name,
-                "http_method": route.http_method,
+                "operation": resolved.spec.name,
+                "api_version": resolved.route.api_version,
+                "route_name": resolved.route.name,
+                "http_method": resolved.route.http_method,
                 "recovered": recovered,
             },
         )
 
     async def _run_with_recovery(
         self,
-        spec: EndpointSpec,
-        route: RouteVariant,
+        resolved: _ResolvedOperation,
         request: Callable[[], Awaitable[ResultT]],
     ) -> ResultT:
-        self._audit("started", spec, route)
+        self._audit("started", resolved)
         try:
             result = await request()
         except NotAuthenticatedError:
-            if not spec.requires_session:
-                self._audit("failed", spec, route)
+            if not resolved.spec.requires_session:
+                self._audit("failed", resolved)
                 raise
-            self._audit("session_recovery", spec, route)
+            self._audit("session_recovery", resolved)
             await self.__session_recovery.recover()
             try:
                 result = await request()
             except Exception:
-                self._audit("failed", spec, route, recovered=True)
+                self._audit("failed", resolved, recovered=True)
                 raise
-            self._audit("completed", spec, route, recovered=True)
+            self._audit("completed", resolved, recovered=True)
             return result
         except Exception:
-            self._audit("failed", spec, route)
+            self._audit("failed", resolved)
             raise
-        self._audit("completed", spec, route)
+        self._audit("completed", resolved)
         return result
 
     async def execute(
@@ -288,20 +292,17 @@ class DefaultRequestExecutor:
         path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> JSONPayload:
-        spec = self.__registry.get(operation)
-        route = spec.resolve_route(api_version=api_version, route_name=route_name)
-        if spec.requires_session:
+        resolved = self.__operation_executor.resolve(
+            operation,
+            api_version=api_version,
+            route_name=route_name,
+            path_params=path_params,
+        )
+        if resolved.spec.requires_session:
             await self.__session_gate.ensure_authenticated()
         return await self._run_with_recovery(
-            spec,
-            route,
-            lambda: self.__operation_executor.execute(
-                operation,
-                api_version=api_version,
-                route_name=route_name,
-                path_params=path_params,
-                **kwargs,
-            ),
+            resolved,
+            lambda: self.__operation_executor.execute_resolved(resolved, **kwargs),
         )
 
     async def execute_stream(
@@ -313,18 +314,15 @@ class DefaultRequestExecutor:
         path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> bytes:
-        spec = self.__registry.get(operation)
-        route = spec.resolve_route(api_version=api_version, route_name=route_name)
-        if spec.requires_session:
+        resolved = self.__operation_executor.resolve(
+            operation,
+            api_version=api_version,
+            route_name=route_name,
+            path_params=path_params,
+        )
+        if resolved.spec.requires_session:
             await self.__session_gate.ensure_authenticated()
         return await self._run_with_recovery(
-            spec,
-            route,
-            lambda: self.__operation_executor.execute_stream(
-                operation,
-                api_version=api_version,
-                route_name=route_name,
-                path_params=path_params,
-                **kwargs,
-            ),
+            resolved,
+            lambda: self.__operation_executor.execute_stream_resolved(resolved, **kwargs),
         )
