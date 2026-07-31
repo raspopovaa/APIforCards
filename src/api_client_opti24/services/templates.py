@@ -55,7 +55,21 @@ class TemplatesService(_BaseService):
     async def create_template(
         self, contract_id: str, type_: str, name: str, api_version: str | None = None
     ) -> TemplateCreateResponse:
-        """Создать новый шаблон виртуальной карты."""
+        """Создать новый шаблон виртуальной карты.
+
+        Типовой сценарий:
+            Создать основу для выпуска виртуальных карт, а затем добавить к ней
+            лимиты, товарные ограничения и географические ограничения.
+
+        Пример вызова:
+        ```python
+        template = await client.templates.create_template(
+            contract_id="contract-id",
+            type_="wallet",
+            name="Основной шаблон",
+        )
+        ```
+        """
         request = TemplateCreateRequest(contract_id=contract_id, type=type_, name=name)
         self.logger.info("Creating virtual card template")
         data = await self._request(
