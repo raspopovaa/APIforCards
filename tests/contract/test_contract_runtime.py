@@ -62,8 +62,11 @@ def test_declared_request_models_exist_and_usage_is_classified(contract_catalog)
         classified.add(operation.name)
 
     assert classified == {
+        "attach_contracts",
         "check_purchase",
+        "create_invite",
         "order_report",
+        "set_cards_to_group",
         "create_template",
         "create_template_limit",
         "create_template_restriction",
