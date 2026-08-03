@@ -1,17 +1,20 @@
 from collections.abc import Mapping
 from typing import Any
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.restrictions import (
     RestrictionGetResponse,
     RestrictionRemoveResponse,
     RestrictionRequestItem,
     RestrictionSetResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
 from ..validation import require_identifier, validate_card_or_group_target
+
+GET_RESTRICTIONS = operation("get_restrictions", RestrictionGetResponse)
+SET_RESTRICTION = operation("set_restriction", RestrictionSetResponse)
+REMOVE_RESTRICTION = operation("remove_restriction", RestrictionRemoveResponse)
 
 
 class RestrictionsService(_BaseService):
@@ -20,7 +23,6 @@ class RestrictionsService(_BaseService):
     """
 
     # ---------------- Запрос ----------------
-    @api_method
     async def get_restrictions(
         self,
         *,
@@ -43,16 +45,14 @@ class RestrictionsService(_BaseService):
         if group_id is not None:
             params["group_id"] = group_id
 
-        raw = await self._request(
-            "get_restrictions",
+        return await self._request(
+            GET_RESTRICTIONS,
             api_version=api_version,
             params=params,
+            request_contract_id=cid,
         )
 
-        return decode_model(RestrictionGetResponse, raw)
-
     # ---------------- Установка ----------------
-    @api_method
     async def set_restriction(
         self,
         *,
@@ -116,16 +116,14 @@ class RestrictionsService(_BaseService):
 
         body = {"restriction": to_json_param(serialized_restrictions)}
 
-        raw = await self._request(
-            "set_restriction",
+        return await self._request(
+            SET_RESTRICTION,
             api_version=api_version,
             data=body,
+            request_contract_id=fallback_contract_id or parsed_restrictions[0].contract_id,
         )
 
-        return decode_model(RestrictionSetResponse, raw)
-
     # ---------------- Удаление ----------------
-    @api_method
     async def remove_restriction(
         self,
         *,
@@ -145,10 +143,9 @@ class RestrictionsService(_BaseService):
         if group_id is not None:
             body["group_id"] = require_identifier(group_id, "group_id")
 
-        raw = await self._request(
-            "remove_restriction",
+        return await self._request(
+            REMOVE_RESTRICTION,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        return decode_model(RestrictionRemoveResponse, raw)

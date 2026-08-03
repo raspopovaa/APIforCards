@@ -14,7 +14,7 @@ from api_client_opti24.models.contracts import (
 )
 from api_client_opti24.services.contract import ContractsService
 from api_client_opti24.session import SessionManager
-from tests.service_support import service_dependencies
+from tests.service_support import service_dependencies, typed_request_stub
 
 
 class MockContractClient(ContractsService):
@@ -26,6 +26,7 @@ class MockContractClient(ContractsService):
         super().__init__(*service_dependencies(session_manager))
         self.session_id = "mock-session"
 
+    @typed_request_stub
     async def _request(self, operation, api_version="v1", **kwargs):
         if operation == "get_contract_data":
             return {

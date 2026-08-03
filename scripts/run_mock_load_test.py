@@ -6,6 +6,7 @@ import json
 import logging
 import sys
 import time
+import tracemalloc
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -223,6 +224,7 @@ async def run_load_test(total_operations: int, concurrency: int) -> dict[str, An
     initial_burst = min(concurrency, total_operations)
     remaining = total_operations - initial_burst
 
+    tracemalloc.start()
     started_at = time.perf_counter()
 
     burst_results = await asyncio.gather(
@@ -240,20 +242,36 @@ async def run_load_test(total_operations: int, concurrency: int) -> dict[str, An
     ]
 
     semaphore = asyncio.Semaphore(concurrency)
+    latencies: list[float] = []
 
     async def execute(index: int) -> str:
         async with semaphore:
+            operation_started_at = time.perf_counter()
             result = await operations[index % len(operations)]()
+            latencies.append(time.perf_counter() - operation_started_at)
             return type(result).__name__
 
     remaining_results = await asyncio.gather(*(execute(index) for index in range(remaining)))
     elapsed = time.perf_counter() - started_at
+    _, peak_memory = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    sorted_latencies = sorted(latencies)
+
+    def percentile(fraction: float) -> float | None:
+        if not sorted_latencies:
+            return None
+        index = min(len(sorted_latencies) - 1, int(len(sorted_latencies) * fraction))
+        return round(sorted_latencies[index] * 1000, 3)
 
     summary = {
         "total_operations": total_operations,
         "concurrency": concurrency,
         "elapsed_seconds": round(elapsed, 3),
         "operations_per_second": round(total_operations / elapsed, 2) if elapsed else None,
+        "latency_ms_p50": percentile(0.50),
+        "latency_ms_p95": percentile(0.95),
+        "latency_ms_p99": percentile(0.99),
+        "peak_memory_mib": round(peak_memory / (1024 * 1024), 3),
         "auth_calls": transport.auth_calls,
         "request_count": transport.request_count,
         "result_types": dict(

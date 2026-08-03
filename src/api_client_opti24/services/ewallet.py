@@ -1,18 +1,20 @@
 from decimal import Decimal
 from typing import Literal
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.ewallet import (
     MoveToCardResponse,
     MoveToContractResponse,
     SetCardProductResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
 from ..validation import decimal_to_wire, require_identifier
 
 CardProduct = Literal["wallet", "limit"]
+SET_CARD_PRODUCT = operation("set_card_product", SetCardProductResponse)
+MOVE_TO_CARD = operation("move_to_card", MoveToCardResponse)
+MOVE_TO_CONTRACT = operation("move_to_contract", MoveToContractResponse)
 
 
 class EwalletService(_BaseService):
@@ -30,7 +32,6 @@ class EwalletService(_BaseService):
     # Изменить тип продукта карты
     # ============================================================
 
-    @api_method
     async def set_card_product(
         self,
         *,
@@ -64,19 +65,17 @@ class EwalletService(_BaseService):
             "product": product,
         }
 
-        data = await self._request(
-            "set_card_product",
+        return await self._request(
+            SET_CARD_PRODUCT,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        return decode_model(SetCardProductResponse, data)
 
     # ============================================================
     # Перевести деньги с договора на кошелёк
     # ============================================================
 
-    @api_method
     async def move_to_card(
         self,
         *,
@@ -124,19 +123,17 @@ class EwalletService(_BaseService):
             "amount": decimal_to_wire(amount),
         }
 
-        data = await self._request(
-            "move_to_card",
+        return await self._request(
+            MOVE_TO_CARD,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        return decode_model(MoveToCardResponse, data)
 
     # ============================================================
     # Перевести деньги с кошелька на договор
     # ============================================================
 
-    @api_method
     async def move_to_contract(
         self,
         *,
@@ -165,10 +162,9 @@ class EwalletService(_BaseService):
             "amount": decimal_to_wire(amount),
         }
 
-        data = await self._request(
-            "move_to_contract",
+        return await self._request(
+            MOVE_TO_CONTRACT,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        return decode_model(MoveToContractResponse, data)

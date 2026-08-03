@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from ..modeling import BaseModel, Field, StrictRequestModel
-from .common import ResponseStatus
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 # === Базовые структуры ===
 
@@ -134,31 +133,19 @@ class LimitsData(BaseModel):
     result: list[LimitItem] = Field(..., description="Список лимитов")
 
 
-class LimitsResponse(BaseModel):
+class LimitsResponse(APIEnvelope[LimitsData]):
     """Ответ на запрос списка лимитов."""
-
-    status: ResponseStatus = Field(..., description="Статус выполнения")
-    data: LimitsData = Field(..., description="Данные с лимитами")
-    timestamp: int = Field(..., description="Временная метка ответа")
 
 
 # === Ответ на POST /removeLimit ===
 
 
-class RemoveLimitResponse(BaseModel):
+class RemoveLimitResponse(APIEnvelope[bool]):
     """Ответ на удаление продуктового лимита."""
-
-    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
-    data: bool = Field(..., description="Результат операции (True — успешно)")
-    timestamp: int = Field(..., description="Временная метка ответа")
 
 
 # === Ответ на POST /setLimit ===
 
 
-class SetLimitResponse(BaseModel):
+class SetLimitResponse(APIEnvelope[list[str]]):
     """Ответ на установку/изменение продуктового лимита."""
-
-    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
-    data: list[str] = Field(..., description="ID созданных/обновлённых лимитов")
-    timestamp: int = Field(..., description="Временная метка ответа")

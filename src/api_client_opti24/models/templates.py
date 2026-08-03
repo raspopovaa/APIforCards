@@ -1,7 +1,6 @@
 from typing import Literal
 
-from ..modeling import BaseModel, Field, StrictRequestModel
-from .common import ResponseStatus
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 # ====== ОСНОВНОЙ ШАБЛОН ВК ======
 
@@ -18,10 +17,8 @@ class TemplatesListData(BaseModel):
     result: list[TemplateItem] = Field(..., description="Список найденных шаблонов ВК")
 
 
-class TemplatesListResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: TemplatesListData = Field(..., description="Основные данные списка шаблонов")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplatesListResponse(APIEnvelope[TemplatesListData]):
+    pass
 
 
 class TemplateCreateRequest(StrictRequestModel):
@@ -30,16 +27,12 @@ class TemplateCreateRequest(StrictRequestModel):
     name: str = Field(..., description="Имя (название) нового шаблона ВК")
 
 
-class TemplateCreateResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: str = Field(..., description="ID созданного шаблона")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateCreateResponse(APIEnvelope[str]):
+    pass
 
 
-class TemplateDeleteResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: bool = Field(..., description="Результат операции (true — успешно, false — ошибка)")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateDeleteResponse(APIEnvelope[bool]):
+    pass
 
 
 # ====== ЛИМИТЫ ШАБЛОНОВ ======
@@ -107,10 +100,8 @@ class TemplateLimitListData(BaseModel):
     result: list[TemplateLimit] = Field(..., description="Список лимитов шаблона")
 
 
-class TemplateLimitListResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: TemplateLimitListData = Field(..., description="Основные данные списка лимитов")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateLimitListResponse(APIEnvelope[TemplateLimitListData]):
+    pass
 
 
 class TemplateLimitCreateRequest(StrictRequestModel):
@@ -124,16 +115,12 @@ class TemplateLimitCreateRequest(StrictRequestModel):
     create_restriction: bool | None = Field(None, description="Создать ограничитель автоматически")
 
 
-class TemplateLimitCreateResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: str = Field(..., description="ID созданного лимита шаблона")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateLimitCreateResponse(APIEnvelope[str]):
+    pass
 
 
-class TemplateLimitDeleteResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: bool = Field(..., description="Результат удаления лимита (true — успешно)")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateLimitDeleteResponse(APIEnvelope[bool]):
+    pass
 
 
 # ====== ОГРАНИЧИТЕЛИ ШАБЛОНА ======
@@ -156,12 +143,8 @@ class TemplateRestrictionListData(BaseModel):
     result: list[TemplateRestriction] = Field(..., description="Список ограничителей шаблона")
 
 
-class TemplateRestrictionListResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: TemplateRestrictionListData = Field(
-        ..., description="Основные данные списка ограничителей"
-    )
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateRestrictionListResponse(APIEnvelope[TemplateRestrictionListData]):
+    pass
 
 
 class TemplateRestrictionCreateRequest(StrictRequestModel):
@@ -171,16 +154,12 @@ class TemplateRestrictionCreateRequest(StrictRequestModel):
     restriction_type: Literal[1, 2] = Field(..., description="Тип ограничителя")
 
 
-class TemplateRestrictionCreateResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: str = Field(..., description="ID созданного ограничителя шаблона")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateRestrictionCreateResponse(APIEnvelope[str]):
+    pass
 
 
-class TemplateRestrictionDeleteResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: bool = Field(..., description="Результат удаления ограничителя")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateRestrictionDeleteResponse(APIEnvelope[bool]):
+    pass
 
 
 # ====== ГЕООГРАНИЧИТЕЛИ ШАБЛОНА ======
@@ -209,12 +188,8 @@ class TemplateGeoRestrictionListData(BaseModel):
     result: list[TemplateGeoRestriction] = Field(..., description="Список геоограничителей шаблона")
 
 
-class TemplateGeoRestrictionListResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: TemplateGeoRestrictionListData = Field(
-        ..., description="Основные данные списка геоограничителей"
-    )
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateGeoRestrictionListResponse(APIEnvelope[TemplateGeoRestrictionListData]):
+    pass
 
 
 class TemplateGeoRestrictionCreateRequest(StrictRequestModel):
@@ -226,13 +201,9 @@ class TemplateGeoRestrictionCreateRequest(StrictRequestModel):
     restriction_type: Literal[1, 2] = Field(..., description="Тип геоограничителя")
 
 
-class TemplateGeoRestrictionCreateResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: str = Field(..., description="ID созданного геоограничителя шаблона")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateGeoRestrictionCreateResponse(APIEnvelope[str]):
+    pass
 
 
-class TemplateGeoRestrictionDeleteResponse(BaseModel):
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: bool = Field(..., description="Результат удаления геоограничителя (true — успешно)")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix)")
+class TemplateGeoRestrictionDeleteResponse(APIEnvelope[bool]):
+    pass

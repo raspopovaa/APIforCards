@@ -1,13 +1,41 @@
 import logging
+from collections.abc import Callable
 from datetime import datetime
+from functools import wraps
 from pathlib import Path
 from typing import Any
+
+from api_client_opti24.operations import Operation
+
+
+def operation_name(operation: Operation[Any] | str) -> str:
+    return operation.name if isinstance(operation, Operation) else operation
+
+
+def typed_request_stub(function: Callable[..., Any]) -> Callable[..., Any]:
+    """Adapt legacy dictionary stubs to typed SDK operations."""
+
+    @wraps(function)
+    async def wrapper(
+        self: object,
+        operation: Operation[Any] | str,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
+        payload = await function(self, operation_name(operation), *args, **kwargs)
+        if isinstance(operation, Operation):
+            if operation.response_type is None:
+                raise TypeError(f"Operation {operation.name!r} has no response model")
+            return operation.response_type.model_validate(payload)
+        return payload
+
+    return wrapper
 
 
 class NoopRequestExecutor:
     async def execute(
         self,
-        operation: str,
+        operation: Operation[Any] | str,
         *,
         api_version: str | None = None,
         route_name: str = "default",
@@ -15,11 +43,11 @@ class NoopRequestExecutor:
         **kwargs: Any,
     ) -> dict[str, Any]:
         del route_name, path_params, kwargs
-        raise AssertionError(f"Unexpected request: {api_version} {operation}")
+        raise AssertionError(f"Unexpected request: {api_version} {operation_name(operation)}")
 
     async def execute_stream(
         self,
-        operation: str,
+        operation: Operation[bytes] | str,
         *,
         api_version: str | None = None,
         route_name: str = "default",
@@ -31,7 +59,7 @@ class NoopRequestExecutor:
 
     async def execute_stream_to_file(
         self,
-        operation: str,
+        operation: Operation[bytes] | str,
         destination: str | Path,
         *,
         api_version: str | None = None,
@@ -50,7 +78,7 @@ class RecordingRequestExecutor:
 
     async def execute(
         self,
-        operation: str,
+        operation: Operation[Any] | str,
         *,
         api_version: str | None = None,
         route_name: str = "default",
@@ -63,12 +91,17 @@ class RecordingRequestExecutor:
             "path_params": path_params,
             **kwargs,
         }
-        self.calls.append((operation, call))
-        return self.responses[operation]
+        name = operation_name(operation)
+        self.calls.append((name, call))
+        payload = self.responses[name]
+        if isinstance(operation, Operation):
+            assert operation.response_type is not None
+            return operation.response_type.model_validate(payload)
+        return payload
 
     async def execute_stream(
         self,
-        operation: str,
+        operation: Operation[bytes] | str,
         *,
         api_version: str | None = None,
         route_name: str = "default",
@@ -80,7 +113,7 @@ class RecordingRequestExecutor:
 
     async def execute_stream_to_file(
         self,
-        operation: str,
+        operation: Operation[bytes] | str,
         destination: str | Path,
         *,
         api_version: str | None = None,

@@ -34,7 +34,7 @@ def test_model_descriptions_are_available():
 def test_model_descriptions_render_human_readable_types():
     description = AuthUserResponse.describe()
 
-    assert description["status"]["type"] == "StatusResponse"
+    assert description["status"]["type"] == "ResponseStatus"
     assert description["data"]["type"] == "AuthUserData"
     assert description["timestamp"]["type"] == "int | None"
 
@@ -44,6 +44,11 @@ def test_model_validate_and_dump_support_incremental_adapter():
 
     assert model.count == 2
     assert model.model_dump() == {"name": "demo", "count": 2}
+
+
+def test_response_model_does_not_globally_coerce_numbers_to_strings():
+    with pytest.raises(ValidationError):
+        AdapterExample(name=123, count=2)
 
 
 def test_response_model_preserves_unknown_fields_for_forward_compatibility():

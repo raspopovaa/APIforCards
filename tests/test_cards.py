@@ -11,7 +11,7 @@ from api_client_opti24.models.cards import (
 )
 from api_client_opti24.services.cards import CardsService
 from api_client_opti24.session import SessionManager
-from tests.service_support import service_dependencies
+from tests.service_support import service_dependencies, typed_request_stub
 
 
 @pytest.fixture
@@ -26,6 +26,7 @@ def mock_client():
             super().__init__(*service_dependencies(session_manager))
             self.session_id = "fake-session"
 
+        @typed_request_stub
         async def _request(self, operation, api_version="v1", **kwargs):
             self._called.append((operation, api_version, kwargs))
             # Заглушки ответов для тестов ↓
@@ -191,6 +192,24 @@ async def test_verify_and_reset_pin(mock_client):
     )
     assert isinstance(reset, BoolResponse)
     assert reset.data is True
+
+
+@pytest.mark.asyncio
+async def test_iter_cards_v2_is_sequential_and_stops_at_total(mock_client):
+    items = [item async for item in mock_client.iter_cards_v2(onpage=1, max_pages=5)]
+
+    assert [item.id for item in items] == ["19647206"]
+    operation, _, kwargs = mock_client._called[-1]
+    assert operation == "get_cards_v2"
+    assert kwargs["params"]["page"] == 1
+
+
+@pytest.mark.asyncio
+async def test_iter_cards_v2_rejects_invalid_bounds_without_request(mock_client):
+    before = len(mock_client._called)
+    with pytest.raises(ValueError, match="greater than zero"):
+        _ = [item async for item in mock_client.iter_cards_v2(max_pages=0)]
+    assert len(mock_client._called) == before
 
 
 def test_card_v2_requires_contract_name():

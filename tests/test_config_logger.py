@@ -113,6 +113,15 @@ def test_from_env_loads_request_rate_limit(monkeypatch):
     assert settings.rate_limit_policy.minimum_interval_seconds == 0.5
 
 
+def test_from_env_loads_concurrency_limit(monkeypatch):
+    monkeypatch.setenv("API_MAX_IN_FLIGHT", "7")
+    monkeypatch.setattr(config_module, "load_env_file", lambda _path: None)
+
+    settings = config_module.ConnectionSettings.from_env()
+
+    assert settings.concurrency_policy.max_in_flight == 7
+
+
 def test_from_env_requires_explicit_insecure_http_opt_in(monkeypatch):
     monkeypatch.setenv("API_ALLOW_INSECURE_HTTP", "true")
     monkeypatch.setattr(config_module, "load_env_file", lambda _path: None)

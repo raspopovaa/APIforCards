@@ -1,3 +1,5 @@
+import asyncio
+
 import httpx
 import pytest
 from httpx import Request, Response
@@ -11,7 +13,7 @@ from api_client_opti24.errors import (
     RateLimitError,
     ServerError,
 )
-from api_client_opti24.policies import RateLimitPolicy, RetryPolicy
+from api_client_opti24.policies import ConcurrencyPolicy, RateLimitPolicy, RetryPolicy
 
 
 class DummyResp(Response):
@@ -219,6 +221,40 @@ async def test_request_retries_explicitly_idempotent_operation(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_concurrency_policy_bounds_active_requests(monkeypatch):
+    release = asyncio.Event()
+    two_started = asyncio.Event()
+    active = 0
+    maximum_active = 0
+
+    transport = AsyncTransport(
+        base_url="https://example.com",
+        concurrency_policy=ConcurrencyPolicy(max_in_flight=2),
+        retry_policy=RetryPolicy(network_attempts=1, rate_limit_attempts=1),
+    )
+
+    async def fake_request(method, url, headers=None, timeout=None, **kwargs):
+        nonlocal active, maximum_active
+        active += 1
+        maximum_active = max(maximum_active, active)
+        if active == 2:
+            two_started.set()
+        await release.wait()
+        active -= 1
+        return DummyResp(200, json_data={"ok": True})
+
+    monkeypatch.setattr(transport.client, "request", fake_request)
+    tasks = [asyncio.create_task(transport.request("get", f"item-{index}")) for index in range(5)]
+
+    await asyncio.wait_for(two_started.wait(), timeout=1)
+    assert maximum_active == 2
+    release.set()
+    await asyncio.gather(*tasks)
+
+    assert maximum_active == 2
+
+
+@pytest.mark.asyncio
 async def test_request_stream_to_file_writes_binary_response_atomically(tmp_path):
     payload = b"report-data-" * 10_000
 
@@ -245,12 +281,27 @@ async def test_request_stream_to_file_writes_binary_response_atomically(tmp_path
         retry_class="safe",
         idempotent=True,
         chunk_size=1024,
+        write_buffer_size=16 * 1024,
     )
 
     assert result == destination
     assert destination.read_bytes() == payload
     assert not list(tmp_path.glob("*.part"))
     await http_client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_transport_rejects_invalid_stream_buffer_size():
+    transport = AsyncTransport(base_url="https://example.com")
+
+    with pytest.raises(ValueError, match="write_buffer_size"):
+        await transport.request_stream_to_file(
+            "GET",
+            "reports/job/file",
+            "report.bin",
+            write_buffer_size=0,
+        )
+    await transport.aclose()
 
 
 @pytest.mark.asyncio

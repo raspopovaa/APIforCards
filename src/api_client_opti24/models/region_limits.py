@@ -2,8 +2,7 @@ from typing import Literal
 
 from pydantic import AliasChoices
 
-from ..modeling import BaseModel, Field, StrictRequestModel
-from .common import ResponseStatus
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 
 class RegionLimitRequestItem(StrictRequestModel):
@@ -48,25 +47,13 @@ class RegionLimitList(BaseModel):
     result: list[RegionLimit] = Field(..., description="Данные с лимитами")
 
 
-class RegionLimitResponse(BaseModel):
+class RegionLimitResponse(APIEnvelope[RegionLimitList]):
     """Коллекция региональных лимитов."""
 
-    status: ResponseStatus = Field(..., description="Статус ответа")
-    data: RegionLimitList = Field(..., description="Данные с лимитами")
-    timestamp: int = Field(..., description="Метка времени сервера")
 
-
-class RegionLimitSetResponse(BaseModel):
+class RegionLimitSetResponse(APIEnvelope[list[str]]):
     """Полный envelope установки или изменения региональных лимитов."""
 
-    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
-    data: list[str] = Field(..., description="ID созданных или изменённых лимитов")
-    timestamp: int = Field(..., description="Временная метка ответа")
 
-
-class RemoveRegionLimit(BaseModel):
+class RemoveRegionLimit(APIEnvelope[bool]):
     """Удаление регионального лимита."""
-
-    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
-    data: bool = Field(..., description="Результат операции (True — успешно)")
-    timestamp: int = Field(..., description="Временная метка ответа")

@@ -110,7 +110,7 @@ def build_executor(
             operation_executor=operation_executor,
             session_gate=controller,
             session_recovery=controller,
-            registry=registry,
+            session_context=active_session,
             logger=active_logger,
         ),
         controller,
@@ -265,7 +265,7 @@ async def test_failed_authentication_releases_real_session_lock() -> None:
         operation_executor=operation_executor,
         session_gate=coordinator,
         session_recovery=coordinator,
-        registry=registry,
+        session_context=session,
         logger=logging.getLogger("test-auth-deadlock"),
     )
 

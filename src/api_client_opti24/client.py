@@ -82,6 +82,7 @@ class APIClient(_ServiceFacade):
             default_timeout=self.settings.timeouts.default,
             retry_policy=self.settings.retry_policy,
             rate_limit_policy=self.settings.rate_limit_policy,
+            concurrency_policy=self.settings.concurrency_policy,
             allow_insecure_http=self.settings.allow_insecure_http,
             logger=self.logger,
             clock=self.clock,

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "api-client-opti24"
-version = "2.2.2"
+version = "2.3.0"
 description = "Асинхронный Python-клиент для сервиса API топливных карт"
 readme = "README.md"
 license = "MIT"
@@ -36,6 +36,7 @@ package-dir = {"" = "src"}
 
 [project.optional-dependencies]
 dev = [
+    "build>=1.2.2",
     "ruff>=0.5.0",
     "black>=24.3.0",
     "mkdocs>=1.6.1,<2.0",
@@ -45,6 +46,7 @@ dev = [
     "pyyaml>=6.0.2,<7.0",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
 ]
 
 [tool.black]
@@ -86,3 +88,12 @@ minversion = "8.0"
 addopts = "-ra -q"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.coverage.run]
+branch = true
+source = ["api_client_opti24"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 80

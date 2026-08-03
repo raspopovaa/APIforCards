@@ -3,8 +3,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, Literal
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.templates import (
     TemplateCreateRequest,
     TemplateCreateResponse,
@@ -23,11 +21,43 @@ from ..models.templates import (
     TemplateRestrictionListResponse,
     TemplatesListResponse,
 )
+from ..operations import operation
 from ..payloads import with_method_override
 from ..service_base import _BaseService
 from ..validation import require_identifier
 
 TemplateType = Literal["Limit", "Wallet"]
+
+GET_TEMPLATES = operation("get_templates", TemplatesListResponse)
+CREATE_TEMPLATE = operation("create_template", TemplateCreateResponse)
+UPDATE_TEMPLATE = operation("update_template", TemplateCreateResponse)
+DELETE_TEMPLATE = operation("delete_template", TemplateDeleteResponse)
+GET_TEMPLATE_LIMITS = operation("get_template_limits", TemplateLimitListResponse)
+CREATE_TEMPLATE_LIMIT = operation("create_template_limit", TemplateLimitCreateResponse)
+UPDATE_TEMPLATE_LIMIT = operation("update_template_limit", TemplateLimitCreateResponse)
+DELETE_TEMPLATE_LIMIT = operation("delete_template_limit", TemplateLimitDeleteResponse)
+GET_TEMPLATE_RESTRICTIONS = operation("get_template_restrictions", TemplateRestrictionListResponse)
+CREATE_TEMPLATE_RESTRICTION = operation(
+    "create_template_restriction", TemplateRestrictionCreateResponse
+)
+UPDATE_TEMPLATE_RESTRICTION = operation(
+    "update_template_restriction", TemplateRestrictionCreateResponse
+)
+DELETE_TEMPLATE_RESTRICTION = operation(
+    "delete_template_restriction", TemplateRestrictionDeleteResponse
+)
+GET_TEMPLATE_GEORESTRICTIONS = operation(
+    "get_template_georestrictions", TemplateGeoRestrictionListResponse
+)
+CREATE_TEMPLATE_GEORESTRICTION = operation(
+    "create_template_georestriction", TemplateGeoRestrictionCreateResponse
+)
+UPDATE_TEMPLATE_GEORESTRICTION = operation(
+    "update_template_georestriction", TemplateGeoRestrictionCreateResponse
+)
+DELETE_TEMPLATE_GEORESTRICTION = operation(
+    "delete_template_georestriction", TemplateGeoRestrictionDeleteResponse
+)
 
 
 class TemplatesService(_BaseService):
@@ -44,7 +74,6 @@ class TemplatesService(_BaseService):
             return require_identifier(payload_contract_id, "contract_id")
         return await self._resolve_contract_id(None)
 
-    @api_method
     async def get_templates(
         self,
         *,
@@ -53,14 +82,13 @@ class TemplatesService(_BaseService):
     ) -> TemplatesListResponse:
         """Получить список шаблонов виртуальных карт выбранного договора."""
         cid = await self._resolve_contract_id(contract_id)
-        raw = await self._request(
-            "get_templates",
+        return await self._request(
+            GET_TEMPLATES,
             api_version=api_version,
             params={"contract_id": cid},
+            request_contract_id=cid,
         )
-        return decode_model(TemplatesListResponse, raw)
 
-    @api_method
     async def create_template(
         self,
         *,
@@ -94,14 +122,13 @@ class TemplatesService(_BaseService):
             type=type_,
             name=require_identifier(name, "name"),
         )
-        raw = await self._request(
-            "create_template",
+        return await self._request(
+            CREATE_TEMPLATE,
             api_version=api_version,
             data=request.model_dump(exclude_none=True),
+            request_contract_id=cid,
         )
-        return decode_model(TemplateCreateResponse, raw)
 
-    @api_method
     async def update_template(
         self,
         *,
@@ -118,15 +145,14 @@ class TemplatesService(_BaseService):
             type=type_,
             name=require_identifier(name, "name"),
         )
-        raw = await self._request(
-            "update_template",
+        return await self._request(
+            UPDATE_TEMPLATE,
             api_version=api_version,
             path_params={"template_id": require_identifier(template_id, "template_id")},
             data=request.model_dump(exclude_none=True),
+            request_contract_id=cid,
         )
-        return decode_model(TemplateCreateResponse, raw)
 
-    @api_method
     async def delete_template(
         self,
         *,
@@ -135,16 +161,14 @@ class TemplatesService(_BaseService):
         use_post: bool = False,
     ) -> TemplateDeleteResponse:
         """Удалить шаблон виртуальной карты."""
-        raw = await self._request(
-            "delete_template",
+        return await self._request(
+            DELETE_TEMPLATE,
             api_version=api_version,
             route_name="post_override" if use_post else "default",
             path_params={"template_id": require_identifier(template_id, "template_id")},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return decode_model(TemplateDeleteResponse, raw)
 
-    @api_method
     async def get_template_limits(
         self,
         *,
@@ -152,14 +176,12 @@ class TemplatesService(_BaseService):
         api_version: str | None = None,
     ) -> TemplateLimitListResponse:
         """Получить список лимитов шаблона виртуальной карты."""
-        raw = await self._request(
-            "get_template_limits",
+        return await self._request(
+            GET_TEMPLATE_LIMITS,
             api_version=api_version,
             path_params={"template_id": require_identifier(template_id, "template_id")},
         )
-        return decode_model(TemplateLimitListResponse, raw)
 
-    @api_method
     async def create_template_limit(
         self,
         *,
@@ -173,15 +195,14 @@ class TemplatesService(_BaseService):
         cid = await self._payload_contract_id(request.contract_id, contract_id)
         request_payload = request.model_dump(exclude_none=True, by_alias=True)
         request_payload["contract_id"] = cid
-        raw = await self._request(
-            "create_template_limit",
+        return await self._request(
+            CREATE_TEMPLATE_LIMIT,
             api_version=api_version,
             path_params={"template_id": require_identifier(template_id, "template_id")},
             json=request_payload,
+            request_contract_id=cid,
         )
-        return decode_model(TemplateLimitCreateResponse, raw)
 
-    @api_method
     async def update_template_limit(
         self,
         *,
@@ -211,8 +232,8 @@ class TemplatesService(_BaseService):
             len(request_limits),
             use_post,
         )
-        raw = await self._request(
-            "update_template_limit",
+        return await self._request(
+            UPDATE_TEMPLATE_LIMIT,
             api_version=api_version,
             route_name="default" if use_post else "put",
             path_params={
@@ -220,10 +241,9 @@ class TemplatesService(_BaseService):
                 "limit_id": require_identifier(limit_id, "limit_id"),
             },
             json=request_limits,
+            request_contract_id=request_limits[0]["contract_id"],
         )
-        return decode_model(TemplateLimitCreateResponse, raw)
 
-    @api_method
     async def delete_template_limit(
         self,
         *,
@@ -233,8 +253,8 @@ class TemplatesService(_BaseService):
         use_post: bool = False,
     ) -> TemplateLimitDeleteResponse:
         """Удалить лимит шаблона виртуальной карты."""
-        raw = await self._request(
-            "delete_template_limit",
+        return await self._request(
+            DELETE_TEMPLATE_LIMIT,
             api_version=api_version,
             route_name="post_override" if use_post else "default",
             path_params={
@@ -243,9 +263,7 @@ class TemplatesService(_BaseService):
             },
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return decode_model(TemplateLimitDeleteResponse, raw)
 
-    @api_method
     async def get_template_restrictions(
         self,
         *,
@@ -253,14 +271,12 @@ class TemplatesService(_BaseService):
         api_version: str | None = None,
     ) -> TemplateRestrictionListResponse:
         """Получить список ограничителей шаблона."""
-        raw = await self._request(
-            "get_template_restrictions",
+        return await self._request(
+            GET_TEMPLATE_RESTRICTIONS,
             api_version=api_version,
             path_params={"template_id": require_identifier(template_id, "template_id")},
         )
-        return decode_model(TemplateRestrictionListResponse, raw)
 
-    @api_method
     async def create_template_restriction(
         self,
         *,
@@ -274,15 +290,14 @@ class TemplatesService(_BaseService):
         cid = await self._payload_contract_id(request.contract_id, contract_id)
         request_payload = request.model_dump(exclude_none=True, by_alias=True)
         request_payload["contract_id"] = cid
-        raw = await self._request(
-            "create_template_restriction",
+        return await self._request(
+            CREATE_TEMPLATE_RESTRICTION,
             api_version=api_version,
             path_params={"template_id": require_identifier(template_id, "template_id")},
             json=request_payload,
+            request_contract_id=cid,
         )
-        return decode_model(TemplateRestrictionCreateResponse, raw)
 
-    @api_method
     async def update_template_restriction(
         self,
         *,
@@ -301,8 +316,8 @@ class TemplatesService(_BaseService):
         if use_post:
             request_payload = with_method_override(request_payload, "PUT")
         self.logger.info("Updating template restriction post_fallback=%s", use_post)
-        raw = await self._request(
-            "update_template_restriction",
+        return await self._request(
+            UPDATE_TEMPLATE_RESTRICTION,
             api_version=api_version,
             route_name="default" if use_post else "put",
             path_params={
@@ -310,10 +325,9 @@ class TemplatesService(_BaseService):
                 "restriction_id": require_identifier(restriction_id, "restriction_id"),
             },
             json=request_payload,
+            request_contract_id=cid,
         )
-        return decode_model(TemplateRestrictionCreateResponse, raw)
 
-    @api_method
     async def delete_template_restriction(
         self,
         *,
@@ -323,8 +337,8 @@ class TemplatesService(_BaseService):
         use_post: bool = False,
     ) -> TemplateRestrictionDeleteResponse:
         """Удалить ограничитель шаблона."""
-        raw = await self._request(
-            "delete_template_restriction",
+        return await self._request(
+            DELETE_TEMPLATE_RESTRICTION,
             api_version=api_version,
             route_name="post_override" if use_post else "default",
             path_params={
@@ -333,9 +347,7 @@ class TemplatesService(_BaseService):
             },
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return decode_model(TemplateRestrictionDeleteResponse, raw)
 
-    @api_method
     async def get_template_georestrictions(
         self,
         *,
@@ -343,14 +355,12 @@ class TemplatesService(_BaseService):
         api_version: str | None = None,
     ) -> TemplateGeoRestrictionListResponse:
         """Получить список геоограничителей шаблона."""
-        raw = await self._request(
-            "get_template_georestrictions",
+        return await self._request(
+            GET_TEMPLATE_GEORESTRICTIONS,
             api_version=api_version,
             path_params={"template_id": require_identifier(template_id, "template_id")},
         )
-        return decode_model(TemplateGeoRestrictionListResponse, raw)
 
-    @api_method
     async def create_template_georestriction(
         self,
         *,
@@ -364,15 +374,14 @@ class TemplatesService(_BaseService):
         cid = await self._payload_contract_id(request.contract_id, contract_id)
         request_payload = request.model_dump(exclude_none=True, by_alias=True)
         request_payload["contract_id"] = cid
-        raw = await self._request(
-            "create_template_georestriction",
+        return await self._request(
+            CREATE_TEMPLATE_GEORESTRICTION,
             api_version=api_version,
             path_params={"template_id": require_identifier(template_id, "template_id")},
             json=request_payload,
+            request_contract_id=cid,
         )
-        return decode_model(TemplateGeoRestrictionCreateResponse, raw)
 
-    @api_method
     async def update_template_georestriction(
         self,
         *,
@@ -391,8 +400,8 @@ class TemplatesService(_BaseService):
         if use_post:
             request_payload = with_method_override(request_payload, "PUT")
         self.logger.info("Updating template geo restriction post_fallback=%s", use_post)
-        raw = await self._request(
-            "update_template_georestriction",
+        return await self._request(
+            UPDATE_TEMPLATE_GEORESTRICTION,
             api_version=api_version,
             route_name="default" if use_post else "put",
             path_params={
@@ -403,10 +412,9 @@ class TemplatesService(_BaseService):
                 ),
             },
             json=request_payload,
+            request_contract_id=cid,
         )
-        return decode_model(TemplateGeoRestrictionCreateResponse, raw)
 
-    @api_method
     async def delete_template_georestriction(
         self,
         *,
@@ -416,8 +424,8 @@ class TemplatesService(_BaseService):
         use_post: bool = False,
     ) -> TemplateGeoRestrictionDeleteResponse:
         """Удалить геоограничитель шаблона."""
-        raw = await self._request(
-            "delete_template_georestriction",
+        return await self._request(
+            DELETE_TEMPLATE_GEORESTRICTION,
             api_version=api_version,
             route_name="post_override" if use_post else "default",
             path_params={
@@ -429,4 +437,3 @@ class TemplatesService(_BaseService):
             },
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return decode_model(TemplateGeoRestrictionDeleteResponse, raw)

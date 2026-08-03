@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ..modeling import BaseModel, Field
+from ..modeling import APIEnvelope, BaseModel, Field
 
 # -------------------------
 # Базовые классы и служебные структуры
@@ -55,10 +55,8 @@ class AuthUserData(BaseModel):
     phone: str | None = Field(None, description="Телефон")
 
 
-class AuthUserResponse(BaseModel):
-    status: StatusResponse = Field(..., description="Статус ответа API")
-    data: AuthUserData = Field(..., description="Данные авторизованного пользователя")
-    timestamp: int | None = Field(None, description="Метка времени (unix timestamp)")
+class AuthUserResponse(APIEnvelope[AuthUserData]):
+    pass
 
 
 # -------------------------
@@ -66,10 +64,8 @@ class AuthUserResponse(BaseModel):
 # -------------------------
 
 
-class LogoffResponse(BaseModel):
-    status: StatusResponse = Field(..., description="Статус ответа API")
-    data: bool = Field(..., description="True — если выход выполнен успешно")
-    timestamp: int | None = Field(None, description="Метка времени ответа")
+class LogoffResponse(APIEnvelope[bool]):
+    pass
 
 
 # -------------------------
@@ -126,7 +122,5 @@ class InfoData(BaseModel):
     methods_info: MethodsInfo = Field(..., description="Описание доступных методов API")
 
 
-class GetInfoResponse(BaseModel):
-    status: StatusResponse = Field(..., description="Статус ответа API")
-    data: InfoData = Field(..., description="Детализированные данные о статистике")
-    timestamp: int = Field(..., description="Временная метка (UNIX timestamp)")
+class GetInfoResponse(APIEnvelope[InfoData]):
+    pass

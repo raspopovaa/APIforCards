@@ -1,8 +1,7 @@
 from ..authentication import Authenticator
-from ..decorators import api_method
 from ..logger import LoggerLike
-from ..modeling import decode_model
 from ..models.auth import AuthUserResponse, GetInfoResponse, LogoffResponse
+from ..operations import operation
 from ..runtime import Clock
 from ..service_base import (
     RequestExecutor,
@@ -11,6 +10,9 @@ from ..service_base import (
     SessionMutator,
     _BaseService,
 )
+
+LOGOFF = operation("logoff", LogoffResponse)
+GET_INFO = operation("get_info", GetInfoResponse)
 
 
 class AuthService(_BaseService):
@@ -29,7 +31,6 @@ class AuthService(_BaseService):
         self.__authenticator = authenticator
         self.__clock = clock
 
-    @api_method
     async def logoff(
         self,
         *,
@@ -40,11 +41,10 @@ class AuthService(_BaseService):
         Вызывайте метод в ``finally`` или используйте контекстный менеджер
         ``APIClient``. Session ID не следует выводить в логи.
         """
-        response = await self._request("logoff", api_version=api_version)
+        response = await self._request(LOGOFF, api_version=api_version)
         self.__session_mutator.reset()
-        return decode_model(LogoffResponse, response)
+        return response
 
-    @api_method
     async def get_info(
         self,
         *,
@@ -55,15 +55,12 @@ class AuthService(_BaseService):
         if period is None:
             now = self.__clock.now()
             period = now.strftime("%Y-%m-%d %H:%M:%S")
-        data = await self._request(
-            "get_info",
+        return await self._request(
+            GET_INFO,
             api_version=api_version,
             params={"period": period},
         )
 
-        return decode_model(GetInfoResponse, data)
-
-    @api_method
     async def auth_user(
         self,
         *,

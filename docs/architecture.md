@@ -106,6 +106,19 @@ credentials изолированному authenticator. `ServiceContainer` не 
 Бинарные методы отчётов сохраняют обратную совместимость с возвратом `bytes`, а
 методы `download_report_file_to()` и `download_report_file_v1_to()` потоково
 пишут данные во временный файл и атомарно заменяют целевой файл после успеха.
+Запись выполняется буферами, поэтому файловый I/O не создаёт отдельный вызов
+worker thread на каждый сетевой chunk.
+
+Каждый endpoint связан с сервисом явной константой `Operation[TResponse]`.
+`DefaultRequestExecutor` один раз разрешает `EndpointSpec`, создаёт неизменяемый
+`PreparedOperation` с `RequestContext` и централизованно декодирует ответ.
+Identity-декораторы и неявный `ContextVar` в этом пути не используются.
+
+`ConcurrencyPolicy.max_in_flight` ограничивает число активных HTTP-запросов на
+экземпляр `APIClient`. Ограничение охватывает чтение потокового ответа целиком,
+но не является глобальным rate limiter между несколькими клиентами или процессами.
+Для больших списков доступны последовательные bounded-итераторы
+`iter_cards_v2()`, `iter_users()`, `iter_invites()` и `iter_transactions_v2()`.
 
 ## Контракт endpoints
 

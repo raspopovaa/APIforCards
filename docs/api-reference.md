@@ -28,6 +28,16 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `recover(self) -> 'str'`
 
+### `AuthenticationRequestExecutor`
+
+Сигнатура: `AuthenticationRequestExecutor(*args, **kwargs)`
+
+Публичные методы:
+
+#### `execute`
+
+Сигнатура: `execute(self, operation: 'Operation[ResponseT]', *, api_version: 'str | None' = None, **kwargs: 'Any') -> 'ResponseT'`
+
 ### `Authenticator`
 
 Сигнатура: `Authenticator(*args, **kwargs)`
@@ -40,7 +50,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `DefaultAuthenticator`
 
-Сигнатура: `DefaultAuthenticator(request_executor: 'RequestExecutor', session_mutator: 'SessionMutator', credentials_provider: 'CredentialsProvider', logger: 'LoggerLike') -> 'None'`
+Сигнатура: `DefaultAuthenticator(request_executor: 'AuthenticationRequestExecutor', session_mutator: 'SessionMutator', credentials_provider: 'CredentialsProvider', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
@@ -76,9 +86,9 @@ ClientRuntime(authentication: 'AuthenticationCoordinator', request_executor: 'De
 
 ### `APISettings`
 
-APISettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None), api_key: 'str', login: 'str | None' = None, password: 'str | None' = None)
+APISettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None), concurrency_policy: 'ConcurrencyPolicy' = ConcurrencyPolicy(max_in_flight=20), api_key: 'str', login: 'str | None' = None, password: 'str | None' = None)
 
-Сигнатура: `APISettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None), api_key: 'str', login: 'str | None' = None, password: 'str | None' = None) -> None`
+Сигнатура: `APISettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None), concurrency_policy: 'ConcurrencyPolicy' = ConcurrencyPolicy(max_in_flight=20), api_key: 'str', login: 'str | None' = None, password: 'str | None' = None) -> None`
 
 Публичные методы:
 
@@ -92,9 +102,9 @@ APISettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl'
 
 ### `ConnectionSettings`
 
-ConnectionSettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None))
+ConnectionSettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None), concurrency_policy: 'ConcurrencyPolicy' = ConcurrencyPolicy(max_in_flight=20))
 
-Сигнатура: `ConnectionSettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None)) -> None`
+Сигнатура: `ConnectionSettings(*, base_url: 'str', request_log_file: 'str' = './api_requests.jsonl', logger_file: 'str' = './api.log', log_level: 'str' = 'INFO', allow_insecure_http: 'bool' = False, timeouts: 'TimeoutPolicy' = TimeoutPolicy(default=30.0, auth=30.0, read_heavy=120.0), retry_policy: 'RetryPolicy' = RetryPolicy(network_attempts=5, rate_limit_attempts=3, network_backoff_min_seconds=2.0, network_backoff_max_seconds=60.0, rate_limit_backoff_seconds=0.5, auth_retry_min_interval_seconds=5.0), rate_limit_policy: 'RateLimitPolicy' = RateLimitPolicy(requests_per_second=None), concurrency_policy: 'ConcurrencyPolicy' = ConcurrencyPolicy(max_in_flight=20)) -> None`
 
 Публичные методы:
 
@@ -173,12 +183,6 @@ TimeoutPolicy(default: 'float' = 30.0, auth: 'float' = 30.0, read_heavy: 'float'
 #### `get_credentials`
 
 Сигнатура: `get_credentials(self) -> 'tuple[str, str]'`
-
-## `api_client_opti24.decorators`
-
-### `api_method`
-
-Сигнатура: `api_method(func: collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]) -> collections.abc.Callable[typing.Concatenate[~ServiceT, ~Params], collections.abc.Awaitable[~ResultT]]`
 
 ## `api_client_opti24.endpoints`
 
@@ -280,21 +284,21 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 ### `DefaultRequestExecutor`
 
-Сигнатура: `DefaultRequestExecutor(*, operation_executor: 'OperationExecutor', session_gate: 'SessionGate', session_recovery: 'SessionRecovery', registry: 'MethodRegistry', logger: 'LoggerLike') -> 'None'`
+Сигнатура: `DefaultRequestExecutor(*, operation_executor: 'OperationExecutor', session_gate: 'SessionGate', session_recovery: 'SessionRecovery', session_context: 'SessionContext', logger: 'LoggerLike') -> 'None'`
 
 Публичные методы:
 
 #### `execute`
 
-Сигнатура: `execute(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'JSONPayload'`
+Сигнатура: `execute(self, operation: 'Operation[ResponseT] | str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, request_contract_id: 'str | None' = None, **kwargs: 'Any') -> 'ResponseT | JSONPayload'`
 
 #### `execute_stream`
 
-Сигнатура: `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
+Сигнатура: `execute_stream(self, operation: 'Operation[bytes] | str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, request_contract_id: 'str | None' = None, **kwargs: 'Any') -> 'bytes'`
 
 #### `execute_stream_to_file`
 
-Сигнатура: `execute_stream_to_file(self, operation: 'str', destination: 'str | Path', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'Path'`
+Сигнатура: `execute_stream_to_file(self, operation: 'Operation[bytes] | str', destination: 'str | Path', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, request_contract_id: 'str | None' = None, **kwargs: 'Any') -> 'Path'`
 
 #### `headers`
 
@@ -308,19 +312,37 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 #### `execute`
 
-Сигнатура: `execute(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'JSONPayload'`
+Сигнатура: `execute(self, operation: 'Operation[ResponseT] | str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, request_contract_id: 'str | None' = None, **kwargs: 'Any') -> 'ResponseT | JSONPayload'`
 
-#### `execute_stream`
+#### `execute_prepared`
 
-Сигнатура: `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
+Сигнатура: `execute_prepared(self, prepared: 'PreparedOperation[Any]', **kwargs: 'Any') -> 'JSONPayload'`
 
-#### `execute_stream_to_file`
+#### `execute_stream_prepared`
 
-Сигнатура: `execute_stream_to_file(self, operation: 'str', destination: 'str | Path', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'Path'`
+Сигнатура: `execute_stream_prepared(self, prepared: 'PreparedOperation[bytes]', **kwargs: 'Any') -> 'bytes'`
+
+#### `execute_stream_to_file_prepared`
+
+Сигнатура: `execute_stream_to_file_prepared(self, prepared: 'PreparedOperation[bytes]', destination: 'str | Path', **kwargs: 'Any') -> 'Path'`
 
 #### `headers`
 
-Сигнатура: `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False) -> 'dict[str, str]'`
+Сигнатура: `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False, *, request_context: 'RequestContext | None' = None) -> 'dict[str, str]'`
+
+#### `prepare`
+
+Сигнатура: `prepare(self, operation: 'Operation[ResultT] | None', spec: 'EndpointSpec', route: 'RouteVariant', *, path_params: 'PathParams | None', request_context: 'RequestContext') -> 'PreparedOperation[ResultT]'`
+
+#### `resolve`
+
+Сигнатура: `resolve(self, operation_name: 'str', *, api_version: 'str | None', route_name: 'str') -> 'tuple[EndpointSpec, RouteVariant]'`
+
+### `PreparedOperation`
+
+PreparedOperation(operation: 'Operation[ResultT] | None', spec: 'EndpointSpec', route: 'RouteVariant', endpoint: 'str', request_context: 'RequestContext', timeout: 'float')
+
+Сигнатура: `PreparedOperation(operation: 'Operation[ResultT] | None', spec: 'EndpointSpec', route: 'RouteVariant', endpoint: 'str', request_context: 'RequestContext', timeout: 'float') -> None`
 
 ### `Transport`
 
@@ -346,9 +368,411 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 ## `api_client_opti24.modeling`
 
+### `APIEnvelope`
+
+Сигнатура: `APIEnvelope(*, status: api_client_opti24.modeling.ResponseStatus, data: ~DataT, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[AuthUserData]`
+
+Сигнатура: `APIEnvelope[AuthUserData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.auth.AuthUserData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[CardDetailData]`
+
+Сигнатура: `APIEnvelope[CardDetailData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardDetailData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[CardDriversData]`
+
+Сигнатура: `APIEnvelope[CardDriversData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardDriversData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[CardGroupData]`
+
+Сигнатура: `APIEnvelope[CardGroupData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardGroupData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[CardGroupListData]`
+
+Сигнатура: `APIEnvelope[CardGroupListData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.card_group.CardGroupListData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[CardsListData]`
+
+Сигнатура: `APIEnvelope[CardsListData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardsListData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[CardsV2Data]`
+
+Сигнатура: `APIEnvelope[CardsV2Data](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardsV2Data, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[ContractResponse]`
+
+Сигнатура: `APIEnvelope[ContractResponse](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.contracts.ContractResponse, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[DocumentsData]`
+
+Сигнатура: `APIEnvelope[DocumentsData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.contracts.DocumentsData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[FinalPricesData]`
+
+Сигнатура: `APIEnvelope[FinalPricesData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.final_prices.FinalPricesData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[InfoData]`
+
+Сигнатура: `APIEnvelope[InfoData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.auth.InfoData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[InviteActionResult]`
+
+Сигнатура: `APIEnvelope[InviteActionResult](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.invites.InviteActionResult, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[InviteList]`
+
+Сигнатура: `APIEnvelope[InviteList](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.invites.InviteList, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[InvoicesData]`
+
+Сигнатура: `APIEnvelope[InvoicesData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.contracts.InvoicesData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[LimitsData]`
+
+Сигнатура: `APIEnvelope[LimitsData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.limits.LimitsData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[PaymentsData]`
+
+Сигнатура: `APIEnvelope[PaymentsData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.contracts.PaymentsData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[RegionLimitList]`
+
+Сигнатура: `APIEnvelope[RegionLimitList](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.region_limits.RegionLimitList, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[ReportJobList]`
+
+Сигнатура: `APIEnvelope[ReportJobList](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.reports.ReportJobList, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[ReportList]`
+
+Сигнатура: `APIEnvelope[ReportList](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.reports.ReportList, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[ReportOrderData]`
+
+Сигнатура: `APIEnvelope[ReportOrderData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.reports.ReportOrderData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[RestrictionList]`
+
+Сигнатура: `APIEnvelope[RestrictionList](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.restrictions.RestrictionList, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[SetCardGroupData]`
+
+Сигнатура: `APIEnvelope[SetCardGroupData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.card_group.SetCardGroupData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[TemplateGeoRestrictionListData]`
+
+Сигнатура: `APIEnvelope[TemplateGeoRestrictionListData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.templates.TemplateGeoRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[TemplateLimitListData]`
+
+Сигнатура: `APIEnvelope[TemplateLimitListData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.templates.TemplateLimitListData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[TemplateRestrictionListData]`
+
+Сигнатура: `APIEnvelope[TemplateRestrictionListData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.templates.TemplateRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[TemplatesListData]`
+
+Сигнатура: `APIEnvelope[TemplatesListData](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.templates.TemplatesListData, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[TransactionsV1Data]`
+
+Сигнатура: `APIEnvelope[TransactionsV1Data](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.transactions.TransactionsV1Data, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[TransactionsV2Data]`
+
+Сигнатура: `APIEnvelope[TransactionsV2Data](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.transactions.TransactionsV2Data, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[Union[AzsListV1Data, NoneType]]`
+
+Сигнатура: `APIEnvelope[Union[AzsListV1Data, NoneType]](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.dictionaries.AzsListV1Data | None, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[Union[AzsListV2Data, NoneType]]`
+
+Сигнатура: `APIEnvelope[Union[AzsListV2Data, NoneType]](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.dictionaries.AzsListV2Data | None, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[Union[DictionaryData, NoneType]]`
+
+Сигнатура: `APIEnvelope[Union[DictionaryData, NoneType]](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.dictionaries.DictionaryData | None, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[Union[UserList, NoneType]]`
+
+Сигнатура: `APIEnvelope[Union[UserList, NoneType]](*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.users.UserList | None, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[Union[list[AzsFilterItem], NoneType]]`
+
+Сигнатура: `APIEnvelope[Union[list[AzsFilterItem], NoneType]](*, status: api_client_opti24.modeling.ResponseStatus, data: list[api_client_opti24.models.dictionaries.AzsFilterItem] | None, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[bool]`
+
+Сигнатура: `APIEnvelope[bool](*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[list[ReportV1JobItem]]`
+
+Сигнатура: `APIEnvelope[list[ReportV1JobItem]](*, status: api_client_opti24.modeling.ResponseStatus, data: list[api_client_opti24.models.reports.ReportV1JobItem], timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[list[str]]`
+
+Сигнатура: `APIEnvelope[list[str]](*, status: api_client_opti24.modeling.ResponseStatus, data: list[str], timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `APIEnvelope[str]`
+
+Сигнатура: `APIEnvelope[str](*, status: api_client_opti24.modeling.ResponseStatus, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `BaseModel`
 
+Backward-compatible name for SDK response and data models.
+
 Сигнатура: `BaseModel(**extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `ResponseModel`
+
+Сигнатура: `ResponseModel(**extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `ResponseStatus`
+
+Сигнатура: `ResponseStatus(*, code: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -359,12 +783,6 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 ### `StrictRequestModel`
 
 Сигнатура: `StrictRequestModel() -> None`
-
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `decode_model`
 
@@ -422,7 +840,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `AuthUserResponse`
 
-Сигнатура: `AuthUserResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: api_client_opti24.models.auth.AuthUserData, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `AuthUserResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.auth.AuthUserData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -452,7 +870,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `GetInfoResponse`
 
-Сигнатура: `GetInfoResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: api_client_opti24.models.auth.InfoData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `GetInfoResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.auth.InfoData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -472,7 +890,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `LogoffResponse`
 
-Сигнатура: `LogoffResponse(*, status: api_client_opti24.models.auth.StatusResponse, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `LogoffResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -540,7 +958,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода получения списка групп карт.
 
-Сигнатура: `CardGroupListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.card_group.CardGroupListData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `CardGroupListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.card_group.CardGroupListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -552,7 +970,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода удаления группы карт.
 
-Сигнатура: `RemoveCardGroupResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RemoveCardGroupResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -576,7 +994,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода установки/изменения группы карт.
 
-Сигнатура: `SetCardGroupResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.card_group.SetCardGroupData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `SetCardGroupResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.card_group.SetCardGroupData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -588,7 +1006,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода добавления карт в группу.
 
-Сигнатура: `SetCardsToGroupResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `SetCardsToGroupResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -600,7 +1018,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `BoolResponse`
 
-Сигнатура: `BoolResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `BoolResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -634,7 +1052,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardDetailResponse`
 
-Сигнатура: `CardDetailResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardDetailData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `CardDetailResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardDetailData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -664,7 +1082,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardDriversResponse`
 
-Сигнатура: `CardDriversResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardDriversData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `CardDriversResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardDriversData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -694,7 +1112,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardGroupResponse`
 
-Сигнатура: `CardGroupResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardGroupData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `CardGroupResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardGroupData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -736,7 +1154,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `CardsListResponse`
 
-Сигнатура: `CardsListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardsListData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `CardsListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardsListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -760,7 +1178,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ API метода GET /v2/cards.
 
-Сигнатура: `CardsV2Response(*, status: dict[str, typing.Any], data: api_client_opti24.models.cards.CardsV2Data, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `CardsV2Response(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.cards.CardsV2Data, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -770,7 +1188,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `IDListResponse`
 
-Сигнатура: `IDListResponse(*, status: dict[str, typing.Any], data: list[str], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `IDListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: list[str], timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -790,17 +1208,7 @@ _Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.common`
 
-### `ResponseStatus`
-
-Статус ответа API из общего envelope.
-
-Сигнатура: `ResponseStatus(*, code: int, **extra_data: Any) -> None`
-
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+_Публичные классы и функции не обнаружены._
 
 ## `api_client_opti24.models.contracts`
 
@@ -844,7 +1252,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope ответа метода получения данных договора.
 
-Сигнатура: `ContractDataResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.contracts.ContractResponse, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `ContractDataResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.contracts.ContractResponse, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -892,7 +1300,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода POST /v2/documents (заказ документов).
 
-Сигнатура: `DocumentsOrderResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `DocumentsOrderResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -904,7 +1312,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода GET /v2/documents.
 
-Сигнатура: `DocumentsResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.contracts.DocumentsData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `DocumentsResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.contracts.DocumentsData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -928,7 +1336,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода POST /v2/invoice.
 
-Сигнатура: `InvoiceOrderResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `InvoiceOrderResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -952,7 +1360,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода GET /v2/invoices.
 
-Сигнатура: `InvoicesResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.contracts.InvoicesData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `InvoicesResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.contracts.InvoicesData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -976,7 +1384,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода POST /v2/orderCards.
 
-Сигнатура: `OrderCardsResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `OrderCardsResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1012,7 +1420,7 @@ _Публичные классы и функции не обнаружены._
 
 Основная модель ответа метода /getPayments.
 
-Сигнатура: `PaymentsResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.contracts.PaymentsData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `PaymentsResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.contracts.PaymentsData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1074,7 +1482,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода /azs/filters
 
-Сигнатура: `AzsFiltersResponse(*, status: dict[str, Any] | None = None, data: list[api_client_opti24.models.dictionaries.AzsFilterItem] | None = <factory>, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `AzsFiltersResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: list[api_client_opti24.models.dictionaries.AzsFilterItem] | None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1129,7 +1537,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода GET /vip/v1/AZS
 
-Сигнатура: `AzsListV1Response(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.dictionaries.AzsListV1Data | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `AzsListV1Response(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.dictionaries.AzsListV1Data | None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1153,7 +1561,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода получения списка торговых точек (v2)
 
-Сигнатура: `AzsListV2Response(*, status: dict[str, Any] | None, data: api_client_opti24.models.dictionaries.AzsListV2Data | None, timestamp: int | None, **extra_data: Any) -> None`
+Сигнатура: `AzsListV2Response(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.dictionaries.AzsListV2Data | None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1201,7 +1609,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода GET /vip/v1/getDictionary
 
-Сигнатура: `DictionaryResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.dictionaries.DictionaryData | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `DictionaryResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.dictionaries.DictionaryData | None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1317,7 +1725,7 @@ _Публичные классы и функции не обнаружены._
     "timestamp": 1596024392
 }
 
-Сигнатура: `MoveToCardResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `MoveToCardResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1335,7 +1743,7 @@ _Публичные классы и функции не обнаружены._
     "timestamp": 1596024392
 }
 
-Сигнатура: `MoveToContractResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `MoveToContractResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1353,7 +1761,7 @@ _Публичные классы и функции не обнаружены._
     "timestamp": 1596024392
 }
 
-Сигнатура: `SetCardProductResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `SetCardProductResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: list[str], timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1369,17 +1777,11 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `CheckPurchaseRequest(*, poi_id: str, goods: list[api_client_opti24.models.final_prices.PurchaseGoodItem]) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `CheckPurchaseResponse`
 
 Ответ метода проверки возможности проведения транзакции
 
-Сигнатура: `CheckPurchaseResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `CheckPurchaseResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1415,7 +1817,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода получения финальных цен на АЗС
 
-Сигнатура: `FinalPricesResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.final_prices.FinalPricesData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `FinalPricesResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.final_prices.FinalPricesData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1453,7 +1855,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope простого действия с приглашением.
 
-Сигнатура: `InviteBoolResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `InviteBoolResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1513,7 +1915,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope списка приглашений.
 
-Сигнатура: `InviteListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.invites.InviteList, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `InviteListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.invites.InviteList, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1525,7 +1927,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope действия с приглашением.
 
-Сигнатура: `InviteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.invites.InviteActionResult, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `InviteResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.invites.InviteActionResult, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1551,12 +1953,6 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `LimitAmountRequest(*, unit: Annotated[str, MinLen(min_length=1)], value: Annotated[float, Gt(gt=0)]) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `LimitItem`
 
 Продуктовый лимит (карта, группа или договор).
@@ -1575,12 +1971,6 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `LimitRequestItem(*, id: Annotated[str | None, MinLen(min_length=1)] = None, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, card_id: Annotated[str | None, MinLen(min_length=1)] = None, group_id: Annotated[str | None, MinLen(min_length=1)] = None, productType: Annotated[str | None, MinLen(min_length=1)] = None, productGroup: Annotated[str | None, MinLen(min_length=1)] = None, amount: api_client_opti24.models.limits.LimitAmountRequest | None = None, sum: api_client_opti24.models.limits.LimitSumRequest | None = None, term: api_client_opti24.models.limits.LimitTermRequest | None = None, transactions: api_client_opti24.models.limits.LimitTransactionsRequest | None = None, time: api_client_opti24.models.limits.LimitTimeRequest) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `LimitSum`
 
 Денежный лимит.
@@ -1596,12 +1986,6 @@ _Публичные классы и функции не обнаружены._
 ### `LimitSumRequest`
 
 Сигнатура: `LimitSumRequest(*, currency: Annotated[str, MinLen(min_length=1)], value: Annotated[float, Gt(gt=0)]) -> None`
-
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `LimitTerm`
 
@@ -1619,12 +2003,6 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `LimitTermRequest(*, days: Annotated[str | None, _PydanticGeneralMetadata(pattern='^[01]{7}$')] = None, type: Literal[1, 2, 3], time: api_client_opti24.models.limits.LimitTermTimeRequest | None = None) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `LimitTermTime`
 
 Временной диапазон действия лимита.
@@ -1640,12 +2018,6 @@ _Публичные классы и функции не обнаружены._
 ### `LimitTermTimeRequest`
 
 Сигнатура: `LimitTermTimeRequest(*, from_: Annotated[str, MinLen(min_length=1)], to: Annotated[str, MinLen(min_length=1)]) -> None`
-
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `LimitTime`
 
@@ -1663,12 +2035,6 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `LimitTimeRequest(*, number: Annotated[int, Gt(gt=0)], type: Literal[2, 3, 4, 5, 6, 7]) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `LimitTransactions`
 
 Ограничения по количеству транзакций.
@@ -1684,12 +2050,6 @@ _Публичные классы и функции не обнаружены._
 ### `LimitTransactionsRequest`
 
 Сигнатура: `LimitTransactionsRequest(*, count: Annotated[int, Gt(gt=0)]) -> None`
-
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `LimitsData`
 
@@ -1707,7 +2067,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на запрос списка лимитов.
 
-Сигнатура: `LimitsResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.limits.LimitsData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `LimitsResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.limits.LimitsData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1719,7 +2079,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на удаление продуктового лимита.
 
-Сигнатура: `RemoveLimitResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RemoveLimitResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1731,7 +2091,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на установку/изменение продуктового лимита.
 
-Сигнатура: `SetLimitResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `SetLimitResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: list[str], timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1771,17 +2131,11 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `RegionLimitRequestItem(*, id: Annotated[str | None, MinLen(min_length=1)] = None, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, card_id: Annotated[str | None, MinLen(min_length=1)] = None, group_id: Annotated[str | None, MinLen(min_length=1)] = None, country: Annotated[str, MinLen(min_length=1)], region: Annotated[str | None, MinLen(min_length=1)] = None, service_center: Annotated[str | None, MinLen(min_length=1)] = None, partner: Annotated[str | None, MinLen(min_length=1)] = None, limit_type: Literal[1, 2]) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `RegionLimitResponse`
 
 Коллекция региональных лимитов.
 
-Сигнатура: `RegionLimitResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.region_limits.RegionLimitList, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RegionLimitResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.region_limits.RegionLimitList, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1793,7 +2147,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope установки или изменения региональных лимитов.
 
-Сигнатура: `RegionLimitSetResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RegionLimitSetResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: list[str], timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1805,7 +2159,7 @@ _Публичные классы и функции не обнаружены._
 
 Удаление регионального лимита.
 
-Сигнатура: `RemoveRegionLimit(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RemoveRegionLimit(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1867,7 +2221,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope списка заданий отчётов (v2).
 
-Сигнатура: `ReportJobListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.reports.ReportJobList, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `ReportJobListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.reports.ReportJobList, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1891,7 +2245,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope списка доступных отчётов.
 
-Сигнатура: `ReportListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.reports.ReportList, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `ReportListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.reports.ReportList, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1929,17 +2283,11 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `ReportOrderRequest(*, id: str, format: str, emails: str | None = None, params: api_client_opti24.models.reports.ReportOrderParams) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `ReportOrderResponse`
 
 Полный envelope заказа отчёта (v2).
 
-Сигнатура: `ReportOrderResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.reports.ReportOrderData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `ReportOrderResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.reports.ReportOrderData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1987,7 +2335,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope списка заданий отчётов (v1).
 
-Сигнатура: `ReportV1JobListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[api_client_opti24.models.reports.ReportV1JobItem], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `ReportV1JobListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: list[api_client_opti24.models.reports.ReportV1JobItem], timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1999,7 +2347,7 @@ _Публичные классы и функции не обнаружены._
 
 Полный envelope заказа отчёта (v1).
 
-Сигнатура: `ReportV1OrderResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `ReportV1OrderResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: list[str], timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2013,7 +2361,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на запрос списка ограничителей (GET /restriction).
 
-Сигнатура: `RestrictionGetResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.restrictions.RestrictionList, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RestrictionGetResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.restrictions.RestrictionList, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2049,7 +2397,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на удаление ограничителя (POST /removeRestriction).
 
-Сигнатура: `RestrictionRemoveResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RestrictionRemoveResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2063,17 +2411,11 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `RestrictionRequestItem(*, id: Annotated[str | None, MinLen(min_length=1)] = None, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, card_id: Annotated[str | None, MinLen(min_length=1)] = None, group_id: Annotated[str | None, MinLen(min_length=1)] = None, productType: Annotated[str, MinLen(min_length=1)], productGroup: Annotated[str | None, MinLen(min_length=1)] = None, restriction_type: Literal[1, 2]) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `RestrictionSetResponse`
 
 Ответ на установку или изменение ограничителя (POST /setRestriction).
 
-Сигнатура: `RestrictionSetResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RestrictionSetResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: list[str], timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2147,15 +2489,9 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `TemplateCreateRequest(*, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, type: Literal['Limit', 'Wallet'], name: str) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `TemplateCreateResponse`
 
-Сигнатура: `TemplateCreateResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: str, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateCreateResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2165,7 +2501,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateDeleteResponse`
 
-Сигнатура: `TemplateDeleteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateDeleteResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2187,15 +2523,9 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `TemplateGeoRestrictionCreateRequest(*, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, country: str, region: str | None = None, partner: str | None = None, service_center: str | None = None, restriction_type: Literal[1, 2]) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `TemplateGeoRestrictionCreateResponse`
 
-Сигнатура: `TemplateGeoRestrictionCreateResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: str, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateGeoRestrictionCreateResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2205,7 +2535,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestrictionDeleteResponse`
 
-Сигнатура: `TemplateGeoRestrictionDeleteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateGeoRestrictionDeleteResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2225,7 +2555,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestrictionListResponse`
 
-Сигнатура: `TemplateGeoRestrictionListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.templates.TemplateGeoRestrictionListData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateGeoRestrictionListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.templates.TemplateGeoRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2257,15 +2587,9 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `TemplateLimitCreateRequest(*, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, product_type: str, product_group: str | None = None, sum: api_client_opti24.models.templates.LimitSum | None = None, amount: api_client_opti24.models.templates.LimitAmount | None = None, time: api_client_opti24.models.templates.LimitTime, term: api_client_opti24.models.templates.LimitTerm | None = None, create_restriction: bool | None = None) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `TemplateLimitCreateResponse`
 
-Сигнатура: `TemplateLimitCreateResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: str, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateLimitCreateResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2275,7 +2599,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitDeleteResponse`
 
-Сигнатура: `TemplateLimitDeleteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateLimitDeleteResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2295,7 +2619,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitListResponse`
 
-Сигнатура: `TemplateLimitListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.templates.TemplateLimitListData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateLimitListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.templates.TemplateLimitListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2317,15 +2641,9 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `TemplateRestrictionCreateRequest(*, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, product_type: str, product_group: str | None = None, restriction_type: Literal[1, 2]) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `TemplateRestrictionCreateResponse`
 
-Сигнатура: `TemplateRestrictionCreateResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: str, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateRestrictionCreateResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2335,7 +2653,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionDeleteResponse`
 
-Сигнатура: `TemplateRestrictionDeleteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateRestrictionDeleteResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2355,7 +2673,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionListResponse`
 
-Сигнатура: `TemplateRestrictionListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.templates.TemplateRestrictionListData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplateRestrictionListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.templates.TemplateRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2375,7 +2693,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplatesListResponse`
 
-Сигнатура: `TemplatesListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.templates.TemplatesListData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TemplatesListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.templates.TemplatesListData, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2401,7 +2719,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода получения детальной информации по транзакции (v2).
 
-Сигнатура: `TransactionDetailResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.transactions.TransactionsV2Data, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TransactionDetailResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.transactions.TransactionsV2Data, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2461,7 +2779,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TransactionsV1Response`
 
-Сигнатура: `TransactionsV1Response(*, status: dict[str, typing.Any], data: api_client_opti24.models.transactions.TransactionsV1Data, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TransactionsV1Response(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.transactions.TransactionsV1Data, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2481,7 +2799,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TransactionsV2Response`
 
-Сигнатура: `TransactionsV2Response(*, status: dict[str, typing.Any], data: api_client_opti24.models.transactions.TransactionsV2Data, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `TransactionsV2Response(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.transactions.TransactionsV2Data, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2503,7 +2821,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `UserBoolResponse`
 
-Сигнатура: `UserBoolResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `UserBoolResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2533,7 +2851,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `UserCreateResponse`
 
-Сигнатура: `UserCreateResponse(*, status: dict[str, typing.Any], data: str, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `UserCreateResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2563,7 +2881,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `UserListResponse`
 
-Сигнатура: `UserListResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.users.UserList | None = None, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `UserListResponse(*, status: api_client_opti24.modeling.ResponseStatus, data: api_client_opti24.models.users.UserList | None, timestamp: int | None = None, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2596,12 +2914,6 @@ _Публичные классы и функции не обнаружены._
 ### `ConfirmVirtualCardRequest`
 
 Сигнатура: `ConfirmVirtualCardRequest(*, card_id: str, code: str) -> None`
-
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `ConfirmVirtualCardResponse`
 
@@ -2667,12 +2979,6 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `RerunVirtualCardReleaseRequest(*, card_id: str, reason: str | None = None) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `RerunVirtualCardReleaseResponse`
 
 Сигнатура: `RerunVirtualCardReleaseResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: api_client_opti24.models.virtual_cards.VirtualCardData, timestamp: int, **extra_data: Any) -> None`
@@ -2687,12 +2993,6 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `ResendSMSRequest(*, card_id: str) -> None`
 
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
 ### `ResendSMSResponse`
 
 Сигнатура: `ResendSMSResponse(*, status: api_client_opti24.models.virtual_cards.StatusModel, data: bool, timestamp: int, **extra_data: Any) -> None`
@@ -2706,12 +3006,6 @@ _Публичные классы и функции не обнаружены._
 ### `ResetMPCRequest`
 
 Сигнатура: `ResetMPCRequest(*, type: str) -> None`
-
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
 ### `ResetMPCResponse`
 
@@ -2763,6 +3057,22 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+## `api_client_opti24.operations`
+
+### `Operation`
+
+Operation(name: 'str', response_type: 'type[ResponseT] | None', response_kind: 'ResponseKind' = 'json')
+
+Сигнатура: `Operation(name: 'str', response_type: 'type[ResponseT] | None', response_kind: 'ResponseKind' = 'json') -> None`
+
+### `binary_operation`
+
+Сигнатура: `binary_operation(name: 'str') -> 'Operation[bytes]'`
+
+### `operation`
+
+Сигнатура: `operation(name: 'str', response_type: 'type[ResponseT]') -> 'Operation[ResponseT]'`
+
 ## `api_client_opti24.payloads`
 
 ### `with_method_override`
@@ -2770,6 +3080,12 @@ _Публичные классы и функции не обнаружены._
 Сигнатура: `with_method_override(payload: 'Mapping[str, Any] | Sequence[Mapping[str, Any]] | None', method: 'str') -> 'dict[str, Any] | list[dict[str, Any]]'`
 
 ## `api_client_opti24.policies`
+
+### `ConcurrencyPolicy`
+
+ConcurrencyPolicy(max_in_flight: 'int' = 20)
+
+Сигнатура: `ConcurrencyPolicy(max_in_flight: 'int' = 20) -> None`
 
 ### `RateLimitPolicy`
 
@@ -2919,25 +3235,27 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 Публичные методы:
 
-#### `execute`
-
-Сигнатура: `execute(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'JSONPayload'`
-
 #### `execute_stream`
 
-Сигнатура: `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
+Сигнатура: `execute_stream(self, operation: 'Operation[bytes] | str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, request_contract_id: 'str | None' = None, **kwargs: 'Any') -> 'bytes'`
 
 #### `execute_stream_to_file`
 
-Сигнатура: `execute_stream_to_file(self, operation: 'str', destination: 'str | Path', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'Path'`
-
-### `ServiceMethodContext`
-
-Сигнатура: `ServiceMethodContext(*args, **kwargs)`
+Сигнатура: `execute_stream_to_file(self, operation: 'Operation[bytes] | str', destination: 'str | Path', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, request_contract_id: 'str | None' = None, **kwargs: 'Any') -> 'Path'`
 
 ### `SessionContext`
 
 Сигнатура: `SessionContext(*args, **kwargs)`
+
+Публичные методы:
+
+#### `request_context`
+
+Сигнатура: `request_context(self, *, contract_id: 'str | None' = None) -> 'RequestContext'`
+
+#### `snapshot`
+
+Сигнатура: `snapshot(self) -> 'SessionSnapshot'`
 
 ### `SessionGate`
 
@@ -2963,6 +3281,10 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 Сигнатура: `mark_authenticated(self, session_id: 'str', contract_id: 'str | None' = None) -> 'None'`
 
+#### `request_context`
+
+Сигнатура: `request_context(self, *, contract_id: 'str | None' = None) -> 'RequestContext'`
+
 #### `reset`
 
 Сигнатура: `reset(self) -> 'None'`
@@ -2970,6 +3292,10 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 #### `set_contract`
 
 Сигнатура: `set_contract(self, contract_id: 'str | None') -> 'None'`
+
+#### `snapshot`
+
+Сигнатура: `snapshot(self) -> 'SessionSnapshot'`
 
 ### `SessionRecovery`
 
@@ -3190,6 +3516,12 @@ result = await client.cards.block_card(
 :param page: Номер страницы (по умолчанию 1)
 :param onpage: Количество элементов на странице (по умолчанию 10)
 :return: Объект CardsV2Response с данными о картах
+
+#### `iter_cards_v2`
+
+Сигнатура: `iter_cards_v2(self, *, contract_id: str | None = None, sort: str = '-id', q: str | None = None, status: str | None = None, carrier: str | None = None, group_id: str | None = None, onpage: int = 100, max_pages: int = 100, api_version: str | None = None) -> collections.abc.AsyncIterator[api_client_opti24.models.cards.CardV2Item]`
+
+Последовательно получить карты, ограничив число страниц.
 
 #### `reset_pin`
 
@@ -3544,6 +3876,12 @@ invite = await client.invites.create_invite(
 - status: Фильтрация по статусу заявки (Active, Expired, Finished)
 - q: Поисковый запрос (Ищет email и mobile)
 - page, on_page: пагинация
+
+#### `iter_invites`
+
+Сигнатура: `iter_invites(self, *, role: str | None = None, status: str | None = None, q: str | None = None, on_page: int = 100, max_pages: int = 100, api_version: str | None = None) -> collections.abc.AsyncIterator[api_client_opti24.models.invites.InviteItem]`
+
+Последовательно получить приглашения, ограничив число страниц.
 
 #### `prolong_invite`
 
@@ -4059,6 +4397,12 @@ transactions = await client.transactions.get_transactions_v2(
 }
 ```
 
+#### `iter_transactions_v2`
+
+Сигнатура: `iter_transactions_v2(self, *, contract_id: str, date_from: str, date_to: str, page_limit: int = 100, max_pages: int = 100, api_version: str | None = None) -> collections.abc.AsyncIterator[api_client_opti24.models.transactions.TransactionItemV2]`
+
+Последовательно получить транзакции, ограничив число страниц.
+
 ## `api_client_opti24.services.users`
 
 ### `UsersService`
@@ -4154,6 +4498,12 @@ await client.users.get_users(
     sort="id", page=1, on_page=10, q="Кирилл", filter={"role": "Driver"}
 )
 
+#### `iter_users`
+
+Сигнатура: `iter_users(self, *, sort: str | None = None, q: str | None = None, filter: dict[str, Any] | None = None, on_page: int = 100, max_pages: int = 100, api_version: str | None = None) -> collections.abc.AsyncIterator[api_client_opti24.models.users.UserItem]`
+
+Последовательно получить пользователей, ограничив число страниц.
+
 ## `api_client_opti24.services.virtual_cards`
 
 ### `VirtualCardsService`
@@ -4244,6 +4594,12 @@ card = await client.virtual_cards.release_virtual_card(
 
 ## `api_client_opti24.session`
 
+### `RequestContext`
+
+RequestContext(session_id: 'str | None', contract_id: 'str | None', session_generation: 'int')
+
+Сигнатура: `RequestContext(session_id: 'str | None', contract_id: 'str | None', session_generation: 'int') -> None`
+
 ### `SessionManager`
 
 Сигнатура: `SessionManager() -> 'None'`
@@ -4262,6 +4618,10 @@ card = await client.virtual_cards.release_virtual_card(
 
 Сигнатура: `mark_authenticated(self, session_id: 'str', contract_id: 'str | None' = None) -> 'None'`
 
+#### `request_context`
+
+Сигнатура: `request_context(self, *, contract_id: 'str | None' = None) -> 'RequestContext'`
+
 #### `reset`
 
 Сигнатура: `reset(self) -> 'None'`
@@ -4276,9 +4636,9 @@ card = await client.virtual_cards.release_virtual_card(
 
 ### `SessionSnapshot`
 
-SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 'str | None')
+SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 'str | None', generation: 'int')
 
-Сигнатура: `SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 'str | None') -> None`
+Сигнатура: `SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 'str | None', generation: 'int') -> None`
 
 ### `SessionState`
 
@@ -4306,7 +4666,7 @@ SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 's
 
 ### `AsyncTransport`
 
-Сигнатура: `AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'LoggerLike | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = <function sleep>, monotonic: 'Callable[[], float]' = <built-in function monotonic>)`
+Сигнатура: `AsyncTransport(base_url: 'str', default_timeout: 'float' = 30.0, *, http_client: 'AsyncHTTPClient | None' = None, retry_policy: 'RetryPolicy | None' = None, rate_limit_policy: 'RateLimitPolicy | None' = None, concurrency_policy: 'ConcurrencyPolicy | None' = None, allow_insecure_http: 'bool' = False, response_decoder: 'ResponseDecoder | None' = None, logger: 'LoggerLike | None' = None, clock: 'Clock | None' = None, sleep: 'AsyncSleep' = <function sleep>, monotonic: 'Callable[[], float]' = <built-in function monotonic>)`
 
 Публичные методы:
 
@@ -4324,7 +4684,7 @@ SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 's
 
 #### `request_stream_to_file`
 
-Сигнатура: `request_stream_to_file(self, method: 'str', endpoint: 'str', destination: 'str | Path', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, *, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, chunk_size: 'int' = 65536, **kwargs: 'Any') -> 'Path'`
+Сигнатура: `request_stream_to_file(self, method: 'str', endpoint: 'str', destination: 'str | Path', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, *, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, chunk_size: 'int' = 65536, write_buffer_size: 'int' = 1048576, **kwargs: 'Any') -> 'Path'`
 
 ## `api_client_opti24.utils`
 

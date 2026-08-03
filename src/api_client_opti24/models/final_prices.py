@@ -1,6 +1,4 @@
-from typing import Any
-
-from ..modeling import BaseModel, Field, StrictRequestModel
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 
 class FinalPriceItem(BaseModel):
@@ -19,12 +17,8 @@ class FinalPricesData(BaseModel):
     )
 
 
-class FinalPricesResponse(BaseModel):
+class FinalPricesResponse(APIEnvelope[FinalPricesData]):
     """Ответ метода получения финальных цен на АЗС"""
-
-    status: dict[str, Any] = Field(..., description="Статус ответа API, например {'code': 200}")
-    data: FinalPricesData = Field(..., description="Основные данные ответа (цены)")
-    timestamp: int = Field(..., description="Время формирования ответа в формате UNIX")
 
 
 class PurchaseGoodItem(BaseModel):
@@ -44,9 +38,5 @@ class CheckPurchaseRequest(StrictRequestModel):
     )
 
 
-class CheckPurchaseResponse(BaseModel):
+class CheckPurchaseResponse(APIEnvelope[bool]):
     """Ответ метода проверки возможности проведения транзакции"""
-
-    status: dict[str, Any] = Field(..., description="Статус ответа API, например {'code': 200}")
-    data: bool = Field(..., description="Результат проверки — True, если покупка возможна")
-    timestamp: int = Field(..., description="Время ответа (UNIX timestamp)")

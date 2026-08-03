@@ -1,17 +1,20 @@
 from collections.abc import Mapping
 from typing import Any
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.region_limits import (
     RegionLimitRequestItem,
     RegionLimitResponse,
     RegionLimitSetResponse,
     RemoveRegionLimit,
 )
+from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
 from ..validation import require_identifier, validate_card_or_group_target
+
+GET_REGION_LIMITS = operation("get_region_limits", RegionLimitResponse)
+SET_REGION_LIMIT = operation("set_region_limit", RegionLimitSetResponse)
+REMOVE_REGION_LIMIT = operation("remove_region_limit", RemoveRegionLimit)
 
 
 class RegionLimitsService(_BaseService):
@@ -19,7 +22,6 @@ class RegionLimitsService(_BaseService):
     Методы для работы с региональными лимитами (v1).
     """
 
-    @api_method
     async def get_region_limits(
         self,
         *,
@@ -42,14 +44,13 @@ class RegionLimitsService(_BaseService):
         if group_id is not None:
             params["group_id"] = group_id
 
-        raw = await self._request(
-            "get_region_limits",
+        return await self._request(
+            GET_REGION_LIMITS,
             api_version=api_version,
             params=params,
+            request_contract_id=cid,
         )
-        return decode_model(RegionLimitResponse, raw)
 
-    @api_method
     async def set_region_limit(
         self,
         *,
@@ -114,14 +115,13 @@ class RegionLimitsService(_BaseService):
 
         body = {"region_limit": to_json_param(serialized_limits)}
 
-        raw = await self._request(
-            "set_region_limit",
+        return await self._request(
+            SET_REGION_LIMIT,
             api_version=api_version,
             data=body,
+            request_contract_id=fallback_contract_id or parsed_limits[0].contract_id,
         )
-        return decode_model(RegionLimitSetResponse, raw)
 
-    @api_method
     async def remove_region_limit(
         self,
         *,
@@ -141,9 +141,9 @@ class RegionLimitsService(_BaseService):
         if group_id is not None:
             body["group_id"] = require_identifier(group_id, "group_id")
 
-        raw = await self._request(
-            "remove_region_limit",
+        return await self._request(
+            REMOVE_REGION_LIMIT,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-        return decode_model(RemoveRegionLimit, raw)

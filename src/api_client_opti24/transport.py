@@ -8,7 +8,7 @@ import time
 from collections.abc import Awaitable, Callable, Mapping
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Protocol, TypeVar, cast
 from urllib.parse import urlsplit
 
 import httpx
@@ -18,6 +18,7 @@ from .logger import logger as default_logger
 from .policies import (
     IDEMPOTENT_HTTP_METHODS,
     SAFE_HTTP_METHODS,
+    ConcurrencyPolicy,
     RateLimitPolicy,
     RetryClass,
     RetryPolicy,
@@ -40,6 +41,8 @@ class AsyncHTTPClient(Protocol):
 
 
 AsyncSleep = Callable[[float], Awaitable[None]]
+ResultT = TypeVar("ResultT")
+_RATE_LIMITED = object()
 
 
 class AsyncTransport:
@@ -51,6 +54,7 @@ class AsyncTransport:
         http_client: AsyncHTTPClient | None = None,
         retry_policy: RetryPolicy | None = None,
         rate_limit_policy: RateLimitPolicy | None = None,
+        concurrency_policy: ConcurrencyPolicy | None = None,
         allow_insecure_http: bool = False,
         response_decoder: ResponseDecoder | None = None,
         logger: LoggerLike | None = None,
@@ -68,10 +72,12 @@ class AsyncTransport:
         self.response_decoder = response_decoder or ResponseDecoder(logger=self.logger)
         self.retry_policy = retry_policy or RetryPolicy()
         self.rate_limit_policy = rate_limit_policy or RateLimitPolicy()
+        self.concurrency_policy = concurrency_policy or ConcurrencyPolicy()
         self._sleep = clock.sleep if clock is not None else sleep
         self._monotonic = clock.monotonic if clock is not None else monotonic
         self._rate_limit_lock = asyncio.Lock()
         self._auth_limit_lock = asyncio.Lock()
+        self._concurrency_gate = asyncio.Semaphore(self.concurrency_policy.max_in_flight)
         self._last_request_started_at: float | None = None
         self._last_auth_request_started_at: float | None = None
 
@@ -171,6 +177,90 @@ class AsyncTransport:
             method_name=method_name,
         )
 
+    def _resolve_retry_settings(
+        self,
+        method: str,
+        retry_class: str | RetryClass | None,
+        idempotent: bool | None,
+    ) -> tuple[str, str | RetryClass, int, int]:
+        normalized_method = method.upper()
+        resolved_retry_class = retry_class or (
+            RetryClass.SAFE.value
+            if normalized_method in SAFE_HTTP_METHODS
+            else RetryClass.NEVER.value
+        )
+        resolved_idempotent = (
+            normalized_method in IDEMPOTENT_HTTP_METHODS if idempotent is None else idempotent
+        )
+        return (
+            normalized_method,
+            resolved_retry_class,
+            self.retry_policy.network_attempt_count(
+                resolved_retry_class,
+                normalized_method,
+                idempotent=resolved_idempotent,
+            ),
+            self.retry_policy.rate_limit_attempt_count(
+                resolved_retry_class,
+                normalized_method,
+                idempotent=resolved_idempotent,
+            ),
+        )
+
+    async def _run_with_retries(
+        self,
+        *,
+        method: str,
+        method_name: str | None,
+        retry_class: str | RetryClass | None,
+        idempotent: bool | None,
+        attempt: Callable[[int, int], Awaitable[ResultT | object]],
+    ) -> ResultT:
+        (
+            normalized_method,
+            resolved_retry_class,
+            network_attempts,
+            rate_limit_attempts,
+        ) = self._resolve_retry_settings(method, retry_class, idempotent)
+        network_backoff = self.retry_policy.initial_network_backoff(resolved_retry_class)
+
+        for network_attempt in range(1, network_attempts + 1):
+            try:
+                for rate_attempt in range(1, rate_limit_attempts + 1):
+                    await self._wait_for_rate_limit()
+                    await self._wait_for_auth_limit(resolved_retry_class)
+                    result = await attempt(rate_attempt, rate_limit_attempts)
+                    if result is not _RATE_LIMITED:
+                        return cast(ResultT, result)
+                    backoff_seconds = self.retry_policy.rate_limit_backoff_seconds * rate_attempt
+                    self.logger.warning(
+                        "Rate limit method=%s operation=%s attempt=%s/%s backoff=%.2fs",
+                        normalized_method,
+                        method_name or "unregistered",
+                        rate_attempt,
+                        rate_limit_attempts,
+                        backoff_seconds,
+                    )
+                    await self._sleep(backoff_seconds)
+                raise RuntimeError("Rate limit retry loop exhausted unexpectedly")
+            except httpx.RequestError:
+                if network_attempt >= network_attempts:
+                    raise
+                self.logger.warning(
+                    "Network error method=%s operation=%s attempt=%s/%s backoff=%.2fs",
+                    normalized_method,
+                    method_name or "unregistered",
+                    network_attempt,
+                    network_attempts,
+                    network_backoff,
+                )
+                await self._sleep(network_backoff)
+                network_backoff = min(
+                    network_backoff * 2,
+                    self.retry_policy.network_backoff_max_seconds,
+                )
+        raise RuntimeError("Network retry loop exhausted unexpectedly")
+
     async def request(
         self,
         method: str,
@@ -184,83 +274,33 @@ class AsyncTransport:
         **kwargs: Any,
     ) -> DecodedPayload:
         url = self._build_url(api_version, endpoint)
-        normalized_method = method.upper()
-        resolved_retry_class = retry_class or (
-            RetryClass.SAFE.value
-            if normalized_method in SAFE_HTTP_METHODS
-            else RetryClass.NEVER.value
-        )
-        resolved_idempotent = (
-            normalized_method in IDEMPOTENT_HTTP_METHODS if idempotent is None else idempotent
-        )
-        network_attempts = self.retry_policy.network_attempt_count(
-            resolved_retry_class,
-            normalized_method,
-            idempotent=resolved_idempotent,
-        )
-        rate_limit_attempts = self.retry_policy.rate_limit_attempt_count(
-            resolved_retry_class,
-            normalized_method,
-            idempotent=resolved_idempotent,
-        )
-        network_backoff = self.retry_policy.initial_network_backoff(resolved_retry_class)
 
-        for network_attempt in range(1, network_attempts + 1):
-            try:
-                for rate_attempt in range(1, rate_limit_attempts + 1):
-                    await self._wait_for_rate_limit()
-                    await self._wait_for_auth_limit(resolved_retry_class)
-                    resp = await self.client.request(
-                        method,
-                        url,
-                        headers=headers,
-                        timeout=timeout,
-                        **kwargs,
-                    )
-                    self.logger.info(
-                        "HTTP method=%s operation=%s status=%s",
-                        method.upper(),
-                        method_name or "unregistered",
-                        resp.status_code,
-                    )
-
-                    if resp.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
-                        backoff_seconds = (
-                            self.retry_policy.rate_limit_backoff_seconds * rate_attempt
-                        )
-                        self.logger.warning(
-                            "Rate limit method=%s operation=%s attempt=%s/%s backoff=%.2fs",
-                            method,
-                            method_name or "unregistered",
-                            rate_attempt,
-                            rate_limit_attempts,
-                            backoff_seconds,
-                        )
-                        await self._sleep(backoff_seconds)
-                        continue
-
-                    return self._handle_response(resp, endpoint, method_name=method_name)
-
-                raise RuntimeError("Rate limit retry loop exhausted unexpectedly")
-
-            except httpx.RequestError:
-                if network_attempt >= network_attempts:
-                    raise
-
-                self.logger.warning(
-                    "Network error method=%s operation=%s attempt=%s/%s backoff=%.2fs",
+        async def send(rate_attempt: int, rate_limit_attempts: int) -> DecodedPayload | object:
+            async with self._concurrency_gate:
+                response = await self.client.request(
                     method,
-                    method_name or "unregistered",
-                    network_attempt,
-                    network_attempts,
-                    network_backoff,
+                    url,
+                    headers=headers,
+                    timeout=timeout,
+                    **kwargs,
                 )
-                await self._sleep(network_backoff)
-                network_backoff = min(
-                    network_backoff * 2,
-                    self.retry_policy.network_backoff_max_seconds,
-                )
-        raise RuntimeError("Network retry loop exhausted unexpectedly")
+            self.logger.info(
+                "HTTP method=%s operation=%s status=%s",
+                method.upper(),
+                method_name or "unregistered",
+                response.status_code,
+            )
+            if response.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
+                return _RATE_LIMITED
+            return self._handle_response(response, endpoint, method_name=method_name)
+
+        return await self._run_with_retries(
+            method=method,
+            method_name=method_name,
+            retry_class=retry_class,
+            idempotent=idempotent,
+            attempt=send,
+        )
 
     async def request_stream(
         self,
@@ -301,10 +341,13 @@ class AsyncTransport:
         retry_class: str | RetryClass | None = None,
         idempotent: bool | None = None,
         chunk_size: int = 64 * 1024,
+        write_buffer_size: int = 1024 * 1024,
         **kwargs: Any,
     ) -> Path:
         if chunk_size <= 0:
             raise ValueError("chunk_size must be greater than zero")
+        if write_buffer_size <= 0:
+            raise ValueError("write_buffer_size must be greater than zero")
         result = await self._download_stream(
             method,
             endpoint,
@@ -315,6 +358,7 @@ class AsyncTransport:
             idempotent=idempotent,
             destination=Path(destination),
             chunk_size=chunk_size,
+            write_buffer_size=write_buffer_size,
             **kwargs,
         )
         if not isinstance(result, Path):
@@ -333,76 +377,52 @@ class AsyncTransport:
         idempotent: bool | None,
         destination: Path | None,
         chunk_size: int = 64 * 1024,
+        write_buffer_size: int = 1024 * 1024,
         **kwargs: Any,
     ) -> bytes | Path:
         parsed = urlsplit(endpoint)
         if parsed.scheme or parsed.netloc:
             raise ValueError("stream endpoint must be relative to the configured base_url")
         url = self._build_url(api_version, endpoint)
-        normalized_method = method.upper()
-        resolved_retry_class = retry_class or (
-            RetryClass.SAFE.value
-            if normalized_method in SAFE_HTTP_METHODS
-            else RetryClass.NEVER.value
-        )
-        resolved_idempotent = (
-            normalized_method in IDEMPOTENT_HTTP_METHODS if idempotent is None else idempotent
-        )
-        network_attempts = self.retry_policy.network_attempt_count(
-            resolved_retry_class,
-            normalized_method,
-            idempotent=resolved_idempotent,
-        )
-        rate_limit_attempts = self.retry_policy.rate_limit_attempt_count(
-            resolved_retry_class,
-            normalized_method,
-            idempotent=resolved_idempotent,
-        )
-        network_backoff = self.retry_policy.initial_network_backoff(resolved_retry_class)
 
-        for network_attempt in range(1, network_attempts + 1):
-            try:
-                for rate_attempt in range(1, rate_limit_attempts + 1):
-                    await self._wait_for_rate_limit()
-                    async with self.client.stream(method, url, headers=headers, **kwargs) as resp:
-                        if resp.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
-                            await resp.aread()
-                            backoff_seconds = (
-                                self.retry_policy.rate_limit_backoff_seconds * rate_attempt
-                            )
-                            await self._sleep(backoff_seconds)
-                            continue
+        async def send(rate_attempt: int, rate_limit_attempts: int) -> bytes | Path | object:
+            async with (
+                self._concurrency_gate,
+                self.client.stream(method, url, headers=headers, **kwargs) as resp,
+            ):
+                if resp.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
+                    await resp.aread()
+                    return _RATE_LIMITED
 
-                        content_type = resp.headers.get("content-type", "").lower()
-                        if not 200 <= resp.status_code < 300 or "json" in content_type:
-                            content = await resp.aread()
-                            self.response_decoder.decode_bytes(
-                                resp,
-                                content,
-                                url,
-                                method_name=method_name,
-                            )
-                            if destination is None:
-                                return content
-                            return await self._write_bytes_atomically(destination, content)
+                content_type = resp.headers.get("content-type", "").lower()
+                if not 200 <= resp.status_code < 300 or "json" in content_type:
+                    content = await resp.aread()
+                    self.response_decoder.decode_bytes(
+                        resp,
+                        content,
+                        url,
+                        method_name=method_name,
+                    )
+                    if destination is None:
+                        return content
+                    return await self._write_bytes_atomically(destination, content)
 
-                        if destination is None:
-                            return await resp.aread()
-                        return await self._write_stream_atomically(
-                            destination,
-                            resp,
-                            chunk_size=chunk_size,
-                        )
-                raise RuntimeError("Rate limit retry loop exhausted unexpectedly")
-            except httpx.RequestError:
-                if network_attempt >= network_attempts:
-                    raise
-                await self._sleep(network_backoff)
-                network_backoff = min(
-                    network_backoff * 2,
-                    self.retry_policy.network_backoff_max_seconds,
+                if destination is None:
+                    return await resp.aread()
+                return await self._write_stream_atomically(
+                    destination,
+                    resp,
+                    chunk_size=chunk_size,
+                    write_buffer_size=write_buffer_size,
                 )
-        raise RuntimeError("Network retry loop exhausted unexpectedly")
+
+        return await self._run_with_retries(
+            method=method,
+            method_name=method_name,
+            retry_class=retry_class,
+            idempotent=idempotent,
+            attempt=send,
+        )
 
     @staticmethod
     async def _write_bytes_atomically(destination: Path, content: bytes) -> Path:
@@ -421,13 +441,20 @@ class AsyncTransport:
         response: httpx.Response,
         *,
         chunk_size: int,
+        write_buffer_size: int,
     ) -> Path:
         destination.parent.mkdir(parents=True, exist_ok=True)
         temporary = AsyncTransport._temporary_path(destination)
         try:
             with temporary.open("wb") as output:
+                buffer = bytearray()
                 async for chunk in response.aiter_bytes(chunk_size):
-                    await asyncio.to_thread(output.write, chunk)
+                    buffer.extend(chunk)
+                    if len(buffer) >= write_buffer_size:
+                        await asyncio.to_thread(output.write, bytes(buffer))
+                        buffer.clear()
+                if buffer:
+                    await asyncio.to_thread(output.write, bytes(buffer))
             await asyncio.to_thread(os.replace, temporary, destination)
         finally:
             temporary.unlink(missing_ok=True)

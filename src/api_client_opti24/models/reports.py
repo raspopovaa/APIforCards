@@ -1,7 +1,6 @@
 from typing import Any
 
-from ..modeling import BaseModel, Field, StrictRequestModel
-from .common import ResponseStatus
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 # === Общие модели ===
 
@@ -44,12 +43,8 @@ class ReportList(BaseModel):
     result: list[ReportItem] = Field(..., description="Массив отчетов")
 
 
-class ReportListResponse(BaseModel):
+class ReportListResponse(APIEnvelope[ReportList]):
     """Полный envelope списка доступных отчётов."""
-
-    status: ResponseStatus
-    data: ReportList
-    timestamp: int
 
 
 # === Заказ отчета ===
@@ -84,12 +79,8 @@ class ReportOrderData(BaseModel):
     )
 
 
-class ReportOrderResponse(BaseModel):
+class ReportOrderResponse(APIEnvelope[ReportOrderData]):
     """Полный envelope заказа отчёта (v2)."""
-
-    status: ResponseStatus
-    data: ReportOrderData
-    timestamp: int
 
 
 # === Список заказанных отчетов ===
@@ -116,12 +107,8 @@ class ReportJobList(BaseModel):
     result: list[ReportJobItem] = Field(..., description="Список заказанных отчетов")
 
 
-class ReportJobListResponse(BaseModel):
+class ReportJobListResponse(APIEnvelope[ReportJobList]):
     """Полный envelope списка заданий отчётов (v2)."""
-
-    status: ResponseStatus
-    data: ReportJobList
-    timestamp: int
 
 
 # === Генерация отчета ===
@@ -141,12 +128,8 @@ class ReportFileResponse(BaseModel):
 # === v1 методы ===
 
 
-class ReportV1OrderResponse(BaseModel):
+class ReportV1OrderResponse(APIEnvelope[list[str]]):
     """Полный envelope заказа отчёта (v1)."""
-
-    status: ResponseStatus
-    data: list[str] = Field(..., description="ID заказанных отчетов")
-    timestamp: int
 
 
 class ReportV1JobItem(BaseModel):
@@ -161,9 +144,5 @@ class ReportV1JobItem(BaseModel):
     report_format: str = Field(..., description="Формат отчета (pdf, xlsx, xml и т.д.)")
 
 
-class ReportV1JobListResponse(BaseModel):
+class ReportV1JobListResponse(APIEnvelope[list[ReportV1JobItem]]):
     """Полный envelope списка заданий отчётов (v1)."""
-
-    status: ResponseStatus
-    data: list[ReportV1JobItem] = Field(..., description="Массив заказанных отчетов")
-    timestamp: int

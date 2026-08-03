@@ -1,5 +1,5 @@
-from ..decorators import api_method
-from ..modeling import decode_model
+from collections.abc import AsyncIterator
+
 from ..models.cards import (
     BoolResponse,
     CardDetailResponse,
@@ -7,16 +7,27 @@ from ..models.cards import (
     CardGroupResponse,
     CardsListResponse,
     CardsV2Response,
+    CardV2Item,
     IDListResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
+
+GET_CARDS_V1 = operation("get_cards_v1", CardsListResponse)
+GET_CARDS_V2 = operation("get_cards_v2", CardsV2Response)
+GET_CARDS_BY_GROUP = operation("get_cards_by_group", CardGroupResponse)
+GET_CARD_DRIVERS = operation("get_card_drivers", CardDriversResponse)
+GET_CARD_DETAIL = operation("get_card_detail", CardDetailResponse)
+BLOCK_CARD = operation("block_card", IDListResponse)
+SET_CARD_COMMENT = operation("set_card_comment", BoolResponse)
+VERIFY_PIN = operation("verify_pin", BoolResponse)
+RESET_PIN = operation("reset_pin", BoolResponse)
 
 
 class CardsService(_BaseService):
     """Методы работы с топливными картами."""
 
     # --- Список карт (v1) ---
-    @api_method
     async def get_cards_v1(
         self,
         *,
@@ -32,15 +43,13 @@ class CardsService(_BaseService):
         """
         params = {"contract_id": contract_id, "cache": str(cache).lower()}
         self.logger.info("Requesting cards version=v1")
-        data = await self._request(
-            "get_cards_v1",
+        return await self._request(
+            GET_CARDS_V1,
             api_version=api_version,
             params=params,
+            request_contract_id=contract_id,
         )
 
-        return decode_model(CardsListResponse, data)
-
-    @api_method
     async def get_cards_v2(
         self,
         *,
@@ -91,17 +100,49 @@ class CardsService(_BaseService):
         # Исключаем None, чтобы не отправлять пустые параметры
         filtered_params = {k: v for k, v in params.items() if v is not None}
 
-        response = await self._request(
-            "get_cards_v2",
+        return await self._request(
+            GET_CARDS_V2,
             api_version=api_version,
             params=filtered_params,
+            request_contract_id=resolved_contract_id,
         )
 
-        # Возвращаем полный типизированный ответ API
-        return decode_model(CardsV2Response, response)
+    async def iter_cards_v2(
+        self,
+        *,
+        contract_id: str | None = None,
+        sort: str = "-id",
+        q: str | None = None,
+        status: str | None = None,
+        carrier: str | None = None,
+        group_id: str | None = None,
+        onpage: int = 100,
+        max_pages: int = 100,
+        api_version: str | None = None,
+    ) -> AsyncIterator[CardV2Item]:
+        """Последовательно получить карты, ограничив число страниц."""
+        if onpage < 1 or max_pages < 1:
+            raise ValueError("onpage and max_pages must be greater than zero")
+        yielded = 0
+        for page in range(1, max_pages + 1):
+            response = await self.get_cards_v2(
+                contract_id=contract_id,
+                sort=sort,
+                q=q,
+                status=status,
+                carrier=carrier,
+                group_id=group_id,
+                page=page,
+                onpage=onpage,
+                api_version=api_version,
+            )
+            for item in response.result:
+                yield item
+                yielded += 1
+            if not response.result or yielded >= response.total_count:
+                return
 
     # --- Список карт по группе ---
-    @api_method
     async def get_cards_by_group(
         self,
         *,
@@ -112,15 +153,14 @@ class CardsService(_BaseService):
         """Получение списка топливных карт по группе карт."""
         params = {"contract_id": contract_id, "group_id": group_id}
         self.logger.info("Requesting cards by group")
-        data = await self._request(
-            "get_cards_by_group",
+        return await self._request(
+            GET_CARDS_BY_GROUP,
             api_version=api_version,
             params=params,
+            request_contract_id=contract_id,
         )
-        return decode_model(CardGroupResponse, data)
 
     # --- Водители по карте ---
-    @api_method
     async def get_card_drivers(
         self,
         *,
@@ -130,16 +170,15 @@ class CardsService(_BaseService):
     ) -> CardDriversResponse:
         """Получение списка водителей по карте."""
         self.logger.info("Requesting card drivers")
-        data = await self._request(
-            "get_card_drivers",
+        return await self._request(
+            GET_CARD_DRIVERS,
             api_version=api_version,
             path_params={"card_id": card_id},
             params={"contract_id": contract_id},
+            request_contract_id=contract_id,
         )
-        return decode_model(CardDriversResponse, data)
 
     # --- Детальная информация по карте ---
-    @api_method
     async def get_card_detail(
         self,
         *,
@@ -150,15 +189,14 @@ class CardsService(_BaseService):
         """Получение детальной информации по карте."""
         params = {"contract_id": contract_id, "card_id": card_id}
         self.logger.info("Requesting card details")
-        data = await self._request(
-            "get_card_detail",
+        return await self._request(
+            GET_CARD_DETAIL,
             api_version=api_version,
             params=params,
+            request_contract_id=contract_id,
         )
-        return decode_model(CardDetailResponse, data)
 
     # --- Блокировка / разблокировка карты ---
-    @api_method
     async def block_card(
         self,
         *,
@@ -202,15 +240,14 @@ class CardsService(_BaseService):
         else:
             self.logger.info("Unblocking cards")
 
-        data = await self._request(
-            "block_card",
+        return await self._request(
+            BLOCK_CARD,
             api_version=api_version,
             data=payload,
+            request_contract_id=contract_id,
         )
-        return decode_model(IDListResponse, data)
 
     # --- Установка комментария ---
-    @api_method
     async def set_card_comment(
         self,
         *,
@@ -222,15 +259,14 @@ class CardsService(_BaseService):
         """Установить комментарий на топливную карту."""
         payload = {"card_id": card_id, "contract_id": contract_id, "comment": comment}
         self.logger.info("Updating card comment")
-        data = await self._request(
-            "set_card_comment",
+        return await self._request(
+            SET_CARD_COMMENT,
             api_version=api_version,
             data=payload,
+            request_contract_id=contract_id,
         )
-        return decode_model(BoolResponse, data)
 
     # --- Запрос одноразового кода для сброса PIN ---
-    @api_method
     async def verify_pin(
         self,
         *,
@@ -244,16 +280,15 @@ class CardsService(_BaseService):
         Данный код нужно ввести в метод resetPIN для завершения операции сброса попыток.
         """
         self.logger.info("Requesting PIN reset verification")
-        data = await self._request(
-            "verify_pin",
+        return await self._request(
+            VERIFY_PIN,
             api_version=api_version,
             path_params={"card_id": card_id},
             params={"contract_id": contract_id},
+            request_contract_id=contract_id,
         )
-        return decode_model(BoolResponse, data)
 
     # --- Подтверждение сброса PIN ---
-    @api_method
     async def reset_pin(
         self,
         *,
@@ -268,10 +303,10 @@ class CardsService(_BaseService):
         """
         payload = {"contract_id": contract_id, "code": code}
         self.logger.info("Resetting card PIN")
-        data = await self._request(
-            "reset_pin",
+        return await self._request(
+            RESET_PIN,
             api_version=api_version,
             path_params={"card_id": card_id},
             data=payload,
+            request_contract_id=contract_id,
         )
-        return decode_model(BoolResponse, data)

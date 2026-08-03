@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Any
 
-from ..modeling import BaseModel, Field
+from ..modeling import APIEnvelope, BaseModel, Field
 
 # ============================================================
 # Общие структуры
@@ -95,10 +94,8 @@ class TransactionsV1Data(BaseModel):
     result: list[TransactionV1] = Field(..., description="Список транзакций")
 
 
-class TransactionsV1Response(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус ответа")
-    data: TransactionsV1Data = Field(..., description="Данные ответа")
-    timestamp: int = Field(..., description="Метка времени сервера")
+class TransactionsV1Response(APIEnvelope[TransactionsV1Data]):
+    pass
 
 
 class TransactionsV2Data(BaseModel):
@@ -106,15 +103,9 @@ class TransactionsV2Data(BaseModel):
     result: list[TransactionItemV2] = Field(..., description="Список транзакций (v2)")
 
 
-class TransactionsV2Response(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус ответа")
-    data: TransactionsV2Data = Field(..., description="Данные ответа")
-    timestamp: int = Field(..., description="Метка времени сервера")
+class TransactionsV2Response(APIEnvelope[TransactionsV2Data]):
+    pass
 
 
-class TransactionDetailResponse(BaseModel):
+class TransactionDetailResponse(APIEnvelope[TransactionsV2Data]):
     """Ответ метода получения детальной информации по транзакции (v2)."""
-
-    status: dict[str, Any] = Field(..., description="Статус ответа")
-    data: TransactionsV2Data = Field(..., description="Информация по одной транзакции")
-    timestamp: int = Field(..., description="Метка времени сервера")

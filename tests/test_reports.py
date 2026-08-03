@@ -8,6 +8,7 @@ from api_client_opti24.session import SessionManager
 from tests.service_support import (
     RecordingRequestExecutor,
     StubSessionGate,
+    operation_name,
     service_dependencies,
 )
 
@@ -39,7 +40,7 @@ async def test_download_report_file_to_delegates_streaming(tmp_path: Path) -> No
     class FileExecutor(RecordingRequestExecutor):
         async def execute_stream_to_file(
             self,
-            operation: str,
+            operation: object,
             destination: str | Path,
             *,
             api_version: str | None = None,
@@ -48,7 +49,7 @@ async def test_download_report_file_to_delegates_streaming(tmp_path: Path) -> No
             **kwargs: object,
         ) -> Path:
             del api_version, route_name, kwargs
-            self.calls.append((operation, {"path_params": path_params}))
+            self.calls.append((operation_name(operation), {"path_params": path_params}))
             target = Path(destination)
             target.write_bytes(b"report")
             return target

@@ -4,7 +4,7 @@
 транзакциями, отчётами, пользователями и виртуальными картами.
 
 !!! info "Текущая версия"
-    Документация соответствует `api-client-opti24 2.2.2` и Python
+    Документация соответствует `api-client-opti24 2.3.0` и Python
     `>=3.11,<3.15`.
 
 ## Начните отсюда
@@ -51,4 +51,4 @@ transactions = await client.transactions.get_transactions_v2()
 - [Совместимость со спецификацией](spec-compatibility.md)
 - [Версионирование документации](versioning.md)
 - [Исходный код на GitHub](https://github.com/raspopovaa/APIforCards)
-- [Пакет 2.2.2 на TestPyPI](https://test.pypi.org/project/api-client-opti24/2.2.2/)
+- [Пакет 2.3.0 на TestPyPI](https://test.pypi.org/project/api-client-opti24/2.3.0/)

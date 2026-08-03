@@ -1,8 +1,6 @@
 from decimal import Decimal
 from typing import Literal
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.contracts import (
     ContractDataResponse,
     DocumentsOrderResponse,
@@ -12,6 +10,7 @@ from ..models.contracts import (
     OrderCardsResponse,
     PaymentsResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
 from ..validation import (
     decimal_to_wire,
@@ -24,10 +23,16 @@ from ..validation import (
 )
 
 DocumentFormat = Literal["pdf", "xlsx"]
+GET_CONTRACT_DATA = operation("get_contract_data", ContractDataResponse)
+GET_PAYMENTS = operation("get_payments", PaymentsResponse)
+GET_DOCUMENTS = operation("get_documents", DocumentsResponse)
+ORDER_DOCUMENTS_EMAIL = operation("order_documents_email", DocumentsOrderResponse)
+ORDER_CARDS = operation("order_cards", OrderCardsResponse)
+ORDER_INVOICE = operation("order_invoice", InvoiceOrderResponse)
+GET_INVOICES = operation("get_invoices", InvoicesResponse)
 
 
 class ContractsService(_BaseService):
-    @api_method
     async def get_contract_data(
         self,
         *,
@@ -36,14 +41,13 @@ class ContractsService(_BaseService):
     ) -> ContractDataResponse:
         """Получение информации о контракте."""
         cid = await self._resolve_contract_id(contract_id)
-        data = await self._request(
-            "get_contract_data",
+        return await self._request(
+            GET_CONTRACT_DATA,
             api_version=api_version,
             params={"contract_id": cid},
+            request_contract_id=cid,
         )
-        return decode_model(ContractDataResponse, data)
 
-    @api_method
     async def get_payments(
         self,
         *,
@@ -52,14 +56,13 @@ class ContractsService(_BaseService):
     ) -> PaymentsResponse:
         """Получение данных о платежах по контракту."""
         cid = await self._resolve_contract_id(contract_id)
-        data = await self._request(
-            "get_payments",
+        return await self._request(
+            GET_PAYMENTS,
             api_version=api_version,
             params={"contract_id": cid},
+            request_contract_id=cid,
         )
-        return decode_model(PaymentsResponse, data)
 
-    @api_method
     async def get_documents(
         self,
         *,
@@ -80,15 +83,13 @@ class ContractsService(_BaseService):
             "page": page,
             "on_page": on_page,
         }
-        data = await self._request(
-            "get_documents",
+        return await self._request(
+            GET_DOCUMENTS,
             api_version=api_version,
             params=params,
-            headers={"contract_id": cid},
+            request_contract_id=cid,
         )
-        return decode_model(DocumentsResponse, data)
 
-    @api_method
     async def order_documents_email(
         self,
         *,
@@ -102,15 +103,13 @@ class ContractsService(_BaseService):
         cid = await self._resolve_contract_id(contract_id)
         ids, fmt, emails = validate_document_order(ids, fmt, emails)
         payload = {"id": ids, "format": fmt, "emails": emails}
-        data = await self._request(
-            "order_documents_email",
+        return await self._request(
+            ORDER_DOCUMENTS_EMAIL,
             api_version=api_version,
             json=payload,
-            headers={"contract_id": cid},
+            request_contract_id=cid,
         )
-        return decode_model(DocumentsOrderResponse, data)
 
-    @api_method
     async def order_cards(
         self,
         *,
@@ -125,15 +124,13 @@ class ContractsService(_BaseService):
             "count": validate_positive_count(count),
             "office_id": require_identifier(office_id, "office_id"),
         }
-        data = await self._request(
-            "order_cards",
+        return await self._request(
+            ORDER_CARDS,
             api_version=api_version,
             data=payload,
-            headers={"contract_id": cid},
+            request_contract_id=cid,
         )
-        return decode_model(OrderCardsResponse, data)
 
-    @api_method
     async def order_invoice(
         self,
         *,
@@ -167,15 +164,13 @@ class ContractsService(_BaseService):
             "sum": decimal_to_wire(amount, "amount"),
             "email": validate_email(email),
         }
-        data = await self._request(
-            "order_invoice",
+        return await self._request(
+            ORDER_INVOICE,
             api_version=api_version,
             data=payload,
-            headers={"contract_id": cid},
+            request_contract_id=cid,
         )
-        return decode_model(InvoiceOrderResponse, data)
 
-    @api_method
     async def get_invoices(
         self,
         *,
@@ -184,9 +179,8 @@ class ContractsService(_BaseService):
     ) -> InvoicesResponse:
         """Получение списка счетов на оплату."""
         cid = await self._resolve_contract_id(contract_id)
-        data = await self._request(
-            "get_invoices",
+        return await self._request(
+            GET_INVOICES,
             api_version=api_version,
-            headers={"contract_id": cid},
+            request_contract_id=cid,
         )
-        return decode_model(InvoicesResponse, data)

@@ -74,7 +74,7 @@ async def test_header_contract_override_is_forwarded() -> None:
         contract_id="explicit-contract",
     )
 
-    assert executor.calls[0][1]["headers"] == {"contract_id": "explicit-contract"}
+    assert executor.calls[0][1]["request_contract_id"] == "explicit-contract"
 
 
 @pytest.mark.asyncio

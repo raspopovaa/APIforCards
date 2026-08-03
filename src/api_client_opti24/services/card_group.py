@@ -1,15 +1,19 @@
 import json
 from typing import Any
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models import (
     CardGroupListResponse,
     RemoveCardGroupResponse,
     SetCardGroupResponse,
     SetCardsToGroupResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
+
+GET_CARD_GROUPS = operation("get_card_groups", CardGroupListResponse)
+SET_CARD_GROUP = operation("set_card_group", SetCardGroupResponse)
+SET_CARDS_TO_GROUP = operation("set_cards_to_group", SetCardsToGroupResponse)
+REMOVE_CARD_GROUP = operation("remove_card_group", RemoveCardGroupResponse)
 
 
 class CardGroupsService(_BaseService):
@@ -20,7 +24,6 @@ class CardGroupsService(_BaseService):
     # -------------------------------
     # Получение списка групп карт
     # -------------------------------
-    @api_method
     async def get_card_groups(
         self,
         *,
@@ -32,17 +35,16 @@ class CardGroupsService(_BaseService):
         """
         params = {"contract_id": contract_id}
 
-        raw = await self._request(
-            "get_card_groups",
+        return await self._request(
+            GET_CARD_GROUPS,
             api_version=api_version,
             params=params,
+            request_contract_id=contract_id,
         )
-        return decode_model(CardGroupListResponse, raw)
 
     # -------------------------------
     # Создание или изменение группы
     # -------------------------------
-    @api_method
     async def set_card_group(
         self,
         *,
@@ -80,17 +82,16 @@ class CardGroupsService(_BaseService):
         if group_id:
             body["id"] = group_id
 
-        raw = await self._request(
-            "set_card_group",
+        return await self._request(
+            SET_CARD_GROUP,
             api_version=api_version,
             data=body,
+            request_contract_id=contract_id,
         )
-        return decode_model(SetCardGroupResponse, raw)
 
     # -------------------------------
     # Добавление карт в группу
     # -------------------------------
-    @api_method
     async def set_cards_to_group(
         self,
         *,
@@ -114,17 +115,16 @@ class CardGroupsService(_BaseService):
             "cards_list": json.dumps(cards_list),
         }
 
-        raw = await self._request(
-            "set_cards_to_group",
+        return await self._request(
+            SET_CARDS_TO_GROUP,
             api_version=api_version,
             data=body,
+            request_contract_id=contract_id,
         )
-        return decode_model(SetCardsToGroupResponse, raw)
 
     # -------------------------------
     # Удаление группы карт
     # -------------------------------
-    @api_method
     async def remove_card_group(
         self,
         *,
@@ -141,9 +141,9 @@ class CardGroupsService(_BaseService):
         """
         body = {"contract_id": contract_id, "group_id": group_id}
 
-        raw = await self._request(
-            "remove_card_group",
+        return await self._request(
+            REMOVE_CARD_GROUP,
             api_version=api_version,
             data=body,
+            request_contract_id=contract_id,
         )
-        return decode_model(RemoveCardGroupResponse, raw)

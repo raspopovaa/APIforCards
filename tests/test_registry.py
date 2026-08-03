@@ -1,10 +1,16 @@
 import ast
+import importlib
 import json
+import pkgutil
 from pathlib import Path
 
 import pytest
 
+import api_client_opti24.services as service_package
+from api_client_opti24.authentication import AUTH_USER
 from api_client_opti24.contracts import serialize_registry_contract
+from api_client_opti24.modeling import APIEnvelope, ResponseModel
+from api_client_opti24.operations import Operation
 from api_client_opti24.registry import (
     EndpointSpec,
     MethodRegistry,
@@ -132,30 +138,36 @@ def test_services_call_their_explicit_registry_operation() -> None:
 
     for service_file in service_directory.glob("*.py"):
         tree = ast.parse(service_file.read_text(encoding="utf-8"))
+        bindings = {
+            target.id: statement.value.args[0].value
+            for statement in tree.body
+            if isinstance(statement, ast.Assign)
+            and len(statement.targets) == 1
+            and isinstance((target := statement.targets[0]), ast.Name)
+            and isinstance(statement.value, ast.Call)
+            and isinstance(statement.value.func, ast.Name)
+            and statement.value.func.id in {"operation", "binary_operation"}
+            and statement.value.args
+            and isinstance(statement.value.args[0], ast.Constant)
+        }
         for function in (node for node in ast.walk(tree) if isinstance(node, ast.AsyncFunctionDef)):
             calls = [
                 node
                 for node in ast.walk(function)
                 if isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
-                and node.func.attr in {"_request", "_request_stream"}
+                and node.func.attr in {"_request", "_request_stream", "_request_stream_to_file"}
             ]
             if not calls:
                 continue
             assert len(calls) == 1, f"{service_file.name}:{function.name} must execute once"
             operation_arg = calls[0].args[0]
-            assert isinstance(operation_arg, ast.Constant)
-            assert operation_arg.value == function.name
-            header_keywords = [keyword for keyword in calls[0].keywords if keyword.arg == "headers"]
-            if header_keywords:
-                assert service_file.name == "contract.py"
-                assert len(header_keywords) == 1
-                header_value = header_keywords[0].value
-                assert isinstance(header_value, ast.Dict)
-                assert [
-                    key.value for key in header_value.keys if isinstance(key, ast.Constant)
-                ] == ["contract_id"]
-            operations.add(function.name)
+            assert isinstance(operation_arg, ast.Name)
+            operation_name = bindings[operation_arg.id]
+            expected_name = function.name.removesuffix("_to")
+            assert operation_name == expected_name
+            assert all(keyword.arg != "headers" for keyword in calls[0].keywords)
+            operations.add(operation_name)
 
     authentication_tree = ast.parse(
         Path("src/api_client_opti24/authentication.py").read_text(encoding="utf-8")
@@ -178,11 +190,32 @@ def test_services_call_their_explicit_registry_operation() -> None:
         and node.func.attr == "execute"
     ]
     assert len(auth_calls) == 1
-    assert isinstance(auth_calls[0].args[0], ast.Constant)
-    assert auth_calls[0].args[0].value == "auth_user"
+    assert isinstance(auth_calls[0].args[0], ast.Name)
+    assert auth_calls[0].args[0].id == "AUTH_USER"
     operations.add("auth_user")
 
     assert operations == {spec.name for spec in build_default_registry().list_all()}
+
+
+def test_typed_operations_cover_registry_and_use_response_models() -> None:
+    registry = build_default_registry()
+    operations = {AUTH_USER.name: AUTH_USER}
+    for module_info in pkgutil.iter_modules(service_package.__path__):
+        module = importlib.import_module(f"{service_package.__name__}.{module_info.name}")
+        for value in vars(module).values():
+            if isinstance(value, Operation):
+                operations[value.name] = value
+
+    assert set(operations) == {spec.name for spec in registry.list_all()}
+    for name, typed_operation in operations.items():
+        if typed_operation.response_kind == "bytes":
+            assert typed_operation.response_type is None
+            continue
+        response_type = typed_operation.response_type
+        assert response_type is not None
+        assert issubclass(response_type, ResponseModel)
+        if registry.get(name).domain != "virtual_cards":
+            assert issubclass(response_type, APIEnvelope)
 
 
 def test_external_metadata_is_declared_inline_with_endpoint_routes() -> None:

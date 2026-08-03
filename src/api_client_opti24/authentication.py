@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Protocol
+from typing import Any, Protocol, TypeVar
 
 from .logger import LoggerLike
-from .modeling import decode_model
+from .modeling import ResponseModel
 from .models.auth import AuthUserResponse
-from .service_base import CredentialsProvider, RequestExecutor, SessionMutator
+from .operations import Operation, operation
+from .service_base import CredentialsProvider, SessionMutator
 from .session import SessionManager
 from .utils import hash_password
+
+ResponseT = TypeVar("ResponseT", bound=ResponseModel)
+AUTH_USER = operation("auth_user", AuthUserResponse)
 
 
 class Authenticator(Protocol):
@@ -21,10 +25,20 @@ class Authenticator(Protocol):
     ) -> AuthUserResponse: ...
 
 
+class AuthenticationRequestExecutor(Protocol):
+    async def execute(
+        self,
+        operation: Operation[ResponseT],
+        *,
+        api_version: str | None = None,
+        **kwargs: Any,
+    ) -> ResponseT: ...
+
+
 class DefaultAuthenticator:
     def __init__(
         self,
-        request_executor: RequestExecutor,
+        request_executor: AuthenticationRequestExecutor,
         session_mutator: SessionMutator,
         credentials_provider: CredentialsProvider,
         logger: LoggerLike,
@@ -42,12 +56,11 @@ class DefaultAuthenticator:
         contract_number: str | None = None,
     ) -> AuthUserResponse:
         login, password = self.__credentials_provider.get_credentials()
-        data = await self.__request_executor.execute(
-            "auth_user",
+        auth_response = await self.__request_executor.execute(
+            AUTH_USER,
             api_version=api_version,
             data={"login": login, "password": hash_password(password)},
         )
-        auth_response = decode_model(AuthUserResponse, data)
         contracts = auth_response.data.contracts
         selected = None
         if contract_id:

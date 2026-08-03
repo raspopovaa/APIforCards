@@ -96,3 +96,12 @@ class RateLimitPolicy:
         if self.requests_per_second is None:
             return 0.0
         return 1.0 / self.requests_per_second
+
+
+@dataclass(frozen=True, slots=True)
+class ConcurrencyPolicy:
+    max_in_flight: int = 20
+
+    def __post_init__(self) -> None:
+        if self.max_in_flight < 1:
+            raise ValueError("max_in_flight must be at least 1")

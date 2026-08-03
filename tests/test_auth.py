@@ -11,6 +11,7 @@ from tests.service_support import (
     FrozenClock,
     NoopRequestExecutor,
     StubSessionGate,
+    typed_request_stub,
 )
 
 
@@ -73,6 +74,7 @@ class DummyClient(AuthService):
             "timestamp": 1710000000,
         }
 
+    @typed_request_stub
     async def _request(self, operation, **kwargs):
         self.calls.append((operation, kwargs))
         if operation == "auth_user":
@@ -207,6 +209,8 @@ async def test_authentication_coordinator_preserves_contract_during_recovery():
 async def test_authentication_coordinator_authenticates_once_for_concurrent_calls():
     session = SessionManager()
     calls = 0
+    started = asyncio.Event()
+    release = asyncio.Event()
 
     class ConcurrentAuthenticator:
         async def authenticate(
@@ -219,17 +223,17 @@ async def test_authentication_coordinator_authenticates_once_for_concurrent_call
             nonlocal calls
             del api_version, contract_id, contract_number
             calls += 1
-            await asyncio.sleep(0.01)
+            started.set()
+            await release.wait()
             session.mark_authenticated("SESSION-NEW", "1-AAA")
             return AuthUserResponse(**DummyClient._auth_payload())
 
     coordinator = AuthenticationCoordinator(session, ConcurrentAuthenticator())
 
-    sessions = await asyncio.gather(
-        coordinator.ensure_authenticated(),
-        coordinator.ensure_authenticated(),
-        coordinator.ensure_authenticated(),
-    )
+    tasks = [asyncio.create_task(coordinator.ensure_authenticated()) for _ in range(3)]
+    await asyncio.wait_for(started.wait(), timeout=1)
+    release.set()
+    sessions = await asyncio.gather(*tasks)
 
     assert sessions == ["SESSION-NEW", "SESSION-NEW", "SESSION-NEW"]
     assert calls == 1
@@ -241,6 +245,8 @@ async def test_authentication_coordinator_recovers_once_for_concurrent_failures(
     session.mark_authenticated("SESSION-OLD", "1-BBB")
     calls = 0
     selected_contracts = []
+    started = asyncio.Event()
+    release = asyncio.Event()
 
     class ConcurrentRecoveryAuthenticator:
         async def authenticate(
@@ -254,19 +260,44 @@ async def test_authentication_coordinator_recovers_once_for_concurrent_failures(
             del api_version, contract_number
             calls += 1
             selected_contracts.append(contract_id)
-            await asyncio.sleep(0.01)
+            started.set()
+            await release.wait()
             session.mark_authenticated("SESSION-NEW", contract_id)
             return AuthUserResponse(**DummyClient._auth_payload())
 
     coordinator = AuthenticationCoordinator(session, ConcurrentRecoveryAuthenticator())
 
-    sessions = await asyncio.gather(
-        coordinator.recover(),
-        coordinator.recover(),
-        coordinator.recover(),
-    )
+    tasks = [asyncio.create_task(coordinator.recover()) for _ in range(3)]
+    await asyncio.wait_for(started.wait(), timeout=1)
+    release.set()
+    sessions = await asyncio.gather(*tasks)
 
     assert sessions == ["SESSION-NEW", "SESSION-NEW", "SESSION-NEW"]
     assert calls == 1
     assert selected_contracts == ["1-BBB"]
     assert session.contract_id == "1-BBB"
+
+
+@pytest.mark.asyncio
+async def test_cancelled_authentication_does_not_poison_session_lock():
+    session = SessionManager()
+    started = asyncio.Event()
+    release = asyncio.Event()
+
+    class CancellableAuthenticator:
+        async def authenticate(self, **kwargs):
+            del kwargs
+            started.set()
+            await release.wait()
+            session.mark_authenticated("SESSION-NEW", "1-AAA")
+            return AuthUserResponse(**DummyClient._auth_payload())
+
+    coordinator = AuthenticationCoordinator(session, CancellableAuthenticator())
+    first = asyncio.create_task(coordinator.ensure_authenticated())
+    await asyncio.wait_for(started.wait(), timeout=1)
+    first.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await first
+
+    release.set()
+    assert await asyncio.wait_for(coordinator.ensure_authenticated(), timeout=1) == "SESSION-NEW"

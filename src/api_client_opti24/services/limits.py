@@ -2,19 +2,22 @@ import json
 from collections.abc import Mapping
 from typing import Any
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.limits import (
     LimitRequestItem,
     LimitsResponse,
     RemoveLimitResponse,
     SetLimitResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
 from ..validation import (
     require_identifier,
     validate_card_or_group_target,
 )
+
+GET_LIMITS = operation("get_limits", LimitsResponse)
+SET_LIMIT = operation("set_limit", SetLimitResponse)
+REMOVE_LIMIT = operation("remove_limit", RemoveLimitResponse)
 
 
 class LimitsService(_BaseService):
@@ -29,7 +32,6 @@ class LimitsService(_BaseService):
 
     # ------------------- GET /limit -------------------
 
-    @api_method
     async def get_limits(
         self,
         *,
@@ -57,17 +59,15 @@ class LimitsService(_BaseService):
         if group_id is not None:
             params["group_id"] = group_id
 
-        raw = await self._request(
-            "get_limits",
+        return await self._request(
+            GET_LIMITS,
             api_version=api_version,
             params=params,
+            request_contract_id=cid,
         )
-
-        return decode_model(LimitsResponse, raw)
 
     # ------------------- POST /setLimit -------------------
 
-    @api_method
     async def set_limit(
         self,
         *,
@@ -140,17 +140,15 @@ class LimitsService(_BaseService):
             )
         }
 
-        raw = await self._request(
-            "set_limit",
+        return await self._request(
+            SET_LIMIT,
             api_version=api_version,
             data=body,
+            request_contract_id=fallback_contract_id or parsed_limits[0].contract_id,
         )
-
-        return decode_model(SetLimitResponse, raw)
 
     # ------------------- POST /removeLimit -------------------
 
-    @api_method
     async def remove_limit(
         self,
         *,
@@ -175,10 +173,9 @@ class LimitsService(_BaseService):
         if group_id is not None:
             body["group_id"] = require_identifier(group_id, "group_id")
 
-        raw = await self._request(
-            "remove_limit",
+        return await self._request(
+            REMOVE_LIMIT,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        return decode_model(RemoveLimitResponse, raw)

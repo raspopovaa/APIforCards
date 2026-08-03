@@ -13,11 +13,19 @@ class SessionState(StrEnum):
     INVALID = "invalid"
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class SessionSnapshot:
     state: SessionState
     session_id: str | None
     contract_id: str | None
+    generation: int
+
+
+@dataclass(frozen=True, slots=True)
+class RequestContext:
+    session_id: str | None
+    contract_id: str | None
+    session_generation: int
 
 
 class SessionManager:
@@ -25,6 +33,7 @@ class SessionManager:
         self._state = SessionState.ANONYMOUS
         self._session_id: str | None = None
         self._contract_id: str | None = None
+        self._generation = 0
         self._auth_lock = asyncio.Lock()
 
     @property
@@ -44,25 +53,38 @@ class SessionManager:
             state=self._state,
             session_id=self._session_id,
             contract_id=self._contract_id,
+            generation=self._generation,
+        )
+
+    def request_context(self, *, contract_id: str | None = None) -> RequestContext:
+        snapshot = self.snapshot()
+        return RequestContext(
+            session_id=snapshot.session_id,
+            contract_id=contract_id if contract_id is not None else snapshot.contract_id,
+            session_generation=snapshot.generation,
         )
 
     def set_contract(self, contract_id: str | None) -> None:
         self._contract_id = contract_id
+        self._generation += 1
 
     def mark_authenticated(self, session_id: str, contract_id: str | None = None) -> None:
         self._session_id = session_id
         self._contract_id = contract_id
         self._state = SessionState.AUTHENTICATED
+        self._generation += 1
 
     def invalidate(self) -> None:
         self._session_id = None
         self._contract_id = None
         self._state = SessionState.INVALID
+        self._generation += 1
 
     def reset(self) -> None:
         self._session_id = None
         self._contract_id = None
         self._state = SessionState.ANONYMOUS
+        self._generation += 1
 
     async def ensure_authenticated(
         self,

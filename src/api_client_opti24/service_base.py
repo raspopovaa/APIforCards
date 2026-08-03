@@ -2,16 +2,33 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Protocol, TypeAlias
+from typing import Any, Protocol, TypeAlias, TypeVar, overload
 
 from .logger import LoggerLike
+from .modeling import ResponseModel
+from .operations import Operation
+from .session import RequestContext, SessionSnapshot
 from .validation import require_identifier
 
 JSONPayload: TypeAlias = dict[str, Any]
 PathParams: TypeAlias = Mapping[str, str | int]
+ResponseT = TypeVar("ResponseT", bound=ResponseModel)
 
 
 class RequestExecutor(Protocol):
+    @overload
+    async def execute(
+        self,
+        operation: Operation[ResponseT],
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
+        **kwargs: Any,
+    ) -> ResponseT: ...
+
+    @overload
     async def execute(
         self,
         operation: str,
@@ -19,27 +36,30 @@ class RequestExecutor(Protocol):
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
     ) -> JSONPayload: ...
 
     async def execute_stream(
         self,
-        operation: str,
+        operation: Operation[bytes] | str,
         *,
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
     ) -> bytes: ...
 
     async def execute_stream_to_file(
         self,
-        operation: str,
+        operation: Operation[bytes] | str,
         destination: str | Path,
         *,
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
     ) -> Path: ...
 
@@ -50,6 +70,10 @@ class SessionContext(Protocol):
 
     @property
     def contract_id(self) -> str | None: ...
+
+    def snapshot(self) -> SessionSnapshot: ...
+
+    def request_context(self, *, contract_id: str | None = None) -> RequestContext: ...
 
 
 class SessionGate(Protocol):
@@ -83,11 +107,6 @@ class APIKeyProvider(Protocol):
     def get_api_key(self) -> str: ...
 
 
-class ServiceMethodContext(Protocol):
-    @property
-    def logger(self) -> LoggerLike: ...
-
-
 class _BaseService:
     def __init__(
         self,
@@ -117,6 +136,19 @@ class _BaseService:
             raise ValueError("contract_id is required when no default contract is selected")
         return require_identifier(self.__session_context.contract_id, "contract_id")
 
+    @overload
+    async def _request(
+        self,
+        operation: Operation[ResponseT],
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
+        **kwargs: Any,
+    ) -> ResponseT: ...
+
+    @overload
     async def _request(
         self,
         operation: str,
@@ -124,23 +156,37 @@ class _BaseService:
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
-    ) -> JSONPayload:
+    ) -> JSONPayload: ...
+
+    async def _request(
+        self,
+        operation: Operation[ResponseT] | str,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
+        **kwargs: Any,
+    ) -> ResponseT | JSONPayload:
         return await self.__request_executor.execute(
             operation,
             api_version=api_version,
             route_name=route_name,
             path_params=path_params,
+            request_contract_id=request_contract_id,
             **kwargs,
         )
 
     async def _request_stream(
         self,
-        operation: str,
+        operation: Operation[bytes] | str,
         *,
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
     ) -> bytes:
         return await self.__request_executor.execute_stream(
@@ -148,17 +194,19 @@ class _BaseService:
             api_version=api_version,
             route_name=route_name,
             path_params=path_params,
+            request_contract_id=request_contract_id,
             **kwargs,
         )
 
     async def _request_stream_to_file(
         self,
-        operation: str,
+        operation: Operation[bytes] | str,
         destination: str | Path,
         *,
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
     ) -> Path:
         return await self.__request_executor.execute_stream_to_file(
@@ -167,5 +215,6 @@ class _BaseService:
             api_version=api_version,
             route_name=route_name,
             path_params=path_params,
+            request_contract_id=request_contract_id,
             **kwargs,
         )

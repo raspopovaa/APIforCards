@@ -1,7 +1,6 @@
 from typing import Literal
 
-from ..modeling import BaseModel, Field, StrictRequestModel
-from .common import ResponseStatus
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 
 class RestrictionRequestItem(StrictRequestModel):
@@ -49,31 +48,19 @@ class RestrictionList(BaseModel):
     result: list[RestrictionItem] = Field(..., description="Список ограничителей")
 
 
-class RestrictionGetResponse(BaseModel):
+class RestrictionGetResponse(APIEnvelope[RestrictionList]):
     """
     Ответ на запрос списка ограничителей (GET /restriction).
     """
 
-    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
-    data: RestrictionList = Field(..., description="Данные с ограничителями")
-    timestamp: int = Field(..., description="Временная метка ответа (Unix time)")
 
-
-class RestrictionSetResponse(BaseModel):
+class RestrictionSetResponse(APIEnvelope[list[str]]):
     """
     Ответ на установку или изменение ограничителя (POST /setRestriction).
     """
 
-    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
-    data: list[str] = Field(..., description="Список ID созданных или изменённых ограничителей")
-    timestamp: int = Field(..., description="Временная метка ответа (Unix time)")
 
-
-class RestrictionRemoveResponse(BaseModel):
+class RestrictionRemoveResponse(APIEnvelope[bool]):
     """
     Ответ на удаление ограничителя (POST /removeRestriction).
     """
-
-    status: ResponseStatus = Field(..., description="Статус выполнения")
-    data: bool = Field(..., description="Результат операции (True — успешно)")
-    timestamp: int = Field(..., description="Временная метка ответа (Unix time)")

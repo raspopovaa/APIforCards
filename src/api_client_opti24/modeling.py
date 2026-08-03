@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import is_dataclass
 from types import UnionType
-from typing import Any, TypeVar, Union, cast, get_args, get_origin
+from typing import Any, Generic, TypeVar, Union, get_args, get_origin
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field, ValidationError, field_validator
 
-ModelT = TypeVar("ModelT")
+ModelT = TypeVar("ModelT", bound=PydanticBaseModel)
+DataT = TypeVar("DataT")
 
 
-class BaseModel(PydanticBaseModel):
+class ResponseModel(PydanticBaseModel):
     model_config = ConfigDict(
-        coerce_numbers_to_str=True,
         extra="allow",
         populate_by_name=True,
         validate_default=True,
@@ -58,8 +57,26 @@ class BaseModel(PydanticBaseModel):
         return str(annotation).replace("typing.", "")
 
 
-class StrictRequestModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+class BaseModel(ResponseModel):
+    """Backward-compatible name for SDK response and data models."""
+
+
+class ResponseStatus(ResponseModel):
+    code: int = Field(..., description="Код выполнения API-операции")
+
+
+class APIEnvelope(ResponseModel, Generic[DataT]):
+    status: ResponseStatus = Field(..., description="Статус ответа API")
+    data: DataT = Field(..., description="Типизированные данные ответа API")
+    timestamp: int | None = Field(None, description="Метка времени ответа API")
+
+
+class StrictRequestModel(PydanticBaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+        validate_default=True,
+    )
 
 
 def validator(*field_names: str, pre: bool = False) -> Any:
@@ -67,17 +84,15 @@ def validator(*field_names: str, pre: bool = False) -> Any:
 
 
 def decode_model(model_type: type[ModelT], payload: dict[str, Any]) -> ModelT:
-    model_validator = getattr(model_type, "model_validate", None)
-    if callable(model_validator):
-        return cast(ModelT, model_validator(payload))
-    if is_dataclass(model_type):
-        return model_type(**payload)
-    raise TypeError(f"Unsupported response model: {model_type.__name__}")
+    return model_type.model_validate(payload)
 
 
 __all__ = [
+    "APIEnvelope",
     "BaseModel",
     "Field",
+    "ResponseModel",
+    "ResponseStatus",
     "StrictRequestModel",
     "ValidationError",
     "decode_model",

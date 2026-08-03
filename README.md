@@ -89,7 +89,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 
 ## 📦 Установка
 
-Пакет `api-client-opti24==2.2.2` опубликован на TestPyPI и поддерживает
+Пакет `api-client-opti24==2.3.0` опубликован на TestPyPI и поддерживает
 `Python >=3.11,<3.15`. Зависимости лучше устанавливать из основного PyPI
 отдельно: это исключает случайную подмену зависимостей пакетами из тестового
 индекса.
@@ -100,7 +100,7 @@ APIClient SDK — асинхронная Python-библиотека для ра
 uv venv --python 3.11
 uv pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 uv pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.2.2
+  --no-deps api-client-opti24==2.3.0
 ```
 
 ### Вариант 2: pip
@@ -110,7 +110,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 python -m pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.2.2
+  --no-deps api-client-opti24==2.3.0
 ```
 
 Проверка версии и публичных импортов:
@@ -189,6 +189,7 @@ API_KEY=your_api_key_here
 API_LOGIN=your_login
 API_PASSWORD=your_password
 API_REQUESTS_PER_SECOND=2
+API_MAX_IN_FLIGHT=20
 API_ALLOW_INSECURE_HTTP=false
 REQUEST_LOG_FILE=./api_requests.jsonl
 LOGGER_FILE=./api.log
@@ -220,6 +221,11 @@ LOG_LEVEL=INFO
 предоставленной спецификации для DEMO рекомендуется `2`, для production — `5`.
 Если переменная не задана, SDK не вводит клиентский лимит и полагается на сервер.
 
+`API_MAX_IN_FLIGHT` ограничивает число одновременно выполняемых HTTP-запросов
+одного экземпляра клиента (по умолчанию `20`). Ограничитель локален для клиента:
+SDK намеренно не создаёт скрытого глобального состояния между процессами или
+экземплярами `APIClient`.
+
 Удалённые адреса принимаются только по HTTPS. HTTP разрешён для loopback; для
 изолированных тестовых стендов его можно явно включить через
 `API_ALLOW_INSECURE_HTTP=true`.
@@ -241,8 +247,9 @@ LOG_LEVEL=INFO
 - Запросы изменения данных не повторяются после сетевой ошибки: результат операции
   мог сохраниться на сервере, поэтому автоматический retry создаёт риск дубля.
 - Авторизация имеет отдельный интервал не менее 5 секунд между попытками.
-- Политики можно заменить через `ConnectionSettings.retry_policy` и
-  `ConnectionSettings.rate_limit_policy`, а transport — внедрить в `APIClient` для тестов.
+- Политики можно заменить через `ConnectionSettings.retry_policy`,
+  `ConnectionSettings.rate_limit_policy` и `ConnectionSettings.concurrency_policy`,
+  а transport — внедрить в `APIClient` для тестов.
 - Решение о повторе учитывает одновременно `EndpointSpec.retry_class` и
   `EndpointSpec.idempotent`.
 
@@ -425,7 +432,7 @@ uv publish --publish-url https://test.pypi.org/legacy/
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.2.2
+  --no-deps api-client-opti24==2.3.0
 ```
 
 ## 🤖 GitHub Actions
@@ -534,7 +541,7 @@ uv run mypy src
 |---------------|-------------------------------|-----------|
 | Возможности | `client.py`, `services/`, `service_groups.py` | Все 89 endpoint-методов доступны только через композиционные доменные сервисы |
 | Архитектура | `client.py`, `executor.py`, `service_base.py`, `service_groups.py` | Сервисы не хранят `APIClient`; зависимости разделены узкими протоколами |
-| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.2.2`, диапазон Python и публичные импорты совпадают |
+| Установка | `pyproject.toml`, `uv.lock`, `__init__.py` | Версия `2.3.0`, диапазон Python и публичные импорты совпадают |
 | Быстрый старт | `config.py`, `auth.py`, `cards.py`, модели auth/cards | Сигнатуры и используемые поля ответа проверены |
 | Конфигурация | `config.py`, `credentials.py`, `.env.example`, `env.py` | Безопасные connection settings отделены от providers секретов |
 | Retry и безопасность | `policies.py`, `transport.py`, `logger.py`, `utils.py` | Retry зависит от idempotency; удалённый HTTP запрещён; логи очищаются |

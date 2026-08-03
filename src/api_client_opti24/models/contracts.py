@@ -1,5 +1,4 @@
-from ..modeling import BaseModel, Field
-from .common import ResponseStatus
+from ..modeling import APIEnvelope, BaseModel, Field
 
 
 # ==========================
@@ -103,12 +102,8 @@ class ContractResponse(BaseModel):
     )
 
 
-class ContractDataResponse(BaseModel):
+class ContractDataResponse(APIEnvelope[ContractResponse]):
     """Полный envelope ответа метода получения данных договора."""
-
-    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
-    data: ContractResponse = Field(..., description="Данные договора")
-    timestamp: int = Field(..., description="Временная метка ответа")
 
 
 # ==========================
@@ -142,14 +137,8 @@ class PaymentsData(BaseModel):
     result: list[PaymentItem] = Field(..., description="Список платежей по договору")
 
 
-class PaymentsResponse(BaseModel):
+class PaymentsResponse(APIEnvelope[PaymentsData]):
     """Основная модель ответа метода /getPayments."""
-
-    status: ResponseStatus = Field(
-        ..., description="Объект с кодом статуса ответа сервера, например {'code': 200}"
-    )
-    data: PaymentsData = Field(..., description="Основная часть ответа с данными о платежах")
-    timestamp: int = Field(..., description="Метка времени ответа сервера в формате Unix timestamp")
 
 
 # ==========================
@@ -181,12 +170,8 @@ class DocumentsData(BaseModel):
     result: list[DocumentItem] = Field(..., description="Список найденных документов")
 
 
-class DocumentsResponse(BaseModel):
+class DocumentsResponse(APIEnvelope[DocumentsData]):
     """Ответ метода GET /v2/documents."""
-
-    status: ResponseStatus = Field(..., description="Объект статуса ответа")
-    data: DocumentsData = Field(..., description="Основные данные — список документов")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
 
 # ==========================
@@ -194,12 +179,8 @@ class DocumentsResponse(BaseModel):
 # ==========================
 
 
-class DocumentsOrderResponse(BaseModel):
+class DocumentsOrderResponse(APIEnvelope[bool]):
     """Ответ метода POST /v2/documents (заказ документов)."""
-
-    status: ResponseStatus = Field(..., description="Объект статуса ответа")
-    data: bool = Field(..., description="Признак успешной отправки (true — заказ выполнен)")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
 
 # ==========================
@@ -207,12 +188,8 @@ class DocumentsOrderResponse(BaseModel):
 # ==========================
 
 
-class OrderCardsResponse(BaseModel):
+class OrderCardsResponse(APIEnvelope[bool]):
     """Ответ метода POST /v2/orderCards."""
-
-    status: ResponseStatus = Field(..., description="Объект статуса ответа")
-    data: bool = Field(..., description="Результат операции: true — заказ выполнен успешно")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
 
 # ==========================
@@ -220,12 +197,8 @@ class OrderCardsResponse(BaseModel):
 # ==========================
 
 
-class InvoiceOrderResponse(BaseModel):
+class InvoiceOrderResponse(APIEnvelope[bool]):
     """Ответ метода POST /v2/invoice."""
-
-    status: ResponseStatus = Field(..., description="Объект статуса ответа")
-    data: bool = Field(..., description="Признак успешного создания счёта")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
 
 # ==========================
@@ -256,9 +229,5 @@ class InvoicesData(BaseModel):
     result: list[InvoiceItem] = Field(..., description="Список счетов на оплату")
 
 
-class InvoicesResponse(BaseModel):
+class InvoicesResponse(APIEnvelope[InvoicesData]):
     """Ответ метода GET /v2/invoices."""
-
-    status: ResponseStatus = Field(..., description="Объект статуса ответа")
-    data: InvoicesData = Field(..., description="Основные данные — список счетов")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
