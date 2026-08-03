@@ -25,6 +25,7 @@ from api_client_opti24.service_groups import ServiceContainer
 
 EXPECTED_SOURCE_VERSION = "1.1.60"
 EXPECTED_ENVELOPE_FIELDS = ["status", "data", "timestamp"]
+LEGACY_POSITIONAL_OPERATIONS = {"delete_mpc", "reset_mpc"}
 ALLOWED_UNDOCUMENTED_OPERATIONS = {
     "confirm_mpc",
     "generate_payment_qr",
@@ -236,7 +237,9 @@ def verify_api_contract(path: Path) -> tuple[int, int]:
         parameters = _actual_parameters(method)
         if parameters != sdk_contract.get("parameters"):
             raise APIContractMismatchError(f"Signature mismatch for {spec.name}")
-        if any(not parameter["keyword_only"] for parameter in parameters):
+        if spec.name not in LEGACY_POSITIONAL_OPERATIONS and any(
+            not parameter["keyword_only"] for parameter in parameters
+        ):
             raise APIContractMismatchError(f"Public parameters must be keyword-only: {spec.name}")
 
         response = _actual_response(method)

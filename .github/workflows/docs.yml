@@ -22,17 +22,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Generate API documentation
-        run: python scripts/generate_api_docs.py
+      - name: Generate documentation
+        run: python scripts/generate_docs.py
 
-      - name: Generate method catalog
-        run: python scripts/generate_method_catalog.py
+      - name: Upload generated Markdown
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-documentation
+          path: docs/
 
-      - name: Verify generated Markdown is committed
-        run: git diff --exit-code -- docs/api-reference.md docs/methods.md
+      - name: Run documentation contract tests
+        run: pytest -q tests/test_documentation_generator.py
 
-      - name: Build documentation site
-        run: python scripts/build_docs_site.py
+      - name: Build documentation site in strict mode
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdocs build --strict 2>&1 | tee mkdocs-build.log
+
+      - name: Upload MkDocs build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mkdocs-build-log
+          path: mkdocs-build.log
 
       - name: Upload documentation site
         uses: actions/upload-artifact@v4

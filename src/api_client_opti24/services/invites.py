@@ -1,8 +1,8 @@
-from collections.abc import AsyncIterator
-from typing import Any
+from collections.abc import AsyncIterator, Mapping
 
 from ..models.invites import (
     InviteBoolResponse,
+    InviteCreateRequest,
     InviteItem,
     InviteListResponse,
     InviteResponse,
@@ -102,7 +102,7 @@ class InvitesService(_BaseService):
     async def create_invite(
         self,
         *,
-        data: dict[str, Any],
+        data: InviteCreateRequest | Mapping[str, object],
         with_send: bool = True,
         api_version: str | None = None,
     ) -> InviteResponse:
@@ -137,11 +137,15 @@ class InvitesService(_BaseService):
         }
         ```
         """
+        payload = InviteCreateRequest.model_validate(data).model_dump(
+            exclude_none=True,
+            exclude_unset=True,
+        )
         return await self._request(
             CREATE_INVITE,
             api_version=api_version,
             route_name="default" if with_send else "without_send",
-            json=data,
+            json=payload,
         )
 
     # ---------------------- DELETE /v2/invites/{invite_id} ----------------------

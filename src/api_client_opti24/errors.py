@@ -17,6 +17,19 @@ class ErrorContext:
     retryable: bool
 
 
+class ContractSelectionError(ValueError):
+    """Не удалось однозначно выбрать договор для серверной сессии."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        available_contracts: tuple[tuple[str, str], ...] = (),
+    ) -> None:
+        super().__init__(message)
+        self.available_contracts = available_contracts
+
+
 class APIError(Exception):
     def __init__(
         self,

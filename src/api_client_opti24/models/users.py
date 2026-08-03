@@ -1,7 +1,15 @@
 # api_client_opti24/models/users.py
-from ..modeling import APIEnvelope, BaseModel, Field
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 # ---------- Общие подмодели ----------
+
+
+class UserAttachContractRequest(StrictRequestModel):
+    """Договор, прикрепляемый к пользователю."""
+
+    sid: str = Field(..., description="ID договора")
+    template_id: str | None = Field(None, description="ID шаблона виртуальной карты")
+    use_mpc: bool | None = Field(None, description="Разрешён ли выпуск МПК")
 
 
 class UserStatus(BaseModel):

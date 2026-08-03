@@ -31,7 +31,7 @@ class CardsService(_BaseService):
     async def get_cards_v1(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         cache: bool = True,
         api_version: str | None = None,
     ) -> CardsListResponse:
@@ -41,13 +41,14 @@ class CardsService(_BaseService):
         :return: Объект CardsListResponse с данными о картах
 
         """
-        params = {"contract_id": contract_id, "cache": str(cache).lower()}
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        params = {"contract_id": resolved_contract_id, "cache": str(cache).lower()}
         self.logger.info("Requesting cards version=v1")
         return await self._request(
             GET_CARDS_V1,
             api_version=api_version,
             params=params,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )
 
     async def get_cards_v2(
@@ -146,18 +147,19 @@ class CardsService(_BaseService):
     async def get_cards_by_group(
         self,
         *,
-        contract_id: str,
         group_id: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardGroupResponse:
         """Получение списка топливных карт по группе карт."""
-        params = {"contract_id": contract_id, "group_id": group_id}
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        params = {"contract_id": resolved_contract_id, "group_id": group_id}
         self.logger.info("Requesting cards by group")
         return await self._request(
             GET_CARDS_BY_GROUP,
             api_version=api_version,
             params=params,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )
 
     # --- Водители по карте ---
@@ -165,43 +167,45 @@ class CardsService(_BaseService):
         self,
         *,
         card_id: str,
-        contract_id: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardDriversResponse:
         """Получение списка водителей по карте."""
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
         self.logger.info("Requesting card drivers")
         return await self._request(
             GET_CARD_DRIVERS,
             api_version=api_version,
             path_params={"card_id": card_id},
-            params={"contract_id": contract_id},
-            request_contract_id=contract_id,
+            params={"contract_id": resolved_contract_id},
+            request_contract_id=resolved_contract_id,
         )
 
     # --- Детальная информация по карте ---
     async def get_card_detail(
         self,
         *,
-        contract_id: str,
         card_id: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardDetailResponse:
         """Получение детальной информации по карте."""
-        params = {"contract_id": contract_id, "card_id": card_id}
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        params = {"contract_id": resolved_contract_id, "card_id": card_id}
         self.logger.info("Requesting card details")
         return await self._request(
             GET_CARD_DETAIL,
             api_version=api_version,
             params=params,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )
 
     # --- Блокировка / разблокировка карты ---
     async def block_card(
         self,
         *,
-        contract_id: str,
         card_ids: list[str],
+        contract_id: str | None = None,
         block: bool = True,
         api_version: str | None = None,
     ) -> IDListResponse:
@@ -230,8 +234,9 @@ class CardsService(_BaseService):
         ```
         """
 
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
         payload = {
-            "contract_id": contract_id,
+            "contract_id": resolved_contract_id,
             "card_id": card_ids,
             "block": str(block).lower(),
         }
@@ -244,7 +249,7 @@ class CardsService(_BaseService):
             BLOCK_CARD,
             api_version=api_version,
             data=payload,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )
 
     # --- Установка комментария ---
@@ -252,18 +257,23 @@ class CardsService(_BaseService):
         self,
         *,
         card_id: str,
-        contract_id: str,
         comment: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
         """Установить комментарий на топливную карту."""
-        payload = {"card_id": card_id, "contract_id": contract_id, "comment": comment}
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        payload = {
+            "card_id": card_id,
+            "contract_id": resolved_contract_id,
+            "comment": comment,
+        }
         self.logger.info("Updating card comment")
         return await self._request(
             SET_CARD_COMMENT,
             api_version=api_version,
             data=payload,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )
 
     # --- Запрос одноразового кода для сброса PIN ---
@@ -271,7 +281,7 @@ class CardsService(_BaseService):
         self,
         *,
         card_id: str,
-        contract_id: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
         """Запрос одноразового кода для сброса PIN карты.
@@ -279,13 +289,14 @@ class CardsService(_BaseService):
         Вам будет отправлено письмо с кодом подтверждения на почту, которая привязана к вашей учетной записи.
         Данный код нужно ввести в метод resetPIN для завершения операции сброса попыток.
         """
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
         self.logger.info("Requesting PIN reset verification")
         return await self._request(
             VERIFY_PIN,
             api_version=api_version,
             path_params={"card_id": card_id},
-            params={"contract_id": contract_id},
-            request_contract_id=contract_id,
+            params={"contract_id": resolved_contract_id},
+            request_contract_id=resolved_contract_id,
         )
 
     # --- Подтверждение сброса PIN ---
@@ -293,20 +304,21 @@ class CardsService(_BaseService):
         self,
         *,
         card_id: str,
-        contract_id: str,
         code: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
         """Подтверждение сброса PIN карты.
         Данный метод позволяет завершить операцию со сбросом попыток некорректного ввода PIN – кода пластиковой топливной карты на АЗС.
         Код подтверждения будет отправлен на почту, которая привязана к вашей учетной записи.
         """
-        payload = {"contract_id": contract_id, "code": code}
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        payload = {"contract_id": resolved_contract_id, "code": code}
         self.logger.info("Resetting card PIN")
         return await self._request(
             RESET_PIN,
             api_version=api_version,
             path_params={"card_id": card_id},
             data=payload,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )

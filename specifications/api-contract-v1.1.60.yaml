@@ -1662,8 +1662,8 @@ methods:
     service: cards
     parameters:
     - name: contract_id
-      type: str
-      required: true
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: cache
@@ -1943,14 +1943,14 @@ methods:
   sdk:
     service: cards
     parameters:
-    - name: contract_id
+    - name: group_id
       type: str
       required: true
       keyword_only: true
       default: null
-    - name: group_id
-      type: str
-      required: true
+    - name: contract_id
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -1987,8 +1987,8 @@ methods:
       keyword_only: true
       default: null
     - name: contract_id
-      type: str
-      required: true
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -2147,14 +2147,14 @@ methods:
   sdk:
     service: cards
     parameters:
-    - name: contract_id
+    - name: card_id
       type: str
       required: true
       keyword_only: true
       default: null
-    - name: card_id
-      type: str
-      required: true
+    - name: contract_id
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -2185,14 +2185,14 @@ methods:
   sdk:
     service: cards
     parameters:
-    - name: contract_id
-      type: str
-      required: true
-      keyword_only: true
-      default: null
     - name: card_ids
       type: list[str]
       required: true
+      keyword_only: true
+      default: null
+    - name: contract_id
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: block
@@ -2285,14 +2285,14 @@ methods:
       required: true
       keyword_only: true
       default: null
-    - name: contract_id
+    - name: comment
       type: str
       required: true
       keyword_only: true
       default: null
-    - name: comment
-      type: str
-      required: true
+    - name: contract_id
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -2365,8 +2365,8 @@ methods:
       keyword_only: true
       default: null
     - name: contract_id
-      type: str
-      required: true
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -2429,14 +2429,14 @@ methods:
       required: true
       keyword_only: true
       default: null
-    - name: contract_id
+    - name: code
       type: str
       required: true
       keyword_only: true
       default: null
-    - name: code
-      type: str
-      required: true
+    - name: contract_id
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -5132,19 +5132,19 @@ methods:
   sdk:
     service: card_groups
     parameters:
-    - name: contract_id
-      type: str
-      required: true
-      keyword_only: true
-      default: null
     - name: group_id
       type: str
       required: true
       keyword_only: true
       default: null
     - name: cards_list
-      type: list[dict[str, Any]]
+      type: list[CardGroupAssignmentRequest | collections.abc.Mapping[str, object]]
       required: true
+      keyword_only: true
+      default: null
+    - name: contract_id
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -5228,8 +5228,8 @@ methods:
     service: card_groups
     parameters:
     - name: contract_id
-      type: str
-      required: true
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -5350,14 +5350,14 @@ methods:
   sdk:
     service: card_groups
     parameters:
-    - name: contract_id
+    - name: group_id
       type: str
       required: true
       keyword_only: true
       default: null
-    - name: group_id
-      type: str
-      required: true
+    - name: contract_id
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: api_version
@@ -5418,14 +5418,14 @@ methods:
   sdk:
     service: card_groups
     parameters:
-    - name: contract_id
+    - name: name
       type: str
       required: true
       keyword_only: true
       default: null
-    - name: name
-      type: str
-      required: true
+    - name: contract_id
+      type: str | None
+      required: false
       keyword_only: true
       default: null
     - name: group_id
@@ -6626,7 +6626,7 @@ methods:
     service: invites
     parameters:
     - name: data
-      type: dict[str, Any]
+      type: InviteCreateRequest | collections.abc.Mapping[str, object]
       required: true
       keyword_only: true
       default: null
@@ -6759,7 +6759,7 @@ methods:
     service: invites
     parameters:
     - name: data
-      type: dict[str, Any]
+      type: InviteCreateRequest | collections.abc.Mapping[str, object]
       required: true
       keyword_only: true
       default: null
@@ -7895,7 +7895,7 @@ methods:
       keyword_only: true
       default: null
     - name: contracts
-      type: list[dict[str, Any]]
+      type: list[UserAttachContractRequest | collections.abc.Mapping[str, object]]
       required: true
       keyword_only: true
       default: null
@@ -10756,12 +10756,12 @@ methods:
     - name: card_id
       type: str
       required: true
-      keyword_only: true
+      keyword_only: false
       default: null
     - name: api_version
       type: str | None
       required: false
-      keyword_only: true
+      keyword_only: false
       default: null
     response:
       kind: model
@@ -10813,17 +10813,17 @@ methods:
     - name: card_id
       type: str
       required: true
-      keyword_only: true
+      keyword_only: false
       default: null
     - name: type_
       type: str
       required: true
-      keyword_only: true
+      keyword_only: false
       default: null
     - name: api_version
       type: str | None
       required: false
-      keyword_only: true
+      keyword_only: false
       default: null
     response:
       kind: model
@@ -12964,3 +12964,96 @@ request_models:
     serialization_alias: restriction_type
     type: Literal[1, 2]
     required: true
+- model: CardGroupAssignmentRequest
+  fields:
+  - name: id
+    alias: id
+    validation_aliases:
+    - id
+    serialization_alias: id
+    type: str
+    required: true
+  - name: type
+    alias: type
+    validation_aliases:
+    - type
+    serialization_alias: type
+    type: Literal['Attach', 'Detach']
+    required: true
+- model: InviteCreateRequest
+  fields:
+  - name: role
+    alias: role
+    validation_aliases:
+    - role
+    serialization_alias: role
+    type: str
+    required: true
+  - name: mobile
+    alias: mobile
+    validation_aliases:
+    - mobile
+    serialization_alias: mobile
+    type: str | None
+    required: false
+  - name: email
+    alias: email
+    validation_aliases:
+    - email
+    serialization_alias: email
+    type: str | None
+    required: false
+  - name: cards
+    alias: cards
+    validation_aliases:
+    - cards
+    serialization_alias: cards
+    type: list[str]
+    required: false
+  - name: contracts
+    alias: contracts
+    validation_aliases:
+    - contracts
+    serialization_alias: contracts
+    type: list[_InviteContractRequest]
+    required: false
+- model: UserAttachContractRequest
+  fields:
+  - name: sid
+    alias: sid
+    validation_aliases:
+    - sid
+    serialization_alias: sid
+    type: str
+    required: true
+  - name: template_id
+    alias: template_id
+    validation_aliases:
+    - template_id
+    serialization_alias: template_id
+    type: str | None
+    required: false
+  - name: use_mpc
+    alias: use_mpc
+    validation_aliases:
+    - use_mpc
+    serialization_alias: use_mpc
+    type: bool | None
+    required: false
+- model: _InviteContractRequest
+  fields:
+  - name: id
+    alias: id
+    validation_aliases:
+    - id
+    - sid
+    serialization_alias: id
+    type: str
+    required: true
+  - name: template_id
+    alias: template_id
+    validation_aliases:
+    - template_id
+    serialization_alias: template_id
+    type: str | None
+    required: false

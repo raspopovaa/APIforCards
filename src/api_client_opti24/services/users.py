@@ -1,7 +1,8 @@
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Mapping
 from typing import Any
 
 from ..models.users import (
+    UserAttachContractRequest,
     UserBoolResponse,
     UserCreateResponse,
     UserItem,
@@ -139,7 +140,7 @@ class UsersService(_BaseService):
         self,
         *,
         user_id: str,
-        contracts: list[dict[str, Any]],
+        contracts: list[UserAttachContractRequest | Mapping[str, object]],
         api_version: str | None = None,
     ) -> UserBoolResponse:
         """
@@ -150,13 +151,16 @@ class UsersService(_BaseService):
             {"sid": "1-380B94P", "template_id": "1-3BE470B", "use_mpc": True}
         ])
         """
-        self.logger.info("Attaching contracts to user")
+        payload = [
+            UserAttachContractRequest.model_validate(contract).model_dump(exclude_none=True)
+            for contract in contracts
+        ]
 
         return await self._request(
             ATTACH_CONTRACTS,
             api_version=api_version,
             path_params={"user_id": user_id},
-            json=contracts,
+            json=payload,
         )
 
     # -------------------- Открепление договоров --------------------

@@ -8,6 +8,9 @@ docs_dir: docs
 site_dir: site
 strict: true
 
+not_in_nav: |
+  data-types/**/*.md
+
 theme:
   name: material
   language: ru
@@ -71,7 +74,25 @@ nav:
       - Типовые сценарии: scenarios.md
       - Договоры и ограничения: section-2b.md
       - Ошибки и retry: errors.md
-  - Методы API: methods.md
+  - Методы API:
+      - Обзор: methods.md
+      - Авторизация: methods/auth.md
+      - Группы карт: methods/card_groups.md
+      - Топливные карты: methods/cards.md
+      - Договоры и документы: methods/contracts.md
+      - Справочники: methods/dictionaries.md
+      - Электронный кошелек: methods/ewallet.md
+      - Итоговые цены: methods/final_prices.md
+      - Приглашения: methods/invites.md
+      - Продуктовые лимиты: methods/limits.md
+      - Региональные ограничения: methods/region_limits.md
+      - Отчеты: methods/reports.md
+      - Ограничители: methods/restrictions.md
+      - Шаблоны: methods/templates.md
+      - Транзакции: methods/transactions.md
+      - Пользователи: methods/users.md
+      - Виртуальные карты: methods/virtual_cards.md
+  - Типы данных: data-types/index.md
   - API Reference: api-reference.md
   - Устройство SDK:
       - Архитектура: architecture.md

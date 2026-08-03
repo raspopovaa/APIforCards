@@ -1,7 +1,8 @@
 import json
-from typing import Any
+from collections.abc import Mapping
 
 from ..models import (
+    CardGroupAssignmentRequest,
     CardGroupListResponse,
     RemoveCardGroupResponse,
     SetCardGroupResponse,
@@ -27,19 +28,20 @@ class CardGroupsService(_BaseService):
     async def get_card_groups(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardGroupListResponse:
         """
         Получить список групп карт по договору.
         """
-        params = {"contract_id": contract_id}
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        params = {"contract_id": resolved_contract_id}
 
         return await self._request(
             GET_CARD_GROUPS,
             api_version=api_version,
             params=params,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )
 
     # -------------------------------
@@ -48,8 +50,8 @@ class CardGroupsService(_BaseService):
     async def set_card_group(
         self,
         *,
-        contract_id: str,
         name: str,
+        contract_id: str | None = None,
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> SetCardGroupResponse:
@@ -78,7 +80,8 @@ class CardGroupsService(_BaseService):
         {"contract_id": "contract-id", "name": "Служебные автомобили"}
         ```
         """
-        body = {"contract_id": contract_id, "name": name}
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        body = {"contract_id": resolved_contract_id, "name": name}
         if group_id:
             body["id"] = group_id
 
@@ -86,7 +89,7 @@ class CardGroupsService(_BaseService):
             SET_CARD_GROUP,
             api_version=api_version,
             data=body,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )
 
     # -------------------------------
@@ -95,9 +98,9 @@ class CardGroupsService(_BaseService):
     async def set_cards_to_group(
         self,
         *,
-        contract_id: str,
         group_id: str,
-        cards_list: list[dict[str, Any]],
+        cards_list: list[CardGroupAssignmentRequest | Mapping[str, object]],
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> SetCardsToGroupResponse:
         """
@@ -109,17 +112,21 @@ class CardGroupsService(_BaseService):
             cards_list: Список карт и действий, например:
                 [{"id": "2728111", "type": "Attach"}, {"id": "2728112", "type": "Attach"}]
         """
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        assignments = [
+            CardGroupAssignmentRequest.model_validate(card).model_dump() for card in cards_list
+        ]
         body = {
-            "contract_id": contract_id,
+            "contract_id": resolved_contract_id,
             "group_id": group_id,
-            "cards_list": json.dumps(cards_list),
+            "cards_list": json.dumps(assignments),
         }
 
         return await self._request(
             SET_CARDS_TO_GROUP,
             api_version=api_version,
             data=body,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )
 
     # -------------------------------
@@ -128,8 +135,8 @@ class CardGroupsService(_BaseService):
     async def remove_card_group(
         self,
         *,
-        contract_id: str,
         group_id: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RemoveCardGroupResponse:
         """
@@ -139,11 +146,12 @@ class CardGroupsService(_BaseService):
             contract_id: Идентификатор договора.
             group_id: Идентификатор группы карт.
         """
-        body = {"contract_id": contract_id, "group_id": group_id}
+        resolved_contract_id = await self._resolve_contract_id(contract_id)
+        body = {"contract_id": resolved_contract_id, "group_id": group_id}
 
         return await self._request(
             REMOVE_CARD_GROUP,
             api_version=api_version,
             data=body,
-            request_contract_id=contract_id,
+            request_contract_id=resolved_contract_id,
         )

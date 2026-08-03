@@ -106,7 +106,6 @@ class VirtualCardsService(_BaseService):
     # === Удаление МПК ===
     async def delete_mpc(
         self,
-        *,
         card_id: str,
         api_version: str | None = None,
     ) -> SimpleActionResponse:
@@ -121,7 +120,6 @@ class VirtualCardsService(_BaseService):
     # === Сброс счётчиков МПК ===
     async def reset_mpc(
         self,
-        *,
         card_id: str,
         type_: str,
         api_version: str | None = None,

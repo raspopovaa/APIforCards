@@ -1,4 +1,6 @@
-from typing import Literal
+from typing import Literal, Self
+
+from pydantic import model_validator
 
 from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
@@ -113,6 +115,12 @@ class TemplateLimitCreateRequest(StrictRequestModel):
     time: LimitTime = Field(..., description="Период лимита")
     term: LimitTerm | None = Field(None, description="Дополнительные временные ограничения")
     create_restriction: bool | None = Field(None, description="Создать ограничитель автоматически")
+
+    @model_validator(mode="after")
+    def require_amount_or_sum(self) -> Self:
+        if self.amount is None and self.sum is None:
+            raise ValueError("one of amount or sum is required")
+        return self
 
 
 class TemplateLimitCreateResponse(APIEnvelope[str]):

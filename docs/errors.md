@@ -3,7 +3,7 @@
 SDK проверяет одновременно HTTP-статус и `payload.status.code`. Успешный код в
 теле ответа не может скрыть HTTP-ошибку.
 
-## Иерархия исключений
+## Иерархия исключений API
 
 | Код/тип | Исключение | Типичная причина |
 |---|---|---|
@@ -15,9 +15,37 @@ SDK проверяет одновременно HTTP-статус и `payload.st
 | `429`, `509` | `RateLimitError` | Превышен лимит запросов |
 | `5xx` | `ServerError` | Серверная ошибка |
 
-Все специализированные исключения наследуют `APIError`.
+Все перечисленные специализированные исключения наследуют `APIError`.
 
-## Обработка ошибки
+## Ошибка выбора договора
+
+`ContractSelectionError` наследует `ValueError`, а не `APIError`: это локальная
+ошибка выбора контекста сессии, а не ошибка HTTP API.
+
+Она возникает, когда:
+
+- одновременно переданы `contract_id` и `contract_number`;
+- указанный договор не найден;
+- номер договора неоднозначен;
+- доступно несколько договоров, но выбор не указан.
+
+Доступные пары `(id, number)` находятся в `exc.available_contracts`. Они не
+включаются в текст исключения, поэтому обычный `str(exc)` не раскрывает список
+договоров в журнале.
+
+```python
+from api_client_opti24 import ContractSelectionError
+
+try:
+    await client.auth.auth_user()
+except ContractSelectionError as exc:
+    for contract_id, contract_number in exc.available_contracts:
+        print(contract_id, contract_number)
+```
+
+Не передавайте `available_contracts` во внешнюю telemetry без необходимости.
+
+## Обработка ошибки API
 
 ```python
 from api_client_opti24 import APIError, RateLimitError, ValidationError
@@ -44,6 +72,10 @@ except APIError as exc:
 одного повторного запроса. `auth_user` выполняется через низкоуровневый executor
 без auth-recovery, поэтому рекурсивный захват session lock исключён.
 
+Выбранный `contract_id` сохраняется при re-auth и повторно проверяется по
+актуальному списку договоров. Если доступ к договору отозван, SDK возвращает
+`ContractSelectionError` и не переключается на другой договор.
+
 ## Retry policy
 
 Автоматический retry разрешён только если одновременно выполняются условия
@@ -52,7 +84,8 @@ except APIError as exc:
 - безопасные операции чтения могут повторяться после временной сетевой ошибки;
 - операции изменения не повторяются после неопределённого сетевого результата;
 - `429` и `509` повторяются только для разрешённых policy операций;
-- duplicate conflict не считается основанием для автоматического retry.
+- duplicate conflict не считается основанием для автоматического retry;
+- JSON и binary download используют одну и ту же execution policy.
 
 ## Практические рекомендации
 

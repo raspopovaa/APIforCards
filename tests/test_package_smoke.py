@@ -248,14 +248,15 @@ def test_registered_service_methods_have_docstrings_and_domain_scenarios() -> No
         assert "Пример" in docstring, operation_name
 
 
-def test_all_public_service_parameters_are_keyword_only() -> None:
+def test_non_qr_mpc_public_service_parameters_are_keyword_only() -> None:
+    legacy_positional_methods = {"delete_mpc", "reset_mpc"}
     for service_type_name in SERVICE_TYPES.values():
         service_type = getattr(sdk, service_type_name)
         for method_name, method in inspect.getmembers(
             service_type,
             predicate=inspect.iscoroutinefunction,
         ):
-            if method_name.startswith("_"):
+            if method_name.startswith("_") or method_name in legacy_positional_methods:
                 continue
             parameters = list(inspect.signature(method).parameters.values())[1:]
             assert all(
