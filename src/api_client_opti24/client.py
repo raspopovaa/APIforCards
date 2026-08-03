@@ -63,6 +63,8 @@ class APIClient(_ServiceFacade):
         )
         self.settings: ConnectionSettings = resolved.settings
         self.__managed_logger: ManagedLogger | None = None
+        self._owns_transport = transport is None
+        self._closed = False
 
         if logger is not None:
             self.logger: LoggerLike = logger
@@ -189,8 +191,12 @@ class APIClient(_ServiceFacade):
         )
 
     async def aclose(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
         try:
-            await self.transport.aclose()
+            if self._owns_transport:
+                await self.transport.aclose()
         finally:
             if self.__managed_logger is not None:
                 self.__managed_logger.close()
