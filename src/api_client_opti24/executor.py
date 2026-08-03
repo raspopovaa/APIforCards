@@ -109,13 +109,15 @@ class OperationExecutor:
         custom_headers = kwargs.pop("headers", None)
         if custom_headers is not None and not isinstance(custom_headers, Mapping):
             raise TypeError("headers must be a mapping of strings")
-        headers = dict(custom_headers or {})
-        headers.update(
-            self.headers(
-                include_session=spec.requires_session,
-                content_type_json="json" in kwargs,
-            )
+        headers = self.headers(
+            include_session=spec.requires_session,
+            content_type_json="json" in kwargs,
         )
+        for name, value in dict(custom_headers or {}).items():
+            normalized_name = name.lower().replace("-", "_")
+            if normalized_name in {"api_key", "session_id", "date_time"}:
+                raise ValueError(f"Header override is not allowed: {name}")
+            headers[name] = value
         return headers
 
     async def _request_json(

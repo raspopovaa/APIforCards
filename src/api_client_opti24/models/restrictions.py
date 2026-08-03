@@ -1,6 +1,19 @@
-from typing import Any
+from typing import Literal
 
-from ..modeling import BaseModel, Field
+from ..modeling import BaseModel, Field, StrictRequestModel
+from .common import ResponseStatus
+
+
+class RestrictionRequestItem(StrictRequestModel):
+    """Строгий элемент запроса установки товарного ограничителя."""
+
+    id: str | None = Field(None, min_length=1)
+    contract_id: str | None = Field(None, min_length=1)
+    card_id: str | None = Field(None, min_length=1)
+    group_id: str | None = Field(None, min_length=1)
+    product_type: str = Field(..., alias="productType", min_length=1)
+    product_group: str | None = Field(None, alias="productGroup", min_length=1)
+    restriction_type: Literal[1, 2]
 
 
 class RestrictionItem(BaseModel):
@@ -41,6 +54,7 @@ class RestrictionGetResponse(BaseModel):
     Ответ на запрос списка ограничителей (GET /restriction).
     """
 
+    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
     data: RestrictionList = Field(..., description="Данные с ограничителями")
     timestamp: int = Field(..., description="Временная метка ответа (Unix time)")
 
@@ -50,6 +64,7 @@ class RestrictionSetResponse(BaseModel):
     Ответ на установку или изменение ограничителя (POST /setRestriction).
     """
 
+    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
     data: list[str] = Field(..., description="Список ID созданных или изменённых ограничителей")
     timestamp: int = Field(..., description="Временная метка ответа (Unix time)")
 
@@ -59,6 +74,6 @@ class RestrictionRemoveResponse(BaseModel):
     Ответ на удаление ограничителя (POST /removeRestriction).
     """
 
-    status: dict[str, Any] = Field(..., description="Статус выполнения (например, {'code': 200})")
+    status: ResponseStatus = Field(..., description="Статус выполнения")
     data: bool = Field(..., description="Результат операции (True — успешно)")
-    timestamp: int | None = Field(None, description="Временная метка ответа (Unix time)")
+    timestamp: int = Field(..., description="Временная метка ответа (Unix time)")

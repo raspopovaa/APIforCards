@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Literal
 
-from ..modeling import BaseModel, Field
+from ..modeling import BaseModel, Field, StrictRequestModel
+from .common import ResponseStatus
 
 # === Базовые структуры ===
 
@@ -51,6 +52,52 @@ class LimitTime(BaseModel):
     type: int | None = Field(None, description="Тип периода (например, 7 — неделя)")
 
 
+class LimitAmountRequest(StrictRequestModel):
+    unit: str = Field(..., min_length=1, description="Единица измерения")
+    value: float = Field(..., gt=0, description="Размер объёмного лимита")
+
+
+class LimitSumRequest(StrictRequestModel):
+    currency: str = Field(..., min_length=1, description="Код валюты")
+    value: float = Field(..., gt=0, description="Размер денежного лимита")
+
+
+class LimitTimeRequest(StrictRequestModel):
+    number: int = Field(..., gt=0, description="Количество периодов")
+    type: Literal[2, 3, 4, 5, 6, 7] = Field(..., description="Тип периода")
+
+
+class LimitTermTimeRequest(StrictRequestModel):
+    from_: str = Field(..., alias="from", min_length=1, description="Начало интервала")
+    to: str = Field(..., min_length=1, description="Окончание интервала")
+
+
+class LimitTermRequest(StrictRequestModel):
+    days: str | None = Field(None, pattern=r"^[01]{7}$", description="Маска дней недели")
+    type: Literal[1, 2, 3] = Field(..., description="Тип применения ограничения")
+    time: LimitTermTimeRequest | None = Field(None, description="Интервал обслуживания")
+
+
+class LimitTransactionsRequest(StrictRequestModel):
+    count: int = Field(..., gt=0, description="Количество транзакций")
+
+
+class LimitRequestItem(StrictRequestModel):
+    """Строгий элемент запроса установки продуктового лимита."""
+
+    id: str | None = Field(None, min_length=1, description="ID изменяемого лимита")
+    contract_id: str | None = Field(None, min_length=1, description="ID договора")
+    card_id: str | None = Field(None, min_length=1, description="ID карты")
+    group_id: str | None = Field(None, min_length=1, description="ID группы карт")
+    product_type: str | None = Field(None, alias="productType", min_length=1)
+    product_group: str | None = Field(None, alias="productGroup", min_length=1)
+    amount: LimitAmountRequest | None = None
+    sum: LimitSumRequest | None = None
+    term: LimitTermRequest | None = None
+    transactions: LimitTransactionsRequest | None = None
+    time: LimitTimeRequest = Field(..., description="Период действия лимита")
+
+
 # === Основная модель лимита ===
 
 
@@ -90,7 +137,7 @@ class LimitsData(BaseModel):
 class LimitsResponse(BaseModel):
     """Ответ на запрос списка лимитов."""
 
-    status: dict[str, Any] = Field(..., description="Статус выполнения (например, {'code': 200})")
+    status: ResponseStatus = Field(..., description="Статус выполнения")
     data: LimitsData = Field(..., description="Данные с лимитами")
     timestamp: int = Field(..., description="Временная метка ответа")
 
@@ -101,7 +148,7 @@ class LimitsResponse(BaseModel):
 class RemoveLimitResponse(BaseModel):
     """Ответ на удаление продуктового лимита."""
 
-    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
+    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
     data: bool = Field(..., description="Результат операции (True — успешно)")
     timestamp: int = Field(..., description="Временная метка ответа")
 
@@ -112,6 +159,6 @@ class RemoveLimitResponse(BaseModel):
 class SetLimitResponse(BaseModel):
     """Ответ на установку/изменение продуктового лимита."""
 
-    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
+    status: ResponseStatus = Field(..., description="Статус выполнения запроса")
     data: list[str] = Field(..., description="ID созданных/обновлённых лимитов")
     timestamp: int = Field(..., description="Временная метка ответа")

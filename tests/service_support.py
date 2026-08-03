@@ -29,6 +29,42 @@ class NoopRequestExecutor:
         raise AssertionError(f"Unexpected stream request: {api_version} {operation}")
 
 
+class RecordingRequestExecutor:
+    def __init__(self, responses: dict[str, dict[str, Any]]) -> None:
+        self.responses = responses
+        self.calls: list[tuple[str, dict[str, Any]]] = []
+
+    async def execute(
+        self,
+        operation: str,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: object = None,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        call = {
+            "api_version": api_version,
+            "route_name": route_name,
+            "path_params": path_params,
+            **kwargs,
+        }
+        self.calls.append((operation, call))
+        return self.responses[operation]
+
+    async def execute_stream(
+        self,
+        operation: str,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: object = None,
+        **kwargs: Any,
+    ) -> bytes:
+        del operation, api_version, route_name, path_params, kwargs
+        raise AssertionError("Unexpected stream request")
+
+
 class StubSessionGate:
     async def ensure_authenticated(self) -> str:
         return "test-session"

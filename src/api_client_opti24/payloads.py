@@ -1,7 +1,22 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, overload
+
+
+@overload
+def with_method_override(payload: Mapping[str, Any], method: str) -> dict[str, Any]: ...
+
+
+@overload
+def with_method_override(
+    payload: Sequence[Mapping[str, Any]],
+    method: str,
+) -> list[dict[str, Any]]: ...
+
+
+@overload
+def with_method_override(payload: None, method: str) -> dict[str, Any]: ...
 
 
 def with_method_override(

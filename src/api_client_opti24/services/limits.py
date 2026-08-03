@@ -1,13 +1,20 @@
 import json
+from collections.abc import Mapping
 from typing import Any
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.limits import (
+    LimitRequestItem,
     LimitsResponse,
     RemoveLimitResponse,
     SetLimitResponse,
 )
 from ..service_base import _BaseService
+from ..validation import (
+    require_identifier,
+    validate_card_or_group_target,
+)
 
 
 class LimitsService(_BaseService):
@@ -20,13 +27,17 @@ class LimitsService(_BaseService):
       • Удаление лимита
     """
 
+    async def _validated_contract_id(self, contract_id: str | None) -> str:
+        resolved = await self._resolve_contract_id(contract_id)
+        return require_identifier(resolved, "contract_id")
+
     # ------------------- GET /limit -------------------
 
     @api_method
     async def get_limits(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         card_id: str | None = None,
         group_id: str | None = None,
         api_version: str | None = None,
@@ -39,13 +50,15 @@ class LimitsService(_BaseService):
         :param group_id: ID группы карт (опционально)
         :param api_version: версия API (по умолчанию v1)
         """
-        if not contract_id:
-            raise ValueError("contract_id обязателен для get_limits")
-
-        params = {"contract_id": contract_id}
-        if card_id:
+        cid = await self._validated_contract_id(contract_id)
+        card_id, group_id = validate_card_or_group_target(
+            card_id=card_id,
+            group_id=group_id,
+        )
+        params = {"contract_id": cid}
+        if card_id is not None:
             params["card_id"] = card_id
-        if group_id:
+        if group_id is not None:
             params["group_id"] = group_id
 
         raw = await self._request(
@@ -54,8 +67,7 @@ class LimitsService(_BaseService):
             params=params,
         )
 
-        self.logger.debug("Limits received")
-        return LimitsResponse(**raw)
+        return decode_model(LimitsResponse, raw)
 
     # ------------------- POST /setLimit -------------------
 
@@ -63,7 +75,8 @@ class LimitsService(_BaseService):
     async def set_limit(
         self,
         *,
-        limits: list[dict[str, Any]],
+        limits: list[LimitRequestItem | Mapping[str, Any]],
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> SetLimitResponse:
         """
@@ -82,7 +95,7 @@ class LimitsService(_BaseService):
                 "contract_id": "contract-id",
                 "card_id": "card-id",
                 "sum": {"currency": "810", "value": 5000.0},
-                "time": {"number": 1, "type": 1},
+                "time": {"number": 1, "type": 5},
             }]
         )
         ```
@@ -93,14 +106,43 @@ class LimitsService(_BaseService):
           "contract_id": "contract-id",
           "card_id": "card-id",
           "sum": {"currency": "810", "value": 5000.0},
-          "time": {"number": 1, "type": 1}
+          "time": {"number": 1, "type": 5}
         }
         ```
         """
         if not limits:
-            raise ValueError("Не переданы данные лимита (limits)")
+            raise ValueError("limits must contain at least one item")
+        parsed_limits = [LimitRequestItem.model_validate(item) for item in limits]
+        for item in parsed_limits:
+            validate_card_or_group_target(
+                card_id=item.card_id,
+                group_id=item.group_id,
+                required=True,
+            )
+            if item.amount is None and item.sum is None:
+                raise ValueError("each limit must contain amount or sum")
 
-        body = {"limit": json.dumps(limits, ensure_ascii=False)}
+        fallback_contract_id: str | None = None
+        if contract_id is not None or any(item.contract_id is None for item in parsed_limits):
+            fallback_contract_id = await self._validated_contract_id(contract_id)
+
+        serialized_limits: list[dict[str, Any]] = []
+        for item in parsed_limits:
+            serialized = item.model_dump(by_alias=True, exclude_none=True)
+            serialized["contract_id"] = (
+                require_identifier(item.contract_id, "contract_id")
+                if item.contract_id is not None
+                else fallback_contract_id
+            )
+            serialized_limits.append(serialized)
+
+        body = {
+            "limit": json.dumps(
+                serialized_limits,
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+        }
 
         raw = await self._request(
             "set_limit",
@@ -108,8 +150,7 @@ class LimitsService(_BaseService):
             data=body,
         )
 
-        self.logger.info("Limit updated")
-        return SetLimitResponse(**raw)
+        return decode_model(SetLimitResponse, raw)
 
     # ------------------- POST /removeLimit -------------------
 
@@ -117,7 +158,7 @@ class LimitsService(_BaseService):
     async def remove_limit(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         limit_id: str,
         group_id: str | None = None,
         api_version: str | None = None,
@@ -130,14 +171,13 @@ class LimitsService(_BaseService):
         :param limit_id: ID лимита
         :param group_id: ID группы карт (опционально)
         """
-        if not contract_id:
-            raise ValueError("contract_id обязателен для remove_limit")
-        if not limit_id:
-            raise ValueError("limit_id обязателен для remove_limit")
-
-        body = {"limit_id": limit_id, "contract_id": contract_id}
-        if group_id:
-            body["group_id"] = group_id
+        cid = await self._validated_contract_id(contract_id)
+        body = {
+            "limit_id": require_identifier(limit_id, "limit_id"),
+            "contract_id": cid,
+        }
+        if group_id is not None:
+            body["group_id"] = require_identifier(group_id, "group_id")
 
         raw = await self._request(
             "remove_limit",
@@ -145,5 +185,4 @@ class LimitsService(_BaseService):
             data=body,
         )
 
-        self.logger.info("Limit removed")
-        return RemoveLimitResponse(**raw)
+        return decode_model(RemoveLimitResponse, raw)

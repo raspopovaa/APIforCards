@@ -1,11 +1,5 @@
 from ..modeling import BaseModel, Field
-
-
-class Status(BaseModel):
-    """Модель для статуса ответа API."""
-
-    code: int = Field(..., description="Код HTTP-статуса ответа (например, 200).")
-
+from .common import ResponseStatus
 
 # ============================================================
 # 1️⃣ Изменить тип продукта карты
@@ -23,7 +17,7 @@ class SetCardProductResponse(BaseModel):
     }
     """
 
-    status: Status = Field(..., description="Статус выполнения операции.")
+    status: ResponseStatus = Field(..., description="Статус выполнения операции.")
     data: list[str] = Field(
         ..., description="Список идентификаторов карт, у которых изменён продукт."
     )
@@ -46,7 +40,7 @@ class MoveToCardResponse(BaseModel):
     }
     """
 
-    status: Status = Field(..., description="Статус выполнения операции.")
+    status: ResponseStatus = Field(..., description="Статус выполнения операции.")
     data: bool = Field(..., description="Результат выполнения операции (true — успешно).")
     timestamp: int = Field(..., description="Метка времени ответа (UNIX timestamp).")
 
@@ -67,6 +61,6 @@ class MoveToContractResponse(BaseModel):
     }
     """
 
-    status: Status = Field(..., description="Статус выполнения операции.")
+    status: ResponseStatus = Field(..., description="Статус выполнения операции.")
     data: bool = Field(..., description="Результат выполнения операции (true — успешно).")
     timestamp: int = Field(..., description="Метка времени ответа (UNIX timestamp).")

@@ -22,7 +22,7 @@ class DummyTemplatesClient(TemplatesService):
 
     async def _request(self, operation, **kwargs):
         self.calls.append((operation, kwargs))
-        return {"data": "limit-1"}
+        return {"status": {"code": 200}, "data": "limit-1", "timestamp": 1710000000}
 
 
 @pytest.mark.asyncio
@@ -31,6 +31,7 @@ async def test_update_template_limit_does_not_mutate_input() -> None:
     limits = [
         {
             "contract_id": "contract-1",
+            "product_type": "fuel",
             "sum": {"currency": "810", "value": 5000},
             "time": {"type": 5, "number": 1},
         }

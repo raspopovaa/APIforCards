@@ -1,15 +1,23 @@
-from typing import Any
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, Literal
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.templates import (
+    TemplateCreateRequest,
     TemplateCreateResponse,
     TemplateDeleteResponse,
+    TemplateGeoRestrictionCreateRequest,
     TemplateGeoRestrictionCreateResponse,
     TemplateGeoRestrictionDeleteResponse,
     TemplateGeoRestrictionListResponse,
+    TemplateLimitCreateRequest,
     TemplateLimitCreateResponse,
     TemplateLimitDeleteResponse,
     TemplateLimitListResponse,
+    TemplateRestrictionCreateRequest,
     TemplateRestrictionCreateResponse,
     TemplateRestrictionDeleteResponse,
     TemplateRestrictionListResponse,
@@ -17,131 +25,165 @@ from ..models.templates import (
 )
 from ..payloads import with_method_override
 from ..service_base import _BaseService
+from ..validation import require_identifier
+
+TemplateType = Literal["Limit", "Wallet"]
 
 
 class TemplatesService(_BaseService):
-    # ---------- ШАБЛОНЫ ВК ----------
+    """Управление шаблонами виртуальных карт и их ограничениями."""
 
-    """
-    ВК – виртуальная карта. Чтобы выпустить ВК, потребуется создать шаблон лимита и прикрепить этот шаблон к пользователю.
-    Прикрепление происходит на этапе приглашения нового пользователя или методом для существующих пользователей.
-    Шаблон – это первоначальные параметры (Тип карты, Лимиты, Ограничители), с которыми будет выпущена эта ВК,
-    и все последующие, если использовать этот шаблон.
-    Шаблон сделан с точки зрения безопасности,
-    для того чтобы по-умолчанию все выпускаемые ВК имели ограничения на покупку (Лимит/Ограничитель).
-    """
+    async def _validated_contract_id(self, contract_id: str | None) -> str:
+        resolved = await self._resolve_contract_id(contract_id)
+        return require_identifier(resolved, "contract_id")
+
+    async def _payload_contract_id(
+        self,
+        payload_contract_id: str | None,
+        contract_id: str | None,
+    ) -> str:
+        if contract_id is not None:
+            return await self._validated_contract_id(contract_id)
+        if payload_contract_id is not None:
+            return require_identifier(payload_contract_id, "contract_id")
+        return await self._validated_contract_id(None)
 
     @api_method
     async def get_templates(
-        self, contract_id: str, api_version: str | None = None
+        self,
+        *,
+        contract_id: str | None = None,
+        api_version: str | None = None,
     ) -> TemplatesListResponse:
-        """Получить список шаблонов ВК"""
-        self.logger.info("Requesting templates")
-        data = await self._request(
+        """Получить список шаблонов виртуальных карт выбранного договора."""
+        cid = await self._validated_contract_id(contract_id)
+        raw = await self._request(
             "get_templates",
             api_version=api_version,
-            params={"contract_id": contract_id},
+            params={"contract_id": cid},
         )
-        return TemplatesListResponse(**data)
+        return decode_model(TemplatesListResponse, raw)
 
     @api_method
     async def create_template(
-        self, contract_id: str, type_: str, name: str, api_version: str | None = None
+        self,
+        *,
+        type_: TemplateType,
+        name: str,
+        contract_id: str | None = None,
+        api_version: str | None = None,
     ) -> TemplateCreateResponse:
-        """Создать новый шаблон виртуальной карты.
+        """Создать шаблон виртуальной карты для выбранного договора.
 
         Типовой сценарий:
-            Создать базовый шаблон, затем добавить к нему лимиты и ограничения
-            перед выпуском виртуальной карты.
+            Создать лимитный или кошельковый шаблон, который затем можно
+            дополнить лимитами и ограничителями.
 
         Пример вызова:
         ```python
         template = await client.templates.create_template(
-            contract_id="contract-id",
-            type_="wallet",
-            name="Командировки",
+            type_="Limit",
+            name="Дневной лимит",
         )
         ```
 
         Пример payload:
         ```json
-        {"contract_id": "contract-id", "type": "wallet", "name": "Командировки"}
+        {"contract_id": "contract-id", "type": "Limit", "name": "Дневной лимит"}
         ```
         """
-        payload = {"contract_id": contract_id, "type": type_, "name": name}
-        self.logger.info("Creating virtual card template")
-        data = await self._request(
+        cid = await self._validated_contract_id(contract_id)
+        request = TemplateCreateRequest(
+            contract_id=cid,
+            type=type_,
+            name=require_identifier(name, "name"),
+        )
+        raw = await self._request(
             "create_template",
             api_version=api_version,
-            data=payload,
+            data=request.model_dump(exclude_none=True),
         )
-        return TemplateCreateResponse(**data)
+        return decode_model(TemplateCreateResponse, raw)
 
     @api_method
     async def update_template(
         self,
+        *,
         template_id: str,
-        contract_id: str,
-        type_: str,
+        type_: TemplateType,
         name: str,
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> TemplateCreateResponse:
-        """Изменить существующий шаблон ВК"""
-        payload = {"contract_id": contract_id, "type": type_, "name": name}
-        self.logger.info("Updating virtual card template")
-        data = await self._request(
+        """Изменить существующий шаблон виртуальной карты."""
+        cid = await self._validated_contract_id(contract_id)
+        request = TemplateCreateRequest(
+            contract_id=cid,
+            type=type_,
+            name=require_identifier(name, "name"),
+        )
+        raw = await self._request(
             "update_template",
             api_version=api_version,
-            path_params={"template_id": template_id},
-            data=payload,
+            path_params={"template_id": require_identifier(template_id, "template_id")},
+            data=request.model_dump(exclude_none=True),
         )
-        return TemplateCreateResponse(**data)
+        return decode_model(TemplateCreateResponse, raw)
 
     @api_method
     async def delete_template(
         self,
+        *,
         template_id: str,
         api_version: str | None = None,
         use_post: bool = False,
     ) -> TemplateDeleteResponse:
-        """Удалить шаблон ВК"""
-        self.logger.info("Deleting virtual card template")
-        data = await self._request(
+        """Удалить шаблон виртуальной карты."""
+        raw = await self._request(
             "delete_template",
             api_version=api_version,
             route_name="post_override" if use_post else "default",
-            path_params={"template_id": template_id},
+            path_params={"template_id": require_identifier(template_id, "template_id")},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return TemplateDeleteResponse(**data)
+        return decode_model(TemplateDeleteResponse, raw)
 
-    # ---------- ЛИМИТЫ ----------
     @api_method
     async def get_template_limits(
-        self, template_id: str, api_version: str | None = None
+        self,
+        *,
+        template_id: str,
+        api_version: str | None = None,
     ) -> TemplateLimitListResponse:
-        """Получить список лимитов шаблона ВК"""
-        self.logger.info("Requesting template limits")
-        data = await self._request(
+        """Получить список лимитов шаблона виртуальной карты."""
+        raw = await self._request(
             "get_template_limits",
             api_version=api_version,
-            path_params={"template_id": template_id},
+            path_params={"template_id": require_identifier(template_id, "template_id")},
         )
-        return TemplateLimitListResponse(**data)
+        return decode_model(TemplateLimitListResponse, raw)
 
     @api_method
     async def create_template_limit(
-        self, template_id: str, payload: dict[str, Any], api_version: str | None = None
+        self,
+        *,
+        template_id: str,
+        payload: TemplateLimitCreateRequest | Mapping[str, Any],
+        contract_id: str | None = None,
+        api_version: str | None = None,
     ) -> TemplateLimitCreateResponse:
-        """Создать лимит для шаблона ВК"""
-        self.logger.info("Creating template limit")
-        data = await self._request(
+        """Создать лимит шаблона виртуальной карты."""
+        request = TemplateLimitCreateRequest.model_validate(payload)
+        cid = await self._payload_contract_id(request.contract_id, contract_id)
+        request_payload = request.model_dump(exclude_none=True, by_alias=True)
+        request_payload["contract_id"] = cid
+        raw = await self._request(
             "create_template_limit",
             api_version=api_version,
-            path_params={"template_id": template_id},
-            data=payload,
+            path_params={"template_id": require_identifier(template_id, "template_id")},
+            json=request_payload,
         )
-        return TemplateLimitCreateResponse(**data)
+        return decode_model(TemplateLimitCreateResponse, raw)
 
     @api_method
     async def update_template_limit(
@@ -149,224 +191,246 @@ class TemplatesService(_BaseService):
         *,
         template_id: str,
         limit_id: str,
-        limits: list[dict[str, Any]],
+        limits: list[TemplateLimitCreateRequest | Mapping[str, Any]],
+        contract_id: str | None = None,
         use_post: bool = True,
         api_version: str | None = None,
     ) -> TemplateLimitCreateResponse:
-        """
-        Обновить лимит шаблона ВК.
-        Новые параметры описывается в виде словаря, содержащего параметры amount, sum, time, term и т.д.
-        Если система не поддерживает PUT — передай `use_post=True`,
-        тогда запрос будет отправлен методом POST с добавленным `_method="PUT"`.
-
-        Args:
-            template_id (str): ID шаблона ВК
-            limit_id (str): ID лимита, который нужно обновить
-            limits (list[dict]): список новых параметров лимита для обновления, пример:
-                [
-                    {
-                        "contract_id": "1-380B94P",
-                        "product_type": "1-276PF01",
-                        "product_group": "1-276PF0E",
-                        "sum": {"currency": "810", "value": 5000}, 810 - RUB, LIT - литры
-                        "time": {"type": 5, "number": 1},
-                        "term": {
-                            "time": {"from": "03:00", "to": "08:00"},
-                            "days": "1111100",
-                            "type": 1
-                        }
-                    }
-                ]
-            use_post (bool): если True — POST с `_method=PUT`, иначе реальный PUT
-            api_version (str): версия API (по умолчанию "v2")
-
-        Returns:
-            TemplateLimitCreateResponse: объект с ID изменённого лимита
-        """
+        """Изменить лимит шаблона через PUT или POST method override."""
+        if not limits:
+            raise ValueError("limits must contain at least one item")
+        request_limits: list[dict[str, Any]] = []
+        for item in limits:
+            request = TemplateLimitCreateRequest.model_validate(item)
+            if request.amount is None and request.sum is None:
+                raise ValueError("each template limit must contain amount or sum")
+            cid = await self._payload_contract_id(request.contract_id, contract_id)
+            serialized = request.model_dump(exclude_none=True, by_alias=True)
+            serialized["contract_id"] = cid
+            request_limits.append(serialized)
+        if use_post:
+            request_limits = with_method_override(request_limits, "PUT")
         self.logger.info(
             "Updating template limit item_count=%d post_fallback=%s",
-            len(limits),
+            len(request_limits),
             use_post,
         )
-
-        # Проверка содержимого
-        if not limits or not isinstance(limits, list):
-            raise ValueError("Параметр 'limits' должен быть списком объектов лимитов.")
-
-        for limit in limits:
-            if "contract_id" not in limit:
-                raise ValueError("Каждый лимит должен содержать 'contract_id'.")
-            if "time" not in limit:
-                raise ValueError("Каждый лимит должен содержать объект 'time'.")
-            if "amount" not in limit and "sum" not in limit:
-                raise ValueError("Каждый лимит должен содержать либо 'amount', либо 'sum'.")
-
-        request_limits = (
-            with_method_override(limits, "PUT") if use_post else [dict(limit) for limit in limits]
-        )
-
-        # Отправляем список лимитов
-        data = await self._request(
+        raw = await self._request(
             "update_template_limit",
             api_version=api_version,
             route_name="default" if use_post else "put",
-            path_params={"template_id": template_id, "limit_id": limit_id},
+            path_params={
+                "template_id": require_identifier(template_id, "template_id"),
+                "limit_id": require_identifier(limit_id, "limit_id"),
+            },
             json=request_limits,
         )
-
-        return TemplateLimitCreateResponse(**data)
+        return decode_model(TemplateLimitCreateResponse, raw)
 
     @api_method
     async def delete_template_limit(
         self,
+        *,
         template_id: str,
         limit_id: str,
         api_version: str | None = None,
         use_post: bool = False,
     ) -> TemplateLimitDeleteResponse:
-        """Удалить лимит шаблона ВК"""
-        self.logger.info("Deleting template limit")
-        data = await self._request(
+        """Удалить лимит шаблона виртуальной карты."""
+        raw = await self._request(
             "delete_template_limit",
             api_version=api_version,
             route_name="post_override" if use_post else "default",
-            path_params={"template_id": template_id, "limit_id": limit_id},
+            path_params={
+                "template_id": require_identifier(template_id, "template_id"),
+                "limit_id": require_identifier(limit_id, "limit_id"),
+            },
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return TemplateLimitDeleteResponse(**data)
+        return decode_model(TemplateLimitDeleteResponse, raw)
 
-    # ---------- ОГРАНИЧИТЕЛИ ----------
     @api_method
     async def get_template_restrictions(
-        self, template_id: str, api_version: str | None = None
+        self,
+        *,
+        template_id: str,
+        api_version: str | None = None,
     ) -> TemplateRestrictionListResponse:
-        """Получить список ограничителей шаблона ВК"""
-        self.logger.info("Requesting template restrictions")
-        data = await self._request(
+        """Получить список ограничителей шаблона."""
+        raw = await self._request(
             "get_template_restrictions",
             api_version=api_version,
-            path_params={"template_id": template_id},
+            path_params={"template_id": require_identifier(template_id, "template_id")},
         )
-        return TemplateRestrictionListResponse(**data)
+        return decode_model(TemplateRestrictionListResponse, raw)
 
     @api_method
     async def create_template_restriction(
-        self, template_id: str, payload: dict[str, Any], api_version: str | None = None
+        self,
+        *,
+        template_id: str,
+        payload: TemplateRestrictionCreateRequest | Mapping[str, Any],
+        contract_id: str | None = None,
+        api_version: str | None = None,
     ) -> TemplateRestrictionCreateResponse:
-        """Создать ограничитель для шаблона ВК"""
-        self.logger.info("Creating template restriction")
-        data = await self._request(
+        """Создать ограничитель шаблона."""
+        request = TemplateRestrictionCreateRequest.model_validate(payload)
+        cid = await self._payload_contract_id(request.contract_id, contract_id)
+        request_payload = request.model_dump(exclude_none=True, by_alias=True)
+        request_payload["contract_id"] = cid
+        raw = await self._request(
             "create_template_restriction",
             api_version=api_version,
-            path_params={"template_id": template_id},
-            data=payload,
+            path_params={"template_id": require_identifier(template_id, "template_id")},
+            json=request_payload,
         )
-        return TemplateRestrictionCreateResponse(**data)
+        return decode_model(TemplateRestrictionCreateResponse, raw)
 
     @api_method
     async def update_template_restriction(
         self,
+        *,
         template_id: str,
         restriction_id: str,
-        payload: dict[str, Any],
+        payload: TemplateRestrictionCreateRequest | Mapping[str, Any],
+        contract_id: str | None = None,
         api_version: str | None = None,
         use_post: bool = True,
     ) -> TemplateRestrictionCreateResponse:
-        """Изменить ограничитель шаблона ВК"""
+        """Изменить ограничитель шаблона через PUT или POST override."""
+        request = TemplateRestrictionCreateRequest.model_validate(payload)
+        cid = await self._payload_contract_id(request.contract_id, contract_id)
+        request_payload = request.model_dump(exclude_none=True, by_alias=True)
+        request_payload["contract_id"] = cid
+        if use_post:
+            request_payload = with_method_override(request_payload, "PUT")
         self.logger.info("Updating template restriction post_fallback=%s", use_post)
-        request_payload = with_method_override(payload, "PUT") if use_post else dict(payload)
-        data = await self._request(
+        raw = await self._request(
             "update_template_restriction",
             api_version=api_version,
             route_name="default" if use_post else "put",
-            path_params={"template_id": template_id, "restriction_id": restriction_id},
-            data=request_payload,
+            path_params={
+                "template_id": require_identifier(template_id, "template_id"),
+                "restriction_id": require_identifier(restriction_id, "restriction_id"),
+            },
+            json=request_payload,
         )
-        return TemplateRestrictionCreateResponse(**data)
+        return decode_model(TemplateRestrictionCreateResponse, raw)
 
     @api_method
     async def delete_template_restriction(
         self,
+        *,
         template_id: str,
         restriction_id: str,
         api_version: str | None = None,
         use_post: bool = False,
     ) -> TemplateRestrictionDeleteResponse:
-        """Удалить ограничитель шаблона ВК"""
-        self.logger.info("Deleting template restriction")
-        data = await self._request(
+        """Удалить ограничитель шаблона."""
+        raw = await self._request(
             "delete_template_restriction",
             api_version=api_version,
             route_name="post_override" if use_post else "default",
-            path_params={"template_id": template_id, "restriction_id": restriction_id},
+            path_params={
+                "template_id": require_identifier(template_id, "template_id"),
+                "restriction_id": require_identifier(restriction_id, "restriction_id"),
+            },
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return TemplateRestrictionDeleteResponse(**data)
+        return decode_model(TemplateRestrictionDeleteResponse, raw)
 
-    # ---------- ГЕООГРАНИЧИТЕЛИ ----------
     @api_method
     async def get_template_georestrictions(
-        self, template_id: str, api_version: str | None = None
+        self,
+        *,
+        template_id: str,
+        api_version: str | None = None,
     ) -> TemplateGeoRestrictionListResponse:
-        """Получить список геоограничителей шаблона ВК"""
-        self.logger.info("Requesting template geo restrictions")
-        data = await self._request(
+        """Получить список геоограничителей шаблона."""
+        raw = await self._request(
             "get_template_georestrictions",
             api_version=api_version,
-            path_params={"template_id": template_id},
+            path_params={"template_id": require_identifier(template_id, "template_id")},
         )
-        return TemplateGeoRestrictionListResponse(**data)
+        return decode_model(TemplateGeoRestrictionListResponse, raw)
 
     @api_method
     async def create_template_georestriction(
-        self, template_id: str, payload: dict[str, Any], api_version: str | None = None
+        self,
+        *,
+        template_id: str,
+        payload: TemplateGeoRestrictionCreateRequest | Mapping[str, Any],
+        contract_id: str | None = None,
+        api_version: str | None = None,
     ) -> TemplateGeoRestrictionCreateResponse:
-        """Создать геоограничитель для шаблона ВК"""
-        self.logger.info("Creating template geo restriction")
-        data = await self._request(
+        """Создать геоограничитель шаблона."""
+        request = TemplateGeoRestrictionCreateRequest.model_validate(payload)
+        cid = await self._payload_contract_id(request.contract_id, contract_id)
+        request_payload = request.model_dump(exclude_none=True, by_alias=True)
+        request_payload["contract_id"] = cid
+        raw = await self._request(
             "create_template_georestriction",
             api_version=api_version,
-            path_params={"template_id": template_id},
-            data=payload,
+            path_params={"template_id": require_identifier(template_id, "template_id")},
+            json=request_payload,
         )
-        return TemplateGeoRestrictionCreateResponse(**data)
+        return decode_model(TemplateGeoRestrictionCreateResponse, raw)
 
     @api_method
     async def update_template_georestriction(
         self,
+        *,
         template_id: str,
         georestriction_id: str,
-        payload: dict[str, Any],
+        payload: TemplateGeoRestrictionCreateRequest | Mapping[str, Any],
+        contract_id: str | None = None,
         api_version: str | None = None,
         use_post: bool = True,
     ) -> TemplateGeoRestrictionCreateResponse:
-        """Изменить геоограничитель шаблона ВК"""
+        """Изменить геоограничитель шаблона через PUT или POST override."""
+        request = TemplateGeoRestrictionCreateRequest.model_validate(payload)
+        cid = await self._payload_contract_id(request.contract_id, contract_id)
+        request_payload = request.model_dump(exclude_none=True, by_alias=True)
+        request_payload["contract_id"] = cid
+        if use_post:
+            request_payload = with_method_override(request_payload, "PUT")
         self.logger.info("Updating template geo restriction post_fallback=%s", use_post)
-        request_payload = with_method_override(payload, "PUT") if use_post else dict(payload)
-        data = await self._request(
+        raw = await self._request(
             "update_template_georestriction",
             api_version=api_version,
             route_name="default" if use_post else "put",
-            path_params={"template_id": template_id, "georestriction_id": georestriction_id},
-            data=request_payload,
+            path_params={
+                "template_id": require_identifier(template_id, "template_id"),
+                "georestriction_id": require_identifier(
+                    georestriction_id,
+                    "georestriction_id",
+                ),
+            },
+            json=request_payload,
         )
-        return TemplateGeoRestrictionCreateResponse(**data)
+        return decode_model(TemplateGeoRestrictionCreateResponse, raw)
 
     @api_method
     async def delete_template_georestriction(
         self,
+        *,
         template_id: str,
         georestriction_id: str,
         api_version: str | None = None,
         use_post: bool = False,
     ) -> TemplateGeoRestrictionDeleteResponse:
-        """Удалить геоограничитель шаблона ВК"""
-        self.logger.info("Deleting template geo restriction")
-        data = await self._request(
+        """Удалить геоограничитель шаблона."""
+        raw = await self._request(
             "delete_template_georestriction",
             api_version=api_version,
             route_name="post_override" if use_post else "default",
-            path_params={"template_id": template_id, "georestriction_id": georestriction_id},
+            path_params={
+                "template_id": require_identifier(template_id, "template_id"),
+                "georestriction_id": require_identifier(
+                    georestriction_id,
+                    "georestriction_id",
+                ),
+            },
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return TemplateGeoRestrictionDeleteResponse(**data)
+        return decode_model(TemplateGeoRestrictionDeleteResponse, raw)

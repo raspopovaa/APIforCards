@@ -146,7 +146,15 @@ def test_services_call_their_explicit_registry_operation() -> None:
             operation_arg = calls[0].args[0]
             assert isinstance(operation_arg, ast.Constant)
             assert operation_arg.value == function.name
-            assert all(keyword.arg != "headers" for keyword in calls[0].keywords)
+            header_keywords = [keyword for keyword in calls[0].keywords if keyword.arg == "headers"]
+            if header_keywords:
+                assert service_file.name == "contract.py"
+                assert len(header_keywords) == 1
+                header_value = header_keywords[0].value
+                assert isinstance(header_value, ast.Dict)
+                assert [
+                    key.value for key in header_value.keys if isinstance(key, ast.Constant)
+                ] == ["contract_id"]
             operations.add(function.name)
 
     authentication_tree = ast.parse(

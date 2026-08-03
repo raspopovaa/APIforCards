@@ -136,6 +136,24 @@ async def test_executor_builds_headers_and_rejects_non_object_json() -> None:
 
 
 @pytest.mark.asyncio
+async def test_executor_allows_contract_override_but_protects_credentials() -> None:
+    session = SessionManager()
+    session.mark_authenticated("session-1", "default-contract")
+    transport = StubTransport({"status": {"code": 200}, "data": {}})
+    executor, _ = build_executor(transport, session)
+
+    await executor.execute(
+        "get_documents",
+        headers={"contract_id": "explicit-contract"},
+        params={"date_start": "2026-01-01", "date_end": "2026-01-31"},
+    )
+
+    assert transport.calls[0][3]["headers"]["contract_id"] == "explicit-contract"
+    with pytest.raises(ValueError, match="not allowed"):
+        await executor.execute("get_documents", headers={"api_key": "replaced"})
+
+
+@pytest.mark.asyncio
 async def test_executor_resolves_and_escapes_operation_path() -> None:
     transport = StubTransport({"status": {"code": 200}, "data": {}})
     executor, _ = build_executor(transport)
