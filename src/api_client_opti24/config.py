@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .env import load_env_file
-from .policies import RateLimitPolicy, RetryPolicy
+from .policies import ConcurrencyPolicy, RateLimitPolicy, RetryPolicy
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +37,7 @@ class ConnectionSettings:
     timeouts: TimeoutPolicy = TimeoutPolicy()
     retry_policy: RetryPolicy = RetryPolicy()
     rate_limit_policy: RateLimitPolicy = RateLimitPolicy()
+    concurrency_policy: ConcurrencyPolicy = ConcurrencyPolicy()
 
     @classmethod
     def from_env(
@@ -47,6 +48,7 @@ class ConnectionSettings:
     ) -> ConnectionSettings:
         _load_environment(load_dotenv, env_file)
         requests_per_second = os.getenv("API_REQUESTS_PER_SECOND")
+        max_in_flight = os.getenv("API_MAX_IN_FLIGHT")
         return cls(
             base_url=os.getenv("API_BASE_URL", ""),
             request_log_file=os.getenv("REQUEST_LOG_FILE", "./api_requests.jsonl"),
@@ -56,6 +58,9 @@ class ConnectionSettings:
             in {"1", "true", "yes"},
             rate_limit_policy=RateLimitPolicy(
                 requests_per_second=(float(requests_per_second) if requests_per_second else None)
+            ),
+            concurrency_policy=ConcurrencyPolicy(
+                max_in_flight=int(max_in_flight) if max_in_flight else 20
             ),
         )
 
@@ -89,6 +94,7 @@ class APISettings(ConnectionSettings):
             timeouts=connection.timeouts,
             retry_policy=connection.retry_policy,
             rate_limit_policy=connection.rate_limit_policy,
+            concurrency_policy=connection.concurrency_policy,
         )
 
     def connection_settings(self) -> ConnectionSettings:
@@ -101,6 +107,7 @@ class APISettings(ConnectionSettings):
             timeouts=self.timeouts,
             retry_policy=self.retry_policy,
             rate_limit_policy=self.rate_limit_policy,
+            concurrency_policy=self.concurrency_policy,
         )
 
 

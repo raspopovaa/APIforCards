@@ -1,15 +1,21 @@
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Mapping
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.invites import (
     InviteBoolResponse,
     InviteCreateRequest,
+    InviteItem,
     InviteListResponse,
     InviteResponse,
 )
+from ..operations import operation
 from ..payloads import with_method_override
 from ..service_base import _BaseService
+
+GET_INVITES = operation("get_invites", InviteListResponse)
+CREATE_INVITE = operation("create_invite", InviteResponse)
+DELETE_INVITE = operation("delete_invite", InviteBoolResponse)
+RESEND_INVITE = operation("resend_invite", InviteResponse)
+PROLONG_INVITE = operation("prolong_invite", InviteBoolResponse)
 
 
 class InvitesService(_BaseService):
@@ -23,7 +29,6 @@ class InvitesService(_BaseService):
     """
 
     # ---------------------- GET /v2/invites ----------------------
-    @api_method
     async def get_invites(
         self,
         *,
@@ -58,15 +63,42 @@ class InvitesService(_BaseService):
         }
         params = {k: v for k, v in params.items() if v is not None}
 
-        raw = await self._request(
-            "get_invites",
+        return await self._request(
+            GET_INVITES,
             api_version=api_version,
             params=params,
         )
-        return decode_model(InviteListResponse, raw)
+
+    async def iter_invites(
+        self,
+        *,
+        role: str | None = None,
+        status: str | None = None,
+        q: str | None = None,
+        on_page: int = 100,
+        max_pages: int = 100,
+        api_version: str | None = None,
+    ) -> AsyncIterator[InviteItem]:
+        """Последовательно получить приглашения, ограничив число страниц."""
+        if on_page < 1 or max_pages < 1:
+            raise ValueError("on_page and max_pages must be greater than zero")
+        yielded = 0
+        for page in range(1, max_pages + 1):
+            response = await self.get_invites(
+                role=role,
+                status=status,
+                q=q,
+                page=page,
+                on_page=on_page,
+                api_version=api_version,
+            )
+            for item in response.data.result:
+                yield item
+                yielded += 1
+            if not response.data.result or yielded >= response.data.total_count:
+                return
 
     # ---------------------- POST /v2/invites / invites_free ----------------------
-    @api_method
     async def create_invite(
         self,
         *,
@@ -109,16 +141,14 @@ class InvitesService(_BaseService):
             exclude_none=True,
             exclude_unset=True,
         )
-        raw = await self._request(
-            "create_invite",
+        return await self._request(
+            CREATE_INVITE,
             api_version=api_version,
             route_name="default" if with_send else "without_send",
             json=payload,
         )
-        return decode_model(InviteResponse, raw)
 
     # ---------------------- DELETE /v2/invites/{invite_id} ----------------------
-    @api_method
     async def delete_invite(
         self,
         *,
@@ -129,17 +159,15 @@ class InvitesService(_BaseService):
         """
         Удалить приглашение (v2).
         """
-        raw = await self._request(
-            "delete_invite",
+        return await self._request(
+            DELETE_INVITE,
             api_version=api_version,
             route_name="post_override" if use_post else "default",
             path_params={"invite_id": invite_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return decode_model(InviteBoolResponse, raw)
 
     # ---------------------- GET /v2/invites/{invite_id}/send ----------------------
-    @api_method
     async def resend_invite(
         self,
         *,
@@ -149,15 +177,13 @@ class InvitesService(_BaseService):
         """
         Повторно отправить приглашение (v2).
         """
-        raw = await self._request(
-            "resend_invite",
+        return await self._request(
+            RESEND_INVITE,
             api_version=api_version,
             path_params={"invite_id": invite_id},
         )
-        return decode_model(InviteResponse, raw)
 
     # ---------------------- POST /v2/invites/{invite_id}/prolong / prolong_free ----------------------
-    @api_method
     async def prolong_invite(
         self,
         *,
@@ -171,10 +197,9 @@ class InvitesService(_BaseService):
         with_send=True  → POST /v2/invites/{invite_id}/prolong  (с отправкой)
         with_send=False → POST /v2/invites/{invite_id}/prolong_free (без отправки)
         """
-        raw = await self._request(
-            "prolong_invite",
+        return await self._request(
+            PROLONG_INVITE,
             api_version=api_version,
             route_name="default" if with_send else "without_send",
             path_params={"invite_id": invite_id},
         )
-        return decode_model(InviteBoolResponse, raw)

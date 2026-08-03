@@ -1,13 +1,18 @@
 from typing import Any
 
-from ..decorators import api_method
 from ..models.dictionaries import (
     AzsFiltersResponse,
     AzsListV1Response,
     AzsListV2Response,
     DictionaryResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
+
+GET_AZS_LIST_V1 = operation("get_azs_list_v1", AzsListV1Response)
+GET_AZS_LIST_V2 = operation("get_azs_list_v2", AzsListV2Response)
+GET_AZS_FILTERS = operation("get_azs_filters", AzsFiltersResponse)
+GET_DICTIONARY = operation("get_dictionary", DictionaryResponse)
 
 
 class DictionariesService(_BaseService):
@@ -16,9 +21,9 @@ class DictionariesService(_BaseService):
     # ==========================================================
     # 🔹 Получение списка торговых точек (v1)
     # ==========================================================
-    @api_method
     async def get_azs_list_v1(
         self,
+        *,
         page: int = 1,
         onpage: int = 10,
         filter: dict[str, Any] | None = None,
@@ -38,20 +43,18 @@ class DictionariesService(_BaseService):
         if id:
             params["id"] = id
 
-        data = await self._request(
-            "get_azs_list_v1",
+        return await self._request(
+            GET_AZS_LIST_V1,
             api_version=api_version,
             params=params,
         )
 
-        return AzsListV1Response(**data)
-
     # ==========================================================
     # 🔹 Получение списка торговых точек (v2)
     # ==========================================================
-    @api_method
     async def get_azs_list_v2(
         self,
+        *,
         filter: dict[str, Any] | None = None,
         q: str | None = None,
         api_version: str | None = None,
@@ -86,17 +89,15 @@ class DictionariesService(_BaseService):
         if q:
             params["q"] = q
 
-        data = await self._request(
-            "get_azs_list_v2",
+        return await self._request(
+            GET_AZS_LIST_V2,
             api_version=api_version,
             params=params,
         )
-        return AzsListV2Response(**data)
 
     # ==========================================================
     # 🔹 Получение списка фильтров торговых точек
     # ==========================================================
-    @api_method
     async def get_azs_filters(
         self,
         *,
@@ -107,19 +108,18 @@ class DictionariesService(_BaseService):
         """
         self.logger.info("Получение списка фильтров торговых точек")
 
-        data = await self._request(
-            "get_azs_filters",
+        response = await self._request(
+            GET_AZS_FILTERS,
             api_version=api_version,
         )
 
         # У метода data — это словарь с результатом фильтров
         self.logger.info("Dictionary filters received")
-        return AzsFiltersResponse(**data)
+        return response
 
     # ==========================================================
     # 🔹 Получение общего справочника
     # ==========================================================
-    @api_method
     async def get_dictionary(
         self,
         *,
@@ -151,10 +151,8 @@ class DictionariesService(_BaseService):
 
         params = {"name": name}
 
-        data = await self._request(
-            "get_dictionary",
+        return await self._request(
+            GET_DICTIONARY,
             api_version=api_version,
             params=params,
         )
-
-        return DictionaryResponse(**data)

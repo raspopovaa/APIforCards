@@ -32,9 +32,12 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -61,7 +64,7 @@ print(result)
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
 | `user_id` | `str` | Да | — | Идентификатор пользователя. |
-| `contracts` | `list[dict[str, Any]]` | Да | — | Список договоров для прикрепления к пользователю. Для каждого договора указываются `sid` — ID договора, `template_id` — ID шаблона ВК, `use_mpc` — разрешение выпуска МПК (`true`/`false`). |
+| `contracts` | `list[UserAttachContractRequest | Mapping[str, object]]` | Да | — | Список договоров для прикрепления к пользователю. Для каждого договора указываются `sid` — ID договора, `template_id` — ID шаблона ВК, `use_mpc` — разрешение выпуска МПК (`true`/`false`). |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -76,16 +79,19 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.users.attach_contracts(
     user_id="user-id",
-    contracts={},
+    contracts="contracts",
 )
 print(result)
 ```
@@ -122,9 +128,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `str` | `string` | Да | Нет | ID созданного пользователя |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `str` | `string` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -169,9 +178,12 @@ await client.users.delete_user(user_id="1-FK485FK")
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -213,9 +225,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -257,9 +272,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции (true/false) |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -304,11 +322,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса (например {'code': 200}) |
-| `data` | `UserList \| None` | `object (UserList) \| null` | Нет | Да | Основные данные ответа |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Временная метка ответа |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `UserList \| None` | `object (UserList) \| null` | Да | Да | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`UserList`](../data-types/users/UserList.md)
 
 ### Пример

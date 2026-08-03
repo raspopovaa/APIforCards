@@ -39,11 +39,12 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
-| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Данные ответа |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`TransactionsV2Data`](../data-types/transactions/TransactionsV2Data.md)
 
 ### Пример
@@ -90,11 +91,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
-| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Информация по одной транзакции |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`TransactionsV2Data`](../data-types/transactions/TransactionsV2Data.md)
 
 ### Пример
@@ -140,11 +142,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
-| `data` | `TransactionsV1Data` | `object (TransactionsV1Data)` | Да | Нет | Данные ответа |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `TransactionsV1Data` | `object (TransactionsV1Data)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`TransactionsV1Data`](../data-types/transactions/TransactionsV1Data.md)
 
 ### Пример
@@ -194,11 +197,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
-| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Данные ответа |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `TransactionsV2Data` | `object (TransactionsV2Data)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`TransactionsV2Data`](../data-types/transactions/TransactionsV2Data.md)
 
 ### Пример

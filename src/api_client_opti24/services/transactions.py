@@ -1,8 +1,7 @@
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from typing import Any
 
 from .. import utils
-from ..decorators import api_method
 from ..models.transactions import (
     TransactionDetailResponse,
     TransactionItemV2,
@@ -10,7 +9,13 @@ from ..models.transactions import (
     TransactionsV2Response,
     TransactionV1,
 )
+from ..operations import operation
 from ..service_base import _BaseService
+
+GET_TRANSACTIONS_V1 = operation("get_transactions_v1", TransactionsV1Response)
+GET_TRANSACTIONS_V2 = operation("get_transactions_v2", TransactionsV2Response)
+GET_CARD_TRANSACTIONS_V2 = operation("get_card_transactions_v2", TransactionsV2Response)
+GET_TRANSACTION_DETAIL = operation("get_transaction_detail", TransactionDetailResponse)
 
 
 class TransactionsService(_BaseService):
@@ -50,7 +55,6 @@ class TransactionsService(_BaseService):
 
     # ---------------- v1: Транзакции ---------------- #
 
-    @api_method
     async def get_transactions_v1(
         self,
         *,
@@ -76,13 +80,12 @@ class TransactionsService(_BaseService):
         if card_id:
             params["card_id"] = card_id
 
-        raw = await self._request(
-            "get_transactions_v1",
+        tx_response = await self._request(
+            GET_TRANSACTIONS_V1,
             api_version=api_version,
             params=params,
+            request_contract_id=contract_id,
         )
-
-        tx_response = TransactionsV1Response(**raw)
         tx_response.data.result = self._filter_and_sort(
             tx_response.data.result,
             filter_fn=filter_fn,
@@ -92,9 +95,37 @@ class TransactionsService(_BaseService):
 
         return tx_response
 
+    async def iter_transactions_v2(
+        self,
+        *,
+        contract_id: str,
+        date_from: str,
+        date_to: str,
+        page_limit: int = 100,
+        max_pages: int = 100,
+        api_version: str | None = None,
+    ) -> AsyncIterator[TransactionItemV2]:
+        """Последовательно получить транзакции, ограничив число страниц."""
+        if page_limit < 1 or max_pages < 1:
+            raise ValueError("page_limit and max_pages must be greater than zero")
+        yielded = 0
+        for page in range(max_pages):
+            response = await self.get_transactions_v2(
+                contract_id=contract_id,
+                date_from=date_from,
+                date_to=date_to,
+                page_limit=page_limit,
+                page_offset=page * page_limit,
+                api_version=api_version,
+            )
+            for item in response.data.result:
+                yield item
+                yielded += 1
+            if not response.data.result or yielded >= response.data.total_count:
+                return
+
     # ---------------- v2: Транзакции по договору ---------------- #
 
-    @api_method
     async def get_transactions_v2(
         self,
         *,
@@ -155,13 +186,12 @@ class TransactionsService(_BaseService):
             "page_offset": page_offset,
         }
 
-        raw = await self._request(
-            "get_transactions_v2",
+        tx_response = await self._request(
+            GET_TRANSACTIONS_V2,
             api_version=api_version,
             params=params,
+            request_contract_id=contract_id,
         )
-
-        tx_response = TransactionsV2Response(**raw)
         tx_response.data.result = self._filter_and_sort(
             tx_response.data.result,
             filter_fn=filter_fn,
@@ -173,7 +203,6 @@ class TransactionsService(_BaseService):
 
     # ---------------- v2: Транзакции по карте ---------------- #
 
-    @api_method
     async def get_card_transactions_v2(
         self,
         *,
@@ -208,14 +237,13 @@ class TransactionsService(_BaseService):
             "page_offset": page_offset,
         }
 
-        raw = await self._request(
-            "get_card_transactions_v2",
+        tx_response = await self._request(
+            GET_CARD_TRANSACTIONS_V2,
             api_version=api_version,
             path_params={"card_id": card_id},
             params=params,
+            request_contract_id=cid,
         )
-
-        tx_response = TransactionsV2Response(**raw)
         tx_response.data.result = self._filter_and_sort(
             tx_response.data.result,
             filter_fn=filter_fn,
@@ -227,7 +255,6 @@ class TransactionsService(_BaseService):
 
     # ---------------- v2: Детали транзакции ---------------- #
 
-    @api_method
     async def get_transaction_detail(
         self,
         *,
@@ -243,11 +270,10 @@ class TransactionsService(_BaseService):
         """
         cid = await self._resolve_contract_id(contract_id)
 
-        raw = await self._request(
-            "get_transaction_detail",
+        return await self._request(
+            GET_TRANSACTION_DETAIL,
             api_version=api_version,
             path_params={"transaction_id": transaction_id},
             params={"contract_id": cid},
+            request_contract_id=cid,
         )
-
-        return TransactionDetailResponse(**raw)

@@ -1,12 +1,20 @@
+from collections.abc import Mapping
 from typing import Any
 
-from ..decorators import api_method
 from ..models.region_limits import (
+    RegionLimitRequestItem,
     RegionLimitResponse,
+    RegionLimitSetResponse,
     RemoveRegionLimit,
 )
+from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
+from ..validation import require_identifier, validate_card_or_group_target
+
+GET_REGION_LIMITS = operation("get_region_limits", RegionLimitResponse)
+SET_REGION_LIMIT = operation("set_region_limit", RegionLimitSetResponse)
+REMOVE_REGION_LIMIT = operation("remove_region_limit", RemoveRegionLimit)
 
 
 class RegionLimitsService(_BaseService):
@@ -14,11 +22,10 @@ class RegionLimitsService(_BaseService):
     Методы для работы с региональными лимитами (v1).
     """
 
-    @api_method
     async def get_region_limits(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         card_id: str | None = None,
         group_id: str | None = None,
         api_version: str | None = None,
@@ -26,26 +33,31 @@ class RegionLimitsService(_BaseService):
         """
         Получение списка региональных лимитов по договору, карте или группе карт.
         """
-        params = {"contract_id": contract_id}
-        if card_id:
+        cid = await self._resolve_contract_id(contract_id)
+        card_id, group_id = validate_card_or_group_target(
+            card_id=card_id,
+            group_id=group_id,
+        )
+        params = {"contract_id": cid}
+        if card_id is not None:
             params["card_id"] = card_id
-        if group_id:
+        if group_id is not None:
             params["group_id"] = group_id
 
-        raw = await self._request(
-            "get_region_limits",
+        return await self._request(
+            GET_REGION_LIMITS,
             api_version=api_version,
             params=params,
+            request_contract_id=cid,
         )
-        return RegionLimitResponse(**raw)
 
-    @api_method
     async def set_region_limit(
         self,
         *,
-        region_limits: list[dict[str, Any]],
+        region_limits: list[RegionLimitRequestItem | Mapping[str, Any]],
+        contract_id: str | None = None,
         api_version: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> RegionLimitSetResponse:
         """
         Установка/изменение регионального лимита по карте или группе карт.
         Для изменения лимита необходимо передавать его ID.
@@ -77,19 +89,43 @@ class RegionLimitsService(_BaseService):
         }
         ```
         """
-        body = {"region_limit": to_json_param(region_limits)}
+        if not region_limits:
+            raise ValueError("region_limits must contain at least one item")
+        parsed_limits = [RegionLimitRequestItem.model_validate(item) for item in region_limits]
+        for item in parsed_limits:
+            validate_card_or_group_target(
+                card_id=item.card_id,
+                group_id=item.group_id,
+                required=True,
+            )
+
+        fallback_contract_id: str | None = None
+        if contract_id is not None or any(item.contract_id is None for item in parsed_limits):
+            fallback_contract_id = await self._resolve_contract_id(contract_id)
+
+        serialized_limits: list[dict[str, Any]] = []
+        for item in parsed_limits:
+            serialized = item.model_dump(by_alias=True, exclude_none=True)
+            serialized["contract_id"] = (
+                require_identifier(item.contract_id, "contract_id")
+                if item.contract_id is not None
+                else fallback_contract_id
+            )
+            serialized_limits.append(serialized)
+
+        body = {"region_limit": to_json_param(serialized_limits)}
 
         return await self._request(
-            "set_region_limit",
+            SET_REGION_LIMIT,
             api_version=api_version,
             data=body,
+            request_contract_id=fallback_contract_id or parsed_limits[0].contract_id,
         )
 
-    @api_method
     async def remove_region_limit(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         regionlimit_id: str,
         group_id: str | None = None,
         api_version: str | None = None,
@@ -97,13 +133,17 @@ class RegionLimitsService(_BaseService):
         """
         Удаление регионального лимита по карте или группе карт.
         """
-        body = {"regionlimit_id": regionlimit_id, "contract_id": contract_id}
-        if group_id:
-            body["group_id"] = group_id
+        cid = await self._resolve_contract_id(contract_id)
+        body = {
+            "regionlimit_id": require_identifier(regionlimit_id, "regionlimit_id"),
+            "contract_id": cid,
+        }
+        if group_id is not None:
+            body["group_id"] = require_identifier(group_id, "group_id")
 
-        raw = await self._request(
-            "remove_region_limit",
+        return await self._request(
+            REMOVE_REGION_LIMIT,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-        return RemoveRegionLimit(**raw)

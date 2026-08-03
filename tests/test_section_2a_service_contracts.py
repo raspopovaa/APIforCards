@@ -14,6 +14,7 @@ from api_client_opti24.models.invites import (
     InviteResponse,
 )
 from api_client_opti24.models.users import UserAttachContractRequest, UserBoolResponse
+from api_client_opti24.operations import Operation
 from api_client_opti24.services.auth import AuthService
 from api_client_opti24.services.card_group import CardGroupsService
 from api_client_opti24.services.cards import CardsService
@@ -31,9 +32,14 @@ class RecordingExecutor:
         self.responses = responses
         self.calls: list[tuple[str, dict[str, Any]]] = []
 
-    async def execute(self, operation: str, **kwargs: Any) -> dict[str, Any]:
-        self.calls.append((operation, kwargs))
-        return self.responses[operation]
+    async def execute(self, operation: Operation[Any] | str, **kwargs: Any) -> Any:
+        operation_name = operation.name if isinstance(operation, Operation) else operation
+        self.calls.append((operation_name, kwargs))
+        payload = self.responses[operation_name]
+        if isinstance(operation, Operation):
+            assert operation.response_type is not None
+            return operation.response_type.model_validate(payload)
+        return payload
 
     async def execute_stream(self, operation: str, **kwargs: Any) -> bytes:
         del kwargs
@@ -81,6 +87,7 @@ async def test_attach_contracts_validates_and_serializes_request_model() -> None
                 "api_version": None,
                 "route_name": "default",
                 "path_params": {"user_id": "user-1"},
+                "request_contract_id": None,
                 "json": [
                     {"sid": "contract-1", "use_mpc": True},
                     {"sid": "contract-2", "template_id": "template-1"},
@@ -121,7 +128,7 @@ async def test_create_invite_serializes_request_and_returns_full_envelope() -> N
     )
 
     assert isinstance(result, InviteResponse)
-    assert result.status["code"] == 200
+    assert result.status.code == 200
     assert result.timestamp == 1596024392
     assert executor.calls[0][1]["route_name"] == "without_send"
     assert executor.calls[0][1]["json"] == {
@@ -163,7 +170,7 @@ async def test_get_invites_returns_full_envelope() -> None:
     result = await service.get_invites()
 
     assert isinstance(result, InviteListResponse)
-    assert result.status["code"] == 200
+    assert result.status.code == 200
     assert result.data.total_count == 1
     assert result.timestamp == 1591147422
 

@@ -1,6 +1,6 @@
-from typing import Any, Literal
+from typing import Literal
 
-from ..modeling import BaseModel, Field, StrictRequestModel
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 
 class CardGroupAssignmentRequest(StrictRequestModel):
@@ -27,28 +27,16 @@ class CardGroupListData(BaseModel):
     result: list[CardGroupItem] = Field(..., description="Список групп карт")
 
 
-class CardGroupListResponse(BaseModel):
+class CardGroupListResponse(APIEnvelope[CardGroupListData]):
     """Ответ метода получения списка групп карт."""
 
-    status: dict[str, Any] = Field(..., description="Информация о статусе запроса (код и описание)")
-    data: CardGroupListData = Field(..., description="Основные данные ответа")
-    timestamp: int = Field(..., description="Временная метка ответа (UNIX timestamp)")
 
-
-class SetCardsToGroupResponse(BaseModel):
+class SetCardsToGroupResponse(APIEnvelope[bool]):
     """Ответ метода добавления карт в группу."""
 
-    status: dict[str, Any] = Field(..., description="Информация о статусе запроса (код и описание)")
-    data: bool = Field(..., description="Флаг успешного выполнения операции")
-    timestamp: int = Field(..., description="Временная метка ответа (UNIX timestamp)")
 
-
-class RemoveCardGroupResponse(BaseModel):
+class RemoveCardGroupResponse(APIEnvelope[bool]):
     """Ответ метода удаления группы карт."""
-
-    status: dict[str, Any] = Field(..., description="Информация о статусе запроса (код и описание)")
-    data: bool = Field(..., description="Флаг успешного выполнения операции")
-    timestamp: int = Field(..., description="Временная метка ответа (UNIX timestamp)")
 
 
 class SetCardGroupData(BaseModel):
@@ -57,9 +45,5 @@ class SetCardGroupData(BaseModel):
     id: str = Field(..., description="Идентификатор созданной или изменённой группы")
 
 
-class SetCardGroupResponse(BaseModel):
+class SetCardGroupResponse(APIEnvelope[SetCardGroupData]):
     """Ответ метода установки/изменения группы карт."""
-
-    status: dict[str, Any] = Field(..., description="Информация о статусе запроса (код и описание)")
-    data: SetCardGroupData = Field(..., description="Информация о созданной/обновлённой группе")
-    timestamp: int = Field(..., description="Временная метка ответа (UNIX timestamp)")

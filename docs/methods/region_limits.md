@@ -16,7 +16,7 @@
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `card_id` | `str | None` | Нет | `None` | Идентификатор топливной карты. |
 | `group_id` | `str | None` | Нет | `None` | Идентификатор группы топливных карт. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
@@ -33,18 +33,18 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
-| `data` | `RegionLimitList` | `object (RegionLimitList)` | Да | Нет | Данные с лимитами |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `RegionLimitList` | `object (RegionLimitList)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`RegionLimitList`](../data-types/region_limits/RegionLimitList.md)
 
 ### Пример
 
 ```python
 result = await client.region_limits.get_region_limits(
-    contract_id="contract-id",
 )
 print(result)
 ```
@@ -63,7 +63,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `regionlimit_id` | `str` | Да | — | ID регионального лимита. |
 | `group_id` | `str | None` | Нет | `None` | Идентификатор группы топливных карт. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
@@ -80,15 +80,17 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции (True — успешно) |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.region_limits.remove_region_limit(
-    contract_id="contract-id",
     regionlimit_id="regionlimit-id",
 )
 print(result)
@@ -109,22 +111,34 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `region_limits` | `list[dict[str, Any]]` | Да | — | Массив параметров регионального лимита: ID лимита, карты, группы и договора, страна, регион, АЗС, партнёр и `limit_type` (`1` — разрешающий, `2` — запрещающий). |
+| `region_limits` | `list[RegionLimitRequestItem | Mapping[str, Any]]` | Да | — | Массив параметров регионального лимита: ID лимита, карты, группы и договора, страна, регион, АЗС, партнёр и `limit_type` (`1` — разрешающий, `2` — запрещающий). |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
 
-**Тип после валидации:** `dict[str, Any]`
+**Тип после валидации:** `RegionLimitSetResponse`
 
-**Pydantic-модель:** нет.
+**Pydantic-модель:** [`RegionLimitSetResponse`](../data-types/region_limits/RegionLimitSetResponse.md)
 
-SDK возвращает значение указанного Python-типа; отдельная модель ответа не применяется.
+Ответ передаётся в `RegionLimitSetResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+
+#### Поля возвращаемой модели
+
+| Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
+|---|---|---|:---:|:---:|---|
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `list[str]` | `array[string]` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.region_limits.set_region_limit(
-    region_limits={},
+    region_limits="region-limits",
 )
 print(result)
 ```

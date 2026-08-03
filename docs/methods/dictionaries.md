@@ -30,11 +30,12 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус выполнения запроса |
-| `data` | `list[AzsFilterItem] \| None` | `array[object (AzsFilterItem)] \| null` | Нет | Да | Список доступных фильтров торговых точек |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа (timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `list[AzsFilterItem] \| None` | `array[object (AzsFilterItem)] \| null` | Да | Да | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`AzsFilterItem`](../data-types/dictionaries/AzsFilterItem.md)
 
 ### Пример
@@ -77,11 +78,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус выполнения запроса |
-| `data` | `AzsListV1Data \| None` | `object (AzsListV1Data) \| null` | Нет | Да | Основные данные торговых точек (v1) |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Временная метка (UNIX-время запроса) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `AzsListV1Data \| None` | `object (AzsListV1Data) \| null` | Да | Да | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`AzsListV1Data`](../data-types/dictionaries/AzsListV1Data.md)
 
 ### Пример
@@ -124,11 +126,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any] \| None` | `object \| null` | Да | Да | Информация о статусе запроса |
-| `data` | `AzsListV2Data \| None` | `object (AzsListV2Data) \| null` | Да | Да | Основные данные торговых точек |
-| `timestamp` | `int \| None` | `integer \| null` | Да | Да | Метка времени запроса |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `AzsListV2Data \| None` | `object (AzsListV2Data) \| null` | Да | Да | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`AzsListV2Data`](../data-types/dictionaries/AzsListV2Data.md)
 
 ### Пример
@@ -168,11 +171,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any] \| None` | `object \| null` | Нет | Да | Статус выполнения запроса |
-| `data` | `DictionaryData \| None` | `object (DictionaryData) \| null` | Нет | Да | Основные данные справочника |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Временная метка (UNIX-время запроса) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `DictionaryData \| None` | `object (DictionaryData) \| null` | Да | Да | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`DictionaryData`](../data-types/dictionaries/DictionaryData.md)
 
 ### Пример

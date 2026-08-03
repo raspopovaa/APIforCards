@@ -1,17 +1,25 @@
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Mapping
 from typing import Any
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.users import (
     UserAttachContractRequest,
     UserBoolResponse,
     UserCreateResponse,
+    UserItem,
     UserListResponse,
 )
+from ..operations import operation
 from ..payloads import with_method_override
 from ..service_base import _BaseService
 from ..utils import to_json_param
+
+GET_USERS = operation("get_users", UserListResponse)
+CREATE_USER = operation("create_user", UserCreateResponse)
+ATTACH_CONTRACTS = operation("attach_contracts", UserBoolResponse)
+DETACH_CONTRACTS = operation("detach_contracts", UserBoolResponse)
+ATTACH_CARD = operation("attach_card", UserBoolResponse)
+DETACH_CARD = operation("detach_card", UserBoolResponse)
+DELETE_USER = operation("delete_user", UserBoolResponse)
 
 
 class UsersService(_BaseService):
@@ -21,7 +29,6 @@ class UsersService(_BaseService):
 
     # -------------------- Список пользователей --------------------
 
-    @api_method
     async def get_users(
         self,
         *,
@@ -49,17 +56,45 @@ class UsersService(_BaseService):
         }
         params = {k: v for k, v in params.items() if v is not None}
 
-        raw = await self._request(
-            "get_users",
+        self.logger.info("Requesting users")
+
+        return await self._request(
+            GET_USERS,
             api_version=api_version,
             params=params,
         )
 
-        return decode_model(UserListResponse, raw)
+    async def iter_users(
+        self,
+        *,
+        sort: str | None = None,
+        q: str | None = None,
+        filter: dict[str, Any] | None = None,
+        on_page: int = 100,
+        max_pages: int = 100,
+        api_version: str | None = None,
+    ) -> AsyncIterator[UserItem]:
+        """Последовательно получить пользователей, ограничив число страниц."""
+        if on_page < 1 or max_pages < 1:
+            raise ValueError("on_page and max_pages must be greater than zero")
+        yielded = 0
+        for page in range(1, max_pages + 1):
+            response = await self.get_users(
+                sort=sort,
+                page=page,
+                on_page=on_page,
+                q=q,
+                filter=filter,
+                api_version=api_version,
+            )
+            for item in response.result:
+                yield item
+                yielded += 1
+            if not response.result or yielded >= response.total_count:
+                return
 
     # -------------------- Создание пользователя --------------------
 
-    @api_method
     async def create_user(
         self,
         *,
@@ -91,17 +126,16 @@ class UsersService(_BaseService):
         """
         body = {"uuid": uuid, "mobile": mobile}
 
-        raw = await self._request(
-            "create_user",
+        self.logger.info("Creating user")
+
+        return await self._request(
+            CREATE_USER,
             api_version=api_version,
             data=body,
         )
 
-        return decode_model(UserCreateResponse, raw)
-
     # -------------------- Прикрепление договоров --------------------
 
-    @api_method
     async def attach_contracts(
         self,
         *,
@@ -122,18 +156,15 @@ class UsersService(_BaseService):
             for contract in contracts
         ]
 
-        raw = await self._request(
-            "attach_contracts",
+        return await self._request(
+            ATTACH_CONTRACTS,
             api_version=api_version,
             path_params={"user_id": user_id},
             json=payload,
         )
 
-        return decode_model(UserBoolResponse, raw)
-
     # -------------------- Открепление договоров --------------------
 
-    @api_method
     async def detach_contracts(
         self,
         *,
@@ -149,18 +180,17 @@ class UsersService(_BaseService):
             user_id="1-FK485FK", contracts=["1-380B94P", "1-37PYW2D"]
         )
         """
-        raw = await self._request(
-            "detach_contracts",
+        self.logger.info("Detaching contracts from user")
+
+        return await self._request(
+            DETACH_CONTRACTS,
             api_version=api_version,
             path_params={"user_id": user_id},
             json=contracts,
         )
 
-        return decode_model(UserBoolResponse, raw)
-
     # -------------------- Прикрепление карты --------------------
 
-    @api_method
     async def attach_card(
         self,
         *,
@@ -174,18 +204,17 @@ class UsersService(_BaseService):
         Пример:
         await client.users.attach_card(user_id="1-FK485FK", card_id="5050505")
         """
-        raw = await self._request(
-            "attach_card",
+        self.logger.info("Attaching card to user")
+
+        return await self._request(
+            ATTACH_CARD,
             api_version=api_version,
             path_params={"user_id": user_id},
             data={"card_id": card_id},
         )
 
-        return decode_model(UserBoolResponse, raw)
-
     # -------------------- Открепление карты --------------------
 
-    @api_method
     async def detach_card(
         self,
         *,
@@ -199,18 +228,17 @@ class UsersService(_BaseService):
         Пример:
         await client.users.detach_card(user_id="1-FK485FK", card_id="5050505")
         """
-        raw = await self._request(
-            "detach_card",
+        self.logger.info("Detaching card from user")
+
+        return await self._request(
+            DETACH_CARD,
             api_version=api_version,
             path_params={"user_id": user_id},
             data={"card_id": card_id},
         )
 
-        return decode_model(UserBoolResponse, raw)
-
     # -------------------- Удаление пользователя --------------------
 
-    @api_method
     async def delete_user(
         self,
         *,
@@ -224,12 +252,12 @@ class UsersService(_BaseService):
         Пример:
         await client.users.delete_user(user_id="1-FK485FK")
         """
-        raw = await self._request(
-            "delete_user",
+        self.logger.info("Deleting user")
+
+        return await self._request(
+            DELETE_USER,
             api_version=api_version,
             route_name="post_override" if use_post else "default",
             path_params={"user_id": user_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-
-        return decode_model(UserBoolResponse, raw)

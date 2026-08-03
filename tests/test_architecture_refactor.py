@@ -15,6 +15,8 @@ from api_client_opti24.config import TimeoutPolicy
 from api_client_opti24.endpoints import EndpointSpec
 from api_client_opti24.errors import AccessDeniedError, NotAuthenticatedError
 from api_client_opti24.executor import DefaultRequestExecutor, OperationExecutor
+from api_client_opti24.models.auth import AuthUserResponse
+from api_client_opti24.operations import Operation
 from api_client_opti24.policies import RetryPolicy
 from api_client_opti24.session import SessionManager, SessionState
 from api_client_opti24.transport import AsyncTransport
@@ -112,6 +114,7 @@ def build_request_executor(transport: RecordingTransport):
         operation_executor=operation_executor,
         session_gate=controller,
         session_recovery=controller,
+        session_context=session,
         logger=logging.getLogger("executor-test"),
     )
     return executor, registry, controller
@@ -170,6 +173,7 @@ async def test_stream_execution_receives_endpoint_policy_metadata() -> None:
         operation_executor=operation_executor,
         session_gate=controller,
         session_recovery=controller,
+        session_context=session,
         logger=logging.getLogger("executor-test"),
     )
 
@@ -301,11 +305,16 @@ class StubRequestExecutor:
         self.contracts = contracts
         self.calls = 0
 
-    async def execute(self, operation: str, **kwargs: Any) -> dict[str, Any]:
+    async def execute(
+        self,
+        operation: Operation[AuthUserResponse] | str,
+        **kwargs: Any,
+    ) -> AuthUserResponse | dict[str, Any]:
         del kwargs
         self.calls += 1
-        assert operation == "auth_user"
-        return {
+        operation_name = operation.name if isinstance(operation, Operation) else operation
+        assert operation_name == "auth_user"
+        payload = {
             "status": {"code": 200},
             "data": {
                 "session_id": "new-session",
@@ -316,6 +325,10 @@ class StubRequestExecutor:
             },
             "timestamp": 1,
         }
+        if isinstance(operation, Operation):
+            assert operation.response_type is not None
+            return operation.response_type.model_validate(payload)
+        return payload
 
 
 class Credentials:

@@ -16,7 +16,7 @@
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `card_id` | `str | None` | Нет | `None` | Идентификатор топливной карты. |
 | `group_id` | `str | None` | Нет | `None` | Идентификатор группы топливных карт. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
@@ -33,17 +33,18 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `data` | `RestrictionList` | `object (RestrictionList)` | Да | Нет | Данные с ограничителями |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (Unix time) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `RestrictionList` | `object (RestrictionList)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`RestrictionList`](../data-types/restrictions/RestrictionList.md)
 
 ### Пример
 
 ```python
 result = await client.restrictions.get_restrictions(
-    contract_id="contract-id",
 )
 print(result)
 ```
@@ -62,7 +63,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `restriction_id` | `str` | Да | — | ID товарного ограничителя. |
 | `group_id` | `str | None` | Нет | `None` | Идентификатор группы топливных карт. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
@@ -79,15 +80,17 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения (например, {'code': 200}) |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции (True — успешно) |
-| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Временная метка ответа (Unix time) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.restrictions.remove_restriction(
-    contract_id="contract-id",
     restriction_id="restriction-id",
 )
 print(result)
@@ -108,7 +111,8 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `restrictions` | `list[dict[str, Any]]` | Да | — | Массив параметров товарного ограничителя: ID ограничителя, карты, группы и договора, группа и тип продукта, а также `restriction_type` (`1` — разрешающий, `2` — запрещающий). |
+| `restrictions` | `list[RestrictionRequestItem | Mapping[str, Any]]` | Да | — | Массив параметров товарного ограничителя: ID ограничителя, карты, группы и договора, группа и тип продукта, а также `restriction_type` (`1` — разрешающий, `2` — запрещающий). |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -123,14 +127,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `data` | `list[str]` | `array[string]` | Да | Нет | Список ID созданных или изменённых ограничителей |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (Unix time) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `list[str]` | `array[string]` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.restrictions.set_restriction(
-    restrictions={},
+    restrictions="restrictions",
 )
 print(result)
 ```

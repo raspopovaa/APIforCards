@@ -16,8 +16,8 @@
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `card_ids` | `list[str]` | Да | — | Список идентификаторов топливных карт. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `block` | `bool` | Нет | `True` | `true` — заблокировать карту, `false` — разблокировать. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
@@ -33,15 +33,17 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
-| `data` | `list[str]` | `array[string]` | Да | Нет | ID карт, которые были заблокированы/разблокированы |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `list[str]` | `array[string]` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.cards.block_card(
-    contract_id="contract-id",
     card_ids=["item-id"],
     block=True,
 )
@@ -62,8 +64,8 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `card_id` | `str` | Да | — | Идентификатор топливной карты. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -78,18 +80,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
-| `data` | `CardDetailData` | `object (CardDetailData)` | Да | Нет | Основные данные |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `CardDetailData` | `object (CardDetailData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`CardDetailData`](../data-types/cards/CardDetailData.md)
 
 ### Пример
 
 ```python
 result = await client.cards.get_card_detail(
-    contract_id="contract-id",
     card_id="card-id",
 )
 print(result)
@@ -110,7 +112,7 @@ print(result)
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
 | `card_id` | `str` | Да | — | Идентификатор топливной карты. |
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -125,11 +127,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
-| `data` | `CardDriversData` | `object (CardDriversData)` | Да | Нет | Основные данные |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `CardDriversData` | `object (CardDriversData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`CardDriversData`](../data-types/cards/CardDriversData.md)
 
 ### Пример
@@ -137,7 +140,6 @@ print(result)
 ```python
 result = await client.cards.get_card_drivers(
     card_id="card-id",
-    contract_id="contract-id",
 )
 print(result)
 ```
@@ -156,8 +158,8 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `group_id` | `str` | Да | — | Идентификатор группы топливных карт. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -172,18 +174,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа |
-| `data` | `CardGroupData` | `object (CardGroupData)` | Да | Нет | Основные данные |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `CardGroupData` | `object (CardGroupData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`CardGroupData`](../data-types/cards/CardGroupData.md)
 
 ### Пример
 
 ```python
 result = await client.cards.get_cards_by_group(
-    contract_id="contract-id",
     group_id="group-id",
 )
 print(result)
@@ -203,7 +205,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора |
 | `cache` | `bool` | Нет | `True` | Кеш карт. false или не задан - данные берутся по прямому запросу из процессинга. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
@@ -219,18 +221,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект со статусом ответа (например, {'code': 200}) |
-| `data` | `CardsListData` | `object (CardsListData)` | Да | Нет | Основные данные ответа |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка сервера (UNIX-timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `CardsListData` | `object (CardsListData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`CardsListData`](../data-types/cards/CardsListData.md)
 
 ### Пример
 
 ```python
 result = await client.cards.get_cards_v1(
-    contract_id="contract-id",
     cache=True,
 )
 print(result)
@@ -275,11 +277,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса (например {'code': 200}) |
-| `data` | `CardsV2Data` | `object (CardsV2Data)` | Да | Нет | Основные данные (список карт) |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `CardsV2Data` | `object (CardsV2Data)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`CardsV2Data`](../data-types/cards/CardsV2Data.md)
 
 ### Пример
@@ -308,8 +311,8 @@ print(result)
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
 | `card_id` | `str` | Да | — | Идентификатор топливной карты. |
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `code` | `str` | Да | — | Код подтверждения, полученный по email. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -324,16 +327,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Флаг результата операции (True — успех) |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.cards.reset_pin(
     card_id="card-id",
-    contract_id="contract-id",
     code="code",
 )
 print(result)
@@ -354,8 +359,8 @@ print(result)
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
 | `card_id` | `str` | Да | — | Идентификатор топливной карты. |
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `comment` | `str` | Да | — | Комментарий к топливной карте. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -370,16 +375,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Флаг результата операции (True — успех) |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.cards.set_card_comment(
     card_id="card-id",
-    contract_id="contract-id",
     comment="comment",
 )
 print(result)
@@ -403,7 +410,7 @@ print(result)
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
 | `card_id` | `str` | Да | — | Идентификатор топливной карты. |
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -418,16 +425,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Флаг результата операции (True — успех) |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени сервера |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.cards.verify_pin(
     card_id="card-id",
-    contract_id="contract-id",
 )
 print(result)
 ```

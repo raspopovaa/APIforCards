@@ -1,6 +1,6 @@
 from typing import Any
 
-from ..modeling import BaseModel, Field, field_validator
+from ..modeling import APIEnvelope, BaseModel, Field, field_validator
 
 # ==========================================================
 # 🔹 Универсальные модели для общих справочников
@@ -31,12 +31,8 @@ class DictionaryData(BaseModel):
     )
 
 
-class DictionaryResponse(BaseModel):
+class DictionaryResponse(APIEnvelope[DictionaryData | None]):
     """Ответ метода GET /vip/v1/getDictionary"""
-
-    status: dict[str, Any] | None = Field(None, description="Статус выполнения запроса")
-    data: DictionaryData | None = Field(None, description="Основные данные справочника")
-    timestamp: int | None = Field(None, description="Временная метка (UNIX-время запроса)")
 
 
 # ==========================================================
@@ -64,14 +60,8 @@ class AzsFilterItem(BaseModel):
     )
 
 
-class AzsFiltersResponse(BaseModel):
+class AzsFiltersResponse(APIEnvelope[list[AzsFilterItem] | None]):
     """Ответ метода /azs/filters"""
-
-    status: dict[str, Any] | None = Field(default=None, description="Статус выполнения запроса")
-    data: list[AzsFilterItem] | None = Field(
-        default_factory=list, description="Список доступных фильтров торговых точек"
-    )
-    timestamp: int | None = Field(default=None, description="Метка времени ответа (timestamp)")
 
 
 # ==========================================================
@@ -182,12 +172,8 @@ class AzsListV1Data(BaseModel):
     )
 
 
-class AzsListV1Response(BaseModel):
+class AzsListV1Response(APIEnvelope[AzsListV1Data | None]):
     """Ответ метода GET /vip/v1/AZS"""
-
-    status: dict[str, Any] | None = Field(None, description="Статус выполнения запроса")
-    data: AzsListV1Data | None = Field(None, description="Основные данные торговых точек (v1)")
-    timestamp: int | None = Field(None, description="Временная метка (UNIX-время запроса)")
 
 
 # ==========================================================
@@ -364,12 +350,8 @@ class AzsListV2Data(BaseModel):
     result: list[AzsItemV2] = Field(..., description="Список торговых точек (АЗС)")
 
 
-class AzsListV2Response(BaseModel):
+class AzsListV2Response(APIEnvelope[AzsListV2Data | None]):
     """Ответ метода получения списка торговых точек (v2)"""
-
-    status: dict[str, Any] | None = Field(..., description="Информация о статусе запроса")
-    data: AzsListV2Data | None = Field(..., description="Основные данные торговых точек")
-    timestamp: int | None = Field(..., description="Метка времени запроса")
 
 
 # ==========================================================

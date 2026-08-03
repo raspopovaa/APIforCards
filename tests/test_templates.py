@@ -2,7 +2,7 @@ import pytest
 
 from api_client_opti24.services.templates import TemplatesService
 from api_client_opti24.session import SessionManager
-from tests.service_support import service_dependencies
+from tests.service_support import service_dependencies, typed_request_stub
 
 
 class DummyTemplatesClient(TemplatesService):
@@ -20,9 +20,10 @@ class DummyTemplatesClient(TemplatesService):
     def contract_id(self):
         return self.session_manager.contract_id
 
+    @typed_request_stub
     async def _request(self, operation, **kwargs):
         self.calls.append((operation, kwargs))
-        return {"data": "limit-1"}
+        return {"status": {"code": 200}, "data": "limit-1", "timestamp": 1710000000}
 
 
 @pytest.mark.asyncio

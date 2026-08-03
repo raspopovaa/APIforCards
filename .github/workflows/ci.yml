@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - name: Checkout repository
@@ -30,8 +30,31 @@ jobs:
       - name: Run pytest
         run: pytest
 
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run branch coverage
+        run: pytest --cov=api_client_opti24 --cov-branch --cov-report=term-missing
+
       - name: Verify external API contract
         run: python scripts/verify_external_contract.py specifications/api-methods.yaml
+
+      - name: Verify API specification v1.1.60
+        run: python scripts/verify_api_contract.py specifications/api-contract-v1.1.60.yaml
 
       - name: Run verified specification audit
         run: python scripts/audit_spec_contract.py --mode verified

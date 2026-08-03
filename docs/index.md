@@ -4,7 +4,7 @@
 транзакциями, отчётами, пользователями и виртуальными картами.
 
 !!! info "Текущая версия"
-    Документация соответствует `api-client-opti24 2.2.3` и Python
+    Документация соответствует `api-client-opti24 2.3.0` и Python
     `>=3.11,<3.15`.
 
 ## Начните отсюда
@@ -23,15 +23,11 @@
 SDK предоставляет типизированные композиционные сервисы:
 
 ```python
-await client.auth.auth_user(contract_number="TEST-001")
+auth = await client.auth.auth_user()
 cards = await client.cards.get_cards_v2(page=1, onpage=20)
 reports = await client.reports.get_reports()
 transactions = await client.transactions.get_transactions_v2()
 ```
-
-Единственный доступный договор выбирается автоматически. Если доступно несколько
-договоров, передайте `contract_id` или `contract_number`; неявного выбора первого
-элемента списка нет.
 
 Прямых методов вида `client.get_cards_v2()` нет. Каждый метод находится в
 своём доменном пространстве: `client.cards`, `client.reports`, `client.users` и
@@ -40,10 +36,8 @@ transactions = await client.transactions.get_transactions_v2()
 ## Гарантии SDK
 
 - единый декларативный registry маршрутов;
-- однократное разрешение операции на бизнес-вызов;
 - проверка HTTP-кода и API-кода ответа;
-- re-auth без рекурсивного захвата session lock и без смены договора;
-- единая retry policy для JSON и binary download;
+- re-auth без рекурсивного захвата session lock;
 - retry только в соответствии с idempotency policy;
 - percent-encoding параметров пути и запрет небезопасных сегментов;
 - изоляция credentials от доменных сервисов;
@@ -57,4 +51,4 @@ transactions = await client.transactions.get_transactions_v2()
 - [Совместимость со спецификацией](spec-compatibility.md)
 - [Версионирование документации](versioning.md)
 - [Исходный код на GitHub](https://github.com/raspopovaa/APIforCards)
-- [Пакет 2.2.3 на TestPyPI](https://test.pypi.org/project/api-client-opti24/2.2.3/)
+- [Пакет 2.3.0 на TestPyPI](https://test.pypi.org/project/api-client-opti24/2.3.0/)

@@ -34,9 +34,12 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа API, например {'code': 200} |
-| `data` | `bool` | `boolean` | Да | Нет | Результат проверки — True, если покупка возможна |
-| `timestamp` | `int` | `integer` | Да | Нет | Время ответа (UNIX timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -80,11 +83,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус ответа API, например {'code': 200} |
-| `data` | `FinalPricesData` | `object (FinalPricesData)` | Да | Нет | Основные данные ответа (цены) |
-| `timestamp` | `int` | `integer` | Да | Нет | Время формирования ответа в формате UNIX |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `FinalPricesData` | `object (FinalPricesData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`FinalPricesData`](../data-types/final_prices/FinalPricesData.md)
 
 ### Пример

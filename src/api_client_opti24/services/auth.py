@@ -1,8 +1,7 @@
 from ..authentication import Authenticator
-from ..decorators import api_method
 from ..logger import LoggerLike
-from ..modeling import decode_model
 from ..models.auth import AuthUserResponse, GetInfoResponse, LogoffResponse
+from ..operations import operation
 from ..runtime import Clock
 from ..service_base import (
     RequestExecutor,
@@ -11,6 +10,9 @@ from ..service_base import (
     SessionMutator,
     _BaseService,
 )
+
+LOGOFF = operation("logoff", LogoffResponse)
+GET_INFO = operation("get_info", GetInfoResponse)
 
 
 class AuthService(_BaseService):
@@ -29,7 +31,6 @@ class AuthService(_BaseService):
         self.__authenticator = authenticator
         self.__clock = clock
 
-    @api_method
     async def logoff(
         self,
         *,
@@ -37,17 +38,13 @@ class AuthService(_BaseService):
     ) -> LogoffResponse:
         """Завершить серверную сессию и очистить локальное состояние клиента.
 
-        Вызывайте метод в ``finally``. Контекстный менеджер ``APIClient`` закрывает
-        локальные ресурсы, но не выполняет серверный logoff. Session ID не следует
-        выводить в логи.
+        Вызывайте метод в ``finally`` или используйте контекстный менеджер
+        ``APIClient``. Session ID не следует выводить в логи.
         """
-        try:
-            response = await self._request("logoff", api_version=api_version)
-            return decode_model(LogoffResponse, response)
-        finally:
-            self.__session_mutator.reset()
+        response = await self._request(LOGOFF, api_version=api_version)
+        self.__session_mutator.reset()
+        return response
 
-    @api_method
     async def get_info(
         self,
         *,
@@ -58,15 +55,12 @@ class AuthService(_BaseService):
         if period is None:
             now = self.__clock.now()
             period = now.strftime("%Y-%m-%d %H:%M:%S")
-        data = await self._request(
-            "get_info",
+        return await self._request(
+            GET_INFO,
             api_version=api_version,
             params={"period": period},
         )
 
-        return decode_model(GetInfoResponse, data)
-
-    @api_method
     async def auth_user(
         self,
         *,
@@ -77,14 +71,14 @@ class AuthService(_BaseService):
         """Авторизоваться и выбрать договор для последующих запросов.
 
         Типовой сценарий:
-            Передайте ``contract_id`` или ``contract_number``. Единственный
-            доступный договор SDK выберет автоматически. При нескольких
-            договорах без явного выбора будет вызван ``ContractSelectionError``.
+            Выполнить авторизацию в начале интеграционного сценария и сохранить
+            только идентификатор выбранного договора. Session ID SDK хранит и
+            обновляет самостоятельно.
 
         Пример вызова:
         ```python
-        await client.auth.auth_user(contract_number="TEST-001")
-        contract_id = client.contract_id
+        auth = await client.auth.auth_user(contract_number="TEST-001")
+        contract_id = auth.data.contracts[0].id
         ```
 
         Payload формируется из ``CredentialsProvider`` и выбранного договора;

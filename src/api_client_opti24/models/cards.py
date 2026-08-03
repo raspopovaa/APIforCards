@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from ..modeling import BaseModel, Field, field_validator
+from ..modeling import APIEnvelope, BaseModel, Field, field_validator
 
 # ==========================
 # ИНФОРМАЦИЯ О КАРТАХ v1
@@ -47,12 +47,7 @@ class CardsListData(BaseModel):
     result: list[CardInfo] = Field(..., description="Список найденных карт")
 
 
-class CardsListResponse(BaseModel):
-    status: dict[str, Any] = Field(
-        ..., description="Объект со статусом ответа (например, {'code': 200})"
-    )
-    data: CardsListData = Field(..., description="Основные данные ответа")
-    timestamp: int = Field(..., description="Временная метка сервера (UNIX-timestamp)")
+class CardsListResponse(APIEnvelope[CardsListData]):
 
     @property
     def total_count(self) -> int:
@@ -83,10 +78,8 @@ class CardGroupData(BaseModel):
     result: list[CardGroupInfo] = Field(..., description="Список карт в группе")
 
 
-class CardGroupResponse(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус ответа")
-    data: CardGroupData = Field(..., description="Основные данные")
-    timestamp: int = Field(..., description="Метка времени сервера")
+class CardGroupResponse(APIEnvelope[CardGroupData]):
+    pass
 
 
 # ==========================
@@ -110,10 +103,7 @@ class CardDriversData(BaseModel):
     result: list[CardDriverInfo] = Field(..., description="Список водителей")
 
 
-class CardDriversResponse(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус запроса")
-    data: CardDriversData = Field(..., description="Основные данные")
-    timestamp: int = Field(..., description="Метка времени сервера")
+class CardDriversResponse(APIEnvelope[CardDriversData]):
 
     @property
     def total_count(self) -> int:
@@ -164,25 +154,19 @@ class CardDetailData(BaseModel):
     result: list[CardDetail] = Field(..., description="Список карт")
 
 
-class CardDetailResponse(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус ответа")
-    data: CardDetailData = Field(..., description="Основные данные")
-    timestamp: int = Field(..., description="Метка времени сервера")
+class CardDetailResponse(APIEnvelope[CardDetailData]):
+    pass
 
 
 # ==========================
 # блокировка/разблокировка карт и ресет пин кода
 # ==========================
-class BoolResponse(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус запроса")
-    data: bool = Field(..., description="Флаг результата операции (True — успех)")
-    timestamp: int = Field(..., description="Метка времени сервера")
+class BoolResponse(APIEnvelope[bool]):
+    pass
 
 
-class IDListResponse(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус запроса")
-    data: list[str] = Field(..., description="ID карт, которые были заблокированы/разблокированы")
-    timestamp: int = Field(..., description="Метка времени сервера")
+class IDListResponse(APIEnvelope[list[str]]):
+    pass
 
 
 # ==========================
@@ -224,12 +208,8 @@ class CardsV2Data(BaseModel):
     result: list[CardV2Item] = Field(..., description="Список карт договора")
 
 
-class CardsV2Response(BaseModel):
+class CardsV2Response(APIEnvelope[CardsV2Data]):
     """Ответ API метода GET /v2/cards."""
-
-    status: dict[str, Any] = Field(..., description="Объект статуса (например {'code': 200})")
-    data: CardsV2Data = Field(..., description="Основные данные (список карт)")
-    timestamp: int = Field(..., description="Метка времени ответа (Unix timestamp)")
 
     @property
     def total_count(self) -> int:

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, Protocol, TypeVar
+from pathlib import Path
+from typing import Any, Generic, Protocol, TypeVar, overload
 
 from .config import TimeoutPolicy
 from .endpoints import EndpointSpec, RouteVariant
 from .errors import NotAuthenticatedError
 from .logger import LoggerLike
+from .modeling import ResponseModel, decode_model
+from .operations import Operation
 from .registry import MethodRegistry
 from .response import DecodedPayload
 from .runtime import Clock
@@ -19,9 +22,21 @@ from .service_base import (
     SessionGate,
     SessionRecovery,
 )
+from .session import RequestContext
 from .utils import sanitize_for_logging
 
 ResultT = TypeVar("ResultT")
+ResponseT = TypeVar("ResponseT", bound=ResponseModel)
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedOperation(Generic[ResultT]):
+    operation: Operation[ResultT] | None
+    spec: EndpointSpec
+    route: RouteVariant
+    endpoint: str
+    request_context: RequestContext
+    timeout: float
 
 
 class Transport(Protocol):
@@ -44,14 +59,18 @@ class Transport(Protocol):
         **kwargs: Any,
     ) -> bytes: ...
 
+    async def request_stream_to_file(
+        self,
+        method: str,
+        endpoint: str,
+        destination: str | Path,
+        *,
+        api_version: str = "v1",
+        headers: Mapping[str, str] | None = None,
+        **kwargs: Any,
+    ) -> Path: ...
+
     async def aclose(self) -> None: ...
-
-
-@dataclass(frozen=True, slots=True)
-class _ResolvedOperation:
-    spec: EndpointSpec
-    route: RouteVariant
-    endpoint: str
 
 
 class OperationExecutor:
@@ -78,6 +97,8 @@ class OperationExecutor:
         self,
         include_session: bool = False,
         content_type_json: bool = False,
+        *,
+        request_context: RequestContext | None = None,
     ) -> dict[str, str]:
         api_key = self.__api_key_provider.get_api_key()
         if not api_key:
@@ -90,69 +111,115 @@ class OperationExecutor:
                 "application/json" if content_type_json else "application/x-www-form-urlencoded"
             ),
         }
-        if include_session and self.__session_context.session_id:
-            headers["session_id"] = self.__session_context.session_id
-            if self.__session_context.contract_id:
-                headers["contract_id"] = self.__session_context.contract_id
+        context = request_context or self.__session_context.request_context()
+        if include_session and context.session_id:
+            headers["session_id"] = context.session_id
+            if context.contract_id:
+                headers["contract_id"] = context.contract_id
         self.__logger.debug("Prepared headers: %s", sanitize_for_logging(headers))
         return headers
 
     def resolve(
         self,
-        operation: str,
+        operation_name: str,
         *,
-        api_version: str | None = None,
-        route_name: str = "default",
-        path_params: PathParams | None = None,
-    ) -> _ResolvedOperation:
-        spec = self.__registry.get(operation)
+        api_version: str | None,
+        route_name: str,
+    ) -> tuple[EndpointSpec, RouteVariant]:
+        spec = self.__registry.get(operation_name)
         route = spec.resolve_route(api_version=api_version, route_name=route_name)
-        return _ResolvedOperation(spec=spec, route=route, endpoint=route.render(path_params))
+        return spec, route
+
+    def prepare(
+        self,
+        operation: Operation[ResultT] | None,
+        spec: EndpointSpec,
+        route: RouteVariant,
+        *,
+        path_params: PathParams | None,
+        request_context: RequestContext,
+    ) -> PreparedOperation[ResultT]:
+        return PreparedOperation(
+            operation=operation,
+            spec=spec,
+            route=route,
+            endpoint=route.render(path_params),
+            request_context=request_context,
+            timeout=self.__timeouts.resolve(spec.timeout_class),
+        )
 
     def _request_headers(
         self,
-        spec: EndpointSpec,
+        prepared: PreparedOperation[Any],
         kwargs: dict[str, Any],
     ) -> dict[str, str]:
         custom_headers = kwargs.pop("headers", None)
         if custom_headers is not None and not isinstance(custom_headers, Mapping):
             raise TypeError("headers must be a mapping of strings")
-        headers = dict(custom_headers or {})
-        headers.update(
-            self.headers(
-                include_session=spec.requires_session,
-                content_type_json="json" in kwargs,
-            )
+        headers = self.headers(
+            include_session=prepared.spec.requires_session,
+            content_type_json="json" in kwargs,
+            request_context=prepared.request_context,
         )
+        for name, value in dict(custom_headers or {}).items():
+            normalized_name = name.lower().replace("-", "_")
+            if normalized_name in {"api_key", "session_id", "date_time"}:
+                raise ValueError(f"Header override is not allowed: {name}")
+            headers[name] = value
         return headers
 
-    async def execute_resolved(
+    async def _request_json(
         self,
-        resolved: _ResolvedOperation,
-        **kwargs: Any,
+        prepared: PreparedOperation[Any],
+        kwargs: dict[str, Any],
     ) -> JSONPayload:
-        request_kwargs = dict(kwargs)
         result = await self.__transport.request(
-            resolved.route.http_method,
-            resolved.endpoint,
-            api_version=resolved.route.api_version,
-            headers=self._request_headers(resolved.spec, request_kwargs),
-            timeout=self.__timeouts.resolve(resolved.spec.timeout_class),
-            method_name=resolved.spec.name,
-            retry_class=resolved.spec.retry_class,
-            idempotent=resolved.spec.idempotent,
-            **request_kwargs,
+            prepared.route.http_method,
+            prepared.endpoint,
+            api_version=prepared.route.api_version,
+            headers=self._request_headers(prepared, kwargs),
+            timeout=prepared.timeout,
+            method_name=prepared.spec.name,
+            retry_class=prepared.spec.retry_class,
+            idempotent=prepared.spec.idempotent,
+            **kwargs,
         )
         if not isinstance(result, dict):
             self.__logger.error(
                 "Unexpected API response operation=%s response_type=%s",
-                resolved.spec.name,
+                prepared.spec.name,
                 type(result).__name__,
             )
             raise TypeError("Expected API response to be a JSON object")
         self.__logger.debug("Received response type: %s", type(result).__name__)
         return result
 
+    async def execute_prepared(
+        self,
+        prepared: PreparedOperation[Any],
+        **kwargs: Any,
+    ) -> JSONPayload:
+        self.__logger.debug(
+            "Preparing API request operation=%s version=%s route=%s",
+            prepared.spec.name,
+            prepared.route.api_version,
+            prepared.route.name,
+        )
+        return await self._request_json(prepared, dict(kwargs))
+
+    @overload
+    async def execute(
+        self,
+        operation: Operation[ResponseT],
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
+        **kwargs: Any,
+    ) -> ResponseT: ...
+
+    @overload
     async def execute(
         self,
         operation: str,
@@ -160,56 +227,82 @@ class OperationExecutor:
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
-    ) -> JSONPayload:
-        resolved = self.resolve(
-            operation,
-            api_version=api_version,
-            route_name=route_name,
-            path_params=path_params,
-        )
-        self.__logger.debug(
-            "Preparing API request operation=%s version=%s route=%s",
-            resolved.spec.name,
-            resolved.route.api_version,
-            resolved.route.name,
-        )
-        return await self.execute_resolved(resolved, **kwargs)
+    ) -> JSONPayload: ...
 
-    async def execute_stream_resolved(
+    async def execute(
         self,
-        resolved: _ResolvedOperation,
-        **kwargs: Any,
-    ) -> bytes:
-        request_kwargs = dict(kwargs)
-        return await self.__transport.request_stream(
-            resolved.route.http_method,
-            resolved.endpoint,
-            api_version=resolved.route.api_version,
-            headers=self._request_headers(resolved.spec, request_kwargs),
-            timeout=self.__timeouts.resolve(resolved.spec.timeout_class),
-            method_name=resolved.spec.name,
-            retry_class=resolved.spec.retry_class,
-            idempotent=resolved.spec.idempotent,
-            **request_kwargs,
-        )
-
-    async def execute_stream(
-        self,
-        operation: str,
+        operation: Operation[ResponseT] | str,
         *,
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
-    ) -> bytes:
-        resolved = self.resolve(
-            operation,
+    ) -> ResponseT | JSONPayload:
+        operation_name = operation.name if isinstance(operation, Operation) else operation
+        spec, route = self.resolve(
+            operation_name,
             api_version=api_version,
             route_name=route_name,
-            path_params=path_params,
         )
-        return await self.execute_stream_resolved(resolved, **kwargs)
+        prepared: PreparedOperation[Any] = self.prepare(
+            operation if isinstance(operation, Operation) else None,
+            spec,
+            route,
+            path_params=path_params,
+            request_context=self.__session_context.request_context(contract_id=request_contract_id),
+        )
+        payload = await self.execute_prepared(prepared, **kwargs)
+        if not isinstance(operation, Operation):
+            return payload
+        if operation.response_type is None:
+            raise TypeError(f"JSON operation {operation.name!r} has no response type")
+        return decode_model(operation.response_type, payload)
+
+    async def _request_bytes(
+        self,
+        prepared: PreparedOperation[Any],
+        kwargs: dict[str, Any],
+    ) -> bytes:
+        return await self.__transport.request_stream(
+            prepared.route.http_method,
+            prepared.endpoint,
+            api_version=prepared.route.api_version,
+            headers=self._request_headers(prepared, kwargs),
+            timeout=prepared.timeout,
+            method_name=prepared.spec.name,
+            retry_class=prepared.spec.retry_class,
+            idempotent=prepared.spec.idempotent,
+            **kwargs,
+        )
+
+    async def execute_stream_prepared(
+        self,
+        prepared: PreparedOperation[bytes],
+        **kwargs: Any,
+    ) -> bytes:
+        return await self._request_bytes(prepared, dict(kwargs))
+
+    async def execute_stream_to_file_prepared(
+        self,
+        prepared: PreparedOperation[bytes],
+        destination: str | Path,
+        **kwargs: Any,
+    ) -> Path:
+        return await self.__transport.request_stream_to_file(
+            prepared.route.http_method,
+            prepared.endpoint,
+            destination,
+            api_version=prepared.route.api_version,
+            headers=self._request_headers(prepared, kwargs),
+            timeout=prepared.timeout,
+            method_name=prepared.spec.name,
+            retry_class=prepared.spec.retry_class,
+            idempotent=prepared.spec.idempotent,
+            **kwargs,
+        )
 
 
 class DefaultRequestExecutor:
@@ -219,11 +312,13 @@ class DefaultRequestExecutor:
         operation_executor: OperationExecutor,
         session_gate: SessionGate,
         session_recovery: SessionRecovery,
+        session_context: SessionContext,
         logger: LoggerLike,
     ) -> None:
         self.__operation_executor = operation_executor
         self.__session_gate = session_gate
         self.__session_recovery = session_recovery
+        self.__session_context = session_context
         self.__logger = logger
 
     def headers(
@@ -236,10 +331,33 @@ class DefaultRequestExecutor:
             content_type_json=content_type_json,
         )
 
+    @staticmethod
+    def _operation_name(operation: Operation[Any] | str) -> str:
+        return operation.name if isinstance(operation, Operation) else operation
+
+    def _prepare(
+        self,
+        operation: Operation[ResultT] | str,
+        spec: EndpointSpec,
+        route: RouteVariant,
+        *,
+        path_params: PathParams | None,
+        request_contract_id: str | None,
+    ) -> PreparedOperation[ResultT]:
+        typed_operation = operation if isinstance(operation, Operation) else None
+        return self.__operation_executor.prepare(
+            typed_operation,
+            spec,
+            route,
+            path_params=path_params,
+            request_context=self.__session_context.request_context(contract_id=request_contract_id),
+        )
+
     def _audit(
         self,
         event: str,
-        resolved: _ResolvedOperation,
+        spec: EndpointSpec,
+        route: RouteVariant,
         *,
         recovered: bool = False,
     ) -> None:
@@ -248,41 +366,55 @@ class DefaultRequestExecutor:
             extra={
                 "request_audit": True,
                 "event": event,
-                "operation": resolved.spec.name,
-                "api_version": resolved.route.api_version,
-                "route_name": resolved.route.name,
-                "http_method": resolved.route.http_method,
+                "operation": spec.name,
+                "api_version": route.api_version,
+                "route_name": route.name,
+                "http_method": route.http_method,
                 "recovered": recovered,
             },
         )
 
     async def _run_with_recovery(
         self,
-        resolved: _ResolvedOperation,
+        spec: EndpointSpec,
+        route: RouteVariant,
         request: Callable[[], Awaitable[ResultT]],
     ) -> ResultT:
-        self._audit("started", resolved)
+        self._audit("started", spec, route)
         try:
             result = await request()
         except NotAuthenticatedError:
-            if not resolved.spec.requires_session:
-                self._audit("failed", resolved)
+            if not spec.requires_session:
+                self._audit("failed", spec, route)
                 raise
-            self._audit("session_recovery", resolved)
+            self._audit("session_recovery", spec, route)
             await self.__session_recovery.recover()
             try:
                 result = await request()
             except Exception:
-                self._audit("failed", resolved, recovered=True)
+                self._audit("failed", spec, route, recovered=True)
                 raise
-            self._audit("completed", resolved, recovered=True)
+            self._audit("completed", spec, route, recovered=True)
             return result
         except Exception:
-            self._audit("failed", resolved)
+            self._audit("failed", spec, route)
             raise
-        self._audit("completed", resolved)
+        self._audit("completed", spec, route)
         return result
 
+    @overload
+    async def execute(
+        self,
+        operation: Operation[ResponseT],
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
+        **kwargs: Any,
+    ) -> ResponseT: ...
+
+    @overload
     async def execute(
         self,
         operation: str,
@@ -290,39 +422,106 @@ class DefaultRequestExecutor:
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
-    ) -> JSONPayload:
-        resolved = self.__operation_executor.resolve(
-            operation,
-            api_version=api_version,
-            route_name=route_name,
-            path_params=path_params,
-        )
-        if resolved.spec.requires_session:
-            await self.__session_gate.ensure_authenticated()
-        return await self._run_with_recovery(
-            resolved,
-            lambda: self.__operation_executor.execute_resolved(resolved, **kwargs),
-        )
+    ) -> JSONPayload: ...
 
-    async def execute_stream(
+    async def execute(
         self,
-        operation: str,
+        operation: Operation[ResponseT] | str,
         *,
         api_version: str | None = None,
         route_name: str = "default",
         path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
+        **kwargs: Any,
+    ) -> ResponseT | JSONPayload:
+        operation_name = self._operation_name(operation)
+        spec, route = self.__operation_executor.resolve(
+            operation_name, api_version=api_version, route_name=route_name
+        )
+        if spec.requires_session:
+            await self.__session_gate.ensure_authenticated()
+        raw = await self._run_with_recovery(
+            spec,
+            route,
+            lambda: self.__operation_executor.execute_prepared(
+                self._prepare(
+                    operation,
+                    spec,
+                    route,
+                    path_params=path_params,
+                    request_contract_id=request_contract_id,
+                ),
+                **kwargs,
+            ),
+        )
+        if not isinstance(operation, Operation):
+            return raw
+        if operation.response_type is None:
+            raise TypeError(f"JSON operation {operation.name!r} has no response type")
+        return decode_model(operation.response_type, raw)
+
+    async def execute_stream(
+        self,
+        operation: Operation[bytes] | str,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
         **kwargs: Any,
     ) -> bytes:
-        resolved = self.__operation_executor.resolve(
-            operation,
-            api_version=api_version,
-            route_name=route_name,
-            path_params=path_params,
+        operation_name = self._operation_name(operation)
+        spec, route = self.__operation_executor.resolve(
+            operation_name, api_version=api_version, route_name=route_name
         )
-        if resolved.spec.requires_session:
+        if spec.requires_session:
             await self.__session_gate.ensure_authenticated()
         return await self._run_with_recovery(
-            resolved,
-            lambda: self.__operation_executor.execute_stream_resolved(resolved, **kwargs),
+            spec,
+            route,
+            lambda: self.__operation_executor.execute_stream_prepared(
+                self._prepare(
+                    operation,
+                    spec,
+                    route,
+                    path_params=path_params,
+                    request_contract_id=request_contract_id,
+                ),
+                **kwargs,
+            ),
+        )
+
+    async def execute_stream_to_file(
+        self,
+        operation: Operation[bytes] | str,
+        destination: str | Path,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        request_contract_id: str | None = None,
+        **kwargs: Any,
+    ) -> Path:
+        operation_name = self._operation_name(operation)
+        spec, route = self.__operation_executor.resolve(
+            operation_name, api_version=api_version, route_name=route_name
+        )
+        if spec.requires_session:
+            await self.__session_gate.ensure_authenticated()
+        return await self._run_with_recovery(
+            spec,
+            route,
+            lambda: self.__operation_executor.execute_stream_to_file_prepared(
+                self._prepare(
+                    operation,
+                    spec,
+                    route,
+                    path_params=path_params,
+                    request_contract_id=request_contract_id,
+                ),
+                destination,
+                **kwargs,
+            ),
         )

@@ -1,13 +1,20 @@
+from collections.abc import Mapping
 from typing import Any
 
-from ..decorators import api_method
 from ..models.restrictions import (
     RestrictionGetResponse,
     RestrictionRemoveResponse,
+    RestrictionRequestItem,
     RestrictionSetResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
+from ..validation import require_identifier, validate_card_or_group_target
+
+GET_RESTRICTIONS = operation("get_restrictions", RestrictionGetResponse)
+SET_RESTRICTION = operation("set_restriction", RestrictionSetResponse)
+REMOVE_RESTRICTION = operation("remove_restriction", RestrictionRemoveResponse)
 
 
 class RestrictionsService(_BaseService):
@@ -16,11 +23,10 @@ class RestrictionsService(_BaseService):
     """
 
     # ---------------- Запрос ----------------
-    @api_method
     async def get_restrictions(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         card_id: str | None = None,
         group_id: str | None = None,
         api_version: str | None = None,
@@ -28,27 +34,30 @@ class RestrictionsService(_BaseService):
         """
         Получение списка товарных ограничителей по договору, карте или группе карт.
         """
-        params = {"contract_id": contract_id}
-        if card_id:
+        cid = await self._resolve_contract_id(contract_id)
+        card_id, group_id = validate_card_or_group_target(
+            card_id=card_id,
+            group_id=group_id,
+        )
+        params = {"contract_id": cid}
+        if card_id is not None:
             params["card_id"] = card_id
-        if group_id:
+        if group_id is not None:
             params["group_id"] = group_id
 
-        raw = await self._request(
-            "get_restrictions",
+        return await self._request(
+            GET_RESTRICTIONS,
             api_version=api_version,
             params=params,
+            request_contract_id=cid,
         )
 
-        self.logger.debug("Restriction list received")
-        return RestrictionGetResponse(**raw)
-
     # ---------------- Установка ----------------
-    @api_method
     async def set_restriction(
         self,
         *,
-        restrictions: list[dict[str, Any]],
+        restrictions: list[RestrictionRequestItem | Mapping[str, Any]],
+        contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RestrictionSetResponse:
         """
@@ -82,25 +91,43 @@ class RestrictionsService(_BaseService):
         ```
         """
         if not restrictions:
-            raise ValueError("Список restrictions не может быть пустым")
+            raise ValueError("restrictions must contain at least one item")
+        parsed_restrictions = [RestrictionRequestItem.model_validate(item) for item in restrictions]
+        for item in parsed_restrictions:
+            validate_card_or_group_target(
+                card_id=item.card_id,
+                group_id=item.group_id,
+                required=True,
+            )
 
-        body = {"restriction": to_json_param(restrictions)}
+        fallback_contract_id: str | None = None
+        if contract_id is not None or any(item.contract_id is None for item in parsed_restrictions):
+            fallback_contract_id = await self._resolve_contract_id(contract_id)
 
-        raw = await self._request(
-            "set_restriction",
+        serialized_restrictions: list[dict[str, Any]] = []
+        for item in parsed_restrictions:
+            serialized = item.model_dump(by_alias=True, exclude_none=True)
+            serialized["contract_id"] = (
+                require_identifier(item.contract_id, "contract_id")
+                if item.contract_id is not None
+                else fallback_contract_id
+            )
+            serialized_restrictions.append(serialized)
+
+        body = {"restriction": to_json_param(serialized_restrictions)}
+
+        return await self._request(
+            SET_RESTRICTION,
             api_version=api_version,
             data=body,
+            request_contract_id=fallback_contract_id or parsed_restrictions[0].contract_id,
         )
 
-        self.logger.debug("Restriction updated")
-        return RestrictionSetResponse(**raw)
-
     # ---------------- Удаление ----------------
-    @api_method
     async def remove_restriction(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         restriction_id: str,
         group_id: str | None = None,
         api_version: str | None = None,
@@ -108,18 +135,17 @@ class RestrictionsService(_BaseService):
         """
         Удаление товарного ограничителя по карте или группе карт.
         """
+        cid = await self._resolve_contract_id(contract_id)
         body = {
-            "restriction_id": restriction_id,
-            "contract_id": contract_id,
+            "restriction_id": require_identifier(restriction_id, "restriction_id"),
+            "contract_id": cid,
         }
-        if group_id:
-            body["group_id"] = group_id
+        if group_id is not None:
+            body["group_id"] = require_identifier(group_id, "group_id")
 
-        raw = await self._request(
-            "remove_restriction",
+        return await self._request(
+            REMOVE_RESTRICTION,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        self.logger.debug("Restriction removed")
-        return RestrictionRemoveResponse(**raw)

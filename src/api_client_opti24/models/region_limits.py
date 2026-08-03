@@ -1,6 +1,27 @@
-from typing import Any
+from typing import Literal
 
-from ..modeling import BaseModel, Field
+from pydantic import AliasChoices
+
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
+
+
+class RegionLimitRequestItem(StrictRequestModel):
+    """Строгий элемент запроса установки регионального лимита."""
+
+    id: str | None = Field(
+        None,
+        validation_alias=AliasChoices("id", "regionlimit_id"),
+        serialization_alias="id",
+        min_length=1,
+    )
+    contract_id: str | None = Field(None, min_length=1)
+    card_id: str | None = Field(None, min_length=1)
+    group_id: str | None = Field(None, min_length=1)
+    country: str = Field(..., min_length=1)
+    region: str | None = Field(None, min_length=1)
+    service_center: str | None = Field(None, min_length=1)
+    partner: str | None = Field(None, min_length=1)
+    limit_type: Literal[1, 2]
 
 
 class RegionLimit(BaseModel):
@@ -26,17 +47,13 @@ class RegionLimitList(BaseModel):
     result: list[RegionLimit] = Field(..., description="Данные с лимитами")
 
 
-class RegionLimitResponse(BaseModel):
+class RegionLimitResponse(APIEnvelope[RegionLimitList]):
     """Коллекция региональных лимитов."""
 
-    status: dict[str, Any] = Field(..., description="Статус ответа")
-    data: RegionLimitList = Field(..., description="Данные с лимитами")
-    timestamp: int = Field(..., description="Метка времени сервера")
+
+class RegionLimitSetResponse(APIEnvelope[list[str]]):
+    """Полный envelope установки или изменения региональных лимитов."""
 
 
-class RemoveRegionLimit(BaseModel):
+class RemoveRegionLimit(APIEnvelope[bool]):
     """Удаление регионального лимита."""
-
-    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
-    data: bool = Field(..., description="Результат операции (True — успешно)")
-    timestamp: int = Field(..., description="Временная метка ответа")

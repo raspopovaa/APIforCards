@@ -52,6 +52,7 @@ def compose_client_runtime(
         operation_executor=operation_executor,
         session_gate=authentication,
         session_recovery=authentication,
+        session_context=session_manager,
         logger=logger,
     )
     auth_service = AuthService(

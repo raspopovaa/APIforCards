@@ -16,7 +16,7 @@
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `data` | `dict[str, Any]` | Да | — | Данные приглашения: роль, телефон или email, список карт и список договоров с возможным `template_id`. |
+| `data` | `InviteCreateRequest | Mapping[str, object]` | Да | — | Данные приглашения: роль, телефон или email, список карт и список договоров с возможным `template_id`. |
 | `with_send` | `bool` | Нет | `True` | Параметр публичного метода SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
@@ -32,16 +32,19 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `data` | `InviteActionResult` | `object (InviteActionResult)` | Да | Нет | — |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `InviteActionResult` | `object (InviteActionResult)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`InviteActionResult`](../data-types/invites/InviteActionResult.md)
 
 ### Пример
 
 ```python
 result = await client.invites.create_invite(
-    data={},
+    data="data",
     with_send=True,
 )
 print(result)
@@ -77,7 +80,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `data` | `bool` | `boolean` | Да | Нет | — |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -114,21 +122,23 @@ print(result)
 
 ### Возвращаемое значение
 
-**Тип после валидации:** `InviteList`
+**Тип после валидации:** `InviteListResponse`
 
-**Pydantic-модель:** [`InviteList`](../data-types/invites/InviteList.md)
+**Pydantic-модель:** [`InviteListResponse`](../data-types/invites/InviteListResponse.md)
 
-Ответ передаётся в `InviteList.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+Ответ передаётся в `InviteListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
 
 #### Поля возвращаемой модели
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `total_count` | `int` | `integer` | Да | Нет | Общее количество приглашений |
-| `result` | `list[InviteItem]` | `array[object (InviteItem)]` | Да | Нет | Список приглашений |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `InviteList` | `object (InviteList)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
-- [`InviteItem`](../data-types/invites/InviteItem.md)
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
+- [`InviteList`](../data-types/invites/InviteList.md)
 
 ### Пример
 
@@ -168,7 +178,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `data` | `bool` | `boolean` | Да | Нет | — |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -209,9 +224,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `data` | `InviteActionResult` | `object (InviteActionResult)` | Да | Нет | — |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `InviteActionResult` | `object (InviteActionResult)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`InviteActionResult`](../data-types/invites/InviteActionResult.md)
 
 ### Пример

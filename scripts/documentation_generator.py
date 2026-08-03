@@ -10,6 +10,7 @@ from types import UnionType
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
 import yaml
+from pydantic import BaseModel
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_PATH = PROJECT_ROOT / "src"
@@ -24,7 +25,13 @@ if str(SRC_PATH) not in sys.path:
 
 from pydantic_docs import render_model_page, render_return_details
 
-from api_client_opti24.modeling import BaseModel
+from api_client_opti24.modeling import (
+    APIEnvelope,
+    ResponseModel,
+    ResponseStatus,
+    StrictRequestModel,
+)
+from api_client_opti24.modeling import BaseModel as SDKBaseModel
 from api_client_opti24.registry import build_default_registry
 from api_client_opti24.service_groups import ServiceContainer
 
@@ -193,11 +200,14 @@ def grouped_specs() -> dict[str, list[Any]]:
 
 
 def model_types() -> list[type[BaseModel]]:
-    models: dict[str, type[BaseModel]] = {}
+    models: dict[str, type[BaseModel]] = {
+        f"{ResponseStatus.__module__}.{ResponseStatus.__qualname__}": ResponseStatus
+    }
+    framework_models = {APIEnvelope, SDKBaseModel, ResponseModel, StrictRequestModel}
     for module_name in iter_package_modules(f"{PACKAGE_NAME}.models"):
         module = importlib.import_module(module_name)
         for _, obj in inspect.getmembers(module, inspect.isclass):
-            if obj is BaseModel or not issubclass(obj, BaseModel):
+            if obj is BaseModel or obj in framework_models or not issubclass(obj, BaseModel):
                 continue
             if obj.__module__ != module.__name__:
                 continue

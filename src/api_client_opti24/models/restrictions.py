@@ -1,6 +1,18 @@
-from typing import Any
+from typing import Literal
 
-from ..modeling import BaseModel, Field
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
+
+
+class RestrictionRequestItem(StrictRequestModel):
+    """Строгий элемент запроса установки товарного ограничителя."""
+
+    id: str | None = Field(None, min_length=1)
+    contract_id: str | None = Field(None, min_length=1)
+    card_id: str | None = Field(None, min_length=1)
+    group_id: str | None = Field(None, min_length=1)
+    product_type: str = Field(..., alias="productType", min_length=1)
+    product_group: str | None = Field(None, alias="productGroup", min_length=1)
+    restriction_type: Literal[1, 2]
 
 
 class RestrictionItem(BaseModel):
@@ -36,29 +48,19 @@ class RestrictionList(BaseModel):
     result: list[RestrictionItem] = Field(..., description="Список ограничителей")
 
 
-class RestrictionGetResponse(BaseModel):
+class RestrictionGetResponse(APIEnvelope[RestrictionList]):
     """
     Ответ на запрос списка ограничителей (GET /restriction).
     """
 
-    data: RestrictionList = Field(..., description="Данные с ограничителями")
-    timestamp: int = Field(..., description="Временная метка ответа (Unix time)")
 
-
-class RestrictionSetResponse(BaseModel):
+class RestrictionSetResponse(APIEnvelope[list[str]]):
     """
     Ответ на установку или изменение ограничителя (POST /setRestriction).
     """
 
-    data: list[str] = Field(..., description="Список ID созданных или изменённых ограничителей")
-    timestamp: int = Field(..., description="Временная метка ответа (Unix time)")
 
-
-class RestrictionRemoveResponse(BaseModel):
+class RestrictionRemoveResponse(APIEnvelope[bool]):
     """
     Ответ на удаление ограничителя (POST /removeRestriction).
     """
-
-    status: dict[str, Any] = Field(..., description="Статус выполнения (например, {'code': 200})")
-    data: bool = Field(..., description="Результат операции (True — успешно)")
-    timestamp: int | None = Field(None, description="Временная метка ответа (Unix time)")

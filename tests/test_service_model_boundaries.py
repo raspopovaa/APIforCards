@@ -9,8 +9,7 @@ from api_client_opti24.models.templates import (
     TemplateCreateResponse,
     TemplateLimitCreateResponse,
 )
-from api_client_opti24.services import final_prices as final_prices_module
-from api_client_opti24.services import templates as templates_module
+from api_client_opti24.operations import Operation
 from api_client_opti24.services.final_prices import FinalPricesService
 from api_client_opti24.services.templates import TemplatesService
 
@@ -20,9 +19,14 @@ class RecordingExecutor:
         self.responses = responses
         self.calls: list[tuple[str, dict[str, Any]]] = []
 
-    async def execute(self, operation: str, **kwargs: Any) -> dict[str, Any]:
-        self.calls.append((operation, kwargs))
-        return self.responses[operation]
+    async def execute(self, operation: Operation[Any] | str, **kwargs: Any) -> Any:
+        operation_name = operation.name if isinstance(operation, Operation) else operation
+        self.calls.append((operation_name, kwargs))
+        payload = self.responses[operation_name]
+        if isinstance(operation, Operation):
+            assert operation.response_type is not None
+            return operation.response_type.model_validate(payload)
+        return payload
 
     async def execute_stream(self, operation: str, **kwargs: Any) -> bytes:
         del kwargs
@@ -49,20 +53,11 @@ def service_dependencies(executor: RecordingExecutor) -> tuple[object, ...]:
 
 
 @pytest.mark.asyncio
-async def test_check_purchase_validates_payload_and_uses_decoder(monkeypatch):
+async def test_check_purchase_validates_payload_and_uses_typed_operation():
     executor = RecordingExecutor(
         {"check_purchase": {"status": {"code": 200}, "data": True, "timestamp": 1}}
     )
     service = FinalPricesService(*service_dependencies(executor))
-    decoded_models: list[type[object]] = []
-    original_decode = final_prices_module.decode_model
-
-    def tracked_decode(model_type, payload):
-        decoded_models.append(model_type)
-        return original_decode(model_type, payload)
-
-    monkeypatch.setattr(final_prices_module, "decode_model", tracked_decode)
-
     result = await service.check_purchase(
         card_id="card-1",
         poi_id="poi-1",
@@ -70,7 +65,6 @@ async def test_check_purchase_validates_payload_and_uses_decoder(monkeypatch):
     )
 
     assert isinstance(result, CheckPurchaseResponse)
-    assert decoded_models == [CheckPurchaseResponse]
     assert executor.calls[0][1]["data"] == {
         "poi_id": "poi-1",
         "goods": [{"code": "fuel", "quantity": 2.0, "price": 51.5}],
@@ -93,7 +87,7 @@ async def test_check_purchase_rejects_invalid_nested_item_before_request():
 
 
 @pytest.mark.asyncio
-async def test_create_template_uses_request_model_and_decoder(monkeypatch):
+async def test_create_template_uses_request_model_and_typed_operation():
     executor = RecordingExecutor(
         {
             "create_template": {
@@ -104,19 +98,13 @@ async def test_create_template_uses_request_model_and_decoder(monkeypatch):
         }
     )
     service = TemplatesService(*service_dependencies(executor))
-    decoded_models: list[type[object]] = []
-    original_decode = templates_module.decode_model
-
-    def tracked_decode(model_type, payload):
-        decoded_models.append(model_type)
-        return original_decode(model_type, payload)
-
-    monkeypatch.setattr(templates_module, "decode_model", tracked_decode)
-
-    result = await service.create_template("contract-1", "Wallet", "Main")
+    result = await service.create_template(
+        contract_id="contract-1",
+        type_="Wallet",
+        name="Main",
+    )
 
     assert isinstance(result, TemplateCreateResponse)
-    assert decoded_models == [TemplateCreateResponse]
     assert executor.calls[0][1]["data"] == {
         "contract_id": "contract-1",
         "type": "Wallet",
@@ -144,7 +132,7 @@ async def test_update_template_limit_serializes_aliases_and_method_override():
             {
                 "contract_id": "contract-1",
                 "product_type": "fuel",
-                "sum": {"currency": 810, "value": "5000"},
+                "sum": {"currency": "810", "value": "5000"},
                 "time": {"type": "5", "number": 1},
                 "term": {"time": {"from": "03:00", "to": "08:00"}},
             }
@@ -171,8 +159,8 @@ async def test_template_payload_rejects_unknown_fields_before_request():
 
     with pytest.raises(ValidationError):
         await service.create_template_limit(
-            "template-1",
-            {
+            template_id="template-1",
+            payload={
                 "contract_id": "contract-1",
                 "product_type": "fuel",
                 "sum": {"value": 5000},
@@ -191,8 +179,8 @@ async def test_template_limit_requires_amount_or_sum_before_request():
 
     with pytest.raises(ValueError, match="amount.*sum"):
         await service.create_template_limit(
-            "template-1",
-            {
+            template_id="template-1",
+            payload={
                 "contract_id": "contract-1",
                 "product_type": "fuel",
                 "time": {"type": 5, "number": 1},

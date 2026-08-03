@@ -16,44 +16,33 @@
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
 
-**Тип после валидации:** `ContractResponse`
+**Тип после валидации:** `ContractDataResponse`
 
-**Pydantic-модель:** [`ContractResponse`](../data-types/contracts/ContractResponse.md)
+**Pydantic-модель:** [`ContractDataResponse`](../data-types/contracts/ContractDataResponse.md)
 
-Ответ передаётся в `ContractResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+Ответ передаётся в `ContractDataResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
 
 #### Поля возвращаемой модели
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `mpc` | `bool` | `boolean` | Да | Нет | Разрешен ли выпуск виртуальных карт |
-| `template_id` | `str` | `string` | Да | Нет | ID шаблона виртуальных карт |
-| `status` | `str` | `string` | Да | Нет | Статус Way4 |
-| `status_crm` | `str` | `string` | Да | Нет | Статус CRM |
-| `payment_term_id` | `str \| None` | `string \| null` | Нет | Да | ID справочника условия оплаты |
-| `payment_scheme_id` | `str \| None` | `string \| null` | Нет | Да | ID справочника схема оплаты |
-| `is_dealer` | `bool` | `boolean` | Да | Нет | Признак дилерский |
-| `balanceData` | `BalanceData` | `object (BalanceData)` | Да | Нет | Данные по расходу и балансу договора |
-| `contractData` | `ContractData` | `object (ContractData)` | Да | Нет | Данные договора |
-| `managerData` | `ManagerData \| None` | `object (ManagerData) \| null` | Нет | Да | Данные по менеджеру договора |
-| `cardsData` | `CardsData` | `object (CardsData)` | Да | Нет | Данные по количеству карт и групп карт на договоре |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `ContractResponse` | `object (ContractResponse)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
-- [`BalanceData`](../data-types/contracts/BalanceData.md)
-- [`ContractData`](../data-types/contracts/ContractData.md)
-- [`ManagerData`](../data-types/contracts/ManagerData.md)
-- [`CardsData`](../data-types/contracts/CardsData.md)
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
+- [`ContractResponse`](../data-types/contracts/ContractResponse.md)
 
 ### Пример
 
 ```python
 result = await client.contracts.get_contract_data(
-    contract_id="contract-id",
 )
 print(result)
 ```
@@ -74,6 +63,7 @@ print(result)
 |---|---|:---:|---|---|
 | `date_start` | `str` | Да | — | Дата начала периода в формате `YYYY-MM-DD`. |
 | `date_end` | `str` | Да | — | Дата окончания периода в формате `YYYY-MM-DD`. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 | `page` | `int` | Нет | `1` | Номер страницы результата. |
 | `on_page` | `int` | Нет | `10` | Количество элементов на странице. |
@@ -90,11 +80,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
-| `data` | `DocumentsData` | `object (DocumentsData)` | Да | Нет | Основные данные — список документов |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `DocumentsData` | `object (DocumentsData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`DocumentsData`](../data-types/contracts/DocumentsData.md)
 
 ### Пример
@@ -123,6 +114,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -137,11 +129,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
-| `data` | `InvoicesData` | `object (InvoicesData)` | Да | Нет | Основные данные — список счетов |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `InvoicesData` | `object (InvoicesData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`InvoicesData`](../data-types/contracts/InvoicesData.md)
 
 ### Пример
@@ -166,7 +159,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -181,18 +174,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект с кодом статуса ответа сервера, например {'code': 200} |
-| `data` | `PaymentsData` | `object (PaymentsData)` | Да | Нет | Основная часть ответа с данными о платежах |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа сервера в формате Unix timestamp |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `PaymentsData` | `object (PaymentsData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`PaymentsData`](../data-types/contracts/PaymentsData.md)
 
 ### Пример
 
 ```python
 result = await client.contracts.get_payments(
-    contract_id="contract-id",
 )
 print(result)
 ```
@@ -213,6 +206,7 @@ print(result)
 |---|---|:---:|---|---|
 | `count` | `int` | Да | — | Количество заказываемых карт. |
 | `office_id` | `str` | Да | — | ID офиса продаж из справочника `Office`. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -227,9 +221,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции: true — заказ выполнен успешно |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -256,8 +253,9 @@ print(result)
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
 | `ids` | `list[str]` | Да | — | Список ID документов. В API параметр называется `id`. |
-| `fmt` | `str` | Да | — | Формат документа: `pdf` или `xlsx`. В API параметр называется `format`. |
+| `fmt` | `Literal[pdf, xlsx]` | Да | — | Формат документа: `pdf` или `xlsx`. В API параметр называется `format`. |
 | `emails` | `list[str]` | Да | — | Список email-адресов для отправки документов, не более пяти. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -272,9 +270,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
-| `data` | `bool` | `boolean` | Да | Нет | Признак успешной отправки (true — заказ выполнен) |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
@@ -301,8 +302,9 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `amount` | `float` | Да | — | Сумма счёта в рублях. В API параметр называется `sum`. |
+| `amount` | `Decimal` | Да | — | Сумма счёта в рублях. В API параметр называется `sum`. |
 | `email` | `str` | Да | — | Email-адрес для отправки счёта. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -317,15 +319,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Объект статуса, например {'code': 200} |
-| `data` | `bool` | `boolean` | Да | Нет | Признак успешного создания счёта |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (Unix timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.contracts.order_invoice(
-    amount=1.0,
+    amount="amount",
     email="email",
 )
 print(result)

@@ -9,7 +9,7 @@ from api_client_opti24.models.virtual_cards import (
 )
 from api_client_opti24.services.virtual_cards import VirtualCardsService
 from api_client_opti24.session import SessionManager
-from tests.service_support import service_dependencies
+from tests.service_support import service_dependencies, typed_request_stub
 
 
 class DummyClient(VirtualCardsService):
@@ -20,6 +20,7 @@ class DummyClient(VirtualCardsService):
         self.session_id = "mock-session"
         self._called = []
 
+    @typed_request_stub
     async def _request(self, operation, api_version="v2", **kwargs):
         self._called.append((operation, api_version, kwargs))
         if operation == "get_mpc_qr_list":

@@ -203,4 +203,4 @@ def test_approved_spec_parameter_descriptions_are_applied() -> None:
 
     output = generator.build_all()
     ewallet_page = output[generator.METHODS_PATH / "ewallet.md"]
-    assert "| `amount` | `float` | Да | — | Сумма перевода. |" in ewallet_page
+    assert "| `amount` | `Decimal` | Да | — | Сумма перевода. |" in ewallet_page

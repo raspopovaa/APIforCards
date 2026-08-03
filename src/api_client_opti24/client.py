@@ -78,14 +78,15 @@ class APIClient(_ServiceFacade):
             self.logger = self.__managed_logger.logger
 
         try:
-            self.clock = clock or SystemClock()
-            self.session_manager = session_manager or SessionManager()
-            self.registry = registry or build_default_registry()
-            self.transport = transport or AsyncTransport(
+            self.clock: Clock = clock or SystemClock()
+            self.session_manager: SessionManager = session_manager or SessionManager()
+            self.registry: MethodRegistry = registry or build_default_registry()
+            self.transport: Transport = transport or AsyncTransport(
                 self.settings.base_url,
                 default_timeout=self.settings.timeouts.default,
                 retry_policy=self.settings.retry_policy,
                 rate_limit_policy=self.settings.rate_limit_policy,
+                concurrency_policy=self.settings.concurrency_policy,
                 allow_insecure_http=self.settings.allow_insecure_http,
                 logger=self.logger,
                 clock=self.clock,
@@ -124,7 +125,6 @@ class APIClient(_ServiceFacade):
         legacy_api_key: str | None = None
         legacy_login: str | None = None
         legacy_password: str | None = None
-
         if settings is None:
             if base_url is None:
                 raise ValueError("Missing APIClient setting: base_url")
@@ -160,8 +160,7 @@ class APIClient(_ServiceFacade):
                     login=legacy_login,
                     password=legacy_password,
                 )
-
-        resolved_api_key = cls._resolve_api_key_provider(
+        resolved_api_key_provider = cls._resolve_api_key_provider(
             api_key_provider=api_key_provider,
             credentials_provider=resolved_credentials,
             legacy_api_key=legacy_api_key,
@@ -169,7 +168,7 @@ class APIClient(_ServiceFacade):
         return _ResolvedClientInputs(
             settings=connection_settings,
             credentials_provider=resolved_credentials,
-            api_key_provider=resolved_api_key,
+            api_key_provider=resolved_api_key_provider,
         )
 
     @staticmethod

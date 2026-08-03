@@ -16,7 +16,7 @@
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -31,18 +31,18 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Информация о статусе запроса (код и описание) |
-| `data` | `CardGroupListData` | `object (CardGroupListData)` | Да | Нет | Основные данные ответа |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (UNIX timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `CardGroupListData` | `object (CardGroupListData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`CardGroupListData`](../data-types/card_group/CardGroupListData.md)
 
 ### Пример
 
 ```python
 result = await client.card_groups.get_card_groups(
-    contract_id="contract-id",
 )
 print(result)
 ```
@@ -61,8 +61,8 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `group_id` | `str` | Да | — | Идентификатор группы топливных карт. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -77,15 +77,17 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Информация о статусе запроса (код и описание) |
-| `data` | `bool` | `boolean` | Да | Нет | Флаг успешного выполнения операции |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (UNIX timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.card_groups.remove_card_group(
-    contract_id="contract-id",
     group_id="group-id",
 )
 print(result)
@@ -105,8 +107,8 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `name` | `str` | Да | — | Имя группы карт. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `group_id` | `str | None` | Нет | `None` | Идентификатор группы топливных карт. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
@@ -122,18 +124,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Информация о статусе запроса (код и описание) |
-| `data` | `SetCardGroupData` | `object (SetCardGroupData)` | Да | Нет | Информация о созданной/обновлённой группе |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (UNIX timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `SetCardGroupData` | `object (SetCardGroupData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`SetCardGroupData`](../data-types/card_group/SetCardGroupData.md)
 
 ### Пример
 
 ```python
 result = await client.card_groups.set_card_group(
-    contract_id="contract-id",
     name="name",
 )
 print(result)
@@ -153,9 +155,9 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `group_id` | `str` | Да | — | Идентификатор группы топливных карт. |
-| `cards_list` | `list[dict[str, Any]]` | Да | — | Список карт договора, добавляемых в группу или удаляемых из неё. |
+| `cards_list` | `list[CardGroupAssignmentRequest | Mapping[str, object]]` | Да | — | Список карт договора, добавляемых в группу или удаляемых из неё. |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -170,17 +172,19 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Информация о статусе запроса (код и описание) |
-| `data` | `bool` | `boolean` | Да | Нет | Флаг успешного выполнения операции |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа (UNIX timestamp) |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.card_groups.set_cards_to_group(
-    contract_id="contract-id",
     group_id="group-id",
-    cards_list={},
+    cards_list="cards-list",
 )
 print(result)
 ```

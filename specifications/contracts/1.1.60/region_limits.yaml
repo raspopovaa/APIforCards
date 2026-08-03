@@ -164,4 +164,3 @@ operations:
       fixture: tests/fixtures/spec/1.1.60/region_limits/set_region_limit.success.json
       fixture_status: spec-only
       fixture_corrections: []
-    response_kind: mapping

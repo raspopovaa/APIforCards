@@ -110,6 +110,7 @@ def build_executor(
             operation_executor=operation_executor,
             session_gate=controller,
             session_recovery=controller,
+            session_context=active_session,
             logger=active_logger,
         ),
         controller,
@@ -132,6 +133,24 @@ async def test_executor_builds_headers_and_rejects_non_object_json() -> None:
     }
     with pytest.raises(TypeError, match="JSON object"):
         await executor.execute("get_cards_v2")
+
+
+@pytest.mark.asyncio
+async def test_executor_allows_contract_override_but_protects_credentials() -> None:
+    session = SessionManager()
+    session.mark_authenticated("session-1", "default-contract")
+    transport = StubTransport({"status": {"code": 200}, "data": {}})
+    executor, _ = build_executor(transport, session)
+
+    await executor.execute(
+        "get_documents",
+        headers={"contract_id": "explicit-contract"},
+        params={"date_start": "2026-01-01", "date_end": "2026-01-31"},
+    )
+
+    assert transport.calls[0][3]["headers"]["contract_id"] == "explicit-contract"
+    with pytest.raises(ValueError, match="not allowed"):
+        await executor.execute("get_documents", headers={"api_key": "replaced"})
 
 
 @pytest.mark.asyncio
@@ -246,6 +265,7 @@ async def test_failed_authentication_releases_real_session_lock() -> None:
         operation_executor=operation_executor,
         session_gate=coordinator,
         session_recovery=coordinator,
+        session_context=session,
         logger=logging.getLogger("test-auth-deadlock"),
     )
 

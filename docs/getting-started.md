@@ -5,8 +5,7 @@
 - Python `>=3.11,<3.15`;
 - доступ к API из разрешённой сети;
 - API key, логин и пароль;
-- HTTPS URL стенда с путём `/vip/`;
-- ID или номер договора, если пользователю доступно несколько договоров.
+- HTTPS URL стенда с путём `/vip/`.
 
 ## Установка через uv
 
@@ -17,7 +16,7 @@
 uv venv --python 3.11
 uv pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 uv pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.2.3
+  --no-deps api-client-opti24==2.3.0
 ```
 
 ## Установка через pip
@@ -27,7 +26,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install "httpx>=0.27.0,<1.0" "pydantic>=2.13.4,<3.0"
 python -m pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.2.3
+  --no-deps api-client-opti24==2.3.0
 ```
 
 Проверка установки:
@@ -40,7 +39,7 @@ python -m pip install --index-url https://test.pypi.org/simple/ \
 Ожидаемый результат:
 
 ```text
-2.2.3 APIClient
+2.3.0 APIClient
 ```
 
 ## Файл `.env`
@@ -80,10 +79,10 @@ async def main() -> None:
         settings=settings,
         credentials_provider=credentials,
     ) as client:
-        await client.auth.auth_user(contract_number="TEST-001")
+        auth = await client.auth.auth_user()
         try:
             cards = await client.cards.get_cards_v2(page=1, onpage=5)
-            print("Выбранный договор:", client.contract_id)
+            print("Договоров:", len(auth.data.contracts))
             print("Карт найдено:", cards.total_count)
         finally:
             await client.auth.logoff()
@@ -92,26 +91,6 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 ```
-
-Единственный доступный договор SDK выбирает автоматически. Если сервер возвращает
-несколько договоров, передайте `contract_id` или `contract_number`. Без явного
-выбора SDK возвращает `ContractSelectionError` и не выбирает первый элемент
-списка неявно.
-
-Можно установить предпочтительный договор до первого защищённого вызова:
-
-```python
-client.contract_id = "contract-id"
-cards = await client.cards.get_cards_v2()
-```
-
-Lazy authentication и последующий re-auth сохранят этот договор только при его
-наличии в актуальном ответе сервера.
-
-Выход из `async with APIClient(...)` закрывает локальные ресурсы клиента, но не
-выполняет серверный `logoff`. Поэтому завершайте серверную сессию явно в `finally`,
-как в примере выше. Transport, переданный через параметр `transport`, клиент не
-закрывает: его жизненным циклом управляет вызывающий код.
 
 !!! warning "Доступ к стенду"
     Пример выполняет реальные сетевые запросы. Если API принимает запросы только

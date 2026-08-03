@@ -16,7 +16,7 @@
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | ID договора |
+| `contract_id` | `str | None` | Нет | `None` | ID договора |
 | `card_id` | `str | None` | Нет | `None` | ID карты (опционально) |
 | `group_id` | `str | None` | Нет | `None` | ID группы карт (опционально) |
 | `api_version` | `str | None` | Нет | `None` | версия API (по умолчанию v1) |
@@ -33,18 +33,18 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения (например, {'code': 200}) |
-| `data` | `LimitsData` | `object (LimitsData)` | Да | Нет | Данные с лимитами |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `LimitsData` | `object (LimitsData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`LimitsData`](../data-types/limits/LimitsData.md)
 
 ### Пример
 
 ```python
 result = await client.limits.get_limits(
-    contract_id="contract-id",
 )
 print(result)
 ```
@@ -63,7 +63,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | ID договора |
+| `contract_id` | `str | None` | Нет | `None` | ID договора |
 | `limit_id` | `str` | Да | — | ID лимита |
 | `group_id` | `str | None` | Нет | `None` | ID группы карт (опционально) |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
@@ -80,15 +80,17 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `bool` | `boolean` | Да | Нет | Результат операции (True — успешно) |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.limits.remove_limit(
-    contract_id="contract-id",
     limit_id="limit-id",
 )
 print(result)
@@ -108,7 +110,8 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `limits` | `list[dict[str, Any]]` | Да | — | список лимитов в виде словарей (см. документацию API) Типовой сценарий: Ограничить дневной расход конкретной карты. Для изменения ранее созданного лимита добавьте его ``id`` в тот же словарь. Пример вызова: ```python result = await client.limits.set_limit( limits=[{ "contract_id": "contract-id", "card_id": "card-id", "sum": {"currency": "810", "value": 5000.0}, "time": {"number": 1, "type": 1}, }] ) ``` Пример логического payload до сериализации поля ``limit``: ```json { "contract_id": "contract-id", "card_id": "card-id", "sum": {"currency": "810", "value": 5000.0}, "time": {"number": 1, "type": 1} } ``` |
+| `limits` | `list[LimitRequestItem | Mapping[str, Any]]` | Да | — | список лимитов в виде словарей (см. документацию API) Типовой сценарий: Ограничить дневной расход конкретной карты. Для изменения ранее созданного лимита добавьте его ``id`` в тот же словарь. Пример вызова: ```python result = await client.limits.set_limit( limits=[{ "contract_id": "contract-id", "card_id": "card-id", "sum": {"currency": "810", "value": 5000.0}, "time": {"number": 1, "type": 5}, }] ) ``` Пример логического payload до сериализации поля ``limit``: ```json { "contract_id": "contract-id", "card_id": "card-id", "sum": {"currency": "810", "value": 5000.0}, "time": {"number": 1, "type": 5} } ``` |
+| `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -123,15 +126,18 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `dict[str, Any]` | `object` | Да | Нет | Статус выполнения запроса |
-| `data` | `list[str]` | `array[string]` | Да | Нет | ID созданных/обновлённых лимитов |
-| `timestamp` | `int` | `integer` | Да | Нет | Временная метка ответа |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `list[str]` | `array[string]` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.limits.set_limit(
-    limits={},
+    limits="limits",
 )
 print(result)
 ```

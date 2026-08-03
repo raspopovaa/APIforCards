@@ -7,7 +7,7 @@ from api_client_opti24.models.users import (
 )
 from api_client_opti24.services.users import UsersService
 from api_client_opti24.session import SessionManager
-from tests.service_support import service_dependencies
+from tests.service_support import service_dependencies, typed_request_stub
 
 
 class DummyClient(UsersService):
@@ -19,6 +19,7 @@ class DummyClient(UsersService):
         super().__init__(*service_dependencies(session_manager))
         self.session_id = "mock-session"
 
+    @typed_request_stub
     async def _request(self, operation, api_version="v2", **kwargs):
         # Эмуляция API для users
         if operation == "get_users":

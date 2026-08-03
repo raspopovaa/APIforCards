@@ -1,8 +1,6 @@
-from typing import Any
-
 from pydantic import AliasChoices, model_validator
 
-from ..modeling import BaseModel, Field, StrictRequestModel
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 
 class _InviteContractRequest(StrictRequestModel):
@@ -91,12 +89,8 @@ class InviteList(BaseModel):
     result: list[InviteItem] = Field(..., description="Список приглашений")
 
 
-class InviteListResponse(BaseModel):
-    """Полный ответ на запрос списка приглашений."""
-
-    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
-    data: InviteList = Field(..., description="Список приглашений")
-    timestamp: int | None = Field(None, description="Метка времени")
+class InviteListResponse(APIEnvelope[InviteList]):
+    """Полный envelope списка приглашений."""
 
 
 class InviteActionResult(BaseModel):
@@ -110,17 +104,9 @@ class InviteActionResult(BaseModel):
     )
 
 
-class InviteResponse(BaseModel):
-    """Обертка для InviteActionResult"""
-
-    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
-    data: InviteActionResult
-    timestamp: int | None = Field(None, description="Метка времени")
+class InviteResponse(APIEnvelope[InviteActionResult]):
+    """Полный envelope действия с приглашением."""
 
 
-class InviteBoolResponse(BaseModel):
-    """Результат простых действий (удаление, продление и т.п.)"""
-
-    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
-    data: bool
-    timestamp: int | None = Field(None, description="Метка времени")
+class InviteBoolResponse(APIEnvelope[bool]):
+    """Полный envelope простого действия с приглашением."""

@@ -1,7 +1,5 @@
 # api_client_opti24/models/users.py
-from typing import Any
-
-from ..modeling import BaseModel, Field, StrictRequestModel
+from ..modeling import APIEnvelope, BaseModel, Field, StrictRequestModel
 
 # ---------- Общие подмодели ----------
 
@@ -82,12 +80,7 @@ class UserList(BaseModel):
     result: list[UserItem] = Field(..., description="Список пользователей")
 
 
-class UserListResponse(BaseModel):
-    status: dict[str, Any] = Field(
-        ..., description="Статус выполнения запроса (например {'code': 200})"
-    )
-    data: UserList | None = Field(None, description="Основные данные ответа")
-    timestamp: int | None = Field(None, description="Временная метка ответа")
+class UserListResponse(APIEnvelope[UserList | None]):
 
     @property
     def total_count(self) -> int:
@@ -98,16 +91,12 @@ class UserListResponse(BaseModel):
         return self.data.result if self.data else []
 
 
-class UserCreateResponse(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
-    data: str = Field(..., description="ID созданного пользователя")
-    timestamp: int | None = Field(None, description="Метка времени")
+class UserCreateResponse(APIEnvelope[str]):
+    pass
 
 
-class UserBoolResponse(BaseModel):
-    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
-    data: bool = Field(..., description="Результат операции (true/false)")
-    timestamp: int | None = Field(None, description="Метка времени")
+class UserBoolResponse(APIEnvelope[bool]):
+    pass
 
 
 UsersListResponse = UserListResponse

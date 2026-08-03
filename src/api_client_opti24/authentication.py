@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-from typing import Protocol
+import asyncio
+from typing import Any, Protocol, TypeVar
 
 from .errors import ContractSelectionError
 from .logger import LoggerLike
+from .modeling import ResponseModel
 from .models.auth import AuthUserResponse, ContractInfo
-from .service_base import CredentialsProvider, RequestExecutor, SessionMutator
+from .operations import Operation, operation
+from .service_base import CredentialsProvider, SessionMutator
 from .session import SessionManager
 from .utils import hash_password
+
+ResponseT = TypeVar("ResponseT", bound=ResponseModel)
+AUTH_USER = operation("auth_user", AuthUserResponse)
 
 
 def _contract_choices(contracts: list[ContractInfo]) -> tuple[tuple[str, str], ...]:
@@ -23,20 +29,17 @@ def _select_contract(
     if contract_id is not None and contract_number is not None:
         raise ContractSelectionError("Pass either contract_id or contract_number, not both")
 
-    if contract_id is not None:
-        matches = [item for item in contracts if item.id == contract_id]
+    lookup = contract_id if contract_id is not None else contract_number
+    if lookup is not None:
+        matches = [
+            item
+            for item in contracts
+            if (item.id if contract_id is not None else item.number) == lookup
+        ]
         if len(matches) != 1:
+            requested_field = "contract_id" if contract_id is not None else "contract_number"
             raise ContractSelectionError(
-                "Requested contract_id is unavailable or ambiguous",
-                available_contracts=_contract_choices(contracts),
-            )
-        return matches[0]
-
-    if contract_number is not None:
-        matches = [item for item in contracts if item.number == contract_number]
-        if len(matches) != 1:
-            raise ContractSelectionError(
-                "Requested contract_number is unavailable or ambiguous",
+                f"Requested {requested_field} is unavailable or ambiguous",
                 available_contracts=_contract_choices(contracts),
             )
         return matches[0]
@@ -61,10 +64,20 @@ class Authenticator(Protocol):
     ) -> AuthUserResponse: ...
 
 
+class AuthenticationRequestExecutor(Protocol):
+    async def execute(
+        self,
+        operation: Operation[ResponseT],
+        *,
+        api_version: str | None = None,
+        **kwargs: Any,
+    ) -> ResponseT: ...
+
+
 class DefaultAuthenticator:
     def __init__(
         self,
-        request_executor: RequestExecutor,
+        request_executor: AuthenticationRequestExecutor,
         session_mutator: SessionMutator,
         credentials_provider: CredentialsProvider,
         logger: LoggerLike,
@@ -85,12 +98,11 @@ class DefaultAuthenticator:
             raise ContractSelectionError("Pass either contract_id or contract_number, not both")
 
         login, password = self.__credentials_provider.get_credentials()
-        data = await self.__request_executor.execute(
-            "auth_user",
+        auth_response = await self.__request_executor.execute(
+            AUTH_USER,
             api_version=api_version,
             data={"login": login, "password": hash_password(password)},
         )
-        auth_response = AuthUserResponse(**data)
         try:
             selected = _select_contract(
                 auth_response.data.contracts,
@@ -120,6 +132,7 @@ class AuthenticationCoordinator:
     ) -> None:
         self.__session = session
         self.__authenticator = authenticator
+        self.__recovery_lock = asyncio.Lock()
 
     async def authenticate(self) -> AuthUserResponse:
         return await self.__authenticator.authenticate(
@@ -130,7 +143,13 @@ class AuthenticationCoordinator:
         return await self.__session.ensure_authenticated(self.authenticate)
 
     async def recover(self) -> str:
+        failed_session_id = self.__session.session_id
         selected_contract_id = self.__session.contract_id
-        self.__session.invalidate()
-        self.__session.set_contract(selected_contract_id)
-        return await self.ensure_authenticated()
+        async with self.__recovery_lock:
+            current_session_id = self.__session.session_id
+            if current_session_id is not None and current_session_id != failed_session_id:
+                return current_session_id
+            self.__session.invalidate()
+            return await self.__session.ensure_authenticated(
+                lambda: self.__authenticator.authenticate(contract_id=selected_contract_id)
+            )

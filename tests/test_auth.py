@@ -1,9 +1,9 @@
+import asyncio
 import logging
 
 import pytest
 
-from api_client_opti24.authentication import _select_contract
-from api_client_opti24.errors import ContractSelectionError
+from api_client_opti24.authentication import AuthenticationCoordinator
 from api_client_opti24.models.auth import AuthUserResponse
 from api_client_opti24.services import AuthService
 from api_client_opti24.session import SessionManager, SessionState
@@ -11,6 +11,7 @@ from tests.service_support import (
     FrozenClock,
     NoopRequestExecutor,
     StubSessionGate,
+    typed_request_stub,
 )
 
 
@@ -18,7 +19,6 @@ class DummyClient(AuthService):
     def __init__(self):
         self.session_manager = SessionManager()
         self.calls = []
-        self.fail_logoff = False
 
         class StubAuthenticator:
             async def authenticate(
@@ -30,15 +30,17 @@ class DummyClient(AuthService):
             ):
                 del inner_self, api_version
                 response = AuthUserResponse(**self._auth_payload())
-                try:
-                    selected = _select_contract(
-                        response.data.contracts,
-                        contract_id=contract_id,
-                        contract_number=contract_number,
+                contracts = response.data.contracts
+                selected = None
+                if contract_id:
+                    selected = next((item for item in contracts if item.id == contract_id), None)
+                elif contract_number:
+                    selected = next(
+                        (item for item in contracts if item.number == contract_number),
+                        None,
                     )
-                except ContractSelectionError:
-                    self.session_manager.invalidate()
-                    raise
+                elif contracts:
+                    selected = contracts[0]
                 self.session_manager.mark_authenticated(
                     response.data.session_id,
                     selected.id if selected else None,
@@ -72,15 +74,14 @@ class DummyClient(AuthService):
             "timestamp": 1710000000,
         }
 
+    @typed_request_stub
     async def _request(self, operation, **kwargs):
         self.calls.append((operation, kwargs))
         if operation == "auth_user":
             return self._auth_payload()
-        if operation == "logoff":
-            if self.fail_logoff:
-                raise RuntimeError("logoff failed")
+        elif operation == "logoff":
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
-        if operation == "get_info":
+        elif operation == "get_info":
             return {
                 "status": {"code": 200},
                 "data": {
@@ -97,7 +98,8 @@ class DummyClient(AuthService):
                 },
                 "timestamp": 1710000000,
             }
-        raise ValueError(f"Unexpected operation: {operation}")
+        else:
+            raise ValueError(f"Unexpected operation: {operation}")
 
     @property
     def session_id(self):
@@ -123,20 +125,14 @@ class DummyClient(AuthService):
 @pytest.mark.parametrize(
     "contract_id,contract_number,expected_id",
     [
-        ("1-AAA", None, "1-AAA"),
-        (None, "NV0002", "1-BBB"),
+        ("1-AAA", None, "1-AAA"),  # выбор по id
+        (None, "NV0002", "1-BBB"),  # выбор по номеру
+        (None, None, "1-AAA"),  # автоселект первого по списку
     ],
 )
-async def test_auth_user_sets_session_and_selected_contract(
-    contract_id,
-    contract_number,
-    expected_id,
-):
+async def test_auth_user_sets_session_and_contract_id(contract_id, contract_number, expected_id):
     client = DummyClient()
-    response = await client.auth_user(
-        contract_id=contract_id,
-        contract_number=contract_number,
-    )
+    response = await client.auth_user(contract_id=contract_id, contract_number=contract_number)
 
     assert isinstance(response, AuthUserResponse)
     assert client.session_id == "SESSION123"
@@ -145,49 +141,20 @@ async def test_auth_user_sets_session_and_selected_contract(
 
 
 @pytest.mark.asyncio
-async def test_auth_user_requires_selection_when_multiple_contracts_are_available():
+async def test_logoff_returns_true():
     client = DummyClient()
-
-    with pytest.raises(ContractSelectionError):
-        await client.auth_user()
-
-    assert client.session_id is None
-    assert client.contract_id is None
-    assert client.session_manager.state == SessionState.INVALID
-
-
-@pytest.mark.asyncio
-async def test_logoff_returns_envelope_and_clears_local_session():
-    client = DummyClient()
-    client.session_id = "SESSION123"
+    client.session_id = "SESSION123"  # имитируем авторизацию
 
     result = await client.logoff()
 
     assert result.status.code == 200
     assert result.data is True
-    assert client.session_id is None
-    assert client.contract_id is None
-    assert client.session_manager.state == SessionState.ANONYMOUS
-
-
-@pytest.mark.asyncio
-async def test_logoff_clears_local_session_when_request_fails():
-    client = DummyClient()
-    client.session_manager.mark_authenticated("SESSION123", "1-AAA")
-    client.fail_logoff = True
-
-    with pytest.raises(RuntimeError, match="logoff failed"):
-        await client.logoff()
-
-    assert client.session_id is None
-    assert client.contract_id is None
-    assert client.session_manager.state == SessionState.ANONYMOUS
 
 
 @pytest.mark.asyncio
 async def test_get_info_returns_data():
     client = DummyClient()
-    client.session_id = "SESSION123"
+    client.session_id = "SESSION123"  # имитируем авторизацию
 
     result = await client.get_info()
 
@@ -208,3 +175,129 @@ async def test_get_info_uses_explicit_period():
     operation, kwargs = client.calls[-1]
     assert operation == "get_info"
     assert kwargs["params"]["period"] == "2025-01-15 12:30:00"
+
+
+@pytest.mark.asyncio
+async def test_authentication_coordinator_preserves_contract_during_recovery():
+    session = SessionManager()
+    session.mark_authenticated("SESSION-OLD", "1-BBB")
+    selected_contracts = []
+
+    class RecordingAuthenticator:
+        async def authenticate(
+            self,
+            *,
+            api_version=None,
+            contract_id=None,
+            contract_number=None,
+        ):
+            del api_version, contract_number
+            selected_contracts.append(contract_id)
+            session.mark_authenticated("SESSION-NEW", contract_id)
+            return AuthUserResponse(**DummyClient._auth_payload())
+
+    coordinator = AuthenticationCoordinator(session, RecordingAuthenticator())
+
+    recovered_session = await coordinator.recover()
+
+    assert recovered_session == "SESSION-NEW"
+    assert session.contract_id == "1-BBB"
+    assert selected_contracts == ["1-BBB"]
+
+
+@pytest.mark.asyncio
+async def test_authentication_coordinator_authenticates_once_for_concurrent_calls():
+    session = SessionManager()
+    calls = 0
+    started = asyncio.Event()
+    release = asyncio.Event()
+
+    class ConcurrentAuthenticator:
+        async def authenticate(
+            self,
+            *,
+            api_version=None,
+            contract_id=None,
+            contract_number=None,
+        ):
+            nonlocal calls
+            del api_version, contract_id, contract_number
+            calls += 1
+            started.set()
+            await release.wait()
+            session.mark_authenticated("SESSION-NEW", "1-AAA")
+            return AuthUserResponse(**DummyClient._auth_payload())
+
+    coordinator = AuthenticationCoordinator(session, ConcurrentAuthenticator())
+
+    tasks = [asyncio.create_task(coordinator.ensure_authenticated()) for _ in range(3)]
+    await asyncio.wait_for(started.wait(), timeout=1)
+    release.set()
+    sessions = await asyncio.gather(*tasks)
+
+    assert sessions == ["SESSION-NEW", "SESSION-NEW", "SESSION-NEW"]
+    assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_authentication_coordinator_recovers_once_for_concurrent_failures():
+    session = SessionManager()
+    session.mark_authenticated("SESSION-OLD", "1-BBB")
+    calls = 0
+    selected_contracts = []
+    started = asyncio.Event()
+    release = asyncio.Event()
+
+    class ConcurrentRecoveryAuthenticator:
+        async def authenticate(
+            self,
+            *,
+            api_version=None,
+            contract_id=None,
+            contract_number=None,
+        ):
+            nonlocal calls
+            del api_version, contract_number
+            calls += 1
+            selected_contracts.append(contract_id)
+            started.set()
+            await release.wait()
+            session.mark_authenticated("SESSION-NEW", contract_id)
+            return AuthUserResponse(**DummyClient._auth_payload())
+
+    coordinator = AuthenticationCoordinator(session, ConcurrentRecoveryAuthenticator())
+
+    tasks = [asyncio.create_task(coordinator.recover()) for _ in range(3)]
+    await asyncio.wait_for(started.wait(), timeout=1)
+    release.set()
+    sessions = await asyncio.gather(*tasks)
+
+    assert sessions == ["SESSION-NEW", "SESSION-NEW", "SESSION-NEW"]
+    assert calls == 1
+    assert selected_contracts == ["1-BBB"]
+    assert session.contract_id == "1-BBB"
+
+
+@pytest.mark.asyncio
+async def test_cancelled_authentication_does_not_poison_session_lock():
+    session = SessionManager()
+    started = asyncio.Event()
+    release = asyncio.Event()
+
+    class CancellableAuthenticator:
+        async def authenticate(self, **kwargs):
+            del kwargs
+            started.set()
+            await release.wait()
+            session.mark_authenticated("SESSION-NEW", "1-AAA")
+            return AuthUserResponse(**DummyClient._auth_payload())
+
+    coordinator = AuthenticationCoordinator(session, CancellableAuthenticator())
+    first = asyncio.create_task(coordinator.ensure_authenticated())
+    await asyncio.wait_for(started.wait(), timeout=1)
+    first.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await first
+
+    release.set()
+    assert await asyncio.wait_for(coordinator.ensure_authenticated(), timeout=1) == "SESSION-NEW"

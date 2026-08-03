@@ -97,19 +97,22 @@ print(result)
 
 ### Возвращаемое значение
 
-**Тип после валидации:** `ReportV1JobList`
+**Тип после валидации:** `ReportV1JobListResponse`
 
-**Pydantic-модель:** [`ReportV1JobList`](../data-types/reports/ReportV1JobList.md)
+**Pydantic-модель:** [`ReportV1JobListResponse`](../data-types/reports/ReportV1JobListResponse.md)
 
-Ответ передаётся в `ReportV1JobList.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+Ответ передаётся в `ReportV1JobListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
 
 #### Поля возвращаемой модели
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `jobs` | `list[ReportV1JobItem]` | `array[object (ReportV1JobItem)]` | Да | Нет | Массив заказанных отчетов |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `list[ReportV1JobItem]` | `array[object (ReportV1JobItem)]` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 - [`ReportV1JobItem`](../data-types/reports/ReportV1JobItem.md)
 
 ### Пример
@@ -138,21 +141,23 @@ print(result)
 
 ### Возвращаемое значение
 
-**Тип после валидации:** `ReportJobList`
+**Тип после валидации:** `ReportJobListResponse`
 
-**Pydantic-модель:** [`ReportJobList`](../data-types/reports/ReportJobList.md)
+**Pydantic-модель:** [`ReportJobListResponse`](../data-types/reports/ReportJobListResponse.md)
 
-Ответ передаётся в `ReportJobList.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+Ответ передаётся в `ReportJobListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
 
 #### Поля возвращаемой модели
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `total_count` | `int \| None` | `integer \| null` | Нет | Да | Количество найденных отчетов |
-| `result` | `list[ReportJobItem]` | `array[object (ReportJobItem)]` | Да | Нет | Список заказанных отчетов |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `ReportJobList` | `object (ReportJobList)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
-- [`ReportJobItem`](../data-types/reports/ReportJobItem.md)
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
+- [`ReportJobList`](../data-types/reports/ReportJobList.md)
 
 ### Пример
 
@@ -180,21 +185,23 @@ print(result)
 
 ### Возвращаемое значение
 
-**Тип после валидации:** `ReportList`
+**Тип после валидации:** `ReportListResponse`
 
-**Pydantic-модель:** [`ReportList`](../data-types/reports/ReportList.md)
+**Pydantic-модель:** [`ReportListResponse`](../data-types/reports/ReportListResponse.md)
 
-Ответ передаётся в `ReportList.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
+Ответ передаётся в `ReportListResponse.model_validate(payload)`. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.
 
 #### Поля возвращаемой модели
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `total_count` | `int` | `integer` | Да | Нет | Количество доступных отчетов |
-| `result` | `list[ReportItem]` | `array[object (ReportItem)]` | Да | Нет | Массив отчетов |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `ReportList` | `object (ReportList)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
-- [`ReportItem`](../data-types/reports/ReportItem.md)
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
+- [`ReportList`](../data-types/reports/ReportList.md)
 
 ### Пример
 
@@ -236,7 +243,13 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `job_id` | `list[str]` | `array[string]` | Да | Нет | Идентификаторы созданных заданий на генерацию отчета |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `ReportOrderData` | `object (ReportOrderData)` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
+- [`ReportOrderData`](../data-types/reports/ReportOrderData.md)
 
 ### Пример
 
@@ -285,7 +298,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `report_ids` | `list[str]` | `array[string]` | Да | Нет | ID заказанных отчетов |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `list[str]` | `array[string]` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
+
+**Вложенные модели:**
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 

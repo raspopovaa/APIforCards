@@ -18,7 +18,7 @@
 |---|---|:---:|---|---|
 | `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `card_id` | `str` | Да | — | Идентификатор топливной карты. |
-| `amount` | `float` | Да | — | Сумма перевода. |
+| `amount` | `Decimal` | Да | — | Сумма перевода. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -33,19 +33,19 @@
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `Status` | `object (Status)` | Да | Нет | Статус выполнения операции. |
-| `data` | `bool` | `boolean` | Да | Нет | Результат выполнения операции (true — успешно). |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (UNIX timestamp). |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
-- [`Status`](../data-types/ewallet/Status.md)
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.ewallet.move_to_card(
     card_id="card-id",
-    amount=1.0,
+    amount="amount",
 )
 print(result)
 ```
@@ -66,7 +66,7 @@ print(result)
 |---|---|:---:|---|---|
 | `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `card_id` | `str` | Да | — | Идентификатор топливной карты. |
-| `amount` | `float` | Да | — | Сумма перевода. |
+| `amount` | `Decimal` | Да | — | Сумма перевода. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -81,19 +81,19 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `Status` | `object (Status)` | Да | Нет | Статус выполнения операции. |
-| `data` | `bool` | `boolean` | Да | Нет | Результат выполнения операции (true — успешно). |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (UNIX timestamp). |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `bool` | `boolean` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
-- [`Status`](../data-types/ewallet/Status.md)
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 
 ```python
 result = await client.ewallet.move_to_contract(
     card_id="card-id",
-    amount=1.0,
+    amount="amount",
 )
 print(result)
 ```
@@ -114,7 +114,7 @@ print(result)
 |---|---|:---:|---|---|
 | `contract_id` | `str | None` | Нет | `None` | Идентификатор договора. Для части методов может быть получен из активного контекста SDK. |
 | `card_ids` | `list[str]` | Да | — | Список идентификаторов топливных карт. |
-| `product` | `str` | Да | — | Тип продукта: `wallet` или `limit`. |
+| `product` | `Literal[wallet, limit]` | Да | — | Тип продукта: `wallet` или `limit`. |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 
 ### Возвращаемое значение
@@ -129,12 +129,12 @@ print(result)
 
 | Поле | Тип после валидации | JSON-тип | Обязательное | `None` | Описание |
 |---|---|---|:---:|:---:|---|
-| `status` | `Status` | `object (Status)` | Да | Нет | Статус выполнения операции. |
-| `data` | `list[str]` | `array[string]` | Да | Нет | Список идентификаторов карт, у которых изменён продукт. |
-| `timestamp` | `int` | `integer` | Да | Нет | Метка времени ответа (UNIX timestamp). |
+| `status` | `ResponseStatus` | `object (ResponseStatus)` | Да | Нет | Статус ответа API |
+| `data` | `list[str]` | `array[string]` | Да | Нет | Типизированные данные ответа API |
+| `timestamp` | `int \| None` | `integer \| null` | Нет | Да | Метка времени ответа API |
 
 **Вложенные модели:**
-- [`Status`](../data-types/ewallet/Status.md)
+- [`ResponseStatus`](../data-types/modeling/ResponseStatus.md)
 
 ### Пример
 

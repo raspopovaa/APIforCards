@@ -1,7 +1,5 @@
 from typing import Any
 
-from ..decorators import api_method
-from ..modeling import decode_model
 from ..models.virtual_cards import (
     MPCListResponse,
     MPCPayloadResponse,
@@ -9,7 +7,18 @@ from ..models.virtual_cards import (
     SimpleActionResponse,
     VirtualCardResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
+
+GET_MPC_QR_LIST = operation("get_mpc_qr_list", MPCListResponse)
+CREATE_VIRTUAL_CARD = operation("create_virtual_card", VirtualCardResponse)
+RELEASE_VIRTUAL_CARD = operation("release_virtual_card", VirtualCardResponse)
+DELETE_MPC = operation("delete_mpc", SimpleActionResponse)
+RESET_MPC = operation("reset_mpc", ResetMPCResponse)
+GENERATE_PAYMENT_QR = operation("generate_payment_qr", MPCPayloadResponse)
+INIT_MPC = operation("init_mpc", MPCPayloadResponse)
+CONFIRM_MPC = operation("confirm_mpc", MPCPayloadResponse)
+UPDATE_MPC = operation("update_mpc", MPCPayloadResponse)
 
 
 class VirtualCardsService(_BaseService):
@@ -17,7 +26,6 @@ class VirtualCardsService(_BaseService):
     Методы для работы с виртуальными картами (ВК) и мобильными профилями карт (МПК)
     """
 
-    @api_method
     async def get_mpc_qr_list(
         self,
         *,
@@ -25,14 +33,12 @@ class VirtualCardsService(_BaseService):
     ) -> MPCListResponse:
         """Получить список выпущенных МПК/QR (GET /vip/v2/MPC)."""
         self.logger.info("Получение списка выпущенных МПК/QR")
-        data = await self._request(
-            "get_mpc_qr_list",
+        return await self._request(
+            GET_MPC_QR_LIST,
             api_version=api_version,
         )
-        return MPCListResponse(**data)
 
     # === Выпуск виртуальной карты (старый метод) ===
-    @api_method
     async def create_virtual_card(
         self,
         *,
@@ -41,15 +47,14 @@ class VirtualCardsService(_BaseService):
     ) -> VirtualCardResponse:
         """Выпуск виртуальной карты (старый метод POST /vip/v2/cards)"""
         payload = {"user_id": user_id}
-        data = await self._request(
-            "create_virtual_card",
+        self.logger.info("Creating virtual card using legacy method")
+        return await self._request(
+            CREATE_VIRTUAL_CARD,
             api_version=api_version,
             data=payload,
         )
-        return decode_model(VirtualCardResponse, data)
 
     # === Выпуск виртуальной карты (новый метод /release) ===
-    @api_method
     async def release_virtual_card(
         self,
         *,
@@ -91,15 +96,14 @@ class VirtualCardsService(_BaseService):
         if user_id:
             payload["user_id"] = user_id
 
-        data = await self._request(
-            "release_virtual_card",
+        self.logger.info("Creating virtual card")
+        return await self._request(
+            RELEASE_VIRTUAL_CARD,
             api_version=api_version,
             data=payload,
         )
-        return decode_model(VirtualCardResponse, data)
 
     # === Удаление МПК ===
-    @api_method
     async def delete_mpc(
         self,
         card_id: str,
@@ -107,15 +111,13 @@ class VirtualCardsService(_BaseService):
     ) -> SimpleActionResponse:
         """Удаление мобильного профиля карты (МПК)"""
         self.logger.info("Deleting mobile card profile")
-        data = await self._request(
-            "delete_mpc",
+        return await self._request(
+            DELETE_MPC,
             api_version=api_version,
             path_params={"card_id": card_id},
         )
-        return SimpleActionResponse(**data)
 
     # === Сброс счётчиков МПК ===
-    @api_method
     async def reset_mpc(
         self,
         card_id: str,
@@ -129,15 +131,13 @@ class VirtualCardsService(_BaseService):
         """
         payload = {"type": type_}
         self.logger.info("Resetting mobile card profile counters")
-        data = await self._request(
-            "reset_mpc",
+        return await self._request(
+            RESET_MPC,
             api_version=api_version,
             path_params={"card_id": card_id},
             data=payload,
         )
-        return ResetMPCResponse(**data)
 
-    @api_method
     async def generate_payment_qr(
         self,
         *,
@@ -148,15 +148,13 @@ class VirtualCardsService(_BaseService):
         """Сгенерировать QR-код оплаты (POST /vip/v2/cards/{card_id}/pay)."""
         request_payload = payload or {}
         self.logger.info("Generating payment QR")
-        data = await self._request(
-            "generate_payment_qr",
+        return await self._request(
+            GENERATE_PAYMENT_QR,
             api_version=api_version,
             path_params={"card_id": card_id},
             data=request_payload,
         )
-        return MPCPayloadResponse(**data)
 
-    @api_method
     async def init_mpc(
         self,
         *,
@@ -167,15 +165,13 @@ class VirtualCardsService(_BaseService):
         """Инициализировать выпуск МПК (POST /vip/v2/cards/{card_id}/initMPC)."""
         request_payload = payload or {}
         self.logger.info("Initializing mobile card profile")
-        data = await self._request(
-            "init_mpc",
+        return await self._request(
+            INIT_MPC,
             api_version=api_version,
             path_params={"card_id": card_id},
             data=request_payload,
         )
-        return MPCPayloadResponse(**data)
 
-    @api_method
     async def confirm_mpc(
         self,
         *,
@@ -186,15 +182,13 @@ class VirtualCardsService(_BaseService):
         """Подтвердить выпуск МПК (POST /vip/v2/cards/{card_id}/confirmMPC)."""
         request_payload = payload or {}
         self.logger.info("Confirming mobile card profile")
-        data = await self._request(
-            "confirm_mpc",
+        return await self._request(
+            CONFIRM_MPC,
             api_version=api_version,
             path_params={"card_id": card_id},
             data=request_payload,
         )
-        return MPCPayloadResponse(**data)
 
-    @api_method
     async def update_mpc(
         self,
         *,
@@ -205,10 +199,9 @@ class VirtualCardsService(_BaseService):
         """Обновить МПК (POST /vip/v2/cards/{card_id}/updateMPC)."""
         request_payload = payload or {}
         self.logger.info("Updating mobile card profile")
-        data = await self._request(
-            "update_mpc",
+        return await self._request(
+            UPDATE_MPC,
             api_version=api_version,
             path_params={"card_id": card_id},
             data=request_payload,
         )
-        return MPCPayloadResponse(**data)

@@ -1,11 +1,20 @@
-from ..decorators import api_method
+from decimal import Decimal
+from typing import Literal
+
 from ..models.ewallet import (
     MoveToCardResponse,
     MoveToContractResponse,
     SetCardProductResponse,
 )
+from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
+from ..validation import decimal_to_wire, require_identifier
+
+CardProduct = Literal["wallet", "limit"]
+SET_CARD_PRODUCT = operation("set_card_product", SetCardProductResponse)
+MOVE_TO_CARD = operation("move_to_card", MoveToCardResponse)
+MOVE_TO_CONTRACT = operation("move_to_contract", MoveToContractResponse)
 
 
 class EwalletService(_BaseService):
@@ -23,13 +32,12 @@ class EwalletService(_BaseService):
     # Изменить тип продукта карты
     # ============================================================
 
-    @api_method
     async def set_card_product(
         self,
         *,
         contract_id: str | None = None,
         card_ids: list[str],
-        product: str,
+        product: CardProduct,
         api_version: str | None = None,
     ) -> SetCardProductResponse:
         """
@@ -45,32 +53,35 @@ class EwalletService(_BaseService):
             SetCardProductResponse: Результат изменения продукта карт.
         """
         cid = await self._resolve_contract_id(contract_id)
+        if not card_ids:
+            raise ValueError("card_ids must contain at least one card ID")
+        normalized_card_ids = [require_identifier(card_id, "card_id") for card_id in card_ids]
+        if product not in {"wallet", "limit"}:
+            raise ValueError("product must be either 'wallet' or 'limit'")
 
         body = {
             "contract_id": cid,
-            "card_id": to_json_param(card_ids),
+            "card_id": to_json_param(normalized_card_ids),
             "product": product,
         }
 
-        data = await self._request(
-            "set_card_product",
+        return await self._request(
+            SET_CARD_PRODUCT,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        return SetCardProductResponse(**data)
 
     # ============================================================
     # Перевести деньги с договора на кошелёк
     # ============================================================
 
-    @api_method
     async def move_to_card(
         self,
         *,
         contract_id: str | None = None,
         card_id: str,
-        amount: float,
+        amount: Decimal,
         api_version: str | None = None,
     ) -> MoveToCardResponse:
         """
@@ -95,38 +106,40 @@ class EwalletService(_BaseService):
         transfer = await client.ewallet.move_to_card(
             contract_id="contract-id",
             card_id="card-id",
-            amount=2500.0,
+            amount=Decimal("2500.00"),
         )
         ```
 
         Пример payload:
         ```json
-        {"contract_id": "contract-id", "card_id": "card-id", "amount": 2500.0}
+        {"contract_id": "contract-id", "card_id": "card-id", "amount": "2500.00"}
         ```
         """
         cid = await self._resolve_contract_id(contract_id)
 
-        body = {"contract_id": cid, "card_id": card_id, "amount": amount}
+        body = {
+            "contract_id": cid,
+            "card_id": require_identifier(card_id, "card_id"),
+            "amount": decimal_to_wire(amount),
+        }
 
-        data = await self._request(
-            "move_to_card",
+        return await self._request(
+            MOVE_TO_CARD,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        return MoveToCardResponse(**data)
 
     # ============================================================
     # Перевести деньги с кошелька на договор
     # ============================================================
 
-    @api_method
     async def move_to_contract(
         self,
         *,
         contract_id: str | None = None,
         card_id: str,
-        amount: float,
+        amount: Decimal,
         api_version: str | None = None,
     ) -> MoveToContractResponse:
         """
@@ -143,12 +156,15 @@ class EwalletService(_BaseService):
         """
         cid = await self._resolve_contract_id(contract_id)
 
-        body = {"contract_id": cid, "card_id": card_id, "amount": amount}
+        body = {
+            "contract_id": cid,
+            "card_id": require_identifier(card_id, "card_id"),
+            "amount": decimal_to_wire(amount),
+        }
 
-        data = await self._request(
-            "move_to_contract",
+        return await self._request(
+            MOVE_TO_CONTRACT,
             api_version=api_version,
             data=body,
+            request_contract_id=cid,
         )
-
-        return MoveToContractResponse(**data)

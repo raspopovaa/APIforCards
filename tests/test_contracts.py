@@ -1,7 +1,10 @@
+from decimal import Decimal
+
 import pytest
 
-from api_client_opti24.models import ContractResponse
 from api_client_opti24.models.contracts import (
+    ContractDataResponse,
+    ContractResponse,
     DocumentsOrderResponse,
     DocumentsResponse,
     InvoiceOrderResponse,
@@ -11,7 +14,7 @@ from api_client_opti24.models.contracts import (
 )
 from api_client_opti24.services.contract import ContractsService
 from api_client_opti24.session import SessionManager
-from tests.service_support import service_dependencies
+from tests.service_support import service_dependencies, typed_request_stub
 
 
 class MockContractClient(ContractsService):
@@ -19,10 +22,11 @@ class MockContractClient(ContractsService):
 
     def __init__(self):
         session_manager = SessionManager()
-        session_manager.mark_authenticated("mock-session")
+        session_manager.mark_authenticated("mock-session", "1-1FLKAJQ")
         super().__init__(*service_dependencies(session_manager))
         self.session_id = "mock-session"
 
+    @typed_request_stub
     async def _request(self, operation, api_version="v1", **kwargs):
         if operation == "get_contract_data":
             return {
@@ -170,10 +174,11 @@ def mock_contract_client():
 # 🔹 Тесты
 @pytest.mark.asyncio
 async def test_get_contract_data(mock_contract_client):
-    result = await mock_contract_client.get_contract_data("1-1FLKAJQ")
-    assert isinstance(result, ContractResponse)
-    assert result.mpc is True
-    assert result.contractData.contract_id == "1-1FLKAJQ"
+    result = await mock_contract_client.get_contract_data(contract_id="1-1FLKAJQ")
+    assert isinstance(result, ContractDataResponse)
+    assert isinstance(result.data, ContractResponse)
+    assert result.data.mpc is True
+    assert result.data.contractData.contract_id == "1-1FLKAJQ"
 
 
 def test_contract_response_allows_missing_manager_data():
@@ -234,7 +239,7 @@ def test_contract_response_allows_missing_manager_data():
 
 @pytest.mark.asyncio
 async def test_get_payments(mock_contract_client):
-    result = await mock_contract_client.get_payments("1-1FLKAJQ")
+    result = await mock_contract_client.get_payments(contract_id="1-1FLKAJQ")
     assert isinstance(result, PaymentsResponse)
     assert result.data.total_count == 1
     assert result.data.result[0].id == "PAY1"
@@ -242,7 +247,10 @@ async def test_get_payments(mock_contract_client):
 
 @pytest.mark.asyncio
 async def test_get_documents(mock_contract_client):
-    result = await mock_contract_client.get_documents("2025-01-01", "2025-09-01")
+    result = await mock_contract_client.get_documents(
+        date_start="2025-01-01",
+        date_end="2025-09-01",
+    )
     assert isinstance(result, DocumentsResponse)
     assert result.data.total_count == 1
     assert result.data.result[0].id == "DOC1"
@@ -266,7 +274,10 @@ async def test_order_cards(mock_contract_client):
 
 @pytest.mark.asyncio
 async def test_order_invoice(mock_contract_client):
-    result = await mock_contract_client.order_invoice(amount=15000, email="test@test.ru")
+    result = await mock_contract_client.order_invoice(
+        amount=Decimal("15000.00"),
+        email="test@test.ru",
+    )
     assert isinstance(result, InvoiceOrderResponse)
     assert result.data is True
 
