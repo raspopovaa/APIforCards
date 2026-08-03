@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://raspopovaa.github.io/APIforCards/latest/data-types/invites/InviteResponse/">
+        <link rel="canonical" href="https://raspopovaa.github.io/APIforCards/latest/data-types/users/UserAttachContractRequest/">
       
       
       
@@ -23,7 +23,7 @@
     
     
       
-        <title>InviteResponse - API Client SDK</title>
+        <title>UserAttachContractRequest - API Client SDK</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#inviteresponse" class="md-skip">
+        <a href="#userattachcontractrequest" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              InviteResponse
+              UserAttachContractRequest
             
           </span>
         </div>
@@ -1449,17 +1449,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Вложенные модели
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -1480,11 +1469,11 @@
   
 
 
-<h1 id="inviteresponse"><code>InviteResponse</code><a class="headerlink" href="#inviteresponse" title="Permanent link">&para;</a></h1>
-<p>Обертка для InviteActionResult</p>
+<h1 id="userattachcontractrequest"><code>UserAttachContractRequest</code><a class="headerlink" href="#userattachcontractrequest" title="Permanent link">&para;</a></h1>
+<p>Договор, прикрепляемый к пользователю.</p>
 <div class="admonition info">
 <p class="admonition-title">Назначение Pydantic</p>
-<p>Тип модели: <strong>response/data</strong>. Ответ API проверяется этой моделью напрямую или рекурсивно как часть родительской response-модели. При несовпадении типов или отсутствии обязательного поля Pydantic формирует <code>ValidationError</code>.</p>
+<p>Тип модели: <strong>request</strong>. Правила ниже применяются, когда вызывающий код явно создаёт <code>UserAttachContractRequest</code> или вызывает <code>UserAttachContractRequest.model_validate(payload)</code>. Наличие request-модели не означает, что каждый метод SDK автоматически создаёт её: фактический входной контракт определяется сигнатурой соответствующего сервисного метода.</p>
 </div>
 <h2 id="_1">Поведение модели<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <table>
@@ -1498,8 +1487,8 @@
 <tbody>
 <tr>
 <td>Дополнительные поля (<code>extra</code>)</td>
-<td><code>allow</code></td>
-<td>Дополнительные поля разрешены и сохраняются в модели.</td>
+<td><code>forbid</code></td>
+<td>Дополнительные поля запрещены и вызывают ValidationError.</td>
 </tr>
 <tr>
 <td>Проверка default</td>
@@ -1536,40 +1525,40 @@
 </thead>
 <tbody>
 <tr>
-<td><code>status</code></td>
-<td><code>dict[str, Any]</code></td>
-<td><code>object</code></td>
+<td><code>sid</code></td>
+<td><code>str</code></td>
+<td><code>string</code></td>
 <td style="text-align: center;">Да</td>
 <td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
 <td><code>—</code></td>
 <td>—</td>
-<td>Проверяется как объект: ключи str, значения Any.</td>
-<td>Статус выполнения запроса</td>
+<td>Значение преобразуется и проверяется как str.</td>
+<td>ID договора</td>
 </tr>
 <tr>
-<td><code>data</code></td>
-<td><code>InviteActionResult</code></td>
-<td><code>object (InviteActionResult)</code></td>
-<td style="text-align: center;">Да</td>
-<td style="text-align: center;">Нет</td>
-<td><code>—</code></td>
-<td><code>—</code></td>
-<td>—</td>
-<td>Вложенный объект рекурсивно проверяется моделью InviteActionResult.</td>
-<td>—</td>
-</tr>
-<tr>
-<td><code>timestamp</code></td>
-<td><code>int \| None</code></td>
-<td><code>integer \| null</code></td>
+<td><code>template_id</code></td>
+<td><code>str \| None</code></td>
+<td><code>string \| null</code></td>
 <td style="text-align: center;">Нет</td>
 <td style="text-align: center;">Да</td>
 <td><code>None</code></td>
 <td><code>—</code></td>
 <td>—</td>
-<td>Значение должно соответствовать одному из типов: int, None</td>
-<td>Метка времени</td>
+<td>Значение должно соответствовать одному из типов: str, None</td>
+<td>ID шаблона виртуальной карты</td>
+</tr>
+<tr>
+<td><code>use_mpc</code></td>
+<td><code>bool \| None</code></td>
+<td><code>boolean \| null</code></td>
+<td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: bool, None</td>
+<td>Разрешён ли выпуск МПК</td>
 </tr>
 </tbody>
 </table>
@@ -1577,10 +1566,6 @@
 <p class="admonition-title">Граница проверки</p>
 <p>Значения, упомянутые только в тексте описания, не считаются жёстким ограничением. Например, фраза «Y или N» проверяется только тогда, когда в модели задан <code>Literal</code>, Enum, ограничение <code>Field</code> или пользовательский валидатор.</p>
 </div>
-<h2 id="_3">Вложенные модели<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="../InviteActionResult/"><code>InviteActionResult</code></a></li>
-</ul>
 
 
 

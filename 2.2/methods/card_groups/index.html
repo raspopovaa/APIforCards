@@ -2168,9 +2168,9 @@
 <tbody>
 <tr>
 <td><code>contract_id</code></td>
-<td><code>str</code></td>
-<td style="text-align: center;">Да</td>
-<td>—</td>
+<td><code>str | None</code></td>
+<td style="text-align: center;">Нет</td>
+<td><code>None</code></td>
 <td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
 </tr>
 <tr>
@@ -2229,9 +2229,8 @@
 - <a href="../../data-types/card_group/CardGroupListData/"><code>CardGroupListData</code></a></p>
 <h3 id="_5">Пример<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">card_groups</span><span class="o">.</span><span class="n">get_card_groups</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">contract_id</span><span class="o">=</span><span class="s2">&quot;contract-id&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="clientcard_groupsremove_card_group"><code>client.card_groups.remove_card_group()</code><a class="headerlink" href="#clientcard_groupsremove_card_group" title="Permanent link">&para;</a></h2>
 <p>Удалить группу карт по ID.</p>
@@ -2269,18 +2268,18 @@
 </thead>
 <tbody>
 <tr>
-<td><code>contract_id</code></td>
-<td><code>str</code></td>
-<td style="text-align: center;">Да</td>
-<td>—</td>
-<td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
-</tr>
-<tr>
 <td><code>group_id</code></td>
 <td><code>str</code></td>
 <td style="text-align: center;">Да</td>
 <td>—</td>
 <td>Идентификатор группы топливных карт.</td>
+</tr>
+<tr>
+<td><code>contract_id</code></td>
+<td><code>str | None</code></td>
+<td style="text-align: center;">Нет</td>
+<td><code>None</code></td>
+<td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
 </tr>
 <tr>
 <td><code>api_version</code></td>
@@ -2336,10 +2335,9 @@
 </table>
 <h3 id="_10">Пример<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">card_groups</span><span class="o">.</span><span class="n">remove_card_group</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">contract_id</span><span class="o">=</span><span class="s2">&quot;contract-id&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">group_id</span><span class="o">=</span><span class="s2">&quot;group-id&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">)</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">group_id</span><span class="o">=</span><span class="s2">&quot;group-id&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="clientcard_groupsset_card_group"><code>client.card_groups.set_card_group()</code><a class="headerlink" href="#clientcard_groupsset_card_group" title="Permanent link">&para;</a></h2>
 <p>Создать новую или изменить существующую группу карт.</p>
@@ -2377,18 +2375,18 @@
 </thead>
 <tbody>
 <tr>
-<td><code>contract_id</code></td>
-<td><code>str</code></td>
-<td style="text-align: center;">Да</td>
-<td>—</td>
-<td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
-</tr>
-<tr>
 <td><code>name</code></td>
 <td><code>str</code></td>
 <td style="text-align: center;">Да</td>
 <td>—</td>
 <td>Имя группы карт.</td>
+</tr>
+<tr>
+<td><code>contract_id</code></td>
+<td><code>str | None</code></td>
+<td style="text-align: center;">Нет</td>
+<td><code>None</code></td>
+<td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
 </tr>
 <tr>
 <td><code>group_id</code></td>
@@ -2453,10 +2451,9 @@
 - <a href="../../data-types/card_group/SetCardGroupData/"><code>SetCardGroupData</code></a></p>
 <h3 id="_15">Пример<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">card_groups</span><span class="o">.</span><span class="n">set_card_group</span><span class="p">(</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">contract_id</span><span class="o">=</span><span class="s2">&quot;contract-id&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="clientcard_groupsset_cards_to_group"><code>client.card_groups.set_cards_to_group()</code><a class="headerlink" href="#clientcard_groupsset_cards_to_group" title="Permanent link">&para;</a></h2>
 <p>Добавление карт в группу.</p>
@@ -2494,13 +2491,6 @@
 </thead>
 <tbody>
 <tr>
-<td><code>contract_id</code></td>
-<td><code>str</code></td>
-<td style="text-align: center;">Да</td>
-<td>—</td>
-<td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
-</tr>
-<tr>
 <td><code>group_id</code></td>
 <td><code>str</code></td>
 <td style="text-align: center;">Да</td>
@@ -2509,10 +2499,17 @@
 </tr>
 <tr>
 <td><code>cards_list</code></td>
-<td><code>list[dict[str, Any]]</code></td>
+<td><code>list[CardGroupAssignmentRequest | Mapping[str, object]]</code></td>
 <td style="text-align: center;">Да</td>
 <td>—</td>
 <td>Список карт договора, добавляемых в группу или удаляемых из неё.</td>
+</tr>
+<tr>
+<td><code>contract_id</code></td>
+<td><code>str | None</code></td>
+<td style="text-align: center;">Нет</td>
+<td><code>None</code></td>
+<td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
 </tr>
 <tr>
 <td><code>api_version</code></td>
@@ -2568,11 +2565,10 @@
 </table>
 <h3 id="_20">Пример<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">card_groups</span><span class="o">.</span><span class="n">set_cards_to_group</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">contract_id</span><span class="o">=</span><span class="s2">&quot;contract-id&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">group_id</span><span class="o">=</span><span class="s2">&quot;group-id&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">cards_list</span><span class="o">=</span><span class="p">{},</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">)</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">group_id</span><span class="o">=</span><span class="s2">&quot;group-id&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">cards_list</span><span class="o">=</span><span class="s2">&quot;cards-list&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 
 

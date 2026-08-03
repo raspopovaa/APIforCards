@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://raspopovaa.github.io/APIforCards/latest/data-types/invites/InviteResponse/">
+        <link rel="canonical" href="https://raspopovaa.github.io/APIforCards/latest/data-types/invites/InviteListResponse/">
       
       
       
@@ -23,7 +23,7 @@
     
     
       
-        <title>InviteResponse - API Client SDK</title>
+        <title>InviteListResponse - API Client SDK</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#inviteresponse" class="md-skip">
+        <a href="#invitelistresponse" class="md-skip">
           Перейти к содержанию
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              InviteResponse
+              InviteListResponse
             
           </span>
         </div>
@@ -1480,8 +1480,8 @@
   
 
 
-<h1 id="inviteresponse"><code>InviteResponse</code><a class="headerlink" href="#inviteresponse" title="Permanent link">&para;</a></h1>
-<p>Обертка для InviteActionResult</p>
+<h1 id="invitelistresponse"><code>InviteListResponse</code><a class="headerlink" href="#invitelistresponse" title="Permanent link">&para;</a></h1>
+<p>Полный ответ на запрос списка приглашений.</p>
 <div class="admonition info">
 <p class="admonition-title">Назначение Pydantic</p>
 <p>Тип модели: <strong>response/data</strong>. Ответ API проверяется этой моделью напрямую или рекурсивно как часть родительской response-модели. При несовпадении типов или отсутствии обязательного поля Pydantic формирует <code>ValidationError</code>.</p>
@@ -1549,15 +1549,15 @@
 </tr>
 <tr>
 <td><code>data</code></td>
-<td><code>InviteActionResult</code></td>
-<td><code>object (InviteActionResult)</code></td>
+<td><code>InviteList</code></td>
+<td><code>object (InviteList)</code></td>
 <td style="text-align: center;">Да</td>
 <td style="text-align: center;">Нет</td>
 <td><code>—</code></td>
 <td><code>—</code></td>
 <td>—</td>
-<td>Вложенный объект рекурсивно проверяется моделью InviteActionResult.</td>
-<td>—</td>
+<td>Вложенный объект рекурсивно проверяется моделью InviteList.</td>
+<td>Список приглашений</td>
 </tr>
 <tr>
 <td><code>timestamp</code></td>
@@ -1579,7 +1579,7 @@
 </div>
 <h2 id="_3">Вложенные модели<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../InviteActionResult/"><code>InviteActionResult</code></a></li>
+<li><a href="../InviteList/"><code>InviteList</code></a></li>
 </ul>
 
 

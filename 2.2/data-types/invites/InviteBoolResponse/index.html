@@ -1525,6 +1525,18 @@
 </thead>
 <tbody>
 <tr>
+<td><code>status</code></td>
+<td><code>dict[str, Any]</code></td>
+<td><code>object</code></td>
+<td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
+<td><code>—</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Проверяется как объект: ключи str, значения Any.</td>
+<td>Статус выполнения запроса</td>
+</tr>
+<tr>
 <td><code>data</code></td>
 <td><code>bool</code></td>
 <td><code>boolean</code></td>
@@ -1535,6 +1547,18 @@
 <td>—</td>
 <td>Значение преобразуется и проверяется как bool.</td>
 <td>—</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td><code>int \| None</code></td>
+<td><code>integer \| null</code></td>
+<td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td><code>None</code></td>
+<td><code>—</code></td>
+<td>—</td>
+<td>Значение должно соответствовать одному из типов: int, None</td>
+<td>Метка времени</td>
 </tr>
 </tbody>
 </table>

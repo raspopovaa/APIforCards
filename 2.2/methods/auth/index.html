@@ -987,10 +987,27 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Возвращаемое значение">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поля возвращаемой модели
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         Пример
@@ -1901,10 +1918,27 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Возвращаемое значение">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Поля возвращаемой модели
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         Пример
@@ -2198,10 +2232,51 @@
 </tbody>
 </table>
 <h3 id="_13">Возвращаемое значение<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
-<p><strong>Тип после валидации:</strong> <code>dict[str, object]</code></p>
-<p><strong>Pydantic-модель:</strong> нет.</p>
-<p>SDK возвращает значение указанного Python-типа; отдельная модель ответа не применяется.</p>
-<h3 id="_14">Пример<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<p><strong>Тип после валидации:</strong> <code>LogoffResponse</code></p>
+<p><strong>Pydantic-модель:</strong> <a href="../../data-types/auth/LogoffResponse/"><code>LogoffResponse</code></a></p>
+<p>Ответ передаётся в <code>LogoffResponse.model_validate(payload)</code>. Pydantic проверяет обязательные поля, преобразует значения по аннотациям и рекурсивно валидирует вложенные модели.</p>
+<h4 id="_14">Поля возвращаемой модели<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Поле</th>
+<th>Тип после валидации</th>
+<th>JSON-тип</th>
+<th style="text-align: center;">Обязательное</th>
+<th style="text-align: center;"><code>None</code></th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status</code></td>
+<td><code>StatusResponse</code></td>
+<td><code>object (StatusResponse)</code></td>
+<td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
+<td>Статус ответа API</td>
+</tr>
+<tr>
+<td><code>data</code></td>
+<td><code>bool</code></td>
+<td><code>boolean</code></td>
+<td style="text-align: center;">Да</td>
+<td style="text-align: center;">Нет</td>
+<td>True — если выход выполнен успешно</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td><code>int \| None</code></td>
+<td><code>integer \| null</code></td>
+<td style="text-align: center;">Нет</td>
+<td style="text-align: center;">Да</td>
+<td>Метка времени ответа</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Вложенные модели:</strong>
+- <a href="../../data-types/auth/StatusResponse/"><code>StatusResponse</code></a></p>
+<h3 id="_15">Пример<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">logoff</span><span class="p">(</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p">)</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
