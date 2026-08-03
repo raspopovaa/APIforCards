@@ -1,4 +1,36 @@
-from ..modeling import BaseModel, Field
+from typing import Any
+
+from pydantic import AliasChoices, model_validator
+
+from ..modeling import BaseModel, Field, StrictRequestModel
+
+
+class _InviteContractRequest(StrictRequestModel):
+    id: str = Field(
+        ...,
+        validation_alias=AliasChoices("id", "sid"),
+        description="ID договора",
+    )
+    template_id: str | None = Field(None, description="ID шаблона виртуальной карты")
+
+
+class InviteCreateRequest(StrictRequestModel):
+    """Данные для создания приглашения."""
+
+    role: str = Field(..., description="ID роли")
+    mobile: str | None = Field(None, description="Номер телефона")
+    email: str | None = Field(None, description="Email")
+    cards: list[str] = Field(default_factory=list, description="ID прикрепляемых карт")
+    contracts: list[_InviteContractRequest] = Field(
+        default_factory=list,
+        description="Договоры, прикрепляемые после регистрации",
+    )
+
+    @model_validator(mode="after")
+    def require_recipient(self) -> "InviteCreateRequest":
+        if self.mobile is None and self.email is None:
+            raise ValueError("mobile or email is required")
+        return self
 
 
 class InviteCard(BaseModel):
@@ -59,6 +91,14 @@ class InviteList(BaseModel):
     result: list[InviteItem] = Field(..., description="Список приглашений")
 
 
+class InviteListResponse(BaseModel):
+    """Полный ответ на запрос списка приглашений."""
+
+    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
+    data: InviteList = Field(..., description="Список приглашений")
+    timestamp: int | None = Field(None, description="Метка времени")
+
+
 class InviteActionResult(BaseModel):
     """Результат действий с приглашениями (создание, продление, повторная отправка)"""
 
@@ -73,10 +113,14 @@ class InviteActionResult(BaseModel):
 class InviteResponse(BaseModel):
     """Обертка для InviteActionResult"""
 
+    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
     data: InviteActionResult
+    timestamp: int | None = Field(None, description="Метка времени")
 
 
 class InviteBoolResponse(BaseModel):
     """Результат простых действий (удаление, продление и т.п.)"""
 
+    status: dict[str, Any] = Field(..., description="Статус выполнения запроса")
     data: bool
+    timestamp: int | None = Field(None, description="Метка времени")

@@ -18,6 +18,7 @@ class DummyClient(AuthService):
     def __init__(self):
         self.session_manager = SessionManager()
         self.calls = []
+        self.fail_logoff = False
 
         class StubAuthenticator:
             async def authenticate(
@@ -76,6 +77,8 @@ class DummyClient(AuthService):
         if operation == "auth_user":
             return self._auth_payload()
         if operation == "logoff":
+            if self.fail_logoff:
+                raise RuntimeError("logoff failed")
             return {"status": {"code": 200}, "data": True, "timestamp": 1710000000}
         if operation == "get_info":
             return {
@@ -154,14 +157,31 @@ async def test_auth_user_requires_selection_when_multiple_contracts_are_availabl
 
 
 @pytest.mark.asyncio
-async def test_logoff_returns_true():
+async def test_logoff_returns_envelope_and_clears_local_session():
     client = DummyClient()
     client.session_id = "SESSION123"
 
     result = await client.logoff()
 
-    assert result["status"]["code"] == 200
-    assert result["data"] is True
+    assert result.status.code == 200
+    assert result.data is True
+    assert client.session_id is None
+    assert client.contract_id is None
+    assert client.session_manager.state == SessionState.ANONYMOUS
+
+
+@pytest.mark.asyncio
+async def test_logoff_clears_local_session_when_request_fails():
+    client = DummyClient()
+    client.session_manager.mark_authenticated("SESSION123", "1-AAA")
+    client.fail_logoff = True
+
+    with pytest.raises(RuntimeError, match="logoff failed"):
+        await client.logoff()
+
+    assert client.session_id is None
+    assert client.contract_id is None
+    assert client.session_manager.state == SessionState.ANONYMOUS
 
 
 @pytest.mark.asyncio

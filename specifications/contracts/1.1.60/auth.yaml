@@ -143,7 +143,6 @@ operations:
       fixture: tests/fixtures/spec/1.1.60/auth/logoff.success.json
       fixture_status: spec-only
       fixture_corrections: []
-    response_kind: mapping
   get_info:
     summary: Статистика
     verification: provisional

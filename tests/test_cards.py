@@ -158,27 +158,60 @@ async def test_get_card_drivers(mock_client):
 
 @pytest.mark.asyncio
 async def test_block_card(mock_client):
-    result = await mock_client.block_card("1-B7C8D", ["517945", "517946"], block=True)
+    result = await mock_client.block_card(
+        contract_id="1-B7C8D",
+        card_ids=["517945", "517946"],
+        block=True,
+    )
     assert isinstance(result, IDListResponse)
     assert result.data == ["517945", "517946"]
 
 
 @pytest.mark.asyncio
 async def test_set_card_comment(mock_client):
-    result = await mock_client.set_card_comment("517945", "1-B7C8D", "COMMENT")
+    result = await mock_client.set_card_comment(
+        card_id="517945",
+        contract_id="1-B7C8D",
+        comment="COMMENT",
+    )
     assert isinstance(result, BoolResponse)
     assert result.data is True
 
 
 @pytest.mark.asyncio
 async def test_verify_and_reset_pin(mock_client):
-    ok = await mock_client.verify_pin("382359", "1-B7C8D")
+    ok = await mock_client.verify_pin(card_id="382359", contract_id="1-B7C8D")
     assert isinstance(ok, BoolResponse)
     assert ok.data is True
 
-    reset = await mock_client.reset_pin("382359", "1-B7C8D", code="TESTCODE")
+    reset = await mock_client.reset_pin(
+        card_id="382359",
+        contract_id="1-B7C8D",
+        code="TESTCODE",
+    )
     assert isinstance(reset, BoolResponse)
     assert reset.data is True
+
+
+@pytest.mark.asyncio
+async def test_contract_bound_card_methods_use_selected_contract(mock_client):
+    calls = [
+        lambda: mock_client.get_cards_v1(),
+        lambda: mock_client.get_cards_v2(),
+        lambda: mock_client.get_cards_by_group(group_id="group-1"),
+        lambda: mock_client.get_card_drivers(card_id="382359"),
+        lambda: mock_client.get_card_detail(card_id="382359"),
+        lambda: mock_client.block_card(card_ids=["517945"]),
+        lambda: mock_client.set_card_comment(card_id="517945", comment="COMMENT"),
+        lambda: mock_client.verify_pin(card_id="382359"),
+        lambda: mock_client.reset_pin(card_id="382359", code="TESTCODE"),
+    ]
+
+    for call in calls:
+        await call()
+        _, _, kwargs = mock_client._called[-1]
+        payload = kwargs.get("params") or kwargs.get("data")
+        assert payload["contract_id"] == "1-1FLW4T7"
 
 
 def test_card_v2_requires_contract_name():
