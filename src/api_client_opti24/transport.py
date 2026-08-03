@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
+import os
+import tempfile
 import time
 from collections.abc import Awaitable, Callable, Mapping
 from contextlib import AbstractAsyncContextManager
+from pathlib import Path
 from typing import Any, Protocol
 from urllib.parse import urlsplit
 
@@ -267,18 +270,175 @@ class AsyncTransport:
         headers: Mapping[str, str] | None = None,
         *,
         method_name: str | None = None,
+        retry_class: str | RetryClass | None = None,
+        idempotent: bool | None = None,
         **kwargs: Any,
     ) -> bytes:
+        result = await self._download_stream(
+            method,
+            endpoint,
+            api_version=api_version,
+            headers=headers,
+            method_name=method_name,
+            retry_class=retry_class,
+            idempotent=idempotent,
+            destination=None,
+            **kwargs,
+        )
+        if not isinstance(result, bytes):
+            raise TypeError("Expected in-memory stream result")
+        return result
+
+    async def request_stream_to_file(
+        self,
+        method: str,
+        endpoint: str,
+        destination: str | Path,
+        api_version: str = "v1",
+        headers: Mapping[str, str] | None = None,
+        *,
+        method_name: str | None = None,
+        retry_class: str | RetryClass | None = None,
+        idempotent: bool | None = None,
+        chunk_size: int = 64 * 1024,
+        **kwargs: Any,
+    ) -> Path:
+        if chunk_size <= 0:
+            raise ValueError("chunk_size must be greater than zero")
+        result = await self._download_stream(
+            method,
+            endpoint,
+            api_version=api_version,
+            headers=headers,
+            method_name=method_name,
+            retry_class=retry_class,
+            idempotent=idempotent,
+            destination=Path(destination),
+            chunk_size=chunk_size,
+            **kwargs,
+        )
+        if not isinstance(result, Path):
+            raise TypeError("Expected file stream result")
+        return result
+
+    async def _download_stream(
+        self,
+        method: str,
+        endpoint: str,
+        *,
+        api_version: str,
+        headers: Mapping[str, str] | None,
+        method_name: str | None,
+        retry_class: str | RetryClass | None,
+        idempotent: bool | None,
+        destination: Path | None,
+        chunk_size: int = 64 * 1024,
+        **kwargs: Any,
+    ) -> bytes | Path:
         parsed = urlsplit(endpoint)
         if parsed.scheme or parsed.netloc:
             raise ValueError("stream endpoint must be relative to the configured base_url")
         url = self._build_url(api_version, endpoint)
-        await self._wait_for_rate_limit()
-        async with self.client.stream(method, url, headers=headers, **kwargs) as resp:
-            content = await resp.aread()
-            return self.response_decoder.decode_bytes(
-                resp,
-                content,
-                url,
-                method_name=method_name,
-            )
+        normalized_method = method.upper()
+        resolved_retry_class = retry_class or (
+            RetryClass.SAFE.value
+            if normalized_method in SAFE_HTTP_METHODS
+            else RetryClass.NEVER.value
+        )
+        resolved_idempotent = (
+            normalized_method in IDEMPOTENT_HTTP_METHODS if idempotent is None else idempotent
+        )
+        network_attempts = self.retry_policy.network_attempt_count(
+            resolved_retry_class,
+            normalized_method,
+            idempotent=resolved_idempotent,
+        )
+        rate_limit_attempts = self.retry_policy.rate_limit_attempt_count(
+            resolved_retry_class,
+            normalized_method,
+            idempotent=resolved_idempotent,
+        )
+        network_backoff = self.retry_policy.initial_network_backoff(resolved_retry_class)
+
+        for network_attempt in range(1, network_attempts + 1):
+            try:
+                for rate_attempt in range(1, rate_limit_attempts + 1):
+                    await self._wait_for_rate_limit()
+                    async with self.client.stream(method, url, headers=headers, **kwargs) as resp:
+                        if resp.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
+                            await resp.aread()
+                            backoff_seconds = (
+                                self.retry_policy.rate_limit_backoff_seconds * rate_attempt
+                            )
+                            await self._sleep(backoff_seconds)
+                            continue
+
+                        content_type = resp.headers.get("content-type", "").lower()
+                        if not 200 <= resp.status_code < 300 or "json" in content_type:
+                            content = await resp.aread()
+                            self.response_decoder.decode_bytes(
+                                resp,
+                                content,
+                                url,
+                                method_name=method_name,
+                            )
+                            if destination is None:
+                                return content
+                            return await self._write_bytes_atomically(destination, content)
+
+                        if destination is None:
+                            return await resp.aread()
+                        return await self._write_stream_atomically(
+                            destination,
+                            resp,
+                            chunk_size=chunk_size,
+                        )
+                raise RuntimeError("Rate limit retry loop exhausted unexpectedly")
+            except httpx.RequestError:
+                if network_attempt >= network_attempts:
+                    raise
+                await self._sleep(network_backoff)
+                network_backoff = min(
+                    network_backoff * 2,
+                    self.retry_policy.network_backoff_max_seconds,
+                )
+        raise RuntimeError("Network retry loop exhausted unexpectedly")
+
+    @staticmethod
+    async def _write_bytes_atomically(destination: Path, content: bytes) -> Path:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = AsyncTransport._temporary_path(destination)
+        try:
+            await asyncio.to_thread(temporary.write_bytes, content)
+            await asyncio.to_thread(os.replace, temporary, destination)
+        finally:
+            temporary.unlink(missing_ok=True)
+        return destination
+
+    @staticmethod
+    async def _write_stream_atomically(
+        destination: Path,
+        response: httpx.Response,
+        *,
+        chunk_size: int,
+    ) -> Path:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = AsyncTransport._temporary_path(destination)
+        try:
+            with temporary.open("wb") as output:
+                async for chunk in response.aiter_bytes(chunk_size):
+                    await asyncio.to_thread(output.write, chunk)
+            await asyncio.to_thread(os.replace, temporary, destination)
+        finally:
+            temporary.unlink(missing_ok=True)
+        return destination
+
+    @staticmethod
+    def _temporary_path(destination: Path) -> Path:
+        with tempfile.NamedTemporaryFile(
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".part",
+            delete=False,
+        ) as temporary:
+            return Path(temporary.name)

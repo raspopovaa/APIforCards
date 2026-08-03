@@ -158,25 +158,37 @@ async def test_get_card_drivers(mock_client):
 
 @pytest.mark.asyncio
 async def test_block_card(mock_client):
-    result = await mock_client.block_card("1-B7C8D", ["517945", "517946"], block=True)
+    result = await mock_client.block_card(
+        contract_id="1-B7C8D",
+        card_ids=["517945", "517946"],
+        block=True,
+    )
     assert isinstance(result, IDListResponse)
     assert result.data == ["517945", "517946"]
 
 
 @pytest.mark.asyncio
 async def test_set_card_comment(mock_client):
-    result = await mock_client.set_card_comment("517945", "1-B7C8D", "COMMENT")
+    result = await mock_client.set_card_comment(
+        card_id="517945",
+        contract_id="1-B7C8D",
+        comment="COMMENT",
+    )
     assert isinstance(result, BoolResponse)
     assert result.data is True
 
 
 @pytest.mark.asyncio
 async def test_verify_and_reset_pin(mock_client):
-    ok = await mock_client.verify_pin("382359", "1-B7C8D")
+    ok = await mock_client.verify_pin(card_id="382359", contract_id="1-B7C8D")
     assert isinstance(ok, BoolResponse)
     assert ok.data is True
 
-    reset = await mock_client.reset_pin("382359", "1-B7C8D", code="TESTCODE")
+    reset = await mock_client.reset_pin(
+        card_id="382359",
+        contract_id="1-B7C8D",
+        code="TESTCODE",
+    )
     assert isinstance(reset, BoolResponse)
     assert reset.data is True
 

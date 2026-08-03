@@ -1,6 +1,7 @@
 from typing import Any
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.virtual_cards import (
     MPCListResponse,
     MPCPayloadResponse,
@@ -28,12 +29,13 @@ class VirtualCardsService(_BaseService):
             "get_mpc_qr_list",
             api_version=api_version,
         )
-        return MPCListResponse(**data)
+        return decode_model(MPCListResponse, data)
 
     # === Выпуск виртуальной карты (старый метод) ===
     @api_method
     async def create_virtual_card(
         self,
+        *,
         user_id: str,
         api_version: str | None = None,
     ) -> VirtualCardResponse:
@@ -45,7 +47,7 @@ class VirtualCardsService(_BaseService):
             api_version=api_version,
             data=payload,
         )
-        return VirtualCardResponse(**data)
+        return decode_model(VirtualCardResponse, data)
 
     # === Выпуск виртуальной карты (новый метод /release) ===
     @api_method
@@ -96,12 +98,13 @@ class VirtualCardsService(_BaseService):
             api_version=api_version,
             data=payload,
         )
-        return VirtualCardResponse(**data)
+        return decode_model(VirtualCardResponse, data)
 
     # === Удаление МПК ===
     @api_method
     async def delete_mpc(
         self,
+        *,
         card_id: str,
         api_version: str | None = None,
     ) -> SimpleActionResponse:
@@ -112,12 +115,13 @@ class VirtualCardsService(_BaseService):
             api_version=api_version,
             path_params={"card_id": card_id},
         )
-        return SimpleActionResponse(**data)
+        return decode_model(SimpleActionResponse, data)
 
     # === Сброс счётчиков МПК ===
     @api_method
     async def reset_mpc(
         self,
+        *,
         card_id: str,
         type_: str,
         api_version: str | None = None,
@@ -135,7 +139,7 @@ class VirtualCardsService(_BaseService):
             path_params={"card_id": card_id},
             data=payload,
         )
-        return ResetMPCResponse(**data)
+        return decode_model(ResetMPCResponse, data)
 
     @api_method
     async def generate_payment_qr(
@@ -154,7 +158,7 @@ class VirtualCardsService(_BaseService):
             path_params={"card_id": card_id},
             data=request_payload,
         )
-        return MPCPayloadResponse(**data)
+        return decode_model(MPCPayloadResponse, data)
 
     @api_method
     async def init_mpc(
@@ -173,7 +177,7 @@ class VirtualCardsService(_BaseService):
             path_params={"card_id": card_id},
             data=request_payload,
         )
-        return MPCPayloadResponse(**data)
+        return decode_model(MPCPayloadResponse, data)
 
     @api_method
     async def confirm_mpc(
@@ -192,7 +196,7 @@ class VirtualCardsService(_BaseService):
             path_params={"card_id": card_id},
             data=request_payload,
         )
-        return MPCPayloadResponse(**data)
+        return decode_model(MPCPayloadResponse, data)
 
     @api_method
     async def update_mpc(
@@ -211,4 +215,4 @@ class VirtualCardsService(_BaseService):
             path_params={"card_id": card_id},
             data=request_payload,
         )
-        return MPCPayloadResponse(**data)
+        return decode_model(MPCPayloadResponse, data)

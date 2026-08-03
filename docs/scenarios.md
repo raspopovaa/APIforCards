@@ -74,6 +74,7 @@ await client.restrictions.set_restriction(
 
 ```python
 available = await client.reports.get_reports()
+print(available.data.total_count)
 
 job = await client.reports.order_report(
     report_id="report-id",
@@ -86,7 +87,12 @@ job = await client.reports.order_report(
 )
 
 jobs = await client.reports.get_report_jobs()
-report_file = await client.reports.download_report_file(job_id="job-id")
+print(jobs.data.total_count)
+
+report_path = await client.reports.download_report_file_to(
+    job_id=job.data.job_id[0],
+    destination="reports/report.xlsx",
+)
 ```
 
 Формирование файла выполняется асинхронно на стороне API. Не запускайте частый

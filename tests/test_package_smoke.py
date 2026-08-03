@@ -248,6 +248,21 @@ def test_registered_service_methods_have_docstrings_and_domain_scenarios() -> No
         assert "Пример" in docstring, operation_name
 
 
+def test_all_public_service_parameters_are_keyword_only() -> None:
+    for service_type_name in SERVICE_TYPES.values():
+        service_type = getattr(sdk, service_type_name)
+        for method_name, method in inspect.getmembers(
+            service_type,
+            predicate=inspect.iscoroutinefunction,
+        ):
+            if method_name.startswith("_"):
+                continue
+            parameters = list(inspect.signature(method).parameters.values())[1:]
+            assert all(
+                parameter.kind is inspect.Parameter.KEYWORD_ONLY for parameter in parameters
+            ), f"{service_type_name}.{method_name}"
+
+
 @pytest.mark.asyncio
 async def test_client_accepts_logger_and_clock_without_configuring_log_file(tmp_path) -> None:
     class FrozenClock:

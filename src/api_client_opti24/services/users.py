@@ -1,6 +1,7 @@
 from typing import Any
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.users import (
     UserBoolResponse,
     UserCreateResponse,
@@ -54,7 +55,7 @@ class UsersService(_BaseService):
             params=params,
         )
 
-        return UserListResponse(**raw)
+        return decode_model(UserListResponse, raw)
 
     # -------------------- Создание пользователя --------------------
 
@@ -98,7 +99,7 @@ class UsersService(_BaseService):
             data=body,
         )
 
-        return UserCreateResponse(**raw)
+        return decode_model(UserCreateResponse, raw)
 
     # -------------------- Прикрепление договоров --------------------
 
@@ -127,7 +128,7 @@ class UsersService(_BaseService):
             json=contracts,
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)
 
     # -------------------- Открепление договоров --------------------
 
@@ -156,7 +157,7 @@ class UsersService(_BaseService):
             json=contracts,
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)
 
     # -------------------- Прикрепление карты --------------------
 
@@ -183,7 +184,7 @@ class UsersService(_BaseService):
             data={"card_id": card_id},
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)
 
     # -------------------- Открепление карты --------------------
 
@@ -210,7 +211,7 @@ class UsersService(_BaseService):
             data={"card_id": card_id},
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)
 
     # -------------------- Удаление пользователя --------------------
 
@@ -238,4 +239,4 @@ class UsersService(_BaseService):
             data=with_method_override(None, "DELETE") if use_post else None,
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)

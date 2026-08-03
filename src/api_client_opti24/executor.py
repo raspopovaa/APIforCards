@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
+from pathlib import Path
 from typing import Any, Protocol, TypeVar
 
 from .config import TimeoutPolicy
@@ -42,6 +43,17 @@ class Transport(Protocol):
         headers: Mapping[str, str] | None = None,
         **kwargs: Any,
     ) -> bytes: ...
+
+    async def request_stream_to_file(
+        self,
+        method: str,
+        endpoint: str,
+        destination: str | Path,
+        *,
+        api_version: str = "v1",
+        headers: Mapping[str, str] | None = None,
+        **kwargs: Any,
+    ) -> Path: ...
 
     async def aclose(self) -> None: ...
 
@@ -185,6 +197,8 @@ class OperationExecutor:
             headers=self._request_headers(spec, kwargs),
             timeout=self.__timeouts.resolve(spec.timeout_class),
             method_name=spec.name,
+            retry_class=spec.retry_class,
+            idempotent=spec.idempotent,
             **kwargs,
         )
 
@@ -204,6 +218,35 @@ class OperationExecutor:
             path_params=path_params,
         )
         return await self._request_bytes(spec, route, endpoint, dict(kwargs))
+
+    async def execute_stream_to_file(
+        self,
+        operation: str,
+        destination: str | Path,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        **kwargs: Any,
+    ) -> Path:
+        spec, route, endpoint = self._resolve_operation(
+            operation,
+            api_version=api_version,
+            route_name=route_name,
+            path_params=path_params,
+        )
+        return await self.__transport.request_stream_to_file(
+            route.http_method,
+            endpoint,
+            destination,
+            api_version=route.api_version,
+            headers=self._request_headers(spec, kwargs),
+            timeout=self.__timeouts.resolve(spec.timeout_class),
+            method_name=spec.name,
+            retry_class=spec.retry_class,
+            idempotent=spec.idempotent,
+            **kwargs,
+        )
 
 
 class DefaultRequestExecutor:
@@ -324,6 +367,33 @@ class DefaultRequestExecutor:
             route,
             lambda: self.__operation_executor.execute_stream(
                 operation,
+                api_version=api_version,
+                route_name=route_name,
+                path_params=path_params,
+                **kwargs,
+            ),
+        )
+
+    async def execute_stream_to_file(
+        self,
+        operation: str,
+        destination: str | Path,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        **kwargs: Any,
+    ) -> Path:
+        spec = self.__registry.get(operation)
+        route = spec.resolve_route(api_version=api_version, route_name=route_name)
+        if spec.requires_session:
+            await self.__session_gate.ensure_authenticated()
+        return await self._run_with_recovery(
+            spec,
+            route,
+            lambda: self.__operation_executor.execute_stream_to_file(
+                operation,
+                destination,
                 api_version=api_version,
                 route_name=route_name,
                 path_params=path_params,

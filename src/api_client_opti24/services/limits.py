@@ -27,10 +27,6 @@ class LimitsService(_BaseService):
       • Удаление лимита
     """
 
-    async def _validated_contract_id(self, contract_id: str | None) -> str:
-        resolved = await self._resolve_contract_id(contract_id)
-        return require_identifier(resolved, "contract_id")
-
     # ------------------- GET /limit -------------------
 
     @api_method
@@ -50,7 +46,7 @@ class LimitsService(_BaseService):
         :param group_id: ID группы карт (опционально)
         :param api_version: версия API (по умолчанию v1)
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         card_id, group_id = validate_card_or_group_target(
             card_id=card_id,
             group_id=group_id,
@@ -124,7 +120,7 @@ class LimitsService(_BaseService):
 
         fallback_contract_id: str | None = None
         if contract_id is not None or any(item.contract_id is None for item in parsed_limits):
-            fallback_contract_id = await self._validated_contract_id(contract_id)
+            fallback_contract_id = await self._resolve_contract_id(contract_id)
 
         serialized_limits: list[dict[str, Any]] = []
         for item in parsed_limits:
@@ -171,7 +167,7 @@ class LimitsService(_BaseService):
         :param limit_id: ID лимита
         :param group_id: ID группы карт (опционально)
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         body = {
             "limit_id": require_identifier(limit_id, "limit_id"),
             "contract_id": cid,

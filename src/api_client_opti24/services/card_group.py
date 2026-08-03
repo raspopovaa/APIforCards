@@ -2,6 +2,7 @@ import json
 from typing import Any
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models import (
     CardGroupListResponse,
     RemoveCardGroupResponse,
@@ -36,7 +37,7 @@ class CardGroupsService(_BaseService):
             api_version=api_version,
             params=params,
         )
-        return CardGroupListResponse(**raw)
+        return decode_model(CardGroupListResponse, raw)
 
     # -------------------------------
     # Создание или изменение группы
@@ -84,7 +85,7 @@ class CardGroupsService(_BaseService):
             api_version=api_version,
             data=body,
         )
-        return SetCardGroupResponse(**raw)
+        return decode_model(SetCardGroupResponse, raw)
 
     # -------------------------------
     # Добавление карт в группу
@@ -118,7 +119,7 @@ class CardGroupsService(_BaseService):
             api_version=api_version,
             data=body,
         )
-        return SetCardsToGroupResponse(**raw)
+        return decode_model(SetCardsToGroupResponse, raw)
 
     # -------------------------------
     # Удаление группы карт
@@ -145,4 +146,4 @@ class CardGroupsService(_BaseService):
             api_version=api_version,
             data=body,
         )
-        return RemoveCardGroupResponse(**raw)
+        return decode_model(RemoveCardGroupResponse, raw)

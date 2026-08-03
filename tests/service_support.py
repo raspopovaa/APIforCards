@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 
@@ -27,6 +28,19 @@ class NoopRequestExecutor:
     ) -> bytes:
         del route_name, path_params, kwargs
         raise AssertionError(f"Unexpected stream request: {api_version} {operation}")
+
+    async def execute_stream_to_file(
+        self,
+        operation: str,
+        destination: str | Path,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: object = None,
+        **kwargs: Any,
+    ) -> Path:
+        del destination, route_name, path_params, kwargs
+        raise AssertionError(f"Unexpected file stream request: {api_version} {operation}")
 
 
 class RecordingRequestExecutor:
@@ -63,6 +77,19 @@ class RecordingRequestExecutor:
     ) -> bytes:
         del operation, api_version, route_name, path_params, kwargs
         raise AssertionError("Unexpected stream request")
+
+    async def execute_stream_to_file(
+        self,
+        operation: str,
+        destination: str | Path,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: object = None,
+        **kwargs: Any,
+    ) -> Path:
+        del operation, destination, api_version, route_name, path_params, kwargs
+        raise AssertionError("Unexpected file stream request")
 
 
 class StubSessionGate:

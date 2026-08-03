@@ -1,4 +1,5 @@
 from ..modeling import BaseModel, Field
+from .common import ResponseStatus
 
 
 class InviteCard(BaseModel):
@@ -59,6 +60,14 @@ class InviteList(BaseModel):
     result: list[InviteItem] = Field(..., description="Список приглашений")
 
 
+class InviteListResponse(BaseModel):
+    """Полный envelope списка приглашений."""
+
+    status: ResponseStatus
+    data: InviteList
+    timestamp: int
+
+
 class InviteActionResult(BaseModel):
     """Результат действий с приглашениями (создание, продление, повторная отправка)"""
 
@@ -71,12 +80,16 @@ class InviteActionResult(BaseModel):
 
 
 class InviteResponse(BaseModel):
-    """Обертка для InviteActionResult"""
+    """Полный envelope действия с приглашением."""
 
+    status: ResponseStatus
     data: InviteActionResult
+    timestamp: int
 
 
 class InviteBoolResponse(BaseModel):
-    """Результат простых действий (удаление, продление и т.п.)"""
+    """Полный envelope простого действия с приглашением."""
 
+    status: ResponseStatus
     data: bool
+    timestamp: int

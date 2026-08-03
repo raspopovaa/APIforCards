@@ -1,6 +1,7 @@
 from typing import Any
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.dictionaries import (
     AzsFiltersResponse,
     AzsListV1Response,
@@ -19,6 +20,7 @@ class DictionariesService(_BaseService):
     @api_method
     async def get_azs_list_v1(
         self,
+        *,
         page: int = 1,
         onpage: int = 10,
         filter: dict[str, Any] | None = None,
@@ -44,7 +46,7 @@ class DictionariesService(_BaseService):
             params=params,
         )
 
-        return AzsListV1Response(**data)
+        return decode_model(AzsListV1Response, data)
 
     # ==========================================================
     # 🔹 Получение списка торговых точек (v2)
@@ -52,6 +54,7 @@ class DictionariesService(_BaseService):
     @api_method
     async def get_azs_list_v2(
         self,
+        *,
         filter: dict[str, Any] | None = None,
         q: str | None = None,
         api_version: str | None = None,
@@ -91,7 +94,7 @@ class DictionariesService(_BaseService):
             api_version=api_version,
             params=params,
         )
-        return AzsListV2Response(**data)
+        return decode_model(AzsListV2Response, data)
 
     # ==========================================================
     # 🔹 Получение списка фильтров торговых точек
@@ -114,7 +117,7 @@ class DictionariesService(_BaseService):
 
         # У метода data — это словарь с результатом фильтров
         self.logger.info("Dictionary filters received")
-        return AzsFiltersResponse(**data)
+        return decode_model(AzsFiltersResponse, data)
 
     # ==========================================================
     # 🔹 Получение общего справочника
@@ -157,4 +160,4 @@ class DictionariesService(_BaseService):
             params=params,
         )
 
-        return DictionaryResponse(**data)
+        return decode_model(DictionaryResponse, data)

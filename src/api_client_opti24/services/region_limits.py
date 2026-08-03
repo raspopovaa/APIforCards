@@ -19,10 +19,6 @@ class RegionLimitsService(_BaseService):
     Методы для работы с региональными лимитами (v1).
     """
 
-    async def _validated_contract_id(self, contract_id: str | None) -> str:
-        resolved = await self._resolve_contract_id(contract_id)
-        return require_identifier(resolved, "contract_id")
-
     @api_method
     async def get_region_limits(
         self,
@@ -35,7 +31,7 @@ class RegionLimitsService(_BaseService):
         """
         Получение списка региональных лимитов по договору, карте или группе карт.
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         card_id, group_id = validate_card_or_group_target(
             card_id=card_id,
             group_id=group_id,
@@ -104,7 +100,7 @@ class RegionLimitsService(_BaseService):
 
         fallback_contract_id: str | None = None
         if contract_id is not None or any(item.contract_id is None for item in parsed_limits):
-            fallback_contract_id = await self._validated_contract_id(contract_id)
+            fallback_contract_id = await self._resolve_contract_id(contract_id)
 
         serialized_limits: list[dict[str, Any]] = []
         for item in parsed_limits:
@@ -137,7 +133,7 @@ class RegionLimitsService(_BaseService):
         """
         Удаление регионального лимита по карте или группе карт.
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         body = {
             "regionlimit_id": require_identifier(regionlimit_id, "regionlimit_id"),
             "contract_id": cid,

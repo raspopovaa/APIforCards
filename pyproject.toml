@@ -71,6 +71,7 @@ fixable = ["ALL"]
 "scripts/generate_method_catalog.py" = ["E402"]
 "scripts/run_mock_load_test.py" = ["E402"]
 "scripts/verify_external_contract.py" = ["E402"]
+"scripts/verify_api_contract.py" = ["E402"]
 
 [tool.mypy]
 python_version = "3.11"

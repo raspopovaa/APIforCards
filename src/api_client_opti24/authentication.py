@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 from typing import Protocol
 
 from .logger import LoggerLike
+from .modeling import decode_model
 from .models.auth import AuthUserResponse
 from .service_base import CredentialsProvider, RequestExecutor, SessionMutator
 from .session import SessionManager
@@ -45,7 +47,7 @@ class DefaultAuthenticator:
             api_version=api_version,
             data={"login": login, "password": hash_password(password)},
         )
-        auth_response = AuthUserResponse(**data)
+        auth_response = decode_model(AuthUserResponse, data)
         contracts = auth_response.data.contracts
         selected = None
         if contract_id:
@@ -74,6 +76,7 @@ class AuthenticationCoordinator:
     ) -> None:
         self.__session = session
         self.__authenticator = authenticator
+        self.__recovery_lock = asyncio.Lock()
 
     async def authenticate(self) -> AuthUserResponse:
         return await self.__authenticator.authenticate()
@@ -82,5 +85,13 @@ class AuthenticationCoordinator:
         return await self.__session.ensure_authenticated(self.authenticate)
 
     async def recover(self) -> str:
-        self.__session.invalidate()
-        return await self.ensure_authenticated()
+        failed_session_id = self.__session.session_id
+        selected_contract_id = self.__session.contract_id
+        async with self.__recovery_lock:
+            current_session_id = self.__session.session_id
+            if current_session_id is not None and current_session_id != failed_session_id:
+                return current_session_id
+            self.__session.invalidate()
+            return await self.__session.ensure_authenticated(
+                lambda: self.__authenticator.authenticate(contract_id=selected_contract_id)
+            )

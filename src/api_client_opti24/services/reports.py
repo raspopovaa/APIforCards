@@ -1,12 +1,13 @@
+from pathlib import Path
 from typing import Any
 
 from ..decorators import api_method
 from ..modeling import decode_model
 from ..models.reports import (
-    ReportJobList,
-    ReportList,
+    ReportJobListResponse,
+    ReportListResponse,
     ReportOrderResponse,
-    ReportV1JobList,
+    ReportV1JobListResponse,
     ReportV1OrderResponse,
 )
 from ..service_base import _BaseService
@@ -33,7 +34,7 @@ class ReportsService(_BaseService):
         self,
         *,
         api_version: str | None = None,
-    ) -> ReportList:
+    ) -> ReportListResponse:
         """
         Получить список доступных отчетов (v2).
         """
@@ -42,7 +43,7 @@ class ReportsService(_BaseService):
             "get_reports",
             api_version=api_version,
         )
-        return decode_model(ReportList, raw.get("data", {}))
+        return decode_model(ReportListResponse, raw)
 
     @api_method
     async def order_report(
@@ -98,14 +99,14 @@ class ReportsService(_BaseService):
             api_version=api_version,
             json=body,
         )
-        return decode_model(ReportOrderResponse, raw.get("data", {}))
+        return decode_model(ReportOrderResponse, raw)
 
     @api_method
     async def get_report_jobs(
         self,
         *,
         api_version: str | None = None,
-    ) -> ReportJobList:
+    ) -> ReportJobListResponse:
         """
         Получить список заказанных отчетов (v2).
         """
@@ -114,7 +115,7 @@ class ReportsService(_BaseService):
             "get_report_jobs",
             api_version=api_version,
         )
-        return decode_model(ReportJobList, raw.get("data", {}))
+        return decode_model(ReportJobListResponse, raw)
 
     @api_method
     async def download_report_file(
@@ -139,6 +140,21 @@ class ReportsService(_BaseService):
 
         self.logger.info("Report downloaded bytes=%s", len(content))
         return content
+
+    async def download_report_file_to(
+        self,
+        *,
+        job_id: str,
+        destination: str | Path,
+        api_version: str | None = None,
+    ) -> Path:
+        """Потоково скачать отчёт v2 в файл без накопления содержимого в памяти."""
+        return await self._request_stream_to_file(
+            "download_report_file",
+            destination,
+            api_version=api_version,
+            path_params={"job_id": job_id},
+        )
 
     # -------- v1 --------
     @api_method
@@ -181,14 +197,14 @@ class ReportsService(_BaseService):
             api_version=api_version,
             params=params,
         )
-        return decode_model(ReportV1OrderResponse, {"report_ids": raw.get("data", [])})
+        return decode_model(ReportV1OrderResponse, raw)
 
     @api_method
     async def get_report_job_list_v1(
         self,
         *,
         api_version: str | None = None,
-    ) -> ReportV1JobList:
+    ) -> ReportV1JobListResponse:
         """
         Получить список заказанных отчетов (v1).
         """
@@ -197,7 +213,7 @@ class ReportsService(_BaseService):
             "get_report_job_list_v1",
             api_version=api_version,
         )
-        return decode_model(ReportV1JobList, {"jobs": raw.get("data", [])})
+        return decode_model(ReportV1JobListResponse, raw)
 
     @api_method
     async def download_report_file_v1(
@@ -229,3 +245,22 @@ class ReportsService(_BaseService):
 
         self.logger.info("Report downloaded version=v1 bytes=%s", len(content))
         return content
+
+    async def download_report_file_v1_to(
+        self,
+        *,
+        job_id: str,
+        destination: str | Path,
+        archive: bool = False,
+        api_version: str | None = None,
+    ) -> Path:
+        """Потоково скачать отчёт v1 в файл без накопления содержимого в памяти."""
+        params = {"job_id": job_id}
+        if archive:
+            params["archive"] = "true"
+        return await self._request_stream_to_file(
+            "download_report_file_v1",
+            destination,
+            api_version=api_version,
+            params=params,
+        )

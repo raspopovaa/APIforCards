@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any, Protocol, TypeAlias
 
 from .logger import LoggerLike
+from .validation import require_identifier
 
 JSONPayload: TypeAlias = dict[str, Any]
 PathParams: TypeAlias = Mapping[str, str | int]
@@ -29,6 +31,17 @@ class RequestExecutor(Protocol):
         path_params: PathParams | None = None,
         **kwargs: Any,
     ) -> bytes: ...
+
+    async def execute_stream_to_file(
+        self,
+        operation: str,
+        destination: str | Path,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        **kwargs: Any,
+    ) -> Path: ...
 
 
 class SessionContext(Protocol):
@@ -97,12 +110,12 @@ class _BaseService:
         return self.__session_context.contract_id
 
     async def _resolve_contract_id(self, contract_id: str | None) -> str:
-        if contract_id:
-            return contract_id
+        if contract_id is not None:
+            return require_identifier(contract_id, "contract_id")
         await self.__session_gate.ensure_authenticated()
         if self.__session_context.contract_id is None:
             raise ValueError("contract_id is required when no default contract is selected")
-        return self.__session_context.contract_id
+        return require_identifier(self.__session_context.contract_id, "contract_id")
 
     async def _request(
         self,
@@ -132,6 +145,25 @@ class _BaseService:
     ) -> bytes:
         return await self.__request_executor.execute_stream(
             operation,
+            api_version=api_version,
+            route_name=route_name,
+            path_params=path_params,
+            **kwargs,
+        )
+
+    async def _request_stream_to_file(
+        self,
+        operation: str,
+        destination: str | Path,
+        *,
+        api_version: str | None = None,
+        route_name: str = "default",
+        path_params: PathParams | None = None,
+        **kwargs: Any,
+    ) -> Path:
+        return await self.__request_executor.execute_stream_to_file(
+            operation,
+            destination,
             api_version=api_version,
             route_name=route_name,
             path_params=path_params,

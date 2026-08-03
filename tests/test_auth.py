@@ -1,7 +1,9 @@
+import asyncio
 import logging
 
 import pytest
 
+from api_client_opti24.authentication import AuthenticationCoordinator
 from api_client_opti24.models.auth import AuthUserResponse
 from api_client_opti24.services import AuthService
 from api_client_opti24.session import SessionManager, SessionState
@@ -143,8 +145,8 @@ async def test_logoff_returns_true():
 
     result = await client.logoff()
 
-    assert result["status"]["code"] == 200
-    assert result["data"] is True
+    assert result.status.code == 200
+    assert result.data is True
 
 
 @pytest.mark.asyncio
@@ -171,3 +173,100 @@ async def test_get_info_uses_explicit_period():
     operation, kwargs = client.calls[-1]
     assert operation == "get_info"
     assert kwargs["params"]["period"] == "2025-01-15 12:30:00"
+
+
+@pytest.mark.asyncio
+async def test_authentication_coordinator_preserves_contract_during_recovery():
+    session = SessionManager()
+    session.mark_authenticated("SESSION-OLD", "1-BBB")
+    selected_contracts = []
+
+    class RecordingAuthenticator:
+        async def authenticate(
+            self,
+            *,
+            api_version=None,
+            contract_id=None,
+            contract_number=None,
+        ):
+            del api_version, contract_number
+            selected_contracts.append(contract_id)
+            session.mark_authenticated("SESSION-NEW", contract_id)
+            return AuthUserResponse(**DummyClient._auth_payload())
+
+    coordinator = AuthenticationCoordinator(session, RecordingAuthenticator())
+
+    recovered_session = await coordinator.recover()
+
+    assert recovered_session == "SESSION-NEW"
+    assert session.contract_id == "1-BBB"
+    assert selected_contracts == ["1-BBB"]
+
+
+@pytest.mark.asyncio
+async def test_authentication_coordinator_authenticates_once_for_concurrent_calls():
+    session = SessionManager()
+    calls = 0
+
+    class ConcurrentAuthenticator:
+        async def authenticate(
+            self,
+            *,
+            api_version=None,
+            contract_id=None,
+            contract_number=None,
+        ):
+            nonlocal calls
+            del api_version, contract_id, contract_number
+            calls += 1
+            await asyncio.sleep(0.01)
+            session.mark_authenticated("SESSION-NEW", "1-AAA")
+            return AuthUserResponse(**DummyClient._auth_payload())
+
+    coordinator = AuthenticationCoordinator(session, ConcurrentAuthenticator())
+
+    sessions = await asyncio.gather(
+        coordinator.ensure_authenticated(),
+        coordinator.ensure_authenticated(),
+        coordinator.ensure_authenticated(),
+    )
+
+    assert sessions == ["SESSION-NEW", "SESSION-NEW", "SESSION-NEW"]
+    assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_authentication_coordinator_recovers_once_for_concurrent_failures():
+    session = SessionManager()
+    session.mark_authenticated("SESSION-OLD", "1-BBB")
+    calls = 0
+    selected_contracts = []
+
+    class ConcurrentRecoveryAuthenticator:
+        async def authenticate(
+            self,
+            *,
+            api_version=None,
+            contract_id=None,
+            contract_number=None,
+        ):
+            nonlocal calls
+            del api_version, contract_number
+            calls += 1
+            selected_contracts.append(contract_id)
+            await asyncio.sleep(0.01)
+            session.mark_authenticated("SESSION-NEW", contract_id)
+            return AuthUserResponse(**DummyClient._auth_payload())
+
+    coordinator = AuthenticationCoordinator(session, ConcurrentRecoveryAuthenticator())
+
+    sessions = await asyncio.gather(
+        coordinator.recover(),
+        coordinator.recover(),
+        coordinator.recover(),
+    )
+
+    assert sessions == ["SESSION-NEW", "SESSION-NEW", "SESSION-NEW"]
+    assert calls == 1
+    assert selected_contracts == ["1-BBB"]
+    assert session.contract_id == "1-BBB"

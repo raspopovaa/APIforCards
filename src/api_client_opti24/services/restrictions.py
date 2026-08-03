@@ -19,10 +19,6 @@ class RestrictionsService(_BaseService):
     Методы для работы с товарными ограничителями (v1).
     """
 
-    async def _validated_contract_id(self, contract_id: str | None) -> str:
-        resolved = await self._resolve_contract_id(contract_id)
-        return require_identifier(resolved, "contract_id")
-
     # ---------------- Запрос ----------------
     @api_method
     async def get_restrictions(
@@ -36,7 +32,7 @@ class RestrictionsService(_BaseService):
         """
         Получение списка товарных ограничителей по договору, карте или группе карт.
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         card_id, group_id = validate_card_or_group_target(
             card_id=card_id,
             group_id=group_id,
@@ -106,7 +102,7 @@ class RestrictionsService(_BaseService):
 
         fallback_contract_id: str | None = None
         if contract_id is not None or any(item.contract_id is None for item in parsed_restrictions):
-            fallback_contract_id = await self._validated_contract_id(contract_id)
+            fallback_contract_id = await self._resolve_contract_id(contract_id)
 
         serialized_restrictions: list[dict[str, Any]] = []
         for item in parsed_restrictions:
@@ -141,7 +137,7 @@ class RestrictionsService(_BaseService):
         """
         Удаление товарного ограничителя по карте или группе карт.
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         body = {
             "restriction_id": require_identifier(restriction_id, "restriction_id"),
             "contract_id": cid,

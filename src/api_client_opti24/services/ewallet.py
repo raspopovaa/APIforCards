@@ -26,10 +26,6 @@ class EwalletService(_BaseService):
       • переводить средства обратно с кошелька на договор.
     """
 
-    async def _validated_contract_id(self, contract_id: str | None) -> str:
-        resolved = await self._resolve_contract_id(contract_id)
-        return require_identifier(resolved, "contract_id")
-
     # ============================================================
     # Изменить тип продукта карты
     # ============================================================
@@ -55,7 +51,7 @@ class EwalletService(_BaseService):
         Returns:
             SetCardProductResponse: Результат изменения продукта карт.
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         if not card_ids:
             raise ValueError("card_ids must contain at least one card ID")
         normalized_card_ids = [require_identifier(card_id, "card_id") for card_id in card_ids]
@@ -120,7 +116,7 @@ class EwalletService(_BaseService):
         {"contract_id": "contract-id", "card_id": "card-id", "amount": "2500.00"}
         ```
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
 
         body = {
             "contract_id": cid,
@@ -161,7 +157,7 @@ class EwalletService(_BaseService):
         Returns:
             MoveToContractResponse: Результат перевода.
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
 
         body = {
             "contract_id": cid,

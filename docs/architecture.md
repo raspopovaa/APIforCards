@@ -96,10 +96,16 @@ credentials изолированному authenticator. `ServiceContainer` не 
 
 Локальный modeling framework заменён Pydantic v2. Совместимый `BaseModel`
 сохраняет `model_validate()`, `model_dump()`, `Field`, validators, `describe()` и
-адаптер `decode_model()`, поэтому сервисный API не изменился. Pydantic проверяет
+адаптер `decode_model()`. Pydantic проверяет
 типы элементов `dict`, длину fixed tuple и вложенные структуры. Response-модели
 сохраняют дополнительные серверные поля для forward compatibility, а
 `StrictRequestModel` запрещает неизвестные поля во всех request DTO.
+
+Все JSON-методы возвращают полный envelope `status/data/timestamp` и используют
+единый `decode_model()`. Публичные параметры сервисов являются keyword-only.
+Бинарные методы отчётов сохраняют обратную совместимость с возвратом `bytes`, а
+методы `download_report_file_to()` и `download_report_file_v1_to()` потоково
+пишут данные во временный файл и атомарно заменяют целевой файл после успеха.
 
 ## Контракт endpoints
 
@@ -116,3 +122,8 @@ Snapshot дополняется независимым текстовым кон
 HTTP-метод, версию, путь, DEMO-доступность и тарификацию. Исходный Excel не
 хранится в репозитории. Известные противоречия сводной и детальной спецификаций
 перечислены непосредственно в YAML и не исправляются неявно.
+
+Дополнительный независимый контракт `specifications/api-contract-v1.1.60.yaml`
+связывает внешний маршрут с параметрами официальной спецификации, сигнатурой
+SDK, response-моделью и aliases строгих request DTO. Его CI-аудит предотвращает
+незаметное расхождение маршрута, Python API и Pydantic schema.

@@ -18,7 +18,11 @@ class CardsService(_BaseService):
     # --- Список карт (v1) ---
     @api_method
     async def get_cards_v1(
-        self, contract_id: str, cache: bool = True, api_version: str | None = None
+        self,
+        *,
+        contract_id: str,
+        cache: bool = True,
+        api_version: str | None = None,
     ) -> CardsListResponse:
         """Список топливных карт (Процессинг).
         :param contract_id: Идентификатор договора
@@ -39,6 +43,7 @@ class CardsService(_BaseService):
     @api_method
     async def get_cards_v2(
         self,
+        *,
         contract_id: str | None = None,
         sort: str = "-id",
         q: str | None = None,
@@ -98,7 +103,11 @@ class CardsService(_BaseService):
     # --- Список карт по группе ---
     @api_method
     async def get_cards_by_group(
-        self, contract_id: str, group_id: str, api_version: str | None = None
+        self,
+        *,
+        contract_id: str,
+        group_id: str,
+        api_version: str | None = None,
     ) -> CardGroupResponse:
         """Получение списка топливных карт по группе карт."""
         params = {"contract_id": contract_id, "group_id": group_id}
@@ -113,7 +122,11 @@ class CardsService(_BaseService):
     # --- Водители по карте ---
     @api_method
     async def get_card_drivers(
-        self, card_id: str, contract_id: str, api_version: str | None = None
+        self,
+        *,
+        card_id: str,
+        contract_id: str,
+        api_version: str | None = None,
     ) -> CardDriversResponse:
         """Получение списка водителей по карте."""
         self.logger.info("Requesting card drivers")
@@ -128,7 +141,11 @@ class CardsService(_BaseService):
     # --- Детальная информация по карте ---
     @api_method
     async def get_card_detail(
-        self, contract_id: str, card_id: str, api_version: str | None = None
+        self,
+        *,
+        contract_id: str,
+        card_id: str,
+        api_version: str | None = None,
     ) -> CardDetailResponse:
         """Получение детальной информации по карте."""
         params = {"contract_id": contract_id, "card_id": card_id}
@@ -144,6 +161,7 @@ class CardsService(_BaseService):
     @api_method
     async def block_card(
         self,
+        *,
         contract_id: str,
         card_ids: list[str],
         block: bool = True,
@@ -194,7 +212,12 @@ class CardsService(_BaseService):
     # --- Установка комментария ---
     @api_method
     async def set_card_comment(
-        self, card_id: str, contract_id: str, comment: str, api_version: str | None = None
+        self,
+        *,
+        card_id: str,
+        contract_id: str,
+        comment: str,
+        api_version: str | None = None,
     ) -> BoolResponse:
         """Установить комментарий на топливную карту."""
         payload = {"card_id": card_id, "contract_id": contract_id, "comment": comment}
@@ -209,7 +232,11 @@ class CardsService(_BaseService):
     # --- Запрос одноразового кода для сброса PIN ---
     @api_method
     async def verify_pin(
-        self, card_id: str, contract_id: str, api_version: str | None = None
+        self,
+        *,
+        card_id: str,
+        contract_id: str,
+        api_version: str | None = None,
     ) -> BoolResponse:
         """Запрос одноразового кода для сброса PIN карты.
         Данный метод позволяет инициировать запрос на сброс попыток некорректного ввода PIN – кода пластиковой топливной карты на АЗС.
@@ -228,7 +255,12 @@ class CardsService(_BaseService):
     # --- Подтверждение сброса PIN ---
     @api_method
     async def reset_pin(
-        self, card_id: str, contract_id: str, code: str, api_version: str | None = None
+        self,
+        *,
+        card_id: str,
+        contract_id: str,
+        code: str,
+        api_version: str | None = None,
     ) -> BoolResponse:
         """Подтверждение сброса PIN карты.
         Данный метод позволяет завершить операцию со сбросом попыток некорректного ввода PIN – кода пластиковой топливной карты на АЗС.

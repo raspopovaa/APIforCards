@@ -1,6 +1,7 @@
 from typing import Any
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.final_prices import CheckPurchaseResponse, FinalPricesResponse
 from ..service_base import _BaseService
 
@@ -50,7 +51,7 @@ class FinalPricesService(_BaseService):
             data=payload,
         )
 
-        return FinalPricesResponse(**data)
+        return decode_model(FinalPricesResponse, data)
 
     @api_method
     async def check_purchase(
@@ -75,4 +76,4 @@ class FinalPricesService(_BaseService):
             data=payload,
         )
 
-        return CheckPurchaseResponse(**data)
+        return decode_model(CheckPurchaseResponse, data)

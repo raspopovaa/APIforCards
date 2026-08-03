@@ -1,6 +1,7 @@
 from typing import Any
 
 from ..modeling import BaseModel, Field, StrictRequestModel
+from .common import ResponseStatus
 
 # === Общие модели ===
 
@@ -43,6 +44,14 @@ class ReportList(BaseModel):
     result: list[ReportItem] = Field(..., description="Массив отчетов")
 
 
+class ReportListResponse(BaseModel):
+    """Полный envelope списка доступных отчётов."""
+
+    status: ResponseStatus
+    data: ReportList
+    timestamp: int
+
+
 # === Заказ отчета ===
 
 
@@ -67,12 +76,20 @@ class ReportOrderRequest(StrictRequestModel):
     params: ReportOrderParams = Field(..., description="Параметры отчета")
 
 
-class ReportOrderResponse(BaseModel):
-    """Ответ на заказ отчета (v2)."""
+class ReportOrderData(BaseModel):
+    """Данные созданного задания отчёта (v2)."""
 
     job_id: list[str] = Field(
         ..., description="Идентификаторы созданных заданий на генерацию отчета"
     )
+
+
+class ReportOrderResponse(BaseModel):
+    """Полный envelope заказа отчёта (v2)."""
+
+    status: ResponseStatus
+    data: ReportOrderData
+    timestamp: int
 
 
 # === Список заказанных отчетов ===
@@ -99,6 +116,14 @@ class ReportJobList(BaseModel):
     result: list[ReportJobItem] = Field(..., description="Список заказанных отчетов")
 
 
+class ReportJobListResponse(BaseModel):
+    """Полный envelope списка заданий отчётов (v2)."""
+
+    status: ResponseStatus
+    data: ReportJobList
+    timestamp: int
+
+
 # === Генерация отчета ===
 
 
@@ -117,9 +142,11 @@ class ReportFileResponse(BaseModel):
 
 
 class ReportV1OrderResponse(BaseModel):
-    """Ответ для v1 метода /reports."""
+    """Полный envelope заказа отчёта (v1)."""
 
-    report_ids: list[str] = Field(..., description="ID заказанных отчетов")
+    status: ResponseStatus
+    data: list[str] = Field(..., description="ID заказанных отчетов")
+    timestamp: int
 
 
 class ReportV1JobItem(BaseModel):
@@ -134,7 +161,9 @@ class ReportV1JobItem(BaseModel):
     report_format: str = Field(..., description="Формат отчета (pdf, xlsx, xml и т.д.)")
 
 
-class ReportV1JobList(BaseModel):
-    """Список заказанных отчетов (v1)."""
+class ReportV1JobListResponse(BaseModel):
+    """Полный envelope списка заданий отчётов (v1)."""
 
-    jobs: list[ReportV1JobItem] = Field(..., description="Массив заказанных отчетов")
+    status: ResponseStatus
+    data: list[ReportV1JobItem] = Field(..., description="Массив заказанных отчетов")
+    timestamp: int

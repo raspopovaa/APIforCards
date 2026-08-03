@@ -3,6 +3,7 @@ from typing import Any
 
 from .. import utils
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.transactions import (
     TransactionDetailResponse,
     TransactionItemV2,
@@ -82,7 +83,7 @@ class TransactionsService(_BaseService):
             params=params,
         )
 
-        tx_response = TransactionsV1Response(**raw)
+        tx_response = decode_model(TransactionsV1Response, raw)
         tx_response.data.result = self._filter_and_sort(
             tx_response.data.result,
             filter_fn=filter_fn,
@@ -161,7 +162,7 @@ class TransactionsService(_BaseService):
             params=params,
         )
 
-        tx_response = TransactionsV2Response(**raw)
+        tx_response = decode_model(TransactionsV2Response, raw)
         tx_response.data.result = self._filter_and_sort(
             tx_response.data.result,
             filter_fn=filter_fn,
@@ -215,7 +216,7 @@ class TransactionsService(_BaseService):
             params=params,
         )
 
-        tx_response = TransactionsV2Response(**raw)
+        tx_response = decode_model(TransactionsV2Response, raw)
         tx_response.data.result = self._filter_and_sort(
             tx_response.data.result,
             filter_fn=filter_fn,
@@ -250,4 +251,4 @@ class TransactionsService(_BaseService):
             params={"contract_id": cid},
         )
 
-        return TransactionDetailResponse(**raw)
+        return decode_model(TransactionDetailResponse, raw)

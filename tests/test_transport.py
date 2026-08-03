@@ -219,6 +219,41 @@ async def test_request_retries_explicitly_idempotent_operation(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_request_stream_to_file_writes_binary_response_atomically(tmp_path):
+    payload = b"report-data-" * 10_000
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            headers={"content-type": "application/octet-stream"},
+            content=payload,
+            request=request,
+        )
+
+    http_client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    transport = AsyncTransport(
+        base_url="https://example.com/vip/",
+        http_client=http_client,
+    )
+    destination = tmp_path / "report.xlsx"
+
+    result = await transport.request_stream_to_file(
+        "GET",
+        "reports/job/file",
+        destination,
+        api_version="v2",
+        retry_class="safe",
+        idempotent=True,
+        chunk_size=1024,
+    )
+
+    assert result == destination
+    assert destination.read_bytes() == payload
+    assert not list(tmp_path.glob("*.part"))
+    await http_client.aclose()
+
+
+@pytest.mark.asyncio
 async def test_rate_limiter_spaces_requests_without_real_sleep(monkeypatch):
     now = 0.0
     sleep_calls = []

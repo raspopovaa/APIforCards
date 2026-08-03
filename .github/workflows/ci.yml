@@ -33,6 +33,9 @@ jobs:
       - name: Verify external API contract
         run: python scripts/verify_external_contract.py specifications/api-methods.yaml
 
+      - name: Verify API specification v1.1.60
+        run: python scripts/verify_api_contract.py specifications/api-contract-v1.1.60.yaml
+
       - name: Run full lint checks
         run: ruff check src tests scripts
 

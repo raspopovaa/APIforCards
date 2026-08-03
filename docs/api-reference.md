@@ -292,6 +292,10 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 
 Сигнатура: `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
 
+#### `execute_stream_to_file`
+
+Сигнатура: `execute_stream_to_file(self, operation: 'str', destination: 'str | Path', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'Path'`
+
 #### `headers`
 
 Сигнатура: `headers(self, include_session: 'bool' = False, content_type_json: 'bool' = False) -> 'dict[str, str]'`
@@ -309,6 +313,10 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 #### `execute_stream`
 
 Сигнатура: `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
+
+#### `execute_stream_to_file`
+
+Сигнатура: `execute_stream_to_file(self, operation: 'str', destination: 'str | Path', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'Path'`
 
 #### `headers`
 
@@ -331,6 +339,10 @@ ErrorContext(http_status_code: 'int', api_status_code: 'int | None', error_type:
 #### `request_stream`
 
 Сигнатура: `request_stream(self, method: 'str', endpoint: 'str', *, api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, **kwargs: 'Any') -> 'bytes'`
+
+#### `request_stream_to_file`
+
+Сигнатура: `request_stream_to_file(self, method: 'str', endpoint: 'str', destination: 'str | Path', *, api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, **kwargs: 'Any') -> 'Path'`
 
 ## `api_client_opti24.modeling`
 
@@ -1439,9 +1451,9 @@ _Публичные классы и функции не обнаружены._
 
 ### `InviteBoolResponse`
 
-Результат простых действий (удаление, продление и т.п.)
+Полный envelope простого действия с приглашением.
 
-Сигнатура: `InviteBoolResponse(*, data: bool, **extra_data: Any) -> None`
+Сигнатура: `InviteBoolResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1497,11 +1509,23 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+### `InviteListResponse`
+
+Полный envelope списка приглашений.
+
+Сигнатура: `InviteListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.invites.InviteList, timestamp: int, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `InviteResponse`
 
-Обертка для InviteActionResult
+Полный envelope действия с приглашением.
 
-Сигнатура: `InviteResponse(*, data: api_client_opti24.models.invites.InviteActionResult, **extra_data: Any) -> None`
+Сигнатура: `InviteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.invites.InviteActionResult, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1839,11 +1863,47 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+### `ReportJobListResponse`
+
+Полный envelope списка заданий отчётов (v2).
+
+Сигнатура: `ReportJobListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.reports.ReportJobList, timestamp: int, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `ReportList`
 
 Ответ метода /v2/reports — список доступных отчетов.
 
 Сигнатура: `ReportList(*, total_count: int, result: list[api_client_opti24.models.reports.ReportItem], **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `ReportListResponse`
+
+Полный envelope списка доступных отчётов.
+
+Сигнатура: `ReportListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.reports.ReportList, timestamp: int, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `ReportOrderData`
+
+Данные созданного задания отчёта (v2).
+
+Сигнатура: `ReportOrderData(*, job_id: list[str], **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1877,9 +1937,9 @@ _Публичные классы и функции не обнаружены._
 
 ### `ReportOrderResponse`
 
-Ответ на заказ отчета (v2).
+Полный envelope заказа отчёта (v2).
 
-Сигнатура: `ReportOrderResponse(*, job_id: list[str], **extra_data: Any) -> None`
+Сигнатура: `ReportOrderResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.reports.ReportOrderData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1923,11 +1983,11 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
-### `ReportV1JobList`
+### `ReportV1JobListResponse`
 
-Список заказанных отчетов (v1).
+Полный envelope списка заданий отчётов (v1).
 
-Сигнатура: `ReportV1JobList(*, jobs: list[api_client_opti24.models.reports.ReportV1JobItem], **extra_data: Any) -> None`
+Сигнатура: `ReportV1JobListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[api_client_opti24.models.reports.ReportV1JobItem], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1937,9 +1997,9 @@ _Публичные классы и функции не обнаружены._
 
 ### `ReportV1OrderResponse`
 
-Ответ для v1 метода /reports.
+Полный envelope заказа отчёта (v1).
 
-Сигнатура: `ReportV1OrderResponse(*, report_ids: list[str], **extra_data: Any) -> None`
+Сигнатура: `ReportV1OrderResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2867,6 +2927,10 @@ RetryPolicy(network_attempts: 'int' = 5, rate_limit_attempts: 'int' = 3, network
 
 Сигнатура: `execute_stream(self, operation: 'str', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'bytes'`
 
+#### `execute_stream_to_file`
+
+Сигнатура: `execute_stream_to_file(self, operation: 'str', destination: 'str | Path', *, api_version: 'str | None' = None, route_name: 'str' = 'default', path_params: 'PathParams | None' = None, **kwargs: 'Any') -> 'Path'`
+
 ### `ServiceMethodContext`
 
 Сигнатура: `ServiceMethodContext(*args, **kwargs)`
@@ -2965,13 +3029,13 @@ Payload формируется из ``CredentialsProvider`` и выбранно�
 
 #### `get_info`
 
-Сигнатура: `get_info(self, api_version: str | None = None, period: str | None = None) -> api_client_opti24.models.auth.GetInfoResponse`
+Сигнатура: `get_info(self, *, api_version: str | None = None, period: str | None = None) -> api_client_opti24.models.auth.GetInfoResponse`
 
 Получение статистических данных по вызовам всех методов.
 
 #### `logoff`
 
-Сигнатура: `logoff(self, api_version: str | None = None) -> dict[str, object]`
+Сигнатура: `logoff(self, *, api_version: str | None = None) -> api_client_opti24.models.auth.LogoffResponse`
 
 Завершить серверную сессию и очистить локальное состояние клиента.
 
@@ -3056,7 +3120,7 @@ Args:
 
 #### `block_card`
 
-Сигнатура: `block_card(self, contract_id: str, card_ids: list[str], block: bool = True, api_version: str | None = None) -> api_client_opti24.models.cards.IDListResponse`
+Сигнатура: `block_card(self, *, contract_id: str, card_ids: list[str], block: bool = True, api_version: str | None = None) -> api_client_opti24.models.cards.IDListResponse`
 
 Блокировка или разблокировка топливных карт.
 
@@ -3084,25 +3148,25 @@ result = await client.cards.block_card(
 
 #### `get_card_detail`
 
-Сигнатура: `get_card_detail(self, contract_id: str, card_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardDetailResponse`
+Сигнатура: `get_card_detail(self, *, contract_id: str, card_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardDetailResponse`
 
 Получение детальной информации по карте.
 
 #### `get_card_drivers`
 
-Сигнатура: `get_card_drivers(self, card_id: str, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardDriversResponse`
+Сигнатура: `get_card_drivers(self, *, card_id: str, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardDriversResponse`
 
 Получение списка водителей по карте.
 
 #### `get_cards_by_group`
 
-Сигнатура: `get_cards_by_group(self, contract_id: str, group_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardGroupResponse`
+Сигнатура: `get_cards_by_group(self, *, contract_id: str, group_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.CardGroupResponse`
 
 Получение списка топливных карт по группе карт.
 
 #### `get_cards_v1`
 
-Сигнатура: `get_cards_v1(self, contract_id: str, cache: bool = True, api_version: str | None = None) -> api_client_opti24.models.cards.CardsListResponse`
+Сигнатура: `get_cards_v1(self, *, contract_id: str, cache: bool = True, api_version: str | None = None) -> api_client_opti24.models.cards.CardsListResponse`
 
 Список топливных карт (Процессинг).
 :param contract_id: Идентификатор договора
@@ -3111,7 +3175,7 @@ result = await client.cards.block_card(
 
 #### `get_cards_v2`
 
-Сигнатура: `get_cards_v2(self, contract_id: str | None = None, sort: str = '-id', q: str | None = None, status: str | None = None, carrier: str | None = None, platon: bool | None = None, avtodor: bool | None = None, users: bool | None = None, group_id: str | None = None, page: int | None = None, onpage: int | None = None, api_version: str | None = None) -> api_client_opti24.models.cards.CardsV2Response`
+Сигнатура: `get_cards_v2(self, *, contract_id: str | None = None, sort: str = '-id', q: str | None = None, status: str | None = None, carrier: str | None = None, platon: bool | None = None, avtodor: bool | None = None, users: bool | None = None, group_id: str | None = None, page: int | None = None, onpage: int | None = None, api_version: str | None = None) -> api_client_opti24.models.cards.CardsV2Response`
 
 Получение списка карт договора (v2).
 :param contract_id: Идентификатор договора
@@ -3129,7 +3193,7 @@ result = await client.cards.block_card(
 
 #### `reset_pin`
 
-Сигнатура: `reset_pin(self, card_id: str, contract_id: str, code: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
+Сигнатура: `reset_pin(self, *, card_id: str, contract_id: str, code: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
 
 Подтверждение сброса PIN карты.
 Данный метод позволяет завершить операцию со сбросом попыток некорректного ввода PIN – кода пластиковой топливной карты на АЗС.
@@ -3137,13 +3201,13 @@ result = await client.cards.block_card(
 
 #### `set_card_comment`
 
-Сигнатура: `set_card_comment(self, card_id: str, contract_id: str, comment: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
+Сигнатура: `set_card_comment(self, *, card_id: str, contract_id: str, comment: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
 
 Установить комментарий на топливную карту.
 
 #### `verify_pin`
 
-Сигнатура: `verify_pin(self, card_id: str, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
+Сигнатура: `verify_pin(self, *, card_id: str, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.cards.BoolResponse`
 
 Запрос одноразового кода для сброса PIN карты.
 Данный метод позволяет инициировать запрос на сброс попыток некорректного ввода PIN – кода пластиковой топливной карты на АЗС.
@@ -3236,7 +3300,7 @@ invoice = await client.contracts.order_invoice(
 
 #### `get_azs_list_v1`
 
-Сигнатура: `get_azs_list_v1(self, page: int = 1, onpage: int = 10, filter: dict[str, Any] | None = None, id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.dictionaries.AzsListV1Response`
+Сигнатура: `get_azs_list_v1(self, *, page: int = 1, onpage: int = 10, filter: dict[str, Any] | None = None, id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.dictionaries.AzsListV1Response`
 
 Получение списка торговых точек (АЗС, версия 1)
 
@@ -3244,7 +3308,7 @@ invoice = await client.contracts.order_invoice(
 
 #### `get_azs_list_v2`
 
-Сигнатура: `get_azs_list_v2(self, filter: dict[str, Any] | None = None, q: str | None = None, api_version: str | None = None) -> api_client_opti24.models.dictionaries.AzsListV2Response`
+Сигнатура: `get_azs_list_v2(self, *, filter: dict[str, Any] | None = None, q: str | None = None, api_version: str | None = None) -> api_client_opti24.models.dictionaries.AzsListV2Response`
 
 Получение списка торговых точек (АЗС, версия 2)
 
@@ -3469,7 +3533,7 @@ invite = await client.invites.create_invite(
 
 #### `get_invites`
 
-Сигнатура: `get_invites(self, *, role: str | None = None, user_id: str | None = None, sort: str | None = None, status: str | None = None, q: str | None = None, page: int | None = None, on_page: int | None = None, api_version: str | None = None) -> api_client_opti24.models.invites.InviteList`
+Сигнатура: `get_invites(self, *, role: str | None = None, user_id: str | None = None, sort: str | None = None, status: str | None = None, q: str | None = None, page: int | None = None, on_page: int | None = None, api_version: str | None = None) -> api_client_opti24.models.invites.InviteListResponse`
 
 Получить список приглашений (v2).
 
@@ -3651,6 +3715,12 @@ result = await client.region_limits.set_region_limit(
 ⚠️ Важно: успешный запрос возможен только спустя ~300 секунд
 после заказа отчета.
 
+#### `download_report_file_to`
+
+Сигнатура: `download_report_file_to(self, *, job_id: str, destination: str | pathlib.Path, api_version: str | None = None) -> pathlib.Path`
+
+Потоково скачать отчёт v2 в файл без накопления содержимого в памяти.
+
 #### `download_report_file_v1`
 
 Сигнатура: `download_report_file_v1(self, *, job_id: str, archive: bool = False, api_version: str | None = None) -> bytes`
@@ -3662,21 +3732,27 @@ result = await client.region_limits.set_region_limit(
 Если заказывать отчет с параметром archive=true, то нужно выставить формат zip и данные прийдут в виде application/zip.
 Внутри архива будет находится отчет в заказанном формате (pdf, xlsx, csv, xml и другие)..
 
+#### `download_report_file_v1_to`
+
+Сигнатура: `download_report_file_v1_to(self, *, job_id: str, destination: str | pathlib.Path, archive: bool = False, api_version: str | None = None) -> pathlib.Path`
+
+Потоково скачать отчёт v1 в файл без накопления содержимого в памяти.
+
 #### `get_report_job_list_v1`
 
-Сигнатура: `get_report_job_list_v1(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportV1JobList`
+Сигнатура: `get_report_job_list_v1(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportV1JobListResponse`
 
 Получить список заказанных отчетов (v1).
 
 #### `get_report_jobs`
 
-Сигнатура: `get_report_jobs(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportJobList`
+Сигнатура: `get_report_jobs(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportJobListResponse`
 
 Получить список заказанных отчетов (v2).
 
 #### `get_reports`
 
-Сигнатура: `get_reports(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportList`
+Сигнатура: `get_reports(self, *, api_version: str | None = None) -> api_client_opti24.models.reports.ReportListResponse`
 
 Получить список доступных отчетов (v2).
 
@@ -4096,13 +4172,13 @@ await client.users.get_users(
 
 #### `create_virtual_card`
 
-Сигнатура: `create_virtual_card(self, user_id: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
+Сигнатура: `create_virtual_card(self, *, user_id: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.VirtualCardResponse`
 
 Выпуск виртуальной карты (старый метод POST /vip/v2/cards)
 
 #### `delete_mpc`
 
-Сигнатура: `delete_mpc(self, card_id: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.SimpleActionResponse`
+Сигнатура: `delete_mpc(self, *, card_id: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.SimpleActionResponse`
 
 Удаление мобильного профиля карты (МПК)
 
@@ -4154,7 +4230,7 @@ card = await client.virtual_cards.release_virtual_card(
 
 #### `reset_mpc`
 
-Сигнатура: `reset_mpc(self, card_id: str, type_: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.ResetMPCResponse`
+Сигнатура: `reset_mpc(self, *, card_id: str, type_: str, api_version: str | None = None) -> api_client_opti24.models.virtual_cards.ResetMPCResponse`
 
 Сброс счётчиков МПК (POST /vip/v2/cards/{card_id}/resetMPC)
 Тип счетчика (ResetCounterCode/ResetCounterMPC,
@@ -4244,7 +4320,11 @@ SessionSnapshot(state: 'SessionState', session_id: 'str | None', contract_id: 's
 
 #### `request_stream`
 
-Сигнатура: `request_stream(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, *, method_name: 'str | None' = None, **kwargs: 'Any') -> 'bytes'`
+Сигнатура: `request_stream(self, method: 'str', endpoint: 'str', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, *, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, **kwargs: 'Any') -> 'bytes'`
+
+#### `request_stream_to_file`
+
+Сигнатура: `request_stream_to_file(self, method: 'str', endpoint: 'str', destination: 'str | Path', api_version: 'str' = 'v1', headers: 'Mapping[str, str] | None' = None, *, method_name: 'str | None' = None, retry_class: 'str | RetryClass | None' = None, idempotent: 'bool | None' = None, chunk_size: 'int' = 65536, **kwargs: 'Any') -> 'Path'`
 
 ## `api_client_opti24.utils`
 
@@ -4312,7 +4392,7 @@ SHA-512 хэш пароля в нижнем регистре.
 
 ### `validate_document_order`
 
-Сигнатура: `validate_document_order(document_ids: 'list[str]', document_format: 'str', emails: 'list[str]') -> 'tuple[list[str], str, list[str]]'`
+Сигнатура: `validate_document_order(document_ids: 'list[str]', document_format: 'DocumentFormatT', emails: 'list[str]') -> 'tuple[list[str], DocumentFormatT, list[str]]'`
 
 ### `validate_email`
 

@@ -33,20 +33,16 @@ TemplateType = Literal["Limit", "Wallet"]
 class TemplatesService(_BaseService):
     """Управление шаблонами виртуальных карт и их ограничениями."""
 
-    async def _validated_contract_id(self, contract_id: str | None) -> str:
-        resolved = await self._resolve_contract_id(contract_id)
-        return require_identifier(resolved, "contract_id")
-
     async def _payload_contract_id(
         self,
         payload_contract_id: str | None,
         contract_id: str | None,
     ) -> str:
         if contract_id is not None:
-            return await self._validated_contract_id(contract_id)
+            return await self._resolve_contract_id(contract_id)
         if payload_contract_id is not None:
             return require_identifier(payload_contract_id, "contract_id")
-        return await self._validated_contract_id(None)
+        return await self._resolve_contract_id(None)
 
     @api_method
     async def get_templates(
@@ -56,7 +52,7 @@ class TemplatesService(_BaseService):
         api_version: str | None = None,
     ) -> TemplatesListResponse:
         """Получить список шаблонов виртуальных карт выбранного договора."""
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         raw = await self._request(
             "get_templates",
             api_version=api_version,
@@ -92,7 +88,7 @@ class TemplatesService(_BaseService):
         {"contract_id": "contract-id", "type": "Limit", "name": "Дневной лимит"}
         ```
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         request = TemplateCreateRequest(
             contract_id=cid,
             type=type_,
@@ -116,7 +112,7 @@ class TemplatesService(_BaseService):
         api_version: str | None = None,
     ) -> TemplateCreateResponse:
         """Изменить существующий шаблон виртуальной карты."""
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         request = TemplateCreateRequest(
             contract_id=cid,
             type=type_,

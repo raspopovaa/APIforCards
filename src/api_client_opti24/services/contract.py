@@ -27,10 +27,6 @@ DocumentFormat = Literal["pdf", "xlsx"]
 
 
 class ContractsService(_BaseService):
-    async def _validated_contract_id(self, contract_id: str | None) -> str:
-        resolved = await self._resolve_contract_id(contract_id)
-        return require_identifier(resolved, "contract_id")
-
     @api_method
     async def get_contract_data(
         self,
@@ -39,7 +35,7 @@ class ContractsService(_BaseService):
         api_version: str | None = None,
     ) -> ContractDataResponse:
         """Получение информации о контракте."""
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         data = await self._request(
             "get_contract_data",
             api_version=api_version,
@@ -55,7 +51,7 @@ class ContractsService(_BaseService):
         api_version: str | None = None,
     ) -> PaymentsResponse:
         """Получение данных о платежах по контракту."""
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         data = await self._request(
             "get_payments",
             api_version=api_version,
@@ -75,7 +71,7 @@ class ContractsService(_BaseService):
         on_page: int = 10,
     ) -> DocumentsResponse:
         """Получение списка первичных документов (номер документа, дата, сумма, НДС, номер договора и пр.)."""
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         date_start, date_end = validate_date_range(date_start, date_end)
         page, on_page = validate_pagination(page, on_page)
         params = {
@@ -103,7 +99,7 @@ class ContractsService(_BaseService):
         api_version: str | None = None,
     ) -> DocumentsOrderResponse:
         """Заказ первичных документов по ID документа на указанные email – адреса (до 5 адресов)."""
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         ids, fmt, emails = validate_document_order(ids, fmt, emails)
         payload = {"id": ids, "format": fmt, "emails": emails}
         data = await self._request(
@@ -124,7 +120,7 @@ class ContractsService(_BaseService):
         api_version: str | None = None,
     ) -> OrderCardsResponse:
         """Заказ необходимого количества топливных карт в определенном офисе продаж."""
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         payload = {
             "count": validate_positive_count(count),
             "office_id": require_identifier(office_id, "office_id"),
@@ -166,7 +162,7 @@ class ContractsService(_BaseService):
         {"sum": "15000.00", "email": "billing@example.org"}
         ```
         """
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         payload = {
             "sum": decimal_to_wire(amount, "amount"),
             "email": validate_email(email),
@@ -187,7 +183,7 @@ class ContractsService(_BaseService):
         api_version: str | None = None,
     ) -> InvoicesResponse:
         """Получение списка счетов на оплату."""
-        cid = await self._validated_contract_id(contract_id)
+        cid = await self._resolve_contract_id(contract_id)
         data = await self._request(
             "get_invoices",
             api_version=api_version,
