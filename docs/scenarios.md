@@ -36,29 +36,39 @@ await client.cards.block_card(
 
 ## Лимит и товарное ограничение
 
+Если договор выбран при авторизации, `contract_id` подставляется из сессии.
+Для работы с другим договором передайте его явно в метод.
+
 ```python
+from api_client_opti24.models import LimitRequestItem, RestrictionRequestItem
+
 await client.limits.set_limit(
-    limits=[{
-        "contract_id": "contract-id",
-        "card_id": "card-id",
-        "sum": {"currency": "810", "value": 5000.0},
-        "time": {"number": 1, "type": 1},
-    }]
+    limits=[
+        LimitRequestItem(
+            card_id="card-id",
+            sum={"currency": "810", "value": 5000.0},
+            time={"number": 1, "type": 5},
+        )
+    ]
 )
 
 await client.restrictions.set_restriction(
-    restrictions=[{
-        "contract_id": "contract-id",
-        "card_id": "card-id",
-        "productType": "product-type-id",
-        "restriction_type": 1,
-    }]
+    restrictions=[
+        RestrictionRequestItem(
+            card_id="card-id",
+            productType="product-type-id",
+            restriction_type=1,
+        )
+    ]
 )
 ```
 
 Для изменения существующего лимита или ограничителя передавайте его `id`. Перед
 созданием новой записи полезно запросить текущее состояние соответствующим GET-
 методом.
+
+Подробные правила aliases, response envelope и локальной валидации описаны в
+[разделе договорных операций](section-2b.md).
 
 ## Заказ и получение отчёта
 

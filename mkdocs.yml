@@ -69,6 +69,7 @@ nav:
       - Установка и запуск: getting-started.md
       - Конфигурация: configuration.md
       - Типовые сценарии: scenarios.md
+      - Договоры и ограничения: section-2b.md
       - Ошибки и retry: errors.md
   - Методы API: methods.md
   - API Reference: api-reference.md

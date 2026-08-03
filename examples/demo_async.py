@@ -484,13 +484,13 @@ async def main() -> None:
         if contracts:
             contract_data = await run_method(
                 "get_contract_data",
-                lambda: client.contracts.get_contract_data(selected_contract.id),
+                lambda: client.contracts.get_contract_data(),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             payments = await run_method(
                 "get_payments",
-                lambda: client.contracts.get_payments(selected_contract.id),
+                lambda: client.contracts.get_payments(),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
@@ -516,23 +516,19 @@ async def main() -> None:
             )
             limits = await run_method(
                 "get_limits",
-                lambda: client.limits.get_limits(contract_id=selected_contract.id),
+                lambda: client.limits.get_limits(),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             restrictions = await run_method(
                 "get_restrictions",
-                lambda: client.restrictions.get_restrictions(
-                    contract_id=selected_contract.id
-                ),
+                lambda: client.restrictions.get_restrictions(),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
             region_limits = await run_method(
                 "get_region_limits",
-                lambda: client.region_limits.get_region_limits(
-                    contract_id=selected_contract.id
-                ),
+                lambda: client.region_limits.get_region_limits(),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
@@ -576,7 +572,7 @@ async def main() -> None:
             )
             templates = await run_method(
                 "get_templates",
-                lambda: client.templates.get_templates(selected_contract.id),
+                lambda: client.templates.get_templates(),
                 context=[f"Договор: {format_contract(selected_contract)}"],
                 limiter=limiter,
             )
@@ -678,7 +674,7 @@ async def main() -> None:
         if template_id:
             template_limits = await run_method(
                 "get_template_limits",
-                lambda: client.templates.get_template_limits(template_id),
+                lambda: client.templates.get_template_limits(template_id=template_id),
                 context=[
                     f"Договор: {format_contract(selected_contract)}",
                     f"Шаблон ВК: {template_id}",
@@ -688,7 +684,9 @@ async def main() -> None:
             if template_limits is not None:
                 template_restrictions = await run_method(
                     "get_template_restrictions",
-                    lambda: client.templates.get_template_restrictions(template_id),
+                    lambda: client.templates.get_template_restrictions(
+                        template_id=template_id
+                    ),
                     context=[
                         f"Договор: {format_contract(selected_contract)}",
                         f"Шаблон ВК: {template_id}",
@@ -697,7 +695,9 @@ async def main() -> None:
                 )
                 template_georestrictions = await run_method(
                     "get_template_georestrictions",
-                    lambda: client.templates.get_template_georestrictions(template_id),
+                    lambda: client.templates.get_template_georestrictions(
+                        template_id=template_id
+                    ),
                     context=[
                         f"Договор: {format_contract(selected_contract)}",
                         f"Шаблон ВК: {template_id}",

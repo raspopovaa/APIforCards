@@ -776,6 +776,20 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+## `api_client_opti24.models.common`
+
+### `ResponseStatus`
+
+Статус ответа API из общего envelope.
+
+Сигнатура: `ResponseStatus(*, code: int, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ## `api_client_opti24.models.contracts`
 
 ### `BalanceData`
@@ -807,6 +821,18 @@ _Публичные классы и функции не обнаружены._
 Основные данные договора
 
 Сигнатура: `ContractData(*, contract_id: str, way_id: str, contract_number: str, unique_payment_id: str, client: str, client_category: str, contract_category: str, country: str, region: str, fin_institution: str, invoice_scheme: str, invoice_period: str | None = None, invoice_pmt_delay: str | None = None, contract_status: str, contract_status_name: str, pay_scheme: str, discount_scheme: str, auto_pay: str, auto_pay_type: str, credit_limit: str | None = None, current_amount_limiter: str, balance_amount_limiter: str | None = None, max_amount_limiter: str | None = None, date_open: str, effective_date: str, end_date: str, date_expire: str, product_type: bool, type_code: str, supplier_name: str, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `ContractDataResponse`
+
+Полный envelope ответа метода получения данных договора.
+
+Сигнатура: `ContractDataResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.contracts.ContractResponse, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -854,7 +880,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода POST /v2/documents (заказ документов).
 
-Сигнатура: `DocumentsOrderResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `DocumentsOrderResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -866,7 +892,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода GET /v2/documents.
 
-Сигнатура: `DocumentsResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.contracts.DocumentsData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `DocumentsResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.contracts.DocumentsData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -890,7 +916,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода POST /v2/invoice.
 
-Сигнатура: `InvoiceOrderResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `InvoiceOrderResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -914,7 +940,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода GET /v2/invoices.
 
-Сигнатура: `InvoicesResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.contracts.InvoicesData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `InvoicesResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.contracts.InvoicesData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -938,7 +964,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ метода POST /v2/orderCards.
 
-Сигнатура: `OrderCardsResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `OrderCardsResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -974,7 +1000,7 @@ _Публичные классы и функции не обнаружены._
 
 Основная модель ответа метода /getPayments.
 
-Сигнатура: `PaymentsResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.contracts.PaymentsData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `PaymentsResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.contracts.PaymentsData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1279,7 +1305,7 @@ _Публичные классы и функции не обнаружены._
     "timestamp": 1596024392
 }
 
-Сигнатура: `MoveToCardResponse(*, status: api_client_opti24.models.ewallet.Status, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `MoveToCardResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1297,7 +1323,7 @@ _Публичные классы и функции не обнаружены._
     "timestamp": 1596024392
 }
 
-Сигнатура: `MoveToContractResponse(*, status: api_client_opti24.models.ewallet.Status, data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `MoveToContractResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1315,19 +1341,7 @@ _Публичные классы и функции не обнаружены._
     "timestamp": 1596024392
 }
 
-Сигнатура: `SetCardProductResponse(*, status: api_client_opti24.models.ewallet.Status, data: list[str], timestamp: int, **extra_data: Any) -> None`
-
-Публичные методы:
-
-#### `describe`
-
-Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
-
-### `Status`
-
-Модель для статуса ответа API.
-
-Сигнатура: `Status(*, code: int, **extra_data: Any) -> None`
+Сигнатура: `SetCardProductResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1509,11 +1523,33 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+### `LimitAmountRequest`
+
+Сигнатура: `LimitAmountRequest(*, unit: Annotated[str, MinLen(min_length=1)], value: Annotated[float, Gt(gt=0)]) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `LimitItem`
 
 Продуктовый лимит (карта, группа или договор).
 
 Сигнатура: `LimitItem(*, id: str | None = None, card_id: str | None = None, group_id: str | None = None, contract_id: str, productGroup: str | None = None, productType: str | None = None, amount: api_client_opti24.models.limits.LimitAmount | None = None, sum: api_client_opti24.models.limits.LimitSum | None = None, term: api_client_opti24.models.limits.LimitTerm | None = None, transactions: api_client_opti24.models.limits.LimitTransactions | None = None, time: api_client_opti24.models.limits.LimitTime | None = None, date: str | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `LimitRequestItem`
+
+Строгий элемент запроса установки продуктового лимита.
+
+Сигнатура: `LimitRequestItem(*, id: Annotated[str | None, MinLen(min_length=1)] = None, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, card_id: Annotated[str | None, MinLen(min_length=1)] = None, group_id: Annotated[str | None, MinLen(min_length=1)] = None, productType: Annotated[str | None, MinLen(min_length=1)] = None, productGroup: Annotated[str | None, MinLen(min_length=1)] = None, amount: api_client_opti24.models.limits.LimitAmountRequest | None = None, sum: api_client_opti24.models.limits.LimitSumRequest | None = None, term: api_client_opti24.models.limits.LimitTermRequest | None = None, transactions: api_client_opti24.models.limits.LimitTransactionsRequest | None = None, time: api_client_opti24.models.limits.LimitTimeRequest) -> None`
 
 Публичные методы:
 
@@ -1533,11 +1569,31 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+### `LimitSumRequest`
+
+Сигнатура: `LimitSumRequest(*, currency: Annotated[str, MinLen(min_length=1)], value: Annotated[float, Gt(gt=0)]) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `LimitTerm`
 
 Периодичность и временные ограничения.
 
 Сигнатура: `LimitTerm(*, days: str | None = None, type: int | None = None, time: api_client_opti24.models.limits.LimitTermTime | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `LimitTermRequest`
+
+Сигнатура: `LimitTermRequest(*, days: Annotated[str | None, _PydanticGeneralMetadata(pattern='^[01]{7}$')] = None, type: Literal[1, 2, 3], time: api_client_opti24.models.limits.LimitTermTimeRequest | None = None) -> None`
 
 Публичные методы:
 
@@ -1557,6 +1613,16 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+### `LimitTermTimeRequest`
+
+Сигнатура: `LimitTermTimeRequest(*, from_: Annotated[str, MinLen(min_length=1)], to: Annotated[str, MinLen(min_length=1)]) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `LimitTime`
 
 Периодичность сброса лимита.
@@ -1569,11 +1635,31 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+### `LimitTimeRequest`
+
+Сигнатура: `LimitTimeRequest(*, number: Annotated[int, Gt(gt=0)], type: Literal[2, 3, 4, 5, 6, 7]) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `LimitTransactions`
 
 Ограничения по количеству транзакций.
 
 Сигнатура: `LimitTransactions(*, count: int | None = None, occured: int | None = None, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `LimitTransactionsRequest`
+
+Сигнатура: `LimitTransactionsRequest(*, count: Annotated[int, Gt(gt=0)]) -> None`
 
 Публичные методы:
 
@@ -1597,7 +1683,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на запрос списка лимитов.
 
-Сигнатура: `LimitsResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.limits.LimitsData, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `LimitsResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.limits.LimitsData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1609,7 +1695,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на удаление продуктового лимита.
 
-Сигнатура: `RemoveLimitResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RemoveLimitResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1621,7 +1707,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на установку/изменение продуктового лимита.
 
-Сигнатура: `SetLimitResponse(*, status: dict[str, typing.Any], data: list[str], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `SetLimitResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1655,11 +1741,35 @@ _Публичные классы и функции не обнаружены._
 
 Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
 
+### `RegionLimitRequestItem`
+
+Строгий элемент запроса установки регионального лимита.
+
+Сигнатура: `RegionLimitRequestItem(*, id: Annotated[str | None, MinLen(min_length=1)] = None, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, card_id: Annotated[str | None, MinLen(min_length=1)] = None, group_id: Annotated[str | None, MinLen(min_length=1)] = None, country: Annotated[str, MinLen(min_length=1)], region: Annotated[str | None, MinLen(min_length=1)] = None, service_center: Annotated[str | None, MinLen(min_length=1)] = None, partner: Annotated[str | None, MinLen(min_length=1)] = None, limit_type: Literal[1, 2]) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
 ### `RegionLimitResponse`
 
 Коллекция региональных лимитов.
 
-Сигнатура: `RegionLimitResponse(*, status: dict[str, typing.Any], data: api_client_opti24.models.region_limits.RegionLimitList, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RegionLimitResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.region_limits.RegionLimitList, timestamp: int, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `RegionLimitSetResponse`
+
+Полный envelope установки или изменения региональных лимитов.
+
+Сигнатура: `RegionLimitSetResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1671,7 +1781,7 @@ _Публичные классы и функции не обнаружены._
 
 Удаление регионального лимита.
 
-Сигнатура: `RemoveRegionLimit(*, status: dict[str, typing.Any], data: bool, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RemoveRegionLimit(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1843,7 +1953,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на запрос списка ограничителей (GET /restriction).
 
-Сигнатура: `RestrictionGetResponse(*, data: api_client_opti24.models.restrictions.RestrictionList, timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RestrictionGetResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.restrictions.RestrictionList, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1879,7 +1989,19 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на удаление ограничителя (POST /removeRestriction).
 
-Сигнатура: `RestrictionRemoveResponse(*, status: dict[str, typing.Any], data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `RestrictionRemoveResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
+
+Публичные методы:
+
+#### `describe`
+
+Сигнатура: `describe() -> 'dict[str, dict[str, Any]]'`
+
+### `RestrictionRequestItem`
+
+Строгий элемент запроса установки товарного ограничителя.
+
+Сигнатура: `RestrictionRequestItem(*, id: Annotated[str | None, MinLen(min_length=1)] = None, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, card_id: Annotated[str | None, MinLen(min_length=1)] = None, group_id: Annotated[str | None, MinLen(min_length=1)] = None, productType: Annotated[str, MinLen(min_length=1)], productGroup: Annotated[str | None, MinLen(min_length=1)] = None, restriction_type: Literal[1, 2]) -> None`
 
 Публичные методы:
 
@@ -1891,7 +2013,7 @@ _Публичные классы и функции не обнаружены._
 
 Ответ на установку или изменение ограничителя (POST /setRestriction).
 
-Сигнатура: `RestrictionSetResponse(*, data: list[str], timestamp: int, **extra_data: Any) -> None`
+Сигнатура: `RestrictionSetResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: list[str], timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1963,7 +2085,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateCreateRequest`
 
-Сигнатура: `TemplateCreateRequest(*, contract_id: str, type: str, name: str) -> None`
+Сигнатура: `TemplateCreateRequest(*, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, type: Literal['Limit', 'Wallet'], name: str) -> None`
 
 Публичные методы:
 
@@ -1973,7 +2095,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateCreateResponse`
 
-Сигнатура: `TemplateCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateCreateResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: str, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -1983,7 +2105,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateDeleteResponse`
 
-Сигнатура: `TemplateDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateDeleteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2003,7 +2125,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestrictionCreateRequest`
 
-Сигнатура: `TemplateGeoRestrictionCreateRequest(*, contract_id: str, country: str, region: str | None = None, partner: str | None = None, service_center: str | None = None, restriction_type: int) -> None`
+Сигнатура: `TemplateGeoRestrictionCreateRequest(*, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, country: str, region: str | None = None, partner: str | None = None, service_center: str | None = None, restriction_type: Literal[1, 2]) -> None`
 
 Публичные методы:
 
@@ -2013,7 +2135,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestrictionCreateResponse`
 
-Сигнатура: `TemplateGeoRestrictionCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateGeoRestrictionCreateResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: str, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2023,7 +2145,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestrictionDeleteResponse`
 
-Сигнатура: `TemplateGeoRestrictionDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateGeoRestrictionDeleteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2043,7 +2165,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateGeoRestrictionListResponse`
 
-Сигнатура: `TemplateGeoRestrictionListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateGeoRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateGeoRestrictionListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.templates.TemplateGeoRestrictionListData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2073,7 +2195,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitCreateRequest`
 
-Сигнатура: `TemplateLimitCreateRequest(*, contract_id: str, product_type: str, product_group: str | None = None, sum: api_client_opti24.models.templates.LimitSum | None = None, amount: api_client_opti24.models.templates.LimitAmount | None = None, time: api_client_opti24.models.templates.LimitTime, term: api_client_opti24.models.templates.LimitTerm | None = None, create_restriction: bool | None = None) -> None`
+Сигнатура: `TemplateLimitCreateRequest(*, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, product_type: str, product_group: str | None = None, sum: api_client_opti24.models.templates.LimitSum | None = None, amount: api_client_opti24.models.templates.LimitAmount | None = None, time: api_client_opti24.models.templates.LimitTime, term: api_client_opti24.models.templates.LimitTerm | None = None, create_restriction: bool | None = None) -> None`
 
 Публичные методы:
 
@@ -2083,7 +2205,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitCreateResponse`
 
-Сигнатура: `TemplateLimitCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateLimitCreateResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: str, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2093,7 +2215,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitDeleteResponse`
 
-Сигнатура: `TemplateLimitDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateLimitDeleteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2113,7 +2235,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateLimitListResponse`
 
-Сигнатура: `TemplateLimitListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateLimitListData, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateLimitListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.templates.TemplateLimitListData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2133,7 +2255,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionCreateRequest`
 
-Сигнатура: `TemplateRestrictionCreateRequest(*, contract_id: str, product_type: str, product_group: str | None = None, restriction_type: int) -> None`
+Сигнатура: `TemplateRestrictionCreateRequest(*, contract_id: Annotated[str | None, MinLen(min_length=1)] = None, product_type: str, product_group: str | None = None, restriction_type: Literal[1, 2]) -> None`
 
 Публичные методы:
 
@@ -2143,7 +2265,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionCreateResponse`
 
-Сигнатура: `TemplateRestrictionCreateResponse(*, status: dict[str, Any] | None = None, data: str, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateRestrictionCreateResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: str, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2153,7 +2275,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionDeleteResponse`
 
-Сигнатура: `TemplateRestrictionDeleteResponse(*, status: dict[str, Any] | None = None, data: bool, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateRestrictionDeleteResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: bool, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2173,7 +2295,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplateRestrictionListResponse`
 
-Сигнатура: `TemplateRestrictionListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplateRestrictionListData, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplateRestrictionListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.templates.TemplateRestrictionListData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -2193,7 +2315,7 @@ _Публичные классы и функции не обнаружены._
 
 ### `TemplatesListResponse`
 
-Сигнатура: `TemplatesListResponse(*, status: dict[str, Any] | None = None, data: api_client_opti24.models.templates.TemplatesListData, timestamp: int | None = None, **extra_data: Any) -> None`
+Сигнатура: `TemplatesListResponse(*, status: api_client_opti24.models.common.ResponseStatus, data: api_client_opti24.models.templates.TemplatesListData, timestamp: int, **extra_data: Any) -> None`
 
 Публичные методы:
 
@@ -3038,43 +3160,43 @@ result = await client.cards.block_card(
 
 #### `get_contract_data`
 
-Сигнатура: `get_contract_data(self, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.contracts.ContractResponse`
+Сигнатура: `get_contract_data(self, *, contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.contracts.ContractDataResponse`
 
 Получение информации о контракте.
 
 #### `get_documents`
 
-Сигнатура: `get_documents(self, date_start: str, date_end: str, api_version: str | None = None, page: int = 1, on_page: int = 10) -> api_client_opti24.models.contracts.DocumentsResponse`
+Сигнатура: `get_documents(self, *, date_start: str, date_end: str, contract_id: str | None = None, api_version: str | None = None, page: int = 1, on_page: int = 10) -> api_client_opti24.models.contracts.DocumentsResponse`
 
 Получение списка первичных документов (номер документа, дата, сумма, НДС, номер договора и пр.).
 
 #### `get_invoices`
 
-Сигнатура: `get_invoices(self, api_version: str | None = None) -> api_client_opti24.models.contracts.InvoicesResponse`
+Сигнатура: `get_invoices(self, *, contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.contracts.InvoicesResponse`
 
 Получение списка счетов на оплату.
 
 #### `get_payments`
 
-Сигнатура: `get_payments(self, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.contracts.PaymentsResponse`
+Сигнатура: `get_payments(self, *, contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.contracts.PaymentsResponse`
 
 Получение данных о платежах по контракту.
 
 #### `order_cards`
 
-Сигнатура: `order_cards(self, count: int, office_id: str, api_version: str | None = None) -> api_client_opti24.models.contracts.OrderCardsResponse`
+Сигнатура: `order_cards(self, *, count: int, office_id: str, contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.contracts.OrderCardsResponse`
 
 Заказ необходимого количества топливных карт в определенном офисе продаж.
 
 #### `order_documents_email`
 
-Сигнатура: `order_documents_email(self, ids: list[str], fmt: str, emails: list[str], api_version: str | None = None) -> api_client_opti24.models.contracts.DocumentsOrderResponse`
+Сигнатура: `order_documents_email(self, *, ids: list[str], fmt: Literal['pdf', 'xlsx'], emails: list[str], contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.contracts.DocumentsOrderResponse`
 
 Заказ первичных документов по ID документа на указанные email – адреса (до 5 адресов).
 
 #### `order_invoice`
 
-Сигнатура: `order_invoice(self, amount: float, email: str, api_version: str | None = None) -> api_client_opti24.models.contracts.InvoiceOrderResponse`
+Сигнатура: `order_invoice(self, *, amount: decimal.Decimal, email: str, contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.contracts.InvoiceOrderResponse`
 
 Заказать счёт на оплату и отправить его на email.
 
@@ -3086,14 +3208,14 @@ result = await client.cards.block_card(
 Пример вызова:
 ```python
 invoice = await client.contracts.order_invoice(
-    amount=15000.0,
+    amount=Decimal("15000.00"),
     email="billing@example.org",
 )
 ```
 
 Пример payload:
 ```json
-{"sum": 15000.0, "email": "billing@example.org"}
+{"sum": "15000.00", "email": "billing@example.org"}
 ```
 
 ## `api_client_opti24.services.dictionaries`
@@ -3187,7 +3309,7 @@ stations = await client.dictionaries.get_azs_list_v2(
 
 #### `move_to_card`
 
-Сигнатура: `move_to_card(self, *, contract_id: str | None = None, card_id: str, amount: float, api_version: str | None = None) -> api_client_opti24.models.ewallet.MoveToCardResponse`
+Сигнатура: `move_to_card(self, *, contract_id: str | None = None, card_id: str, amount: decimal.Decimal, api_version: str | None = None) -> api_client_opti24.models.ewallet.MoveToCardResponse`
 
 Перевести деньги со счёта договора на электронный кошелёк карты.
 
@@ -3210,18 +3332,18 @@ Returns:
 transfer = await client.ewallet.move_to_card(
     contract_id="contract-id",
     card_id="card-id",
-    amount=2500.0,
+    amount=Decimal("2500.00"),
 )
 ```
 
 Пример payload:
 ```json
-{"contract_id": "contract-id", "card_id": "card-id", "amount": 2500.0}
+{"contract_id": "contract-id", "card_id": "card-id", "amount": "2500.00"}
 ```
 
 #### `move_to_contract`
 
-Сигнатура: `move_to_contract(self, *, contract_id: str | None = None, card_id: str, amount: float, api_version: str | None = None) -> api_client_opti24.models.ewallet.MoveToContractResponse`
+Сигнатура: `move_to_contract(self, *, contract_id: str | None = None, card_id: str, amount: decimal.Decimal, api_version: str | None = None) -> api_client_opti24.models.ewallet.MoveToContractResponse`
 
 Перевести деньги с электронного кошелька карты обратно на договор.
 
@@ -3236,7 +3358,7 @@ Returns:
 
 #### `set_card_product`
 
-Сигнатура: `set_card_product(self, *, contract_id: str | None = None, card_ids: list[str], product: str, api_version: str | None = None) -> api_client_opti24.models.ewallet.SetCardProductResponse`
+Сигнатура: `set_card_product(self, *, contract_id: str | None = None, card_ids: list[str], product: Literal['wallet', 'limit'], api_version: str | None = None) -> api_client_opti24.models.ewallet.SetCardProductResponse`
 
 Изменить тип карты (лимитная ↔ электронный кошелёк).
 
@@ -3391,7 +3513,7 @@ with_send=False → POST /v2/invites/{invite_id}/prolong_free (без отпра
 
 #### `get_limits`
 
-Сигнатура: `get_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.limits.LimitsResponse`
+Сигнатура: `get_limits(self, *, contract_id: str | None = None, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.limits.LimitsResponse`
 
 Получить список продуктовых лимитов по договору, карте или группе карт.
 
@@ -3402,7 +3524,7 @@ with_send=False → POST /v2/invites/{invite_id}/prolong_free (без отпра
 
 #### `remove_limit`
 
-Сигнатура: `remove_limit(self, *, contract_id: str, limit_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.limits.RemoveLimitResponse`
+Сигнатура: `remove_limit(self, *, contract_id: str | None = None, limit_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.limits.RemoveLimitResponse`
 
 Удалить продуктовый лимит по карте или группе карт.
 Если ID группы карты не передано, то будет удален лимит по карте.
@@ -3413,7 +3535,7 @@ with_send=False → POST /v2/invites/{invite_id}/prolong_free (без отпра
 
 #### `set_limit`
 
-Сигнатура: `set_limit(self, *, limits: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.limits.SetLimitResponse`
+Сигнатура: `set_limit(self, *, limits: list[api_client_opti24.models.limits.LimitRequestItem | collections.abc.Mapping[str, typing.Any]], contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.limits.SetLimitResponse`
 
 Для изменения уже ранее созданного лимита, требуется передавать в запросе его ID.
 Для договора нельзя выставить продуктовый лимит, можно для карты или группы карт.
@@ -3430,7 +3552,7 @@ result = await client.limits.set_limit(
         "contract_id": "contract-id",
         "card_id": "card-id",
         "sum": {"currency": "810", "value": 5000.0},
-        "time": {"number": 1, "type": 1},
+        "time": {"number": 1, "type": 5},
     }]
 )
 ```
@@ -3441,7 +3563,7 @@ result = await client.limits.set_limit(
   "contract_id": "contract-id",
   "card_id": "card-id",
   "sum": {"currency": "810", "value": 5000.0},
-  "time": {"number": 1, "type": 1}
+  "time": {"number": 1, "type": 5}
 }
 ```
 
@@ -3457,19 +3579,19 @@ result = await client.limits.set_limit(
 
 #### `get_region_limits`
 
-Сигнатура: `get_region_limits(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.region_limits.RegionLimitResponse`
+Сигнатура: `get_region_limits(self, *, contract_id: str | None = None, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.region_limits.RegionLimitResponse`
 
 Получение списка региональных лимитов по договору, карте или группе карт.
 
 #### `remove_region_limit`
 
-Сигнатура: `remove_region_limit(self, *, contract_id: str, regionlimit_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.region_limits.RemoveRegionLimit`
+Сигнатура: `remove_region_limit(self, *, contract_id: str | None = None, regionlimit_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.region_limits.RemoveRegionLimit`
 
 Удаление регионального лимита по карте или группе карт.
 
 #### `set_region_limit`
 
-Сигнатура: `set_region_limit(self, *, region_limits: list[dict[str, typing.Any]], api_version: str | None = None) -> dict[str, typing.Any]`
+Сигнатура: `set_region_limit(self, *, region_limits: list[api_client_opti24.models.region_limits.RegionLimitRequestItem | collections.abc.Mapping[str, typing.Any]], contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.region_limits.RegionLimitSetResponse`
 
 Установка/изменение регионального лимита по карте или группе карт.
 Для изменения лимита необходимо передавать его ID.
@@ -3612,19 +3734,19 @@ job = await client.reports.order_report(
 
 #### `get_restrictions`
 
-Сигнатура: `get_restrictions(self, *, contract_id: str, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionGetResponse`
+Сигнатура: `get_restrictions(self, *, contract_id: str | None = None, card_id: str | None = None, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionGetResponse`
 
 Получение списка товарных ограничителей по договору, карте или группе карт.
 
 #### `remove_restriction`
 
-Сигнатура: `remove_restriction(self, *, contract_id: str, restriction_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionRemoveResponse`
+Сигнатура: `remove_restriction(self, *, contract_id: str | None = None, restriction_id: str, group_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionRemoveResponse`
 
 Удаление товарного ограничителя по карте или группе карт.
 
 #### `set_restriction`
 
-Сигнатура: `set_restriction(self, *, restrictions: list[dict[str, typing.Any]], api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionSetResponse`
+Сигнатура: `set_restriction(self, *, restrictions: list[api_client_opti24.models.restrictions.RestrictionRequestItem | collections.abc.Mapping[str, typing.Any]], contract_id: str | None = None, api_version: str | None = None) -> api_client_opti24.models.restrictions.RestrictionSetResponse`
 
 Установка или изменение товарного ограничителя по карте или группе карт.
 Для изменения ограничителя необходимо передавать его ID.
@@ -3659,12 +3781,7 @@ result = await client.restrictions.set_restriction(
 
 ### `TemplatesService`
 
-ВК – виртуальная карта. Чтобы выпустить ВК, потребуется создать шаблон лимита и прикрепить этот шаблон к пользователю.
-Прикрепление происходит на этапе приглашения нового пользователя или методом для существующих пользователей.
-Шаблон – это первоначальные параметры (Тип карты, Лимиты, Ограничители), с которыми будет выпущена эта ВК,
-и все последующие, если использовать этот шаблон.
-Шаблон сделан с точки зрения безопасности,
-для того чтобы по-умолчанию все выпускаемые ВК имели ограничения на покупку (Лимит/Ограничитель).
+Управление шаблонами виртуальных карт и их ограничениями.
 
 Сигнатура: `TemplatesService(request_executor: 'RequestExecutor', session_context: 'SessionContext', session_gate: 'SessionGate', logger: 'LoggerLike') -> 'None'`
 
@@ -3672,144 +3789,116 @@ result = await client.restrictions.set_restriction(
 
 #### `create_template`
 
-Сигнатура: `create_template(self, contract_id: str, type_: str, name: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateCreateResponse`
+Сигнатура: `create_template(self, *, type_: 'TemplateType', name: 'str', contract_id: 'str | None' = None, api_version: 'str | None' = None) -> 'TemplateCreateResponse'`
 
-Создать новый шаблон виртуальной карты.
+Создать шаблон виртуальной карты для выбранного договора.
 
 Типовой сценарий:
-    Создать базовый шаблон, затем добавить к нему лимиты и ограничения
-    перед выпуском виртуальной карты.
+    Создать лимитный или кошельковый шаблон, который затем можно
+    дополнить лимитами и ограничителями.
 
 Пример вызова:
 ```python
 template = await client.templates.create_template(
-    contract_id="contract-id",
-    type_="wallet",
-    name="Командировки",
+    type_="Limit",
+    name="Дневной лимит",
 )
 ```
 
 Пример payload:
 ```json
-{"contract_id": "contract-id", "type": "wallet", "name": "Командировки"}
+{"contract_id": "contract-id", "type": "Limit", "name": "Дневной лимит"}
 ```
 
 #### `create_template_georestriction`
 
-Сигнатура: `create_template_georestriction(self, template_id: str, payload: dict[str, typing.Any], api_version: str | None = None) -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
+Сигнатура: `create_template_georestriction(self, *, template_id: 'str', payload: 'TemplateGeoRestrictionCreateRequest | Mapping[str, Any]', contract_id: 'str | None' = None, api_version: 'str | None' = None) -> 'TemplateGeoRestrictionCreateResponse'`
 
-Создать геоограничитель для шаблона ВК
+Создать геоограничитель шаблона.
 
 #### `create_template_limit`
 
-Сигнатура: `create_template_limit(self, template_id: str, payload: dict[str, typing.Any], api_version: str | None = None) -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
+Сигнатура: `create_template_limit(self, *, template_id: 'str', payload: 'TemplateLimitCreateRequest | Mapping[str, Any]', contract_id: 'str | None' = None, api_version: 'str | None' = None) -> 'TemplateLimitCreateResponse'`
 
-Создать лимит для шаблона ВК
+Создать лимит шаблона виртуальной карты.
 
 #### `create_template_restriction`
 
-Сигнатура: `create_template_restriction(self, template_id: str, payload: dict[str, typing.Any], api_version: str | None = None) -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
+Сигнатура: `create_template_restriction(self, *, template_id: 'str', payload: 'TemplateRestrictionCreateRequest | Mapping[str, Any]', contract_id: 'str | None' = None, api_version: 'str | None' = None) -> 'TemplateRestrictionCreateResponse'`
 
-Создать ограничитель для шаблона ВК
+Создать ограничитель шаблона.
 
 #### `delete_template`
 
-Сигнатура: `delete_template(self, template_id: str, api_version: str | None = None, use_post: bool = False) -> api_client_opti24.models.templates.TemplateDeleteResponse`
+Сигнатура: `delete_template(self, *, template_id: 'str', api_version: 'str | None' = None, use_post: 'bool' = False) -> 'TemplateDeleteResponse'`
 
-Удалить шаблон ВК
+Удалить шаблон виртуальной карты.
 
 #### `delete_template_georestriction`
 
-Сигнатура: `delete_template_georestriction(self, template_id: str, georestriction_id: str, api_version: str | None = None, use_post: bool = False) -> api_client_opti24.models.templates.TemplateGeoRestrictionDeleteResponse`
+Сигнатура: `delete_template_georestriction(self, *, template_id: 'str', georestriction_id: 'str', api_version: 'str | None' = None, use_post: 'bool' = False) -> 'TemplateGeoRestrictionDeleteResponse'`
 
-Удалить геоограничитель шаблона ВК
+Удалить геоограничитель шаблона.
 
 #### `delete_template_limit`
 
-Сигнатура: `delete_template_limit(self, template_id: str, limit_id: str, api_version: str | None = None, use_post: bool = False) -> api_client_opti24.models.templates.TemplateLimitDeleteResponse`
+Сигнатура: `delete_template_limit(self, *, template_id: 'str', limit_id: 'str', api_version: 'str | None' = None, use_post: 'bool' = False) -> 'TemplateLimitDeleteResponse'`
 
-Удалить лимит шаблона ВК
+Удалить лимит шаблона виртуальной карты.
 
 #### `delete_template_restriction`
 
-Сигнатура: `delete_template_restriction(self, template_id: str, restriction_id: str, api_version: str | None = None, use_post: bool = False) -> api_client_opti24.models.templates.TemplateRestrictionDeleteResponse`
+Сигнатура: `delete_template_restriction(self, *, template_id: 'str', restriction_id: 'str', api_version: 'str | None' = None, use_post: 'bool' = False) -> 'TemplateRestrictionDeleteResponse'`
 
-Удалить ограничитель шаблона ВК
+Удалить ограничитель шаблона.
 
 #### `get_template_georestrictions`
 
-Сигнатура: `get_template_georestrictions(self, template_id: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateGeoRestrictionListResponse`
+Сигнатура: `get_template_georestrictions(self, *, template_id: 'str', api_version: 'str | None' = None) -> 'TemplateGeoRestrictionListResponse'`
 
-Получить список геоограничителей шаблона ВК
+Получить список геоограничителей шаблона.
 
 #### `get_template_limits`
 
-Сигнатура: `get_template_limits(self, template_id: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateLimitListResponse`
+Сигнатура: `get_template_limits(self, *, template_id: 'str', api_version: 'str | None' = None) -> 'TemplateLimitListResponse'`
 
-Получить список лимитов шаблона ВК
+Получить список лимитов шаблона виртуальной карты.
 
 #### `get_template_restrictions`
 
-Сигнатура: `get_template_restrictions(self, template_id: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateRestrictionListResponse`
+Сигнатура: `get_template_restrictions(self, *, template_id: 'str', api_version: 'str | None' = None) -> 'TemplateRestrictionListResponse'`
 
-Получить список ограничителей шаблона ВК
+Получить список ограничителей шаблона.
 
 #### `get_templates`
 
-Сигнатура: `get_templates(self, contract_id: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplatesListResponse`
+Сигнатура: `get_templates(self, *, contract_id: 'str | None' = None, api_version: 'str | None' = None) -> 'TemplatesListResponse'`
 
-Получить список шаблонов ВК
+Получить список шаблонов виртуальных карт выбранного договора.
 
 #### `update_template`
 
-Сигнатура: `update_template(self, template_id: str, contract_id: str, type_: str, name: str, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateCreateResponse`
+Сигнатура: `update_template(self, *, template_id: 'str', type_: 'TemplateType', name: 'str', contract_id: 'str | None' = None, api_version: 'str | None' = None) -> 'TemplateCreateResponse'`
 
-Изменить существующий шаблон ВК
+Изменить существующий шаблон виртуальной карты.
 
 #### `update_template_georestriction`
 
-Сигнатура: `update_template_georestriction(self, template_id: str, georestriction_id: str, payload: dict[str, typing.Any], api_version: str | None = None, use_post: bool = True) -> api_client_opti24.models.templates.TemplateGeoRestrictionCreateResponse`
+Сигнатура: `update_template_georestriction(self, *, template_id: 'str', georestriction_id: 'str', payload: 'TemplateGeoRestrictionCreateRequest | Mapping[str, Any]', contract_id: 'str | None' = None, api_version: 'str | None' = None, use_post: 'bool' = True) -> 'TemplateGeoRestrictionCreateResponse'`
 
-Изменить геоограничитель шаблона ВК
+Изменить геоограничитель шаблона через PUT или POST override.
 
 #### `update_template_limit`
 
-Сигнатура: `update_template_limit(self, *, template_id: str, limit_id: str, limits: list[dict[str, typing.Any]], use_post: bool = True, api_version: str | None = None) -> api_client_opti24.models.templates.TemplateLimitCreateResponse`
+Сигнатура: `update_template_limit(self, *, template_id: 'str', limit_id: 'str', limits: 'list[TemplateLimitCreateRequest | Mapping[str, Any]]', contract_id: 'str | None' = None, use_post: 'bool' = True, api_version: 'str | None' = None) -> 'TemplateLimitCreateResponse'`
 
-Обновить лимит шаблона ВК.
-Новые параметры описывается в виде словаря, содержащего параметры amount, sum, time, term и т.д.
-Если система не поддерживает PUT — передай `use_post=True`,
-тогда запрос будет отправлен методом POST с добавленным `_method="PUT"`.
-
-Args:
-    template_id (str): ID шаблона ВК
-    limit_id (str): ID лимита, который нужно обновить
-    limits (list[dict]): список новых параметров лимита для обновления, пример:
-        [
-            {
-                "contract_id": "1-380B94P",
-                "product_type": "1-276PF01",
-                "product_group": "1-276PF0E",
-                "sum": {"currency": "810", "value": 5000}, 810 - RUB, LIT - литры
-                "time": {"type": 5, "number": 1},
-                "term": {
-                    "time": {"from": "03:00", "to": "08:00"},
-                    "days": "1111100",
-                    "type": 1
-                }
-            }
-        ]
-    use_post (bool): если True — POST с `_method=PUT`, иначе реальный PUT
-    api_version (str): версия API (по умолчанию "v2")
-
-Returns:
-    TemplateLimitCreateResponse: объект с ID изменённого лимита
+Изменить лимит шаблона через PUT или POST method override.
 
 #### `update_template_restriction`
 
-Сигнатура: `update_template_restriction(self, template_id: str, restriction_id: str, payload: dict[str, typing.Any], api_version: str | None = None, use_post: bool = True) -> api_client_opti24.models.templates.TemplateRestrictionCreateResponse`
+Сигнатура: `update_template_restriction(self, *, template_id: 'str', restriction_id: 'str', payload: 'TemplateRestrictionCreateRequest | Mapping[str, Any]', contract_id: 'str | None' = None, api_version: 'str | None' = None, use_post: 'bool' = True) -> 'TemplateRestrictionCreateResponse'`
 
-Изменить ограничитель шаблона ВК
+Изменить ограничитель шаблона через PUT или POST override.
 
 ## `api_client_opti24.services.transactions`
 
@@ -4202,3 +4291,37 @@ SHA-512 хэш пароля в нижнем регистре.
 Проверка, что разница между датами не больше месяца.
 
 Сигнатура: `validate_month_span(date_from: str, date_to: str) -> None`
+
+## `api_client_opti24.validation`
+
+### `decimal_to_wire`
+
+Сигнатура: `decimal_to_wire(value: 'Decimal', field_name: 'str' = 'amount') -> 'str'`
+
+### `require_identifier`
+
+Сигнатура: `require_identifier(value: 'str', field_name: 'str') -> 'str'`
+
+### `validate_card_or_group_target`
+
+Сигнатура: `validate_card_or_group_target(*, card_id: 'str | None', group_id: 'str | None', required: 'bool' = False) -> 'tuple[str | None, str | None]'`
+
+### `validate_date_range`
+
+Сигнатура: `validate_date_range(date_start: 'str', date_end: 'str') -> 'tuple[str, str]'`
+
+### `validate_document_order`
+
+Сигнатура: `validate_document_order(document_ids: 'list[str]', document_format: 'str', emails: 'list[str]') -> 'tuple[list[str], str, list[str]]'`
+
+### `validate_email`
+
+Сигнатура: `validate_email(value: 'str', field_name: 'str' = 'email') -> 'str'`
+
+### `validate_pagination`
+
+Сигнатура: `validate_pagination(page: 'int', on_page: 'int') -> 'tuple[int, int]'`
+
+### `validate_positive_count`
+
+Сигнатура: `validate_positive_count(count: 'int') -> 'int'`
