@@ -1,7 +1,8 @@
 from ..authentication import Authenticator
 from ..decorators import api_method
 from ..logger import LoggerLike
-from ..models.auth import AuthUserResponse, GetInfoResponse
+from ..modeling import decode_model
+from ..models.auth import AuthUserResponse, GetInfoResponse, LogoffResponse
 from ..runtime import Clock
 from ..service_base import (
     RequestExecutor,
@@ -29,7 +30,11 @@ class AuthService(_BaseService):
         self.__clock = clock
 
     @api_method
-    async def logoff(self, api_version: str | None = None) -> dict[str, object]:
+    async def logoff(
+        self,
+        *,
+        api_version: str | None = None,
+    ) -> LogoffResponse:
         """Завершить серверную сессию и очистить локальное состояние клиента.
 
         Вызывайте метод в ``finally`` или используйте контекстный менеджер
@@ -37,11 +42,12 @@ class AuthService(_BaseService):
         """
         response = await self._request("logoff", api_version=api_version)
         self.__session_mutator.reset()
-        return response
+        return decode_model(LogoffResponse, response)
 
     @api_method
     async def get_info(
         self,
+        *,
         api_version: str | None = None,
         period: str | None = None,
     ) -> GetInfoResponse:
@@ -55,7 +61,7 @@ class AuthService(_BaseService):
             params={"period": period},
         )
 
-        return GetInfoResponse(**data)
+        return decode_model(GetInfoResponse, data)
 
     @api_method
     async def auth_user(

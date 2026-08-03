@@ -1,6 +1,7 @@
 from typing import Any
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.virtual_cards import (
     MPCListResponse,
     MPCPayloadResponse,
@@ -34,18 +35,18 @@ class VirtualCardsService(_BaseService):
     @api_method
     async def create_virtual_card(
         self,
+        *,
         user_id: str,
         api_version: str | None = None,
     ) -> VirtualCardResponse:
         """Выпуск виртуальной карты (старый метод POST /vip/v2/cards)"""
         payload = {"user_id": user_id}
-        self.logger.info("Creating virtual card using legacy method")
         data = await self._request(
             "create_virtual_card",
             api_version=api_version,
             data=payload,
         )
-        return VirtualCardResponse(**data)
+        return decode_model(VirtualCardResponse, data)
 
     # === Выпуск виртуальной карты (новый метод /release) ===
     @api_method
@@ -90,13 +91,12 @@ class VirtualCardsService(_BaseService):
         if user_id:
             payload["user_id"] = user_id
 
-        self.logger.info("Creating virtual card")
         data = await self._request(
             "release_virtual_card",
             api_version=api_version,
             data=payload,
         )
-        return VirtualCardResponse(**data)
+        return decode_model(VirtualCardResponse, data)
 
     # === Удаление МПК ===
     @api_method

@@ -1,9 +1,11 @@
-from typing import Any
+from collections.abc import Mapping
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.invites import (
     InviteBoolResponse,
-    InviteList,
+    InviteCreateRequest,
+    InviteListResponse,
     InviteResponse,
 )
 from ..payloads import with_method_override
@@ -33,7 +35,7 @@ class InvitesService(_BaseService):
         page: int | None = None,
         on_page: int | None = None,
         api_version: str | None = None,
-    ) -> InviteList:
+    ) -> InviteListResponse:
         """
         Получить список приглашений (v2).
 
@@ -61,14 +63,14 @@ class InvitesService(_BaseService):
             api_version=api_version,
             params=params,
         )
-        return InviteList(**raw.get("data", {}))
+        return decode_model(InviteListResponse, raw)
 
     # ---------------------- POST /v2/invites / invites_free ----------------------
     @api_method
     async def create_invite(
         self,
         *,
-        data: dict[str, Any],
+        data: InviteCreateRequest | Mapping[str, object],
         with_send: bool = True,
         api_version: str | None = None,
     ) -> InviteResponse:
@@ -103,13 +105,17 @@ class InvitesService(_BaseService):
         }
         ```
         """
+        payload = InviteCreateRequest.model_validate(data).model_dump(
+            exclude_none=True,
+            exclude_unset=True,
+        )
         raw = await self._request(
             "create_invite",
             api_version=api_version,
             route_name="default" if with_send else "without_send",
-            json=data,
+            json=payload,
         )
-        return InviteResponse(**raw)
+        return decode_model(InviteResponse, raw)
 
     # ---------------------- DELETE /v2/invites/{invite_id} ----------------------
     @api_method
@@ -130,7 +136,7 @@ class InvitesService(_BaseService):
             path_params={"invite_id": invite_id},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
-        return InviteBoolResponse(**raw)
+        return decode_model(InviteBoolResponse, raw)
 
     # ---------------------- GET /v2/invites/{invite_id}/send ----------------------
     @api_method
@@ -148,7 +154,7 @@ class InvitesService(_BaseService):
             api_version=api_version,
             path_params={"invite_id": invite_id},
         )
-        return InviteResponse(**raw)
+        return decode_model(InviteResponse, raw)
 
     # ---------------------- POST /v2/invites/{invite_id}/prolong / prolong_free ----------------------
     @api_method
@@ -171,4 +177,4 @@ class InvitesService(_BaseService):
             route_name="default" if with_send else "without_send",
             path_params={"invite_id": invite_id},
         )
-        return InviteBoolResponse(**raw)
+        return decode_model(InviteBoolResponse, raw)

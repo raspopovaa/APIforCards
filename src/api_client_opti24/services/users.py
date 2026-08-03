@@ -1,7 +1,10 @@
+from collections.abc import Mapping
 from typing import Any
 
 from ..decorators import api_method
+from ..modeling import decode_model
 from ..models.users import (
+    UserAttachContractRequest,
     UserBoolResponse,
     UserCreateResponse,
     UserListResponse,
@@ -46,15 +49,13 @@ class UsersService(_BaseService):
         }
         params = {k: v for k, v in params.items() if v is not None}
 
-        self.logger.info("Requesting users")
-
         raw = await self._request(
             "get_users",
             api_version=api_version,
             params=params,
         )
 
-        return UserListResponse(**raw)
+        return decode_model(UserListResponse, raw)
 
     # -------------------- Создание пользователя --------------------
 
@@ -90,15 +91,13 @@ class UsersService(_BaseService):
         """
         body = {"uuid": uuid, "mobile": mobile}
 
-        self.logger.info("Creating user")
-
         raw = await self._request(
             "create_user",
             api_version=api_version,
             data=body,
         )
 
-        return UserCreateResponse(**raw)
+        return decode_model(UserCreateResponse, raw)
 
     # -------------------- Прикрепление договоров --------------------
 
@@ -107,7 +106,7 @@ class UsersService(_BaseService):
         self,
         *,
         user_id: str,
-        contracts: list[dict[str, Any]],
+        contracts: list[UserAttachContractRequest | Mapping[str, object]],
         api_version: str | None = None,
     ) -> UserBoolResponse:
         """
@@ -118,16 +117,19 @@ class UsersService(_BaseService):
             {"sid": "1-380B94P", "template_id": "1-3BE470B", "use_mpc": True}
         ])
         """
-        self.logger.info("Attaching contracts to user")
+        payload = [
+            UserAttachContractRequest.model_validate(contract).model_dump(exclude_none=True)
+            for contract in contracts
+        ]
 
         raw = await self._request(
             "attach_contracts",
             api_version=api_version,
             path_params={"user_id": user_id},
-            json=contracts,
+            json=payload,
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)
 
     # -------------------- Открепление договоров --------------------
 
@@ -147,8 +149,6 @@ class UsersService(_BaseService):
             user_id="1-FK485FK", contracts=["1-380B94P", "1-37PYW2D"]
         )
         """
-        self.logger.info("Detaching contracts from user")
-
         raw = await self._request(
             "detach_contracts",
             api_version=api_version,
@@ -156,7 +156,7 @@ class UsersService(_BaseService):
             json=contracts,
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)
 
     # -------------------- Прикрепление карты --------------------
 
@@ -174,8 +174,6 @@ class UsersService(_BaseService):
         Пример:
         await client.users.attach_card(user_id="1-FK485FK", card_id="5050505")
         """
-        self.logger.info("Attaching card to user")
-
         raw = await self._request(
             "attach_card",
             api_version=api_version,
@@ -183,7 +181,7 @@ class UsersService(_BaseService):
             data={"card_id": card_id},
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)
 
     # -------------------- Открепление карты --------------------
 
@@ -201,8 +199,6 @@ class UsersService(_BaseService):
         Пример:
         await client.users.detach_card(user_id="1-FK485FK", card_id="5050505")
         """
-        self.logger.info("Detaching card from user")
-
         raw = await self._request(
             "detach_card",
             api_version=api_version,
@@ -210,7 +206,7 @@ class UsersService(_BaseService):
             data={"card_id": card_id},
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)
 
     # -------------------- Удаление пользователя --------------------
 
@@ -228,8 +224,6 @@ class UsersService(_BaseService):
         Пример:
         await client.users.delete_user(user_id="1-FK485FK")
         """
-        self.logger.info("Deleting user")
-
         raw = await self._request(
             "delete_user",
             api_version=api_version,
@@ -238,4 +232,4 @@ class UsersService(_BaseService):
             data=with_method_override(None, "DELETE") if use_post else None,
         )
 
-        return UserBoolResponse(**raw)
+        return decode_model(UserBoolResponse, raw)

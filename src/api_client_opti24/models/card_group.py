@@ -1,6 +1,13 @@
-from typing import Any
+from typing import Any, Literal
 
-from ..modeling import BaseModel, Field
+from ..modeling import BaseModel, Field, StrictRequestModel
+
+
+class CardGroupAssignmentRequest(StrictRequestModel):
+    """Карта и действие при изменении состава группы."""
+
+    id: str = Field(..., description="ID карты")
+    type: Literal["Attach", "Detach"] = Field(..., description="Действие с картой")
 
 
 class CardGroupItem(BaseModel):
