@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from typing import Any
 
 from ..models.region_limits import (
@@ -53,7 +52,7 @@ class RegionLimitsService(_BaseService):
     async def set_region_limit(
         self,
         *,
-        region_limits: Sequence[RegionLimitRequestItem],
+        region_limits: list[RegionLimitRequestItem],
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RegionLimitSetResponse:
