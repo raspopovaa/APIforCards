@@ -1,5 +1,4 @@
 import json
-from collections.abc import Sequence
 from typing import Any
 
 from ..models.limits import (
@@ -53,7 +52,7 @@ class LimitsService(_BaseService):
     async def set_limit(
         self,
         *,
-        limits: Sequence[LimitRequestItem],
+        limits: list[LimitRequestItem],
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> SetLimitResponse:
