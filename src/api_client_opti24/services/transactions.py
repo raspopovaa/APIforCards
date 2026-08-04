@@ -200,9 +200,7 @@ class TransactionsService(_BaseService):
         return await self._request(
             GET_TRANSACTION_DETAIL,
             api_version=api_version,
-            path_params={
-                "transaction_id": require_identifier(transaction_id, "transaction_id")
-            },
+            path_params={"transaction_id": require_identifier(transaction_id, "transaction_id")},
             params={"contract_id": cid},
             request_contract_id=cid,
         )
