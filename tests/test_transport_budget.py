@@ -103,6 +103,7 @@ async def test_operation_attempt_budget_caps_nested_rate_limit_retries(monkeypat
             rate_limit_attempts=3,
             rate_limit_backoff_seconds=0,
         ),
+        monotonic=lambda: 0.0,
         jitter=lambda _cap: 0.0,
     )
 
