@@ -86,7 +86,10 @@ class OperationExecutor:
         timeouts: TimeoutPolicy,
         logger: LoggerLike,
         clock: Clock,
+        max_attempts: int = 5,
     ) -> None:
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be at least 1")
         self.__api_key_provider = api_key_provider
         self.__transport = transport
         self.__session_context = session_context
@@ -94,6 +97,7 @@ class OperationExecutor:
         self.__timeouts = timeouts
         self.__logger = logger
         self.__clock = clock
+        self.__max_attempts = max_attempts
 
     def headers(
         self,
@@ -136,7 +140,7 @@ class OperationExecutor:
         return OperationBudget(
             deadline_at=self.__clock.monotonic()
             + self.__timeouts.resolve_total(spec.timeout_class),
-            max_attempts=5,
+            max_attempts=self.__max_attempts,
         )
 
     def prepare(
