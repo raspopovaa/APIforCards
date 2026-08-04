@@ -184,7 +184,14 @@ class CardsService(_BaseService):
         block: bool = True,
         api_version: str | None = None,
     ) -> IDListResponse:
-        """Заблокировать или разблокировать список карт."""
+        """Заблокировать или разблокировать список карт.
+
+        Типовой сценарий:
+            Немедленно заблокировать утраченную карту до её замены.
+
+        Пример:
+            ``await client.cards.block_card(card_ids=["card-id"], block=True)``
+        """
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             BLOCK_CARD,
