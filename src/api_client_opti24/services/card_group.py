@@ -27,6 +27,7 @@ class CardGroupsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardGroupListResponse:
+        """Получить группы карт выбранного договора."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARD_GROUPS,
@@ -43,6 +44,7 @@ class CardGroupsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> SetCardGroupResponse:
+        """Создать группу карт или изменить существующую."""
         cid = await self._resolve_contract_id(contract_id)
         body = {
             "contract_id": cid,
@@ -65,6 +67,7 @@ class CardGroupsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> SetCardsToGroupResponse:
+        """Добавить карты в группу или удалить их из группы."""
         if not cards_list:
             raise ValueError("cards_list must contain at least one item")
         cid = await self._resolve_contract_id(contract_id)
@@ -89,6 +92,7 @@ class CardGroupsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RemoveCardGroupResponse:
+        """Удалить группу карт."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             REMOVE_CARD_GROUP,
