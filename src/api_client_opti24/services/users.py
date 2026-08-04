@@ -41,6 +41,7 @@ class UsersService(_BaseService):
         filter: dict[str, Any] | None = None,
         api_version: str | None = None,
     ) -> UserListResponse:
+        """Получить страницу пользователей корпоративного клиента."""
         if page is not None:
             validate_positive_count(page)
         if on_page is not None:
@@ -68,6 +69,7 @@ class UsersService(_BaseService):
         max_pages: int = 100,
         api_version: str | None = None,
     ) -> AsyncIterator[UserItem]:
+        """Последовательно получить пользователей с ограничением числа страниц."""
         validate_positive_count(on_page)
         validate_positive_count(max_pages)
         yielded = 0
@@ -93,6 +95,7 @@ class UsersService(_BaseService):
         mobile: str,
         api_version: str | None = None,
     ) -> UserCreateResponse:
+        """Создать пользователя по внешнему UUID и мобильному номеру."""
         return await self._request(
             CREATE_USER,
             api_version=api_version,
@@ -109,6 +112,7 @@ class UsersService(_BaseService):
         contracts: list[UserAttachContractRequest | Mapping[str, object]],
         api_version: str | None = None,
     ) -> UserBoolResponse:
+        """Привязать договоры и права доступа к пользователю."""
         if not contracts:
             raise ValueError("contracts must contain at least one item")
         payload = [
@@ -129,6 +133,7 @@ class UsersService(_BaseService):
         contracts: list[str],
         api_version: str | None = None,
     ) -> UserBoolResponse:
+        """Отвязать договоры от пользователя."""
         return await self._request(
             DETACH_CONTRACTS,
             api_version=api_version,
@@ -143,6 +148,7 @@ class UsersService(_BaseService):
         card_id: str,
         api_version: str | None = None,
     ) -> UserBoolResponse:
+        """Привязать карту к пользователю."""
         return await self._request(
             ATTACH_CARD,
             api_version=api_version,
@@ -157,6 +163,7 @@ class UsersService(_BaseService):
         card_id: str,
         api_version: str | None = None,
     ) -> UserBoolResponse:
+        """Отвязать карту от пользователя."""
         return await self._request(
             DETACH_CARD,
             api_version=api_version,
@@ -171,6 +178,7 @@ class UsersService(_BaseService):
         use_post: bool = False,
         api_version: str | None = None,
     ) -> UserBoolResponse:
+        """Удалить пользователя через DELETE или POST method override."""
         return await self._request(
             DELETE_USER,
             api_version=api_version,
