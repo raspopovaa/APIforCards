@@ -37,6 +37,7 @@ class ReportsService(_BaseService):
         *,
         api_version: str | None = None,
     ) -> ReportListResponse:
+        """Получить список доступных отчётов v2."""
         return await self._request(GET_REPORTS, api_version=api_version)
 
     async def order_report(
@@ -48,6 +49,7 @@ class ReportsService(_BaseService):
         emails: str | None = None,
         api_version: str | None = None,
     ) -> ReportOrderResponse:
+        """Заказать формирование отчёта v2."""
         request = ReportOrderRequest.model_validate(
             {
                 "id": require_identifier(report_id, "report_id"),
@@ -67,6 +69,7 @@ class ReportsService(_BaseService):
         *,
         api_version: str | None = None,
     ) -> ReportJobListResponse:
+        """Получить список задач формирования отчётов v2."""
         return await self._request(GET_REPORT_JOBS, api_version=api_version)
 
     async def download_report_file(
@@ -75,6 +78,7 @@ class ReportsService(_BaseService):
         job_id: str,
         api_version: str | None = None,
     ) -> bytes:
+        """Скачать сформированный отчёт v2 в память."""
         return await self._request_stream(
             DOWNLOAD_REPORT_FILE,
             api_version=api_version,
@@ -88,6 +92,7 @@ class ReportsService(_BaseService):
         destination: str | Path,
         api_version: str | None = None,
     ) -> Path:
+        """Потоково скачать отчёт v2 в файл."""
         return await self._request_stream_to_file(
             DOWNLOAD_REPORT_FILE,
             destination,
@@ -108,6 +113,7 @@ class ReportsService(_BaseService):
         archive: bool = False,
         api_version: str | None = None,
     ) -> ReportV1OrderResponse:
+        """Заказать транзакционный отчёт v1."""
         cid = await self._resolve_contract_id(contract_id)
         start, end = validate_date_range(start, end)
         params: dict[str, Any] = {
@@ -136,6 +142,7 @@ class ReportsService(_BaseService):
         *,
         api_version: str | None = None,
     ) -> ReportV1JobListResponse:
+        """Получить список задач формирования отчётов v1."""
         return await self._request(GET_REPORT_JOB_LIST_V1, api_version=api_version)
 
     async def download_report_file_v1(
@@ -145,6 +152,7 @@ class ReportsService(_BaseService):
         archive: bool = False,
         api_version: str | None = None,
     ) -> bytes:
+        """Скачать сформированный отчёт v1 в память."""
         params = {"job_id": require_identifier(job_id, "job_id")}
         if archive:
             params["archive"] = "true"
@@ -162,6 +170,7 @@ class ReportsService(_BaseService):
         archive: bool = False,
         api_version: str | None = None,
     ) -> Path:
+        """Потоково скачать отчёт v1 в файл."""
         params = {"job_id": require_identifier(job_id, "job_id")}
         if archive:
             params["archive"] = "true"
