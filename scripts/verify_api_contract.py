@@ -183,7 +183,9 @@ def _parameters_match(
         parameter_name = actual_parameter.get("name")
         expected_type = expected_parameter.get("type")
         actual_type = actual_parameter.get("type")
-        if not all(isinstance(value, str) for value in (parameter_name, expected_type, actual_type)):
+        if not all(
+            isinstance(value, str) for value in (parameter_name, expected_type, actual_type)
+        ):
             return False
         if ALLOWED_SDK_PARAMETER_MIGRATIONS.get((operation_name, parameter_name)) != (
             expected_type,
