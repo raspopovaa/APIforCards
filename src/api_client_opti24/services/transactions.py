@@ -38,10 +38,17 @@ class TransactionsService(_BaseService):
         if filter_fn:
             result = list(filter(filter_fn, result))
         if sort_by:
+
+            def sort_key(item: Any) -> Any:
+                value = getattr(item, sort_by, None)
+                if value is None:
+                    raise ValueError(f"transaction sort field is missing: {sort_by}")
+                return value
+
             try:
-                result.sort(key=lambda item: getattr(item, sort_by, None), reverse=reverse)
-            except Exception:
-                self.logger.warning("Transaction sorting failed")
+                result.sort(key=sort_key, reverse=reverse)
+            except (TypeError, ValueError):
+                self.logger.warning("Transaction sorting failed sort_by=%s", sort_by)
         return result
 
     async def get_transactions_v1(
