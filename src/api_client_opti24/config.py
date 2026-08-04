@@ -18,14 +18,17 @@ class TimeoutPolicy:
     total_read_heavy: float = 300.0
 
     def __post_init__(self) -> None:
-        if min(
-            self.default,
-            self.auth,
-            self.read_heavy,
-            self.total_default,
-            self.total_auth,
-            self.total_read_heavy,
-        ) <= 0:
+        if (
+            min(
+                self.default,
+                self.auth,
+                self.read_heavy,
+                self.total_default,
+                self.total_auth,
+                self.total_read_heavy,
+            )
+            <= 0
+        ):
             raise ValueError("timeout values must be greater than zero")
 
     def resolve(self, timeout_class: str) -> float:
