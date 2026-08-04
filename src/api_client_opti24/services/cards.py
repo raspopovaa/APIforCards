@@ -12,6 +12,12 @@ from ..models.cards import (
 )
 from ..operations import operation
 from ..service_base import _BaseService
+from ..validation import (
+    require_identifier,
+    validate_identifier_list,
+    validate_non_empty_value,
+    validate_positive_count,
+)
 
 GET_CARDS_V1 = operation("get_cards_v1", CardsListResponse)
 GET_CARDS_V2 = operation("get_cards_v2", CardsV2Response)
@@ -25,9 +31,8 @@ RESET_PIN = operation("reset_pin", BoolResponse)
 
 
 class CardsService(_BaseService):
-    """Методы работы с топливными картами."""
+    """Methods for fuel cards."""
 
-    # --- Список карт (v1) ---
     async def get_cards_v1(
         self,
         *,
@@ -35,20 +40,12 @@ class CardsService(_BaseService):
         cache: bool = True,
         api_version: str | None = None,
     ) -> CardsListResponse:
-        """Список топливных карт (Процессинг).
-        :param contract_id: Идентификатор договора
-        :param cache: Кеш карт. false или не задан - данные берутся по прямому запросу из процессинга.
-        :return: Объект CardsListResponse с данными о картах
-
-        """
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-        params = {"contract_id": resolved_contract_id, "cache": str(cache).lower()}
-        self.logger.info("Requesting cards version=v1")
+        cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARDS_V1,
             api_version=api_version,
-            params=params,
-            request_contract_id=resolved_contract_id,
+            params={"contract_id": cid, "cache": str(cache).lower()},
+            request_contract_id=cid,
         )
 
     async def get_cards_v2(
@@ -67,45 +64,30 @@ class CardsService(_BaseService):
         onpage: int | None = None,
         api_version: str | None = None,
     ) -> CardsV2Response:
-        """
-        Получение списка карт договора (v2).
-        :param contract_id: Идентификатор договора
-        :param sort: Поле сортировки (по умолчанию '-id')
-        :param q: Поисковый запрос (например, часть номера карты)
-        :param status: Фильтр по статусу карты (Active, Locked и т.д.)
-        :param carrier: Тип носителя карты ('Plastic', 'Virtual Card')
-        :param platon: Фильтр по поддержке Платон
-        :param avtodor: Фильтр по поддержке Автодор
-        :param users: Фильтр по наличию пользователей
-        :param group_id: Идентификатор группы карт (опционально)
-        :param page: Номер страницы (по умолчанию 1)
-        :param onpage: Количество элементов на странице (по умолчанию 10)
-        :return: Объект CardsV2Response с данными о картах
-        """
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-
+        cid = await self._resolve_contract_id(contract_id)
+        normalized_group = require_identifier(group_id, "group_id") if group_id is not None else None
+        if page is not None:
+            validate_positive_count(page)
+        if onpage is not None:
+            validate_positive_count(onpage)
         params = {
-            "contract_id": resolved_contract_id,
-            "sort": sort,
+            "contract_id": cid,
+            "sort": validate_non_empty_value(sort, "sort"),
             "q": q,
             "status": status,
             "carrier": carrier,
             "platon": platon,
             "avtodor": avtodor,
             "users": users,
-            "group_id": group_id,
+            "group_id": normalized_group,
             "page": page,
             "onpage": onpage,
         }
-
-        # Исключаем None, чтобы не отправлять пустые параметры
-        filtered_params = {k: v for k, v in params.items() if v is not None}
-
         return await self._request(
             GET_CARDS_V2,
             api_version=api_version,
-            params=filtered_params,
-            request_contract_id=resolved_contract_id,
+            params={key: value for key, value in params.items() if value is not None},
+            request_contract_id=cid,
         )
 
     async def iter_cards_v2(
@@ -121,9 +103,8 @@ class CardsService(_BaseService):
         max_pages: int = 100,
         api_version: str | None = None,
     ) -> AsyncIterator[CardV2Item]:
-        """Последовательно получить карты, ограничив число страниц."""
-        if onpage < 1 or max_pages < 1:
-            raise ValueError("onpage and max_pages must be greater than zero")
+        validate_positive_count(onpage)
+        validate_positive_count(max_pages)
         yielded = 0
         for page in range(1, max_pages + 1):
             response = await self.get_cards_v2(
@@ -143,7 +124,6 @@ class CardsService(_BaseService):
             if not response.result or yielded >= response.total_count:
                 return
 
-    # --- Список карт по группе ---
     async def get_cards_by_group(
         self,
         *,
@@ -151,18 +131,14 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardGroupResponse:
-        """Получение списка топливных карт по группе карт."""
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-        params = {"contract_id": resolved_contract_id, "group_id": group_id}
-        self.logger.info("Requesting cards by group")
+        cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARDS_BY_GROUP,
             api_version=api_version,
-            params=params,
-            request_contract_id=resolved_contract_id,
+            params={"contract_id": cid, "group_id": require_identifier(group_id, "group_id")},
+            request_contract_id=cid,
         )
 
-    # --- Водители по карте ---
     async def get_card_drivers(
         self,
         *,
@@ -170,18 +146,15 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardDriversResponse:
-        """Получение списка водителей по карте."""
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-        self.logger.info("Requesting card drivers")
+        cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARD_DRIVERS,
             api_version=api_version,
-            path_params={"card_id": card_id},
-            params={"contract_id": resolved_contract_id},
-            request_contract_id=resolved_contract_id,
+            path_params={"card_id": require_identifier(card_id, "card_id")},
+            params={"contract_id": cid},
+            request_contract_id=cid,
         )
 
-    # --- Детальная информация по карте ---
     async def get_card_detail(
         self,
         *,
@@ -189,18 +162,14 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardDetailResponse:
-        """Получение детальной информации по карте."""
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-        params = {"contract_id": resolved_contract_id, "card_id": card_id}
-        self.logger.info("Requesting card details")
+        cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARD_DETAIL,
             api_version=api_version,
-            params=params,
-            request_contract_id=resolved_contract_id,
+            params={"contract_id": cid, "card_id": require_identifier(card_id, "card_id")},
+            request_contract_id=cid,
         )
 
-    # --- Блокировка / разблокировка карты ---
     async def block_card(
         self,
         *,
@@ -209,50 +178,18 @@ class CardsService(_BaseService):
         block: bool = True,
         api_version: str | None = None,
     ) -> IDListResponse:
-        """Блокировка или разблокировка топливных карт.
-
-        Типовой сценарий:
-            Немедленно заблокировать одну или несколько утраченных карт. Для
-            обратной операции передайте ``block=False``.
-
-        Пример вызова:
-        ```python
-        result = await client.cards.block_card(
-            contract_id="contract-id",
-            card_ids=["card-id-1", "card-id-2"],
-            block=True,
-        )
-        ```
-
-        Пример payload:
-        ```json
-        {
-          "contract_id": "contract-id",
-          "card_id": ["card-id-1", "card-id-2"],
-          "block": "true"
-        }
-        ```
-        """
-
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-        payload = {
-            "contract_id": resolved_contract_id,
-            "card_id": card_ids,
-            "block": str(block).lower(),
-        }
-        if block:
-            self.logger.info("Blocking cards")
-        else:
-            self.logger.info("Unblocking cards")
-
+        cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             BLOCK_CARD,
             api_version=api_version,
-            data=payload,
-            request_contract_id=resolved_contract_id,
+            data={
+                "contract_id": cid,
+                "card_id": validate_identifier_list(card_ids, "card_ids"),
+                "block": str(block).lower(),
+            },
+            request_contract_id=cid,
         )
 
-    # --- Установка комментария ---
     async def set_card_comment(
         self,
         *,
@@ -261,22 +198,18 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
-        """Установить комментарий на топливную карту."""
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-        payload = {
-            "card_id": card_id,
-            "contract_id": resolved_contract_id,
-            "comment": comment,
-        }
-        self.logger.info("Updating card comment")
+        cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             SET_CARD_COMMENT,
             api_version=api_version,
-            data=payload,
-            request_contract_id=resolved_contract_id,
+            data={
+                "card_id": require_identifier(card_id, "card_id"),
+                "contract_id": cid,
+                "comment": validate_non_empty_value(comment, "comment"),
+            },
+            request_contract_id=cid,
         )
 
-    # --- Запрос одноразового кода для сброса PIN ---
     async def verify_pin(
         self,
         *,
@@ -284,22 +217,15 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
-        """Запрос одноразового кода для сброса PIN карты.
-        Данный метод позволяет инициировать запрос на сброс попыток некорректного ввода PIN – кода пластиковой топливной карты на АЗС.
-        Вам будет отправлено письмо с кодом подтверждения на почту, которая привязана к вашей учетной записи.
-        Данный код нужно ввести в метод resetPIN для завершения операции сброса попыток.
-        """
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-        self.logger.info("Requesting PIN reset verification")
+        cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             VERIFY_PIN,
             api_version=api_version,
-            path_params={"card_id": card_id},
-            params={"contract_id": resolved_contract_id},
-            request_contract_id=resolved_contract_id,
+            path_params={"card_id": require_identifier(card_id, "card_id")},
+            params={"contract_id": cid},
+            request_contract_id=cid,
         )
 
-    # --- Подтверждение сброса PIN ---
     async def reset_pin(
         self,
         *,
@@ -308,17 +234,11 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
-        """Подтверждение сброса PIN карты.
-        Данный метод позволяет завершить операцию со сбросом попыток некорректного ввода PIN – кода пластиковой топливной карты на АЗС.
-        Код подтверждения будет отправлен на почту, которая привязана к вашей учетной записи.
-        """
-        resolved_contract_id = await self._resolve_contract_id(contract_id)
-        payload = {"contract_id": resolved_contract_id, "code": code}
-        self.logger.info("Resetting card PIN")
+        cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             RESET_PIN,
             api_version=api_version,
-            path_params={"card_id": card_id},
-            data=payload,
-            request_contract_id=resolved_contract_id,
+            path_params={"card_id": require_identifier(card_id, "card_id")},
+            data={"contract_id": cid, "code": validate_non_empty_value(code, "code")},
+            request_contract_id=cid,
         )
