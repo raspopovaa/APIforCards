@@ -78,7 +78,7 @@ def test_package_root_exports_client() -> None:
 
 
 def test_package_root_exports_version() -> None:
-    assert __version__ == "2.3.0"
+    assert __version__ == "3.0.0"
 
 
 def test_settings_factory_is_available() -> None:
