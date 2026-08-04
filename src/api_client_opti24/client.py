@@ -98,6 +98,7 @@ class APIClient(_ServiceFacade):
                 session_manager=self.session_manager,
                 registry=self.registry,
                 timeouts=self.settings.timeouts,
+                max_attempts=self.settings.retry_policy.max_total_attempts,
                 logger=self.logger,
                 clock=self.clock,
             )
