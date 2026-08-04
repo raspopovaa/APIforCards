@@ -1,4 +1,4 @@
-from collections.abc import Mapping
+from collections.abc import Sequence
 from typing import Any
 
 from ..models.region_limits import (
@@ -10,7 +10,11 @@ from ..models.region_limits import (
 from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
-from ..validation import require_identifier, validate_card_or_group_target
+from ..validation import (
+    require_identifier,
+    validate_card_or_group_target,
+    validate_model_sequence,
+)
 
 GET_REGION_LIMITS = operation("get_region_limits", RegionLimitResponse)
 SET_REGION_LIMIT = operation("set_region_limit", RegionLimitSetResponse)
@@ -28,7 +32,7 @@ class RegionLimitsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RegionLimitResponse:
-        """Получить региональные ограничения договора, карты или группы."""
+        """Получить региональные лимиты договора, карты или группы карт."""
         cid = await self._resolve_contract_id(contract_id)
         card_id, group_id = validate_card_or_group_target(
             card_id=card_id,
@@ -49,14 +53,23 @@ class RegionLimitsService(_BaseService):
     async def set_region_limit(
         self,
         *,
-        region_limits: list[RegionLimitRequestItem | Mapping[str, Any]],
+        region_limits: Sequence[RegionLimitRequestItem],
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RegionLimitSetResponse:
-        """Создать или изменить региональные ограничения одного договора."""
-        if not region_limits:
-            raise ValueError("region_limits must contain at least one item")
-        parsed_limits = [RegionLimitRequestItem.model_validate(item) for item in region_limits]
+        """Создать или изменить региональные лимиты одного договора.
+
+        Типовой сценарий:
+            Разрешить обслуживание карты только в выбранных регионах.
+
+        Пример:
+            ``await client.region_limits.set_region_limit(region_limits=[item])``
+        """
+        parsed_limits = validate_model_sequence(
+            region_limits,
+            RegionLimitRequestItem,
+            "region_limits",
+        )
         for item in parsed_limits:
             validate_card_or_group_target(
                 card_id=item.card_id,
@@ -89,7 +102,7 @@ class RegionLimitsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RemoveRegionLimit:
-        """Удалить региональное ограничение карты или группы."""
+        """Удалить региональный лимит карты или группы карт."""
         cid = await self._resolve_contract_id(contract_id)
         body = {
             "regionlimit_id": require_identifier(regionlimit_id, "regionlimit_id"),
