@@ -67,7 +67,9 @@ class CardsService(_BaseService):
     ) -> CardsV2Response:
         """Получить страницу карт договора через API v2."""
         cid = await self._resolve_contract_id(contract_id)
-        normalized_group = require_identifier(group_id, "group_id") if group_id is not None else None
+        normalized_group = (
+            require_identifier(group_id, "group_id") if group_id is not None else None
+        )
         if page is not None:
             validate_positive_count(page)
         if onpage is not None:
