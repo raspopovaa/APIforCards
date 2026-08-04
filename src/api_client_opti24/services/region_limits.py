@@ -28,6 +28,7 @@ class RegionLimitsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RegionLimitResponse:
+        """Получить региональные ограничения договора, карты или группы."""
         cid = await self._resolve_contract_id(contract_id)
         card_id, group_id = validate_card_or_group_target(
             card_id=card_id,
@@ -52,7 +53,7 @@ class RegionLimitsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RegionLimitSetResponse:
-        """Create or update region limits for one contract."""
+        """Создать или изменить региональные ограничения одного договора."""
         if not region_limits:
             raise ValueError("region_limits must contain at least one item")
         parsed_limits = [RegionLimitRequestItem.model_validate(item) for item in region_limits]
@@ -88,6 +89,7 @@ class RegionLimitsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RemoveRegionLimit:
+        """Удалить региональное ограничение карты или группы."""
         cid = await self._resolve_contract_id(contract_id)
         body = {
             "regionlimit_id": require_identifier(regionlimit_id, "regionlimit_id"),
