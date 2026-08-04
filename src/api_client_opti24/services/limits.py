@@ -28,6 +28,7 @@ class LimitsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> LimitsResponse:
+        """Получить продуктовые лимиты договора, карты или группы карт."""
         cid = await self._resolve_contract_id(contract_id)
         card_id, group_id = validate_card_or_group_target(
             card_id=card_id,
@@ -52,7 +53,7 @@ class LimitsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> SetLimitResponse:
-        """Create or update limits; every item must target the same contract."""
+        """Создать или изменить лимиты одного договора."""
         if not limits:
             raise ValueError("limits must contain at least one item")
         parsed_limits = [LimitRequestItem.model_validate(item) for item in limits]
@@ -97,6 +98,7 @@ class LimitsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RemoveLimitResponse:
+        """Удалить продуктовый лимит карты или группы карт."""
         cid = await self._resolve_contract_id(contract_id)
         body = {
             "limit_id": require_identifier(limit_id, "limit_id"),
