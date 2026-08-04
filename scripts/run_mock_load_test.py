@@ -220,7 +220,7 @@ async def run_load_test(total_operations: int, concurrency: int) -> dict[str, An
         transport=transport,
         logger=logger,
     )
-    client.contract_id = "1-AAA"
+    client.select_contract(contract_id="1-AAA")
 
     initial_burst = min(concurrency, total_operations)
     remaining = total_operations - initial_burst

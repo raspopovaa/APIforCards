@@ -9,7 +9,7 @@ from ..models.ewallet import (
 from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
-from ..validation import decimal_to_wire, require_identifier
+from ..validation import decimal_to_wire, require_identifier, validate_identifier_list
 
 CardProduct = Literal["wallet", "limit"]
 SET_CARD_PRODUCT = operation("set_card_product", SetCardProductResponse)
@@ -53,9 +53,7 @@ class EwalletService(_BaseService):
             SetCardProductResponse: Результат изменения продукта карт.
         """
         cid = await self._resolve_contract_id(contract_id)
-        if not card_ids:
-            raise ValueError("card_ids must contain at least one card ID")
-        normalized_card_ids = [require_identifier(card_id, "card_id") for card_id in card_ids]
+        normalized_card_ids = validate_identifier_list(card_ids, "card_ids")
         if product not in {"wallet", "limit"}:
             raise ValueError("product must be either 'wallet' or 'limit'")
 

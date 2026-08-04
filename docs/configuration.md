@@ -69,11 +69,34 @@ settings = ConnectionSettings(
         default=30.0,
         auth=30.0,
         read_heavy=120.0,
+        total_default=120.0,
+        total_auth=60.0,
+        total_read_heavy=300.0,
     ),
 )
 ```
 
-Конкретный timeout выбирается из `EndpointSpec.timeout_class`.
+Конкретный timeout попытки и общий deadline операции выбираются из
+`EndpointSpec.timeout_class`. Общий deadline продолжает отсчитываться во время
+rate limiting, backoff и восстановления сессии.
+
+Общее число HTTP-попыток дополнительно ограничивает
+`RetryPolicy.max_total_attempts` (по умолчанию `5`). Retry использует full jitter,
+поэтому параллельные клиенты не обязаны повторять запросы одновременно.
+
+## Управление сессией
+
+`session_id` и `contract_id` доступны только для чтения. Используйте явные
+операции lifecycle:
+
+```python
+client.select_contract(contract_id="contract-id")
+client.restore_session(session_id="session-id", contract_id="contract-id")
+client.clear_session()
+```
+
+`restore_session()` восстанавливает только локальное состояние. Сервер проверит
+валидность сессии при следующем запросе.
 
 ## Rate limit
 
