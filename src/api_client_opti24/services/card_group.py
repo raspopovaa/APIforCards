@@ -44,7 +44,15 @@ class CardGroupsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> SetCardGroupResponse:
-        """Создать группу карт или изменить существующую."""
+        """Создать группу карт или изменить существующую.
+
+        Типовой сценарий:
+            Создать группу для подразделения, затем добавить карты через
+            ``set_cards_to_group``.
+
+        Пример:
+            ``await client.card_groups.set_card_group(name="Служебные автомобили")``
+        """
         cid = await self._resolve_contract_id(contract_id)
         body = {
             "contract_id": cid,
