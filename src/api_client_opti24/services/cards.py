@@ -40,6 +40,7 @@ class CardsService(_BaseService):
         cache: bool = True,
         api_version: str | None = None,
     ) -> CardsListResponse:
+        """Получить карты договора через API v1."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARDS_V1,
@@ -64,6 +65,7 @@ class CardsService(_BaseService):
         onpage: int | None = None,
         api_version: str | None = None,
     ) -> CardsV2Response:
+        """Получить страницу карт договора через API v2."""
         cid = await self._resolve_contract_id(contract_id)
         normalized_group = require_identifier(group_id, "group_id") if group_id is not None else None
         if page is not None:
@@ -103,6 +105,7 @@ class CardsService(_BaseService):
         max_pages: int = 100,
         api_version: str | None = None,
     ) -> AsyncIterator[CardV2Item]:
+        """Последовательно получить карты v2 с ограничением числа страниц."""
         validate_positive_count(onpage)
         validate_positive_count(max_pages)
         yielded = 0
@@ -131,6 +134,7 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardGroupResponse:
+        """Получить карты выбранной группы."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARDS_BY_GROUP,
@@ -146,6 +150,7 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardDriversResponse:
+        """Получить пользователей, привязанных к карте."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARD_DRIVERS,
@@ -162,6 +167,7 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> CardDetailResponse:
+        """Получить детальную информацию о карте."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_CARD_DETAIL,
@@ -178,6 +184,7 @@ class CardsService(_BaseService):
         block: bool = True,
         api_version: str | None = None,
     ) -> IDListResponse:
+        """Заблокировать или разблокировать список карт."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             BLOCK_CARD,
@@ -198,6 +205,7 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
+        """Установить комментарий для карты."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             SET_CARD_COMMENT,
@@ -217,6 +225,7 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
+        """Запросить проверочный код для сброса PIN карты."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             VERIFY_PIN,
@@ -234,6 +243,7 @@ class CardsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> BoolResponse:
+        """Сбросить PIN карты по проверочному коду."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             RESET_PIN,
