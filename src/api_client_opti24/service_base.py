@@ -156,7 +156,7 @@ class _BaseService:
                 raise ValueError("batch items must use the same contract_id as the request")
             return normalized_explicit
         if len(normalized_items) > 1:
-            raise ValueError("batch items must use one contract_id")
+            raise ValueError("batch items must use the same contract_id")
         if normalized_items:
             return next(iter(normalized_items))
         return await self._resolve_contract_id(None)
