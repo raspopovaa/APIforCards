@@ -38,9 +38,7 @@ def validate_model_sequence(
     validated: list[ModelT] = []
     for index, value in enumerate(values):
         if not isinstance(value, model_type):
-            raise TypeError(
-                f"{field_name}[{index}] must be an instance of {model_type.__name__}"
-            )
+            raise TypeError(f"{field_name}[{index}] must be an instance of {model_type.__name__}")
         validated.append(value)
     return validated
 
