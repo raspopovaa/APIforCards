@@ -12,6 +12,13 @@ from ..models.reports import (
 from ..operations import binary_operation, operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
+from ..validation import (
+    require_identifier,
+    validate_date_range,
+    validate_email,
+    validate_identifier_list,
+    validate_non_empty_value,
+)
 
 GET_REPORTS = operation("get_reports", ReportListResponse)
 ORDER_REPORT = operation("order_report", ReportOrderResponse)
@@ -23,33 +30,14 @@ DOWNLOAD_REPORT_FILE_V1 = binary_operation("download_report_file_v1")
 
 
 class ReportsService(_BaseService):
-    """
-    Методы для работы с отчетами (v1 и v2)
-    Будет возвращен транзакционный отчет, относящийся к указанному договору.
-    Дата начала периода должна быть меньше или равна дате окончания периода.
-    В противном случае сервер автоматически выставит дату окончания периода равной дате начала.
-    Длина периода не должна превышать 3 календарных месяцев.
-    Если длина периода будет превышена, то он автоматически будет сокращен до 3 календарных месяцев с указанной даты начала периода.
-    Карты и группы карт, указанные в запросе, должны принадлежать указанному договору.
-    Ограничения отправки отчетов на Email составляет 15мб.
-    Длительность формирования отчетов за период 1 месяц составляет порядка 300 секунд, при выборе периода более 1 месяца, время формирования отчета может занять до 15 минут.
-    Теперь отчет можно заказать и скачать по ссылке. Заказ производится стандартным образом, только не нужно указывать email, иначе прийдет на email..
-    """
+    """Methods for reports (v1 and v2)."""
 
-    # -------- v2 --------
     async def get_reports(
         self,
         *,
         api_version: str | None = None,
     ) -> ReportListResponse:
-        """
-        Получить список доступных отчетов (v2).
-        """
-        self.logger.info("Запрос списка доступных отчетов (v2)")
-        return await self._request(
-            GET_REPORTS,
-            api_version=api_version,
-        )
+        return await self._request(GET_REPORTS, api_version=api_version)
 
     async def order_report(
         self,
@@ -60,45 +48,14 @@ class ReportsService(_BaseService):
         emails: str | None = None,
         api_version: str | None = None,
     ) -> ReportOrderResponse:
-        """
-        Заказать отчет (на email или по ссылке).
-
-        Типовой сценарий:
-            Сначала получить идентификатор отчёта через ``get_reports``, затем
-            заказать формирование и отслеживать задачу через ``get_report_jobs``.
-
-        Пример вызова:
-        ```python
-        job = await client.reports.order_report(
-            report_id="report-id",
-            format="xlsx",
-            params={
-                "contract_id": "contract-id",
-                "date_from": "2026-01-01",
-                "date_to": "2026-01-31",
-            },
-        )
-        ```
-
-        Пример payload:
-        ```json
-        {
-          "id": "report-id",
-          "format": "xlsx",
-          "params": {
-            "contract_id": "contract-id",
-            "date_from": "2026-01-01",
-            "date_to": "2026-01-31"
-          }
-        }
-        ```
-        """
         request = ReportOrderRequest.model_validate(
-            {"id": report_id, "format": format, "params": params, "emails": emails}
+            {
+                "id": require_identifier(report_id, "report_id"),
+                "format": validate_non_empty_value(format, "format"),
+                "params": params,
+                "emails": validate_email(emails, "emails") if emails is not None else None,
+            }
         )
-
-        self.logger.info("Ordering report format=%s delivery=%s", format, bool(emails))
-
         return await self._request(
             ORDER_REPORT,
             api_version=api_version,
@@ -110,14 +67,7 @@ class ReportsService(_BaseService):
         *,
         api_version: str | None = None,
     ) -> ReportJobListResponse:
-        """
-        Получить список заказанных отчетов (v2).
-        """
-        self.logger.info("Получение списка заказанных отчетов (v2)")
-        return await self._request(
-            GET_REPORT_JOBS,
-            api_version=api_version,
-        )
+        return await self._request(GET_REPORT_JOBS, api_version=api_version)
 
     async def download_report_file(
         self,
@@ -125,22 +75,11 @@ class ReportsService(_BaseService):
         job_id: str,
         api_version: str | None = None,
     ) -> bytes:
-        """
-        Скачать файл отчета (по job_id).
-
-        ⚠️ Важно: успешный запрос возможен только спустя ~300 секунд
-        после заказа отчета.
-        """
-        self.logger.info("Downloading report version=%s", api_version)
-
-        content = await self._request_stream(
+        return await self._request_stream(
             DOWNLOAD_REPORT_FILE,
             api_version=api_version,
-            path_params={"job_id": job_id},
+            path_params={"job_id": require_identifier(job_id, "job_id")},
         )
-
-        self.logger.info("Report downloaded bytes=%s", len(content))
-        return content
 
     async def download_report_file_to(
         self,
@@ -149,15 +88,13 @@ class ReportsService(_BaseService):
         destination: str | Path,
         api_version: str | None = None,
     ) -> Path:
-        """Потоково скачать отчёт v2 в файл без накопления содержимого в памяти."""
         return await self._request_stream_to_file(
             DOWNLOAD_REPORT_FILE,
             destination,
             api_version=api_version,
-            path_params={"job_id": job_id},
+            path_params={"job_id": require_identifier(job_id, "job_id")},
         )
 
-    # -------- v1 --------
     async def order_report_v1(
         self,
         *,
@@ -171,32 +108,27 @@ class ReportsService(_BaseService):
         archive: bool = False,
         api_version: str | None = None,
     ) -> ReportV1OrderResponse:
-        """
-        Заказ отчета (v1) – email или файл.
-        """
-        params = {
-            "contract_id": contract_id,
+        cid = await self._resolve_contract_id(contract_id)
+        start, end = validate_date_range(start, end)
+        params: dict[str, Any] = {
+            "contract_id": cid,
             "start": start,
             "end": end,
-            "report_format": report_format,
+            "report_format": validate_non_empty_value(report_format, "report_format"),
         }
-
-        if email:
-            params["email"] = email
-        if cards_list:
-            params["cards_list"] = to_json_param(cards_list)
-        if group_id:
-            params["group_id"] = to_json_param(group_id)
+        if email is not None:
+            params["email"] = validate_email(email)
+        if cards_list is not None:
+            params["cards_list"] = to_json_param(validate_identifier_list(cards_list, "cards_list"))
+        if group_id is not None:
+            params["group_id"] = to_json_param(validate_identifier_list(group_id, "group_id"))
         if archive:
             params["archive"] = "true"
-
-        self.logger.info("Ordering report version=v1 format=%s", report_format)
-
         return await self._request(
             ORDER_REPORT_V1,
             api_version=api_version,
             params=params,
-            request_contract_id=contract_id,
+            request_contract_id=cid,
         )
 
     async def get_report_job_list_v1(
@@ -204,14 +136,7 @@ class ReportsService(_BaseService):
         *,
         api_version: str | None = None,
     ) -> ReportV1JobListResponse:
-        """
-        Получить список заказанных отчетов (v1).
-        """
-        self.logger.info("Получение списка заказанных отчетов (v1)")
-        return await self._request(
-            GET_REPORT_JOB_LIST_V1,
-            api_version=api_version,
-        )
+        return await self._request(GET_REPORT_JOB_LIST_V1, api_version=api_version)
 
     async def download_report_file_v1(
         self,
@@ -220,28 +145,14 @@ class ReportsService(_BaseService):
         archive: bool = False,
         api_version: str | None = None,
     ) -> bytes:
-        """
-        Скачать файл отчета (v1)
-        После того как вы узнали Job_ID своего заказанного отчета по ссылке, его содержимое нужно получить и сформировать файл.
-        Формирование файла вы занимаетесь на своей стороне,
-        выставить имя файла, формат файл, содержимое и размер, получив от нас данные в виде потока application/octet-stream.
-        Если заказывать отчет с параметром archive=true, то нужно выставить формат zip и данные прийдут в виде application/zip.
-        Внутри архива будет находится отчет в заказанном формате (pdf, xlsx, csv, xml и другие)..
-        """
-        params = {"job_id": job_id}
+        params = {"job_id": require_identifier(job_id, "job_id")}
         if archive:
             params["archive"] = "true"
-
-        self.logger.info("Downloading report version=v1 archive=%s", archive)
-
-        content = await self._request_stream(
+        return await self._request_stream(
             DOWNLOAD_REPORT_FILE_V1,
             api_version=api_version,
             params=params,
         )
-
-        self.logger.info("Report downloaded version=v1 bytes=%s", len(content))
-        return content
 
     async def download_report_file_v1_to(
         self,
@@ -251,8 +162,7 @@ class ReportsService(_BaseService):
         archive: bool = False,
         api_version: str | None = None,
     ) -> Path:
-        """Потоково скачать отчёт v1 в файл без накопления содержимого в памяти."""
-        params = {"job_id": job_id}
+        params = {"job_id": require_identifier(job_id, "job_id")}
         if archive:
             params["archive"] = "true"
         return await self._request_stream_to_file(
