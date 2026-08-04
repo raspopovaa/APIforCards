@@ -34,6 +34,7 @@ class InvitesService(_BaseService):
         on_page: int | None = None,
         api_version: str | None = None,
     ) -> InviteListResponse:
+        """Получить страницу приглашений пользователей."""
         if page is not None:
             validate_positive_count(page)
         if on_page is not None:
@@ -63,6 +64,7 @@ class InvitesService(_BaseService):
         max_pages: int = 100,
         api_version: str | None = None,
     ) -> AsyncIterator[InviteItem]:
+        """Последовательно получить приглашения с ограничением числа страниц."""
         validate_positive_count(on_page)
         validate_positive_count(max_pages)
         yielded = 0
@@ -88,6 +90,7 @@ class InvitesService(_BaseService):
         with_send: bool = True,
         api_version: str | None = None,
     ) -> InviteResponse:
+        """Создать приглашение с отправкой или без отправки сообщения."""
         payload = InviteCreateRequest.model_validate(data).model_dump(
             exclude_none=True,
             exclude_unset=True,
@@ -106,6 +109,7 @@ class InvitesService(_BaseService):
         use_post: bool = False,
         api_version: str | None = None,
     ) -> InviteBoolResponse:
+        """Удалить приглашение через DELETE или POST method override."""
         return await self._request(
             DELETE_INVITE,
             api_version=api_version,
@@ -120,6 +124,7 @@ class InvitesService(_BaseService):
         invite_id: str,
         api_version: str | None = None,
     ) -> InviteResponse:
+        """Повторно отправить приглашение."""
         return await self._request(
             RESEND_INVITE,
             api_version=api_version,
@@ -133,6 +138,7 @@ class InvitesService(_BaseService):
         with_send: bool = True,
         api_version: str | None = None,
     ) -> InviteBoolResponse:
+        """Продлить срок действия приглашения."""
         return await self._request(
             PROLONG_INVITE,
             api_version=api_version,
