@@ -95,7 +95,15 @@ class UsersService(_BaseService):
         mobile: str,
         api_version: str | None = None,
     ) -> UserCreateResponse:
-        """Создать пользователя по внешнему UUID и мобильному номеру."""
+        """Создать пользователя по внешнему UUID и мобильному номеру.
+
+        Типовой сценарий:
+            Создать технического водителя без персональных данных перед
+            привязкой карты и договора.
+
+        Пример:
+            ``await client.users.create_user(uuid="external-id", mobile="79990000000")``
+        """
         return await self._request(
             CREATE_USER,
             api_version=api_version,
