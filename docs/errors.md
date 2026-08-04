@@ -17,6 +17,29 @@ SDK проверяет одновременно HTTP-статус и `payload.st
 
 Все перечисленные специализированные исключения наследуют `APIError`.
 
+## Локальные ошибки execution policy
+
+Ошибки общего бюджета операции не являются ответами API и не наследуют
+`APIError`:
+
+- `OperationTimeoutError` — исчерпан общий deadline бизнес-операции;
+- `RetryBudgetExceededError` — исчерпан общий лимит HTTP-попыток.
+
+```python
+from api_client_opti24 import OperationTimeoutError, RetryBudgetExceededError
+
+try:
+    await client.cards.get_cards_v2()
+except OperationTimeoutError:
+    print("Общий deadline операции исчерпан")
+except RetryBudgetExceededError:
+    print("Лимит HTTP-попыток исчерпан")
+```
+
+Timeout каждой отдельной HTTP-попытки ограничивается оставшимся временем общего
+deadline. Ожидание rate limit и retry backoff также должно помещаться в остаток
+бюджета; SDK не начинает заведомо неуспевающее ожидание.
+
 ## Ошибка выбора договора
 
 `ContractSelectionError` наследует `ValueError`, а не `APIError`: это локальная
@@ -76,6 +99,9 @@ except APIError as exc:
 актуальному списку договоров. Если доступ к договору отозван, SDK возвращает
 `ContractSelectionError` и не переключается на другой договор.
 
+Повтор бизнес-запроса после re-auth использует тот же operation budget, поэтому
+восстановление сессии не обнуляет deadline и счётчик попыток исходной операции.
+
 ## Retry policy
 
 Автоматический retry разрешён только если одновременно выполняются условия
@@ -85,7 +111,8 @@ except APIError as exc:
 - операции изменения не повторяются после неопределённого сетевого результата;
 - `429` и `509` повторяются только для разрешённых policy операций;
 - duplicate conflict не считается основанием для автоматического retry;
-- JSON и binary download используют одну и ту же execution policy.
+- JSON и binary download используют одну и ту же execution policy;
+- задержка retry использует full jitter в диапазоне от нуля до текущего backoff cap.
 
 ## Практические рекомендации
 
