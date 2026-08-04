@@ -196,7 +196,7 @@ async def test_batch_services_reject_mixed_contract_context_before_request() -> 
             "contract_id": "contract-a",
             "card_id": "card-1",
             "productType": "fuel",
-            "amount": {"value": 10},
+            "sum": {"currency": "810", "value": 10},
             "time": {"number": 1, "type": 5},
         }
     )
@@ -205,7 +205,7 @@ async def test_batch_services_reject_mixed_contract_context_before_request() -> 
             "contract_id": "contract-b",
             "card_id": "card-2",
             "productType": "fuel",
-            "amount": {"value": 20},
+            "sum": {"currency": "810", "value": 20},
             "time": {"number": 1, "type": 5},
         }
     )
