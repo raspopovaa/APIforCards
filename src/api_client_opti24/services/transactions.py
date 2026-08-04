@@ -55,6 +55,7 @@ class TransactionsService(_BaseService):
         sort_by: str | None = None,
         reverse: bool = False,
     ) -> TransactionsV1Response:
+        """Return the latest v1 transactions for a contract and optional card."""
         cid = require_identifier(contract_id, "contract_id")
         validate_positive_count(count)
         params = {"contract_id": cid, "count": count}
@@ -84,6 +85,7 @@ class TransactionsService(_BaseService):
         max_pages: int = 100,
         api_version: str | None = None,
     ) -> AsyncIterator[TransactionItemV2]:
+        """Iterate over paginated v2 contract transactions for one date range."""
         validate_positive_count(page_limit)
         validate_positive_count(max_pages)
         yielded = 0
@@ -115,6 +117,7 @@ class TransactionsService(_BaseService):
         sort_by: str | None = None,
         reverse: bool = False,
     ) -> TransactionsV2Response:
+        """Return paginated v2 transactions for a contract and one-month range."""
         cid = require_identifier(contract_id, "contract_id")
         utils.validate_month_span(date_from, date_to)
         validate_offset_pagination(page_limit, page_offset)
@@ -152,6 +155,7 @@ class TransactionsService(_BaseService):
         sort_by: str | None = None,
         reverse: bool = False,
     ) -> TransactionsV2Response:
+        """Return paginated v2 transactions for one card and one-month range."""
         utils.validate_month_span(date_from, date_to)
         validate_offset_pagination(page_limit, page_offset)
         cid = await self._resolve_contract_id(contract_id)
@@ -183,6 +187,7 @@ class TransactionsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> TransactionDetailResponse:
+        """Return detailed v2 data for one transaction."""
         cid = await self._resolve_contract_id(contract_id)
         return await self._request(
             GET_TRANSACTION_DETAIL,
