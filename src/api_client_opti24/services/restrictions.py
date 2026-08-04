@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from typing import Any
 
 from ..models.restrictions import (
@@ -53,7 +52,7 @@ class RestrictionsService(_BaseService):
     async def set_restriction(
         self,
         *,
-        restrictions: Sequence[RestrictionRequestItem],
+        restrictions: list[RestrictionRequestItem],
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RestrictionSetResponse:
