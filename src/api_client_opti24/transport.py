@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import ipaddress
 import os
+import random
 import tempfile
 import time
 from collections.abc import Awaitable, Callable, Mapping
@@ -13,6 +14,7 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from .execution_budget import OperationBudget
 from .logger import LoggerLike
 from .logger import logger as default_logger
 from .policies import (
@@ -41,6 +43,7 @@ class AsyncHTTPClient(Protocol):
 
 
 AsyncSleep = Callable[[float], Awaitable[None]]
+Jitter = Callable[[float], float]
 ResultT = TypeVar("ResultT")
 _RATE_LIMITED = object()
 
@@ -61,6 +64,7 @@ class AsyncTransport:
         clock: Clock | None = None,
         sleep: AsyncSleep = asyncio.sleep,
         monotonic: Callable[[], float] = time.monotonic,
+        jitter: Jitter | None = None,
     ):
         self.base_url = self._normalize_base_url(
             base_url,
@@ -75,6 +79,7 @@ class AsyncTransport:
         self.concurrency_policy = concurrency_policy or ConcurrencyPolicy()
         self._sleep = clock.sleep if clock is not None else sleep
         self._monotonic = clock.monotonic if clock is not None else monotonic
+        self._jitter = jitter or (lambda cap: random.uniform(0.0, cap))
         self._rate_limit_lock = asyncio.Lock()
         self._auth_limit_lock = asyncio.Lock()
         self._concurrency_gate = asyncio.Semaphore(self.concurrency_policy.max_in_flight)
@@ -92,14 +97,12 @@ class AsyncTransport:
             raise ValueError(
                 "base_url is empty; set API_BASE_URL in .env or pass base_url explicitly"
             )
-
         parsed = urlsplit(normalized)
         if parsed.scheme not in {"http", "https"} or not parsed.netloc:
             raise ValueError(
                 "base_url must be an absolute URL starting with http:// or https://; "
                 f"got {base_url!r}"
             )
-
         if (
             parsed.scheme == "http"
             and not allow_insecure_http
@@ -109,7 +112,6 @@ class AsyncTransport:
                 "base_url must use https:// for remote hosts; "
                 "set allow_insecure_http=True only for controlled test environments"
             )
-
         return normalized.rstrip("/") + "/"
 
     @staticmethod
@@ -130,39 +132,46 @@ class AsyncTransport:
         if self._owns_http_client:
             await self.client.aclose()
 
-    async def _wait_for_rate_limit(self) -> None:
+    @staticmethod
+    def _ensure_delay_fits(operation_budget: OperationBudget | None, delay: float) -> None:
+        if operation_budget is not None:
+            operation_budget.ensure_delay_fits(time.monotonic(), delay)
+
+    async def _wait_for_rate_limit(self, operation_budget: OperationBudget | None) -> None:
         minimum_interval = self.rate_limit_policy.minimum_interval_seconds
         if minimum_interval <= 0:
             return
-
         async with self._rate_limit_lock:
             now = self._monotonic()
             if self._last_request_started_at is not None:
                 wait_seconds = self._last_request_started_at + minimum_interval - now
                 if wait_seconds > 0:
+                    if operation_budget is not None:
+                        operation_budget.ensure_delay_fits(now, wait_seconds)
                     await self._sleep(wait_seconds)
                     now = self._monotonic()
             self._last_request_started_at = now
 
-    async def _wait_for_auth_limit(self, retry_class: str | RetryClass) -> None:
+    async def _wait_for_auth_limit(
+        self,
+        retry_class: str | RetryClass,
+        operation_budget: OperationBudget | None,
+    ) -> None:
         if RetryClass.normalize(retry_class) is not RetryClass.NETWORK_ONLY:
             return
-
         minimum_interval = self.retry_policy.auth_retry_min_interval_seconds
         if minimum_interval <= 0:
             return
-
         async with self._auth_limit_lock:
             now = self._monotonic()
             if self._last_auth_request_started_at is not None:
                 wait_seconds = self._last_auth_request_started_at + minimum_interval - now
                 if wait_seconds > 0:
+                    if operation_budget is not None:
+                        operation_budget.ensure_delay_fits(now, wait_seconds)
                     await self._sleep(wait_seconds)
                     now = self._monotonic()
             self._last_auth_request_started_at = now
-
-    def _safe_json(self, resp: httpx.Response) -> DecodedPayload:
-        return self.response_decoder.parse(resp)
 
     def _handle_response(
         self,
@@ -171,11 +180,7 @@ class AsyncTransport:
         *,
         method_name: str | None = None,
     ) -> DecodedPayload:
-        return self.response_decoder.decode(
-            resp,
-            endpoint,
-            method_name=method_name,
-        )
+        return self.response_decoder.decode(resp, endpoint, method_name=method_name)
 
     def _resolve_retry_settings(
         self,
@@ -214,7 +219,8 @@ class AsyncTransport:
         method_name: str | None,
         retry_class: str | RetryClass | None,
         idempotent: bool | None,
-        attempt: Callable[[int, int], Awaitable[ResultT | object]],
+        operation_budget: OperationBudget | None,
+        attempt: Callable[[int, int, float | None], Awaitable[ResultT | object]],
     ) -> ResultT:
         (
             normalized_method,
@@ -222,44 +228,63 @@ class AsyncTransport:
             network_attempts,
             rate_limit_attempts,
         ) = self._resolve_retry_settings(method, retry_class, idempotent)
-        network_backoff = self.retry_policy.initial_network_backoff(resolved_retry_class)
+        network_backoff_cap = self.retry_policy.initial_network_backoff(resolved_retry_class)
 
         for network_attempt in range(1, network_attempts + 1):
             try:
                 for rate_attempt in range(1, rate_limit_attempts + 1):
-                    await self._wait_for_rate_limit()
-                    await self._wait_for_auth_limit(resolved_retry_class)
-                    result = await attempt(rate_attempt, rate_limit_attempts)
+                    await self._wait_for_rate_limit(operation_budget)
+                    await self._wait_for_auth_limit(resolved_retry_class, operation_budget)
+                    remaining = (
+                        operation_budget.claim_attempt(self._monotonic())
+                        if operation_budget is not None
+                        else None
+                    )
+                    result = await attempt(rate_attempt, rate_limit_attempts, remaining)
                     if result is not _RATE_LIMITED:
                         return cast(ResultT, result)
-                    backoff_seconds = self.retry_policy.rate_limit_backoff_seconds * rate_attempt
+                    base = self.retry_policy.rate_limit_backoff_seconds * rate_attempt
+                    delay = self._jitter(base)
+                    if operation_budget is not None:
+                        operation_budget.ensure_delay_fits(self._monotonic(), delay)
                     self.logger.warning(
                         "Rate limit method=%s operation=%s attempt=%s/%s backoff=%.2fs",
                         normalized_method,
                         method_name or "unregistered",
                         rate_attempt,
                         rate_limit_attempts,
-                        backoff_seconds,
+                        delay,
                     )
-                    await self._sleep(backoff_seconds)
+                    await self._sleep(delay)
                 raise RuntimeError("Rate limit retry loop exhausted unexpectedly")
             except httpx.RequestError:
                 if network_attempt >= network_attempts:
                     raise
+                delay = self._jitter(network_backoff_cap)
+                if operation_budget is not None:
+                    operation_budget.ensure_delay_fits(self._monotonic(), delay)
                 self.logger.warning(
                     "Network error method=%s operation=%s attempt=%s/%s backoff=%.2fs",
                     normalized_method,
                     method_name or "unregistered",
                     network_attempt,
                     network_attempts,
-                    network_backoff,
+                    delay,
                 )
-                await self._sleep(network_backoff)
-                network_backoff = min(
-                    network_backoff * 2,
+                await self._sleep(delay)
+                network_backoff_cap = min(
+                    network_backoff_cap * 2,
                     self.retry_policy.network_backoff_max_seconds,
                 )
         raise RuntimeError("Network retry loop exhausted unexpectedly")
+
+    @staticmethod
+    def _attempt_timeout(timeout: float | None, remaining: float | None) -> float | None:
+        if remaining is None:
+            return timeout
+        if timeout is None:
+            return remaining
+        return min(timeout, remaining)
 
     async def request(
         self,
@@ -271,17 +296,22 @@ class AsyncTransport:
         method_name: str | None = None,
         retry_class: str | RetryClass | None = None,
         idempotent: bool | None = None,
+        operation_budget: OperationBudget | None = None,
         **kwargs: Any,
     ) -> DecodedPayload:
         url = self._build_url(api_version, endpoint)
 
-        async def send(rate_attempt: int, rate_limit_attempts: int) -> DecodedPayload | object:
+        async def send(
+            rate_attempt: int,
+            rate_limit_attempts: int,
+            remaining: float | None,
+        ) -> DecodedPayload | object:
             async with self._concurrency_gate:
                 response = await self.client.request(
                     method,
                     url,
                     headers=headers,
-                    timeout=timeout,
+                    timeout=self._attempt_timeout(timeout, remaining),
                     **kwargs,
                 )
             self.logger.info(
@@ -299,6 +329,7 @@ class AsyncTransport:
             method_name=method_name,
             retry_class=retry_class,
             idempotent=idempotent,
+            operation_budget=operation_budget,
             attempt=send,
         )
 
@@ -309,9 +340,11 @@ class AsyncTransport:
         api_version: str = "v1",
         headers: Mapping[str, str] | None = None,
         *,
+        timeout: float | None = None,
         method_name: str | None = None,
         retry_class: str | RetryClass | None = None,
         idempotent: bool | None = None,
+        operation_budget: OperationBudget | None = None,
         **kwargs: Any,
     ) -> bytes:
         result = await self._download_stream(
@@ -319,9 +352,11 @@ class AsyncTransport:
             endpoint,
             api_version=api_version,
             headers=headers,
+            timeout=timeout,
             method_name=method_name,
             retry_class=retry_class,
             idempotent=idempotent,
+            operation_budget=operation_budget,
             destination=None,
             **kwargs,
         )
@@ -337,9 +372,11 @@ class AsyncTransport:
         api_version: str = "v1",
         headers: Mapping[str, str] | None = None,
         *,
+        timeout: float | None = None,
         method_name: str | None = None,
         retry_class: str | RetryClass | None = None,
         idempotent: bool | None = None,
+        operation_budget: OperationBudget | None = None,
         chunk_size: int = 64 * 1024,
         write_buffer_size: int = 1024 * 1024,
         **kwargs: Any,
@@ -353,9 +390,11 @@ class AsyncTransport:
             endpoint,
             api_version=api_version,
             headers=headers,
+            timeout=timeout,
             method_name=method_name,
             retry_class=retry_class,
             idempotent=idempotent,
+            operation_budget=operation_budget,
             destination=Path(destination),
             chunk_size=chunk_size,
             write_buffer_size=write_buffer_size,
@@ -372,9 +411,11 @@ class AsyncTransport:
         *,
         api_version: str,
         headers: Mapping[str, str] | None,
+        timeout: float | None,
         method_name: str | None,
         retry_class: str | RetryClass | None,
         idempotent: bool | None,
+        operation_budget: OperationBudget | None,
         destination: Path | None,
         chunk_size: int = 64 * 1024,
         write_buffer_size: int = 1024 * 1024,
@@ -385,15 +426,24 @@ class AsyncTransport:
             raise ValueError("stream endpoint must be relative to the configured base_url")
         url = self._build_url(api_version, endpoint)
 
-        async def send(rate_attempt: int, rate_limit_attempts: int) -> bytes | Path | object:
+        async def send(
+            rate_attempt: int,
+            rate_limit_attempts: int,
+            remaining: float | None,
+        ) -> bytes | Path | object:
             async with (
                 self._concurrency_gate,
-                self.client.stream(method, url, headers=headers, **kwargs) as resp,
+                self.client.stream(
+                    method,
+                    url,
+                    headers=headers,
+                    timeout=self._attempt_timeout(timeout, remaining),
+                    **kwargs,
+                ) as resp,
             ):
                 if resp.status_code in {429, 509} and rate_attempt < rate_limit_attempts:
                     await resp.aread()
                     return _RATE_LIMITED
-
                 content_type = resp.headers.get("content-type", "").lower()
                 if not 200 <= resp.status_code < 300 or "json" in content_type:
                     content = await resp.aread()
@@ -406,7 +456,6 @@ class AsyncTransport:
                     if destination is None:
                         return content
                     return await self._write_bytes_atomically(destination, content)
-
                 if destination is None:
                     return await resp.aread()
                 return await self._write_stream_atomically(
@@ -421,6 +470,7 @@ class AsyncTransport:
             method_name=method_name,
             retry_class=retry_class,
             idempotent=idempotent,
+            operation_budget=operation_budget,
             attempt=send,
         )
 
