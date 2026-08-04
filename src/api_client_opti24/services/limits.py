@@ -1,5 +1,5 @@
 import json
-from collections.abc import Mapping
+from collections.abc import Sequence
 from typing import Any
 
 from ..models.limits import (
@@ -10,7 +10,11 @@ from ..models.limits import (
 )
 from ..operations import operation
 from ..service_base import _BaseService
-from ..validation import require_identifier, validate_card_or_group_target
+from ..validation import (
+    require_identifier,
+    validate_card_or_group_target,
+    validate_model_sequence,
+)
 
 GET_LIMITS = operation("get_limits", LimitsResponse)
 SET_LIMIT = operation("set_limit", SetLimitResponse)
@@ -49,14 +53,19 @@ class LimitsService(_BaseService):
     async def set_limit(
         self,
         *,
-        limits: list[LimitRequestItem | Mapping[str, Any]],
+        limits: Sequence[LimitRequestItem],
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> SetLimitResponse:
-        """Создать или изменить лимиты одного договора."""
-        if not limits:
-            raise ValueError("limits must contain at least one item")
-        parsed_limits = [LimitRequestItem.model_validate(item) for item in limits]
+        """Создать или изменить продуктовые лимиты одного договора.
+
+        Типовой сценарий:
+            Ограничить суточный объём топлива для карты или группы карт.
+
+        Пример:
+            ``await client.limits.set_limit(limits=[LimitRequestItem(...)])``
+        """
+        parsed_limits = validate_model_sequence(limits, LimitRequestItem, "limits")
         for item in parsed_limits:
             validate_card_or_group_target(
                 card_id=item.card_id,
