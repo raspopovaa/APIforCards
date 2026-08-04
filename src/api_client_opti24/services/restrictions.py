@@ -28,6 +28,7 @@ class RestrictionsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RestrictionGetResponse:
+        """Получить товарные ограничения договора, карты или группы."""
         cid = await self._resolve_contract_id(contract_id)
         card_id, group_id = validate_card_or_group_target(
             card_id=card_id,
@@ -52,7 +53,7 @@ class RestrictionsService(_BaseService):
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RestrictionSetResponse:
-        """Create or update restrictions for one contract."""
+        """Создать или изменить товарные ограничения одного договора."""
         if not restrictions:
             raise ValueError("restrictions must contain at least one item")
         parsed_restrictions = [RestrictionRequestItem.model_validate(item) for item in restrictions]
@@ -88,6 +89,7 @@ class RestrictionsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RestrictionRemoveResponse:
+        """Удалить товарное ограничение карты или группы."""
         cid = await self._resolve_contract_id(contract_id)
         body = {
             "restriction_id": require_identifier(restriction_id, "restriction_id"),
