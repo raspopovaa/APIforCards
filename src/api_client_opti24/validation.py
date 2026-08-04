@@ -8,6 +8,7 @@ from typing import TypeVar
 
 _EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 DocumentFormatT = TypeVar("DocumentFormatT", bound=str)
+ModelT = TypeVar("ModelT")
 
 
 def validate_non_empty_value(value: str, field_name: str) -> str:
@@ -25,6 +26,23 @@ def validate_identifier_list(values: Sequence[str], field_name: str) -> list[str
     if not values:
         raise ValueError(f"{field_name} must contain at least one item")
     return [require_identifier(value, field_name) for value in values]
+
+
+def validate_model_sequence(
+    values: Sequence[object],
+    model_type: type[ModelT],
+    field_name: str,
+) -> list[ModelT]:
+    if not values:
+        raise ValueError(f"{field_name} must contain at least one item")
+    validated: list[ModelT] = []
+    for index, value in enumerate(values):
+        if not isinstance(value, model_type):
+            raise TypeError(
+                f"{field_name}[{index}] must be an instance of {model_type.__name__}"
+            )
+        validated.append(value)
+    return validated
 
 
 def validate_card_or_group_target(
@@ -114,6 +132,7 @@ __all__ = [
     "validate_document_order",
     "validate_email",
     "validate_identifier_list",
+    "validate_model_sequence",
     "validate_non_empty_value",
     "validate_offset_pagination",
     "validate_pagination",
