@@ -1,4 +1,4 @@
-from collections.abc import Mapping
+from collections.abc import Sequence
 from typing import Any
 
 from ..models.restrictions import (
@@ -10,7 +10,11 @@ from ..models.restrictions import (
 from ..operations import operation
 from ..service_base import _BaseService
 from ..utils import to_json_param
-from ..validation import require_identifier, validate_card_or_group_target
+from ..validation import (
+    require_identifier,
+    validate_card_or_group_target,
+    validate_model_sequence,
+)
 
 GET_RESTRICTIONS = operation("get_restrictions", RestrictionGetResponse)
 SET_RESTRICTION = operation("set_restriction", RestrictionSetResponse)
@@ -28,7 +32,7 @@ class RestrictionsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RestrictionGetResponse:
-        """Получить товарные ограничения договора, карты или группы."""
+        """Получить товарные ограничители договора, карты или группы карт."""
         cid = await self._resolve_contract_id(contract_id)
         card_id, group_id = validate_card_or_group_target(
             card_id=card_id,
@@ -49,14 +53,23 @@ class RestrictionsService(_BaseService):
     async def set_restriction(
         self,
         *,
-        restrictions: list[RestrictionRequestItem | Mapping[str, Any]],
+        restrictions: Sequence[RestrictionRequestItem],
         contract_id: str | None = None,
         api_version: str | None = None,
     ) -> RestrictionSetResponse:
-        """Создать или изменить товарные ограничения одного договора."""
-        if not restrictions:
-            raise ValueError("restrictions must contain at least one item")
-        parsed_restrictions = [RestrictionRequestItem.model_validate(item) for item in restrictions]
+        """Создать или изменить товарные ограничители одного договора.
+
+        Типовой сценарий:
+            Запретить оплату отдельных категорий товаров по карте или группе карт.
+
+        Пример:
+            ``await client.restrictions.set_restriction(restrictions=[item])``
+        """
+        parsed_restrictions = validate_model_sequence(
+            restrictions,
+            RestrictionRequestItem,
+            "restrictions",
+        )
         for item in parsed_restrictions:
             validate_card_or_group_target(
                 card_id=item.card_id,
@@ -89,7 +102,7 @@ class RestrictionsService(_BaseService):
         group_id: str | None = None,
         api_version: str | None = None,
     ) -> RestrictionRemoveResponse:
-        """Удалить товарное ограничение карты или группы."""
+        """Удалить товарный ограничитель карты или группы карт."""
         cid = await self._resolve_contract_id(contract_id)
         body = {
             "restriction_id": require_identifier(restriction_id, "restriction_id"),
