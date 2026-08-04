@@ -117,7 +117,15 @@ class TransactionsService(_BaseService):
         sort_by: str | None = None,
         reverse: bool = False,
     ) -> TransactionsV2Response:
-        """Return paginated v2 transactions for a contract and one-month range."""
+        """Получить страницу транзакций договора через API v2.
+
+        Типовой сценарий:
+            Выгрузить транзакции договора за период не более одного месяца,
+            последовательно проходя страницы результата.
+
+        Пример:
+            ``await client.transactions.get_transactions_v2(contract_id="id", date_from="2026-07-01", date_to="2026-07-31")``
+        """
         cid = require_identifier(contract_id, "contract_id")
         utils.validate_month_span(date_from, date_to)
         validate_offset_pagination(page_limit, page_offset)
