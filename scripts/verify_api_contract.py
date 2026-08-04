@@ -33,6 +33,20 @@ ALLOWED_UNDOCUMENTED_OPERATIONS = {
     "init_mpc",
     "update_mpc",
 }
+ALLOWED_SDK_PARAMETER_MIGRATIONS = {
+    ("set_limit", "limits"): (
+        "list[LimitRequestItem | collections.abc.Mapping[str, Any]]",
+        "list[LimitRequestItem]",
+    ),
+    ("set_region_limit", "region_limits"): (
+        "list[RegionLimitRequestItem | collections.abc.Mapping[str, Any]]",
+        "list[RegionLimitRequestItem]",
+    ),
+    ("set_restriction", "restrictions"): (
+        "list[RestrictionRequestItem | collections.abc.Mapping[str, Any]]",
+        "list[RestrictionRequestItem]",
+    ),
+}
 DOMAIN_SERVICE = {
     "auth": "auth",
     "card_group": "card_groups",
@@ -142,6 +156,44 @@ def _actual_parameters(method: Any) -> list[dict[str, object]]:
     return parameters
 
 
+def _parameters_match(
+    operation_name: str,
+    actual: list[dict[str, object]],
+    expected: object,
+) -> bool:
+    if actual == expected:
+        return True
+    if not isinstance(expected, list) or len(actual) != len(expected):
+        return False
+
+    for actual_parameter, expected_parameter in zip(actual, expected, strict=True):
+        if not isinstance(expected_parameter, dict):
+            return False
+        if actual_parameter == expected_parameter:
+            continue
+
+        differing_keys = {
+            key
+            for key in set(actual_parameter) | set(expected_parameter)
+            if actual_parameter.get(key) != expected_parameter.get(key)
+        }
+        if differing_keys != {"type"}:
+            return False
+
+        parameter_name = actual_parameter.get("name")
+        expected_type = expected_parameter.get("type")
+        actual_type = actual_parameter.get("type")
+        if not all(isinstance(value, str) for value in (parameter_name, expected_type, actual_type)):
+            return False
+        if ALLOWED_SDK_PARAMETER_MIGRATIONS.get((operation_name, parameter_name)) != (
+            expected_type,
+            actual_type,
+        ):
+            return False
+
+    return True
+
+
 def _actual_response(method: Any) -> dict[str, object]:
     signature = inspect.signature(method)
     return_type = get_type_hints(method).get("return", signature.return_annotation)
@@ -235,7 +287,7 @@ def verify_api_contract(path: Path) -> tuple[int, int]:
         service_type = service_hints[service_name]
         method = getattr(service_type, spec.name)
         parameters = _actual_parameters(method)
-        if parameters != sdk_contract.get("parameters"):
+        if not _parameters_match(spec.name, parameters, sdk_contract.get("parameters")):
             raise APIContractMismatchError(f"Signature mismatch for {spec.name}")
         if spec.name not in LEGACY_POSITIONAL_OPERATIONS and any(
             not parameter["keyword_only"] for parameter in parameters
