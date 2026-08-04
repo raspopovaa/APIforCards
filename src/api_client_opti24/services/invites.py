@@ -90,7 +90,14 @@ class InvitesService(_BaseService):
         with_send: bool = True,
         api_version: str | None = None,
     ) -> InviteResponse:
-        """Создать приглашение с отправкой или без отправки сообщения."""
+        """Создать приглашение с отправкой или без отправки сообщения.
+
+        Типовой сценарий:
+            Пригласить сотрудника и сразу отправить ему сообщение с инструкцией.
+
+        Пример:
+            ``await client.invites.create_invite(data=request, with_send=True)``
+        """
         payload = InviteCreateRequest.model_validate(data).model_dump(
             exclude_none=True,
             exclude_unset=True,
