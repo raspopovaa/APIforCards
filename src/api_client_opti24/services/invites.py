@@ -10,6 +10,7 @@ from ..models.invites import (
 from ..operations import operation
 from ..payloads import with_method_override
 from ..service_base import _BaseService
+from ..validation import require_identifier, validate_positive_count
 
 GET_INVITES = operation("get_invites", InviteListResponse)
 CREATE_INVITE = operation("create_invite", InviteResponse)
@@ -19,16 +20,8 @@ PROLONG_INVITE = operation("prolong_invite", InviteBoolResponse)
 
 
 class InvitesService(_BaseService):
-    """
-    Методы для работы с приглашениями пользователей (v2).
-    Invites – функционал регистрации пользователей.
-    Приглашение можно отправить по Email/SMS или получить уникальную ссылку и отправить удобным для вас способом.
-    Ссылка действует 3 календарных дня, повторно направить Email/SMS по одному приглашению можно не чаще 3х раз в день.
-    С помощью приглашения можно зарегистрировать, например, водителя и сразу привязать шаблон виртуальной карты,
-    либо привязать физические топливные карты.
-    """
+    """Methods for user invitations (v2)."""
 
-    # ---------------------- GET /v2/invites ----------------------
     async def get_invites(
         self,
         *,
@@ -41,32 +34,24 @@ class InvitesService(_BaseService):
         on_page: int | None = None,
         api_version: str | None = None,
     ) -> InviteListResponse:
-        """
-        Получить список приглашений (v2).
-
-        Параметры фильтрации:
-        - role: Фильтрация по ID роли (Supervisor, Regulatory, Driver, Readonly)
-        - user_id: Отобразить инвайты по которым произошла регистрация пользователя (true)
-        - sort: поле для сортировки ('sended_at', 'status' и т.д.)
-        - status: Фильтрация по статусу заявки (Active, Expired, Finished)
-        - q: Поисковый запрос (Ищет email и mobile)
-        - page, on_page: пагинация
-        """
+        """Получить страницу приглашений пользователей."""
+        if page is not None:
+            validate_positive_count(page)
+        if on_page is not None:
+            validate_positive_count(on_page)
         params = {
             "role": role,
-            "user_id": user_id,
+            "user_id": require_identifier(user_id, "user_id") if user_id is not None else None,
             "sort": sort,
             "status": status,
             "q": q,
             "page": page,
             "on_page": on_page,
         }
-        params = {k: v for k, v in params.items() if v is not None}
-
         return await self._request(
             GET_INVITES,
             api_version=api_version,
-            params=params,
+            params={key: value for key, value in params.items() if value is not None},
         )
 
     async def iter_invites(
@@ -79,9 +64,9 @@ class InvitesService(_BaseService):
         max_pages: int = 100,
         api_version: str | None = None,
     ) -> AsyncIterator[InviteItem]:
-        """Последовательно получить приглашения, ограничив число страниц."""
-        if on_page < 1 or max_pages < 1:
-            raise ValueError("on_page and max_pages must be greater than zero")
+        """Последовательно получить приглашения с ограничением числа страниц."""
+        validate_positive_count(on_page)
+        validate_positive_count(max_pages)
         yielded = 0
         for page in range(1, max_pages + 1):
             response = await self.get_invites(
@@ -98,7 +83,6 @@ class InvitesService(_BaseService):
             if not response.data.result or yielded >= response.data.total_count:
                 return
 
-    # ---------------------- POST /v2/invites / invites_free ----------------------
     async def create_invite(
         self,
         *,
@@ -106,36 +90,13 @@ class InvitesService(_BaseService):
         with_send: bool = True,
         api_version: str | None = None,
     ) -> InviteResponse:
-        """
-        Создать приглашение.
-
-        with_send=True  → POST /v2/invites  (с отправкой SMS/Email)
-        with_send=False → POST /v2/invites_free (без отправки)
+        """Создать приглашение с отправкой или без отправки сообщения.
 
         Типовой сценарий:
-            Зарегистрировать водителя и передать ему приглашение. Если доставку
-            выполняет внешняя система, используйте ``with_send=False``.
+            Пригласить сотрудника и сразу отправить ему сообщение с инструкцией.
 
-        Пример вызова:
-        ```python
-        invite = await client.invites.create_invite(
-            data={
-                "role": "Driver",
-                "mobile": "79990000000",
-                "contracts": [{"sid": "contract-id"}],
-            },
-            with_send=False,
-        )
-        ```
-
-        Пример payload:
-        ```json
-        {
-          "role": "Driver",
-          "mobile": "79990000000",
-          "contracts": [{"sid": "contract-id"}]
-        }
-        ```
+        Пример:
+            ``await client.invites.create_invite(data=request, with_send=True)``
         """
         payload = InviteCreateRequest.model_validate(data).model_dump(
             exclude_none=True,
@@ -148,7 +109,6 @@ class InvitesService(_BaseService):
             json=payload,
         )
 
-    # ---------------------- DELETE /v2/invites/{invite_id} ----------------------
     async def delete_invite(
         self,
         *,
@@ -156,34 +116,28 @@ class InvitesService(_BaseService):
         use_post: bool = False,
         api_version: str | None = None,
     ) -> InviteBoolResponse:
-        """
-        Удалить приглашение (v2).
-        """
+        """Удалить приглашение через DELETE или POST method override."""
         return await self._request(
             DELETE_INVITE,
             api_version=api_version,
             route_name="post_override" if use_post else "default",
-            path_params={"invite_id": invite_id},
+            path_params={"invite_id": require_identifier(invite_id, "invite_id")},
             data=with_method_override(None, "DELETE") if use_post else None,
         )
 
-    # ---------------------- GET /v2/invites/{invite_id}/send ----------------------
     async def resend_invite(
         self,
         *,
         invite_id: str,
         api_version: str | None = None,
     ) -> InviteResponse:
-        """
-        Повторно отправить приглашение (v2).
-        """
+        """Повторно отправить приглашение."""
         return await self._request(
             RESEND_INVITE,
             api_version=api_version,
-            path_params={"invite_id": invite_id},
+            path_params={"invite_id": require_identifier(invite_id, "invite_id")},
         )
 
-    # ---------------------- POST /v2/invites/{invite_id}/prolong / prolong_free ----------------------
     async def prolong_invite(
         self,
         *,
@@ -191,15 +145,10 @@ class InvitesService(_BaseService):
         with_send: bool = True,
         api_version: str | None = None,
     ) -> InviteBoolResponse:
-        """
-        Продлить приглашение.
-
-        with_send=True  → POST /v2/invites/{invite_id}/prolong  (с отправкой)
-        with_send=False → POST /v2/invites/{invite_id}/prolong_free (без отправки)
-        """
+        """Продлить срок действия приглашения."""
         return await self._request(
             PROLONG_INVITE,
             api_version=api_version,
             route_name="default" if with_send else "without_send",
-            path_params={"invite_id": invite_id},
+            path_params={"invite_id": require_identifier(invite_id, "invite_id")},
         )

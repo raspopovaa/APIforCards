@@ -5,6 +5,8 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
+from .validation import require_identifier
+
 
 class SessionState(StrEnum):
     ANONYMOUS = "anonymous"
@@ -63,6 +65,18 @@ class SessionManager:
             contract_id=contract_id if contract_id is not None else snapshot.contract_id,
             session_generation=snapshot.generation,
         )
+
+    def select_contract(self, contract_id: str) -> None:
+        self.set_contract(require_identifier(contract_id, "contract_id"))
+
+    def restore(self, *, session_id: str, contract_id: str) -> None:
+        self.mark_authenticated(
+            require_identifier(session_id, "session_id"),
+            require_identifier(contract_id, "contract_id"),
+        )
+
+    def clear(self) -> None:
+        self.reset()
 
     def set_contract(self, contract_id: str | None) -> None:
         self._contract_id = contract_id

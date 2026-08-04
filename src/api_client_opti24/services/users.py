@@ -12,6 +12,12 @@ from ..operations import operation
 from ..payloads import with_method_override
 from ..service_base import _BaseService
 from ..utils import to_json_param
+from ..validation import (
+    require_identifier,
+    validate_identifier_list,
+    validate_non_empty_value,
+    validate_positive_count,
+)
 
 GET_USERS = operation("get_users", UserListResponse)
 CREATE_USER = operation("create_user", UserCreateResponse)
@@ -23,11 +29,7 @@ DELETE_USER = operation("delete_user", UserBoolResponse)
 
 
 class UsersService(_BaseService):
-    """
-    Методы для работы с пользователями (v2).
-    """
-
-    # -------------------- Список пользователей --------------------
+    """Methods for users (v2)."""
 
     async def get_users(
         self,
@@ -39,29 +41,22 @@ class UsersService(_BaseService):
         filter: dict[str, Any] | None = None,
         api_version: str | None = None,
     ) -> UserListResponse:
-        """
-        Получить список пользователей.
-
-        Пример:
-        await client.users.get_users(
-            sort="id", page=1, on_page=10, q="Кирилл", filter={"role": "Driver"}
-        )
-        """
+        """Получить страницу пользователей корпоративного клиента."""
+        if page is not None:
+            validate_positive_count(page)
+        if on_page is not None:
+            validate_positive_count(on_page)
         params = {
-            "sort": sort,
+            "sort": validate_non_empty_value(sort, "sort") if sort is not None else None,
             "page": page,
             "on_page": on_page,
             "q": q,
             "filter": to_json_param(filter) if filter else None,
         }
-        params = {k: v for k, v in params.items() if v is not None}
-
-        self.logger.info("Requesting users")
-
         return await self._request(
             GET_USERS,
             api_version=api_version,
-            params=params,
+            params={key: value for key, value in params.items() if value is not None},
         )
 
     async def iter_users(
@@ -74,9 +69,9 @@ class UsersService(_BaseService):
         max_pages: int = 100,
         api_version: str | None = None,
     ) -> AsyncIterator[UserItem]:
-        """Последовательно получить пользователей, ограничив число страниц."""
-        if on_page < 1 or max_pages < 1:
-            raise ValueError("on_page and max_pages must be greater than zero")
+        """Последовательно получить пользователей с ограничением числа страниц."""
+        validate_positive_count(on_page)
+        validate_positive_count(max_pages)
         yielded = 0
         for page in range(1, max_pages + 1):
             response = await self.get_users(
@@ -93,8 +88,6 @@ class UsersService(_BaseService):
             if not response.result or yielded >= response.total_count:
                 return
 
-    # -------------------- Создание пользователя --------------------
-
     async def create_user(
         self,
         *,
@@ -102,39 +95,23 @@ class UsersService(_BaseService):
         mobile: str,
         api_version: str | None = None,
     ) -> UserCreateResponse:
-        """
-        Создание водителя без персональных данных.
-        Данный метод позволяет создать себе технических водителей без ФИО (персональных данных),
-        чтобы использовать их для дальнейших интеграций. Реальных водителей стоит создавать через сервис “Инвайты”.
-
+        """Создать пользователя по внешнему UUID и мобильному номеру.
 
         Типовой сценарий:
-            Создать технического водителя без ФИО для последующего назначения
-            договора или карты. Для реального пользователя используйте invites.
+            Создать технического водителя без персональных данных перед
+            привязкой карты и договора.
 
-        Пример вызова:
-        ```python
-        await client.users.create_user(
-            uuid="62f2e267-4398-4ea2-b02e-6e88b81b0958", mobile="79999999999"
-        )
-        ```
-
-        Пример payload:
-        ```json
-        {"uuid": "62f2e267-4398-4ea2-b02e-6e88b81b0958", "mobile": "79999999999"}
-        ```
+        Пример:
+            ``await client.users.create_user(uuid="external-id", mobile="79990000000")``
         """
-        body = {"uuid": uuid, "mobile": mobile}
-
-        self.logger.info("Creating user")
-
         return await self._request(
             CREATE_USER,
             api_version=api_version,
-            data=body,
+            data={
+                "uuid": validate_non_empty_value(uuid, "uuid"),
+                "mobile": validate_non_empty_value(mobile, "mobile"),
+            },
         )
-
-    # -------------------- Прикрепление договоров --------------------
 
     async def attach_contracts(
         self,
@@ -143,27 +120,19 @@ class UsersService(_BaseService):
         contracts: list[UserAttachContractRequest | Mapping[str, object]],
         api_version: str | None = None,
     ) -> UserBoolResponse:
-        """
-        Прикрепление договоров к пользователю.
-
-        Пример:
-        await client.users.attach_contracts(user_id="1-FK485FK", contracts=[
-            {"sid": "1-380B94P", "template_id": "1-3BE470B", "use_mpc": True}
-        ])
-        """
+        """Привязать договоры и права доступа к пользователю."""
+        if not contracts:
+            raise ValueError("contracts must contain at least one item")
         payload = [
             UserAttachContractRequest.model_validate(contract).model_dump(exclude_none=True)
             for contract in contracts
         ]
-
         return await self._request(
             ATTACH_CONTRACTS,
             api_version=api_version,
-            path_params={"user_id": user_id},
+            path_params={"user_id": require_identifier(user_id, "user_id")},
             json=payload,
         )
-
-    # -------------------- Открепление договоров --------------------
 
     async def detach_contracts(
         self,
@@ -172,24 +141,13 @@ class UsersService(_BaseService):
         contracts: list[str],
         api_version: str | None = None,
     ) -> UserBoolResponse:
-        """
-        Открепление договоров от пользователя.
-
-        Пример:
-        await client.users.detach_contracts(
-            user_id="1-FK485FK", contracts=["1-380B94P", "1-37PYW2D"]
-        )
-        """
-        self.logger.info("Detaching contracts from user")
-
+        """Отвязать договоры от пользователя."""
         return await self._request(
             DETACH_CONTRACTS,
             api_version=api_version,
-            path_params={"user_id": user_id},
-            json=contracts,
+            path_params={"user_id": require_identifier(user_id, "user_id")},
+            json=validate_identifier_list(contracts, "contracts"),
         )
-
-    # -------------------- Прикрепление карты --------------------
 
     async def attach_card(
         self,
@@ -198,22 +156,13 @@ class UsersService(_BaseService):
         card_id: str,
         api_version: str | None = None,
     ) -> UserBoolResponse:
-        """
-        Прикрепление карты к пользователю.
-
-        Пример:
-        await client.users.attach_card(user_id="1-FK485FK", card_id="5050505")
-        """
-        self.logger.info("Attaching card to user")
-
+        """Привязать карту к пользователю."""
         return await self._request(
             ATTACH_CARD,
             api_version=api_version,
-            path_params={"user_id": user_id},
-            data={"card_id": card_id},
+            path_params={"user_id": require_identifier(user_id, "user_id")},
+            data={"card_id": require_identifier(card_id, "card_id")},
         )
-
-    # -------------------- Открепление карты --------------------
 
     async def detach_card(
         self,
@@ -222,22 +171,13 @@ class UsersService(_BaseService):
         card_id: str,
         api_version: str | None = None,
     ) -> UserBoolResponse:
-        """
-        Открепление карты от пользователя.
-
-        Пример:
-        await client.users.detach_card(user_id="1-FK485FK", card_id="5050505")
-        """
-        self.logger.info("Detaching card from user")
-
+        """Отвязать карту от пользователя."""
         return await self._request(
             DETACH_CARD,
             api_version=api_version,
-            path_params={"user_id": user_id},
-            data={"card_id": card_id},
+            path_params={"user_id": require_identifier(user_id, "user_id")},
+            data={"card_id": require_identifier(card_id, "card_id")},
         )
-
-    # -------------------- Удаление пользователя --------------------
 
     async def delete_user(
         self,
@@ -246,18 +186,11 @@ class UsersService(_BaseService):
         use_post: bool = False,
         api_version: str | None = None,
     ) -> UserBoolResponse:
-        """
-        Удаление пользователя.
-        Если ваша система не умеет отправлять DELETE запросы, то можно отправить POST, но в BODY указать _method=DELETE:
-        Пример:
-        await client.users.delete_user(user_id="1-FK485FK")
-        """
-        self.logger.info("Deleting user")
-
+        """Удалить пользователя через DELETE или POST method override."""
         return await self._request(
             DELETE_USER,
             api_version=api_version,
             route_name="post_override" if use_post else "default",
-            path_params={"user_id": user_id},
+            path_params={"user_id": require_identifier(user_id, "user_id")},
             data=with_method_override(None, "DELETE") if use_post else None,
         )

@@ -29,6 +29,7 @@ def compose_client_runtime(
     session_manager: SessionManager,
     registry: MethodRegistry,
     timeouts: TimeoutPolicy,
+    max_attempts: int,
     logger: LoggerLike,
     clock: Clock,
 ) -> ClientRuntime:
@@ -38,6 +39,7 @@ def compose_client_runtime(
         session_context=session_manager,
         registry=registry,
         timeouts=timeouts,
+        max_attempts=max_attempts,
         logger=logger,
         clock=clock,
     )

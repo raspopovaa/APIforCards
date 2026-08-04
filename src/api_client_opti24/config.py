@@ -13,6 +13,23 @@ class TimeoutPolicy:
     default: float = 30.0
     auth: float = 30.0
     read_heavy: float = 120.0
+    total_default: float = 120.0
+    total_auth: float = 60.0
+    total_read_heavy: float = 300.0
+
+    def __post_init__(self) -> None:
+        if (
+            min(
+                self.default,
+                self.auth,
+                self.read_heavy,
+                self.total_default,
+                self.total_auth,
+                self.total_read_heavy,
+            )
+            <= 0
+        ):
+            raise ValueError("timeout values must be greater than zero")
 
     def resolve(self, timeout_class: str) -> float:
         return {
@@ -20,6 +37,13 @@ class TimeoutPolicy:
             "auth": self.auth,
             "read_heavy": self.read_heavy,
         }.get(timeout_class, self.default)
+
+    def resolve_total(self, timeout_class: str) -> float:
+        return {
+            "default": self.total_default,
+            "auth": self.total_auth,
+            "read_heavy": self.total_read_heavy,
+        }.get(timeout_class, self.total_default)
 
 
 def _load_environment(load_dotenv: bool, env_file: str | Path) -> None:

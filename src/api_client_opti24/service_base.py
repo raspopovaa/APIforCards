@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, Protocol, TypeAlias, TypeVar, overload
 
@@ -85,7 +85,6 @@ class SessionRecovery(Protocol):
 
 
 class SessionMutator(SessionContext, Protocol):
-
     def mark_authenticated(
         self,
         session_id: str,
@@ -135,6 +134,32 @@ class _BaseService:
         if self.__session_context.contract_id is None:
             raise ValueError("contract_id is required when no default contract is selected")
         return require_identifier(self.__session_context.contract_id, "contract_id")
+
+    async def _resolve_batch_contract_id(
+        self,
+        *,
+        contract_id: str | None,
+        item_contract_ids: Sequence[str | None],
+    ) -> str:
+        """Resolve one contract for a batch and reject mixed contract payloads."""
+        normalized_explicit = (
+            require_identifier(contract_id, "contract_id") if contract_id is not None else None
+        )
+        normalized_items = {
+            require_identifier(item_contract_id, "contract_id")
+            for item_contract_id in item_contract_ids
+            if item_contract_id is not None
+        }
+        if normalized_explicit is not None:
+            conflicting = normalized_items - {normalized_explicit}
+            if conflicting:
+                raise ValueError("batch items must use the same contract_id as the request")
+            return normalized_explicit
+        if len(normalized_items) > 1:
+            raise ValueError("batch items must use the same contract_id")
+        if normalized_items:
+            return next(iter(normalized_items))
+        return await self._resolve_contract_id(None)
 
     @overload
     async def _request(

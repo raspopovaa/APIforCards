@@ -98,6 +98,7 @@ class APIClient(_ServiceFacade):
                 session_manager=self.session_manager,
                 registry=self.registry,
                 timeouts=self.settings.timeouts,
+                max_attempts=self.settings.retry_policy.max_total_attempts,
                 logger=self.logger,
                 clock=self.clock,
             )
@@ -215,17 +216,18 @@ class APIClient(_ServiceFacade):
     def session_id(self) -> str | None:
         return self.session_manager.session_id
 
-    @session_id.setter
-    def session_id(self, value: str | None) -> None:
-        if value is None:
-            self.session_manager.invalidate()
-        else:
-            self.session_manager.mark_authenticated(value, self.contract_id)
-
     @property
     def contract_id(self) -> str | None:
         return self.session_manager.contract_id
 
-    @contract_id.setter
-    def contract_id(self, value: str | None) -> None:
-        self.session_manager.set_contract(value)
+    def select_contract(self, *, contract_id: str) -> None:
+        """Select the local contract context for lazy authentication and requests."""
+        self.session_manager.select_contract(contract_id)
+
+    def restore_session(self, *, session_id: str, contract_id: str) -> None:
+        """Restore a trusted local session pair without a server round trip."""
+        self.session_manager.restore(session_id=session_id, contract_id=contract_id)
+
+    def clear_session(self) -> None:
+        """Clear local session and contract state."""
+        self.session_manager.clear()

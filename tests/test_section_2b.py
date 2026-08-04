@@ -93,17 +93,16 @@ async def test_limit_alias_and_session_contract_serialization() -> None:
         LimitsService,
         {"set_limit": _response(["limit-1"])},
     )
-
-    response = await service.set_limit(
-        limits=[
-            {
-                "card_id": "card-1",
-                "productType": "fuel",
-                "sum": {"currency": "810", "value": 5000},
-                "time": {"number": 1, "type": 5},
-            }
-        ]
+    item = LimitRequestItem.model_validate(
+        {
+            "card_id": "card-1",
+            "productType": "fuel",
+            "sum": {"currency": "810", "value": 5000},
+            "time": {"number": 1, "type": 5},
+        }
     )
+
+    response = await service.set_limit(limits=[item])
 
     body = json.loads(executor.calls[0][1]["data"]["limit"])
     assert response.status.code == 200
@@ -150,22 +149,71 @@ async def test_region_limit_returns_typed_envelope() -> None:
         RegionLimitsService,
         {"set_region_limit": _response(["region-limit-1"])},
     )
-
-    response = await service.set_region_limit(
-        region_limits=[
-            {
-                "card_id": "card-1",
-                "country": "RUS",
-                "limit_type": 1,
-            }
-        ]
+    item = RegionLimitRequestItem.model_validate(
+        {
+            "card_id": "card-1",
+            "country": "RUS",
+            "limit_type": 1,
+        }
     )
+
+    response = await service.set_region_limit(region_limits=[item])
 
     payload = json.loads(executor.calls[0][1]["data"]["region_limit"])
     assert isinstance(response, RegionLimitSetResponse)
     assert response.status.code == 200
     assert response.data == ["region-limit-1"]
     assert payload[0]["contract_id"] == "session-contract"
+
+
+@pytest.mark.asyncio
+async def test_batch_services_reject_raw_mappings_before_request() -> None:
+    limits, limit_executor = _service(LimitsService, {})
+    regions, region_executor = _service(RegionLimitsService, {})
+    restrictions, restriction_executor = _service(RestrictionsService, {})
+
+    with pytest.raises(TypeError, match=r"limits\[0\]"):
+        await limits.set_limit(limits=[{"card_id": "card-1"}])  # type: ignore[list-item]
+    with pytest.raises(TypeError, match=r"region_limits\[0\]"):
+        await regions.set_region_limit(
+            region_limits=[{"card_id": "card-1"}]  # type: ignore[list-item]
+        )
+    with pytest.raises(TypeError, match=r"restrictions\[0\]"):
+        await restrictions.set_restriction(
+            restrictions=[{"card_id": "card-1"}]  # type: ignore[list-item]
+        )
+
+    assert limit_executor.calls == []
+    assert region_executor.calls == []
+    assert restriction_executor.calls == []
+
+
+@pytest.mark.asyncio
+async def test_batch_services_reject_mixed_contract_context_before_request() -> None:
+    service, executor = _service(LimitsService, {})
+    first = LimitRequestItem.model_validate(
+        {
+            "contract_id": "contract-a",
+            "card_id": "card-1",
+            "productType": "fuel",
+            "sum": {"currency": "810", "value": 10},
+            "time": {"number": 1, "type": 5},
+        }
+    )
+    second = LimitRequestItem.model_validate(
+        {
+            "contract_id": "contract-b",
+            "card_id": "card-2",
+            "productType": "fuel",
+            "sum": {"currency": "810", "value": 20},
+            "time": {"number": 1, "type": 5},
+        }
+    )
+
+    with pytest.raises(ValueError, match="same contract"):
+        await service.set_limit(limits=[first, second])
+
+    assert executor.calls == []
 
 
 @pytest.mark.asyncio
@@ -193,6 +241,14 @@ async def test_decimal_money_is_serialized_without_float_rounding() -> None:
 async def test_invalid_input_does_not_execute_http_request() -> None:
     contracts, contract_executor = _service(ContractsService, {})
     restrictions, restriction_executor = _service(RestrictionsService, {})
+    restriction = RestrictionRequestItem.model_validate(
+        {
+            "card_id": "card-1",
+            "group_id": "group-1",
+            "productType": "fuel",
+            "restriction_type": 1,
+        }
+    )
 
     with pytest.raises(ValueError, match="YYYY-MM-DD"):
         await contracts.get_documents(date_start="01.01.2026", date_end="2026-01-31")
@@ -205,16 +261,7 @@ async def test_invalid_input_does_not_execute_http_request() -> None:
             emails=[f"user{index}@example.org" for index in range(6)],
         )
     with pytest.raises(ValueError, match="mutually exclusive"):
-        await restrictions.set_restriction(
-            restrictions=[
-                {
-                    "card_id": "card-1",
-                    "group_id": "group-1",
-                    "productType": "fuel",
-                    "restriction_type": 1,
-                }
-            ]
-        )
+        await restrictions.set_restriction(restrictions=[restriction])
 
     assert contract_executor.calls == []
     assert restriction_executor.calls == []

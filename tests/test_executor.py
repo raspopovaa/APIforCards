@@ -296,3 +296,32 @@ def test_executor_resolves_api_key_for_every_request() -> None:
     provider.value = "rotated-key"
     assert operation_executor.headers()["api_key"] == "rotated-key"
     assert "first-key" not in repr(vars(operation_executor))
+
+
+def test_executor_uses_configured_operation_attempt_budget() -> None:
+    registry = build_default_registry()
+    operation_executor = OperationExecutor(
+        api_key_provider=StaticAPIKeyProvider("secret-key"),
+        transport=StubTransport(),
+        session_context=SessionManager(),
+        registry=registry,
+        timeouts=TimeoutPolicy(),
+        logger=logging.getLogger("test-operation-budget"),
+        clock=FrozenClock(),
+        max_attempts=2,
+    )
+
+    budget = operation_executor.create_budget(registry.get("get_cards_v2"))
+
+    assert budget.max_attempts == 2
+    with pytest.raises(ValueError, match="max_attempts"):
+        OperationExecutor(
+            api_key_provider=StaticAPIKeyProvider("secret-key"),
+            transport=StubTransport(),
+            session_context=SessionManager(),
+            registry=registry,
+            timeouts=TimeoutPolicy(),
+            logger=logging.getLogger("test-invalid-operation-budget"),
+            clock=FrozenClock(),
+            max_attempts=0,
+        )

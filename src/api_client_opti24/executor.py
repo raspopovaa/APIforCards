@@ -8,6 +8,7 @@ from typing import Any, Generic, Protocol, TypeVar, overload
 from .config import TimeoutPolicy
 from .endpoints import EndpointSpec, RouteVariant
 from .errors import NotAuthenticatedError
+from .execution_budget import OperationBudget
 from .logger import LoggerLike
 from .modeling import ResponseModel, decode_model
 from .operations import Operation
@@ -37,6 +38,7 @@ class PreparedOperation(Generic[ResultT]):
     endpoint: str
     request_context: RequestContext
     timeout: float
+    budget: OperationBudget
 
 
 class Transport(Protocol):
@@ -84,7 +86,10 @@ class OperationExecutor:
         timeouts: TimeoutPolicy,
         logger: LoggerLike,
         clock: Clock,
+        max_attempts: int = 5,
     ) -> None:
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be at least 1")
         self.__api_key_provider = api_key_provider
         self.__transport = transport
         self.__session_context = session_context
@@ -92,6 +97,7 @@ class OperationExecutor:
         self.__timeouts = timeouts
         self.__logger = logger
         self.__clock = clock
+        self.__max_attempts = max_attempts
 
     def headers(
         self,
@@ -130,6 +136,13 @@ class OperationExecutor:
         route = spec.resolve_route(api_version=api_version, route_name=route_name)
         return spec, route
 
+    def create_budget(self, spec: EndpointSpec) -> OperationBudget:
+        return OperationBudget(
+            deadline_at=self.__clock.monotonic()
+            + self.__timeouts.resolve_total(spec.timeout_class),
+            max_attempts=self.__max_attempts,
+        )
+
     def prepare(
         self,
         operation: Operation[ResultT] | None,
@@ -138,6 +151,7 @@ class OperationExecutor:
         *,
         path_params: PathParams | None,
         request_context: RequestContext,
+        budget: OperationBudget,
     ) -> PreparedOperation[ResultT]:
         return PreparedOperation(
             operation=operation,
@@ -146,6 +160,7 @@ class OperationExecutor:
             endpoint=route.render(path_params),
             request_context=request_context,
             timeout=self.__timeouts.resolve(spec.timeout_class),
+            budget=budget,
         )
 
     def _request_headers(
@@ -182,6 +197,7 @@ class OperationExecutor:
             method_name=prepared.spec.name,
             retry_class=prepared.spec.retry_class,
             idempotent=prepared.spec.idempotent,
+            operation_budget=prepared.budget,
             **kwargs,
         )
         if not isinstance(result, dict):
@@ -253,6 +269,7 @@ class OperationExecutor:
             route,
             path_params=path_params,
             request_context=self.__session_context.request_context(contract_id=request_contract_id),
+            budget=self.create_budget(spec),
         )
         payload = await self.execute_prepared(prepared, **kwargs)
         if not isinstance(operation, Operation):
@@ -275,6 +292,7 @@ class OperationExecutor:
             method_name=prepared.spec.name,
             retry_class=prepared.spec.retry_class,
             idempotent=prepared.spec.idempotent,
+            operation_budget=prepared.budget,
             **kwargs,
         )
 
@@ -301,6 +319,7 @@ class OperationExecutor:
             method_name=prepared.spec.name,
             retry_class=prepared.spec.retry_class,
             idempotent=prepared.spec.idempotent,
+            operation_budget=prepared.budget,
             **kwargs,
         )
 
@@ -343,6 +362,7 @@ class DefaultRequestExecutor:
         *,
         path_params: PathParams | None,
         request_contract_id: str | None,
+        budget: OperationBudget,
     ) -> PreparedOperation[ResultT]:
         typed_operation = operation if isinstance(operation, Operation) else None
         return self.__operation_executor.prepare(
@@ -351,6 +371,7 @@ class DefaultRequestExecutor:
             route,
             path_params=path_params,
             request_context=self.__session_context.request_context(contract_id=request_contract_id),
+            budget=budget,
         )
 
     def _audit(
@@ -440,6 +461,7 @@ class DefaultRequestExecutor:
         spec, route = self.__operation_executor.resolve(
             operation_name, api_version=api_version, route_name=route_name
         )
+        budget = self.__operation_executor.create_budget(spec)
         if spec.requires_session:
             await self.__session_gate.ensure_authenticated()
         raw = await self._run_with_recovery(
@@ -452,6 +474,7 @@ class DefaultRequestExecutor:
                     route,
                     path_params=path_params,
                     request_contract_id=request_contract_id,
+                    budget=budget,
                 ),
                 **kwargs,
             ),
@@ -476,6 +499,7 @@ class DefaultRequestExecutor:
         spec, route = self.__operation_executor.resolve(
             operation_name, api_version=api_version, route_name=route_name
         )
+        budget = self.__operation_executor.create_budget(spec)
         if spec.requires_session:
             await self.__session_gate.ensure_authenticated()
         return await self._run_with_recovery(
@@ -488,6 +512,7 @@ class DefaultRequestExecutor:
                     route,
                     path_params=path_params,
                     request_contract_id=request_contract_id,
+                    budget=budget,
                 ),
                 **kwargs,
             ),
@@ -508,6 +533,7 @@ class DefaultRequestExecutor:
         spec, route = self.__operation_executor.resolve(
             operation_name, api_version=api_version, route_name=route_name
         )
+        budget = self.__operation_executor.create_budget(spec)
         if spec.requires_session:
             await self.__session_gate.ensure_authenticated()
         return await self._run_with_recovery(
@@ -520,6 +546,7 @@ class DefaultRequestExecutor:
                     route,
                     path_params=path_params,
                     request_contract_id=request_contract_id,
+                    budget=budget,
                 ),
                 destination,
                 **kwargs,

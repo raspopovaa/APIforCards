@@ -15,6 +15,7 @@
 - типизированные асинхронные методы на базе `httpx` и Pydantic;
 - доменные сервисы `client.auth`, `client.cards`, `client.reports` и другие;
 - управление сессией, выбор договора и безопасное восстановление авторизации;
+- общий deadline и единый лимит HTTP-попыток на бизнес-операцию;
 - retry только для разрешённых политикой операций;
 - ограничение частоты и числа параллельных запросов;
 - единая обработка HTTP- и API-ошибок;
@@ -38,7 +39,7 @@
 uv venv --python 3.11
 uv pip install "httpx>=0.27,<1.0" "pydantic>=2.13.4,<3.0"
 uv pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.3.0
+  --no-deps api-client-opti24==3.0.0
 ```
 
 ### pip
@@ -48,7 +49,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install "httpx>=0.27,<1.0" "pydantic>=2.13.4,<3.0"
 python -m pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==2.3.0
+  --no-deps api-client-opti24==3.0.0
 ```
 
 Проверка импорта:
@@ -114,12 +115,19 @@ if __name__ == "__main__":
 ```python
 await client.auth.get_info()
 await client.cards.get_cards_v2(page=1, onpage=20)
-await client.transactions.get_transactions_v2()
+await client.transactions.get_transactions_v2(
+    contract_id="contract-id",
+    date_from="2026-07-01",
+    date_to="2026-07-31",
+)
 await client.reports.get_reports()
 ```
 
 Параметры публичных методов передаются по имени. JSON-операции возвращают
 типизированный envelope `status/data/timestamp`.
+
+При переходе с линии 2.x используйте
+[руководство по миграции на 3.0](https://raspopovaa.github.io/APIforCards/migration-3.0/).
 
 ## Документация
 
@@ -130,6 +138,7 @@ await client.reports.get_reports()
 |---|---|
 | [Начало работы](https://raspopovaa.github.io/APIforCards/getting-started/) | Установка, `.env` и первый запрос |
 | [Конфигурация](https://raspopovaa.github.io/APIforCards/configuration/) | Timeout, retry, rate limit и dependency injection |
+| [Миграция на 3.0](https://raspopovaa.github.io/APIforCards/migration-3.0/) | Breaking changes и замены API линии 2.x |
 | [Методы API](https://raspopovaa.github.io/APIforCards/methods/) | Сигнатуры, маршруты, DEMO-доступность и тарификация |
 | [Типовые сценарии](https://raspopovaa.github.io/APIforCards/scenarios/) | Прикладные последовательности вызовов |
 | [Ошибки и retry](https://raspopovaa.github.io/APIforCards/errors/) | Исключения и правила безопасных повторов |
