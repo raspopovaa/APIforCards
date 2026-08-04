@@ -4,7 +4,7 @@
 транзакциями, отчётами, пользователями и виртуальными картами.
 
 !!! info "Текущая версия"
-    Документация соответствует `api-client-opti24 2.3.0` и Python
+    Документация соответствует `api-client-opti24 3.0.0` и Python
     `>=3.11,<3.15`.
 
 ## Начните отсюда
@@ -13,6 +13,7 @@
 |---|---|
 | [Установка и быстрый запуск](getting-started.md) | Установить пакет и выполнить первый запрос |
 | [Конфигурация](configuration.md) | Настроить URL, credentials, timeout, retry и rate limit |
+| [Миграция на 3.0](migration-3.0.md) | Перейти с линии 2.x на явный lifecycle и строгие модели |
 | [Типовые сценарии](scenarios.md) | Собрать вызовы SDK в безопасные прикладные последовательности |
 | [Методы API](methods.md) | Найти вызов SDK, маршрут, DEMO-доступность и тарификацию |
 | [Ошибки и retry](errors.md) | Обработать HTTP/API-ошибки и безопасные повторы |
@@ -26,7 +27,11 @@ SDK предоставляет типизированные композицио
 auth = await client.auth.auth_user()
 cards = await client.cards.get_cards_v2(page=1, onpage=20)
 reports = await client.reports.get_reports()
-transactions = await client.transactions.get_transactions_v2()
+transactions = await client.transactions.get_transactions_v2(
+    contract_id="contract-id",
+    date_from="2026-07-01",
+    date_to="2026-07-31",
+)
 ```
 
 Прямых методов вида `client.get_cards_v2()` нет. Каждый метод находится в
@@ -38,6 +43,7 @@ transactions = await client.transactions.get_transactions_v2()
 - единый декларативный registry маршрутов;
 - проверка HTTP-кода и API-кода ответа;
 - re-auth без рекурсивного захвата session lock;
+- общий deadline и лимит попыток для одной бизнес-операции;
 - retry только в соответствии с idempotency policy;
 - percent-encoding параметров пути и запрет небезопасных сегментов;
 - изоляция credentials от доменных сервисов;
@@ -51,4 +57,4 @@ transactions = await client.transactions.get_transactions_v2()
 - [Совместимость со спецификацией](spec-compatibility.md)
 - [Версионирование документации](versioning.md)
 - [Исходный код на GitHub](https://github.com/raspopovaa/APIforCards)
-- [Пакет 2.3.0 на TestPyPI](https://test.pypi.org/project/api-client-opti24/2.3.0/)
+- [Пакет 3.0.0 на TestPyPI](https://test.pypi.org/project/api-client-opti24/3.0.0/)
