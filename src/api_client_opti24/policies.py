@@ -23,13 +23,18 @@ class RetryClass(StrEnum):
 class RetryPolicy:
     network_attempts: int = 5
     rate_limit_attempts: int = 3
+    max_total_attempts: int = 5
     network_backoff_min_seconds: float = 2.0
     network_backoff_max_seconds: float = 60.0
     rate_limit_backoff_seconds: float = 0.5
     auth_retry_min_interval_seconds: float = 5.0
 
     def __post_init__(self) -> None:
-        if self.network_attempts < 1 or self.rate_limit_attempts < 1:
+        if min(
+            self.network_attempts,
+            self.rate_limit_attempts,
+            self.max_total_attempts,
+        ) < 1:
             raise ValueError("retry attempts must be at least 1")
         if (
             min(
@@ -54,9 +59,9 @@ class RetryPolicy:
             http_method.upper() in IDEMPOTENT_HTTP_METHODS if idempotent is None else idempotent
         )
         if normalized is RetryClass.NETWORK_ONLY:
-            return self.network_attempts
+            return min(self.network_attempts, self.max_total_attempts)
         if normalized is RetryClass.SAFE and resolved_idempotent:
-            return self.network_attempts
+            return min(self.network_attempts, self.max_total_attempts)
         return 1
 
     def rate_limit_attempt_count(
@@ -71,7 +76,7 @@ class RetryPolicy:
             http_method.upper() in IDEMPOTENT_HTTP_METHODS if idempotent is None else idempotent
         )
         if normalized is RetryClass.SAFE and resolved_idempotent:
-            return self.rate_limit_attempts
+            return min(self.rate_limit_attempts, self.max_total_attempts)
         return 1
 
     def initial_network_backoff(self, retry_class: str | RetryClass) -> float:
