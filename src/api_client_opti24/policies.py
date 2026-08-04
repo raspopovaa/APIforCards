@@ -30,11 +30,14 @@ class RetryPolicy:
     auth_retry_min_interval_seconds: float = 5.0
 
     def __post_init__(self) -> None:
-        if min(
-            self.network_attempts,
-            self.rate_limit_attempts,
-            self.max_total_attempts,
-        ) < 1:
+        if (
+            min(
+                self.network_attempts,
+                self.rate_limit_attempts,
+                self.max_total_attempts,
+            )
+            < 1
+        ):
             raise ValueError("retry attempts must be at least 1")
         if (
             min(
