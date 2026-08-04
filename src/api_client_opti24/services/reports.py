@@ -49,7 +49,14 @@ class ReportsService(_BaseService):
         emails: str | None = None,
         api_version: str | None = None,
     ) -> ReportOrderResponse:
-        """Заказать формирование отчёта v2."""
+        """Заказать формирование отчёта v2.
+
+        Типовой сценарий:
+            Создать асинхронную задачу отчёта, затем получить её статус и файл.
+
+        Пример:
+            ``await client.reports.order_report(report_id="id", format="xlsx", params={})``
+        """
         request = ReportOrderRequest.model_validate(
             {
                 "id": require_identifier(report_id, "report_id"),
