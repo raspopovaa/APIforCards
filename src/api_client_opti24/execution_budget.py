@@ -17,6 +17,12 @@ class OperationBudget:
     max_attempts: int
     attempts_used: int = 0
 
+    def __post_init__(self) -> None:
+        if self.max_attempts < 1:
+            raise ValueError("max_attempts must be at least 1")
+        if self.attempts_used < 0 or self.attempts_used > self.max_attempts:
+            raise ValueError("attempts_used must be between 0 and max_attempts")
+
     def remaining(self, now: float) -> float:
         remaining = self.deadline_at - now
         if remaining <= 0:
