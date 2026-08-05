@@ -2502,9 +2502,9 @@
 <tbody>
 <tr>
 <td><code>contract_id</code></td>
-<td><code>str</code></td>
-<td style="text-align: center;">Да</td>
-<td>—</td>
+<td><code>str | None</code></td>
+<td style="text-align: center;">Нет</td>
+<td><code>None</code></td>
 <td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
 </tr>
 <tr>
@@ -2599,11 +2599,10 @@
 - <a href="../../data-types/transactions/TransactionsV1Data/"><code>TransactionsV1Data</code></a></p>
 <h3 id="_15">Пример<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">transactions</span><span class="o">.</span><span class="n">get_transactions_v1</span><span class="p">(</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">contract_id</span><span class="o">=</span><span class="s2">&quot;contract-id&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="clienttransactionsget_transactions_v2"><code>client.transactions.get_transactions_v2()</code><a class="headerlink" href="#clienttransactionsget_transactions_v2" title="Permanent link">&para;</a></h2>
 <p>Получить транзакции договора за заданный период.</p>
@@ -2642,9 +2641,9 @@
 <tbody>
 <tr>
 <td><code>contract_id</code></td>
-<td><code>str</code></td>
-<td style="text-align: center;">Да</td>
-<td>—</td>
+<td><code>str | None</code></td>
+<td style="text-align: center;">Нет</td>
+<td><code>None</code></td>
 <td>Идентификатор договора. Для части методов может быть получен из активного контекста SDK.</td>
 </tr>
 <tr>
@@ -2753,14 +2752,13 @@
 - <a href="../../data-types/transactions/TransactionsV2Data/"><code>TransactionsV2Data</code></a></p>
 <h3 id="_20">Пример<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">transactions</span><span class="o">.</span><span class="n">get_transactions_v2</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">contract_id</span><span class="o">=</span><span class="s2">&quot;contract-id&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">date_from</span><span class="o">=</span><span class="s2">&quot;date-from&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">date_to</span><span class="o">=</span><span class="s2">&quot;date-to&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">page_limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">page_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">date_from</span><span class="o">=</span><span class="s2">&quot;date-from&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">date_to</span><span class="o">=</span><span class="s2">&quot;date-to&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">page_limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">page_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 
 
