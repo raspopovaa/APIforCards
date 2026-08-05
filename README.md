@@ -39,7 +39,7 @@
 uv venv --python 3.11
 uv pip install "httpx>=0.27,<1.0" "pydantic>=2.13.4,<3.0"
 uv pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==3.0.0
+  --no-deps api-client-opti24==3.0.1
 ```
 
 ### pip
@@ -49,7 +49,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install "httpx>=0.27,<1.0" "pydantic>=2.13.4,<3.0"
 python -m pip install --index-url https://test.pypi.org/simple/ \
-  --no-deps api-client-opti24==3.0.0
+  --no-deps api-client-opti24==3.0.1
 ```
 
 Проверка импорта:
