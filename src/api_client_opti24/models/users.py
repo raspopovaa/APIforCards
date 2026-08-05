@@ -58,7 +58,7 @@ class UserItem(BaseModel):
     first_name: str = Field(..., description="Имя пользователя")
     last_name: str = Field(..., description="Фамилия пользователя")
     middle_name: str | None = Field(None, description="Отчество пользователя")
-    date: str = Field(..., description="Дата рождения")
+   date: str | None = Field(None, description="Дата рождения")
     position: str | None = Field(None, description="Должность или UUID должности")
     role: UserRole = Field(..., description="Роль пользователя")
     active: bool = Field(..., description="Активен ли пользователь")
