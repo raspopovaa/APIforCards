@@ -3,7 +3,10 @@ from __future__ import annotations
 import asyncio
 import inspect
 import json
+import random
+import re
 from collections.abc import Awaitable, Callable
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, get_args, get_origin
@@ -21,12 +24,20 @@ from api_client_opti24.models.restrictions import RestrictionRequestItem
 
 Check = Callable[[APIClient, dict[str, Any]], Awaitable[Any]]
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-ENV_FILE = PROJECT_ROOT / ".env"
+ENV_FILE = Path(__file__).with_name(".env")
 CURRENT_CLIENT: APIClient | None = None
 CURRENT_STATE: dict[str, Any] = {}
 FIELD_HELP: dict[str, list[str]] = {}
 METHOD_DESCRIPTIONS: dict[str, str] = {}
+REFERENCE_DICTIONARIES = (
+    "Goods",
+    "ProductType",
+    "ProductGroup",
+    "Country",
+    "Region",
+    "Office",
+    "Services",
+)
 
 
 class Color:
@@ -354,6 +365,94 @@ def result_payload(result: Any) -> Any:
     return result
 
 
+def as_int(value: Any) -> int:
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    return 0
+
+
+def print_tariff_usage_summary(result: Any, *, default_quota: int = 500) -> None:
+    payload = result_payload(result)
+    data = payload.get("data") if isinstance(payload, dict) else None
+    if not isinstance(data, dict):
+        print(color("Не удалось посчитать тариф: неожиданный формат data.", Color.YELLOW))
+        return
+
+    methods = data.get("methods")
+    methods_info = data.get("methods_info")
+    client_info = data.get("client_info")
+    if not isinstance(methods, dict) or not isinstance(methods_info, dict):
+        print(color("Не удалось посчитать тариф: нет methods или methods_info.", Color.YELLOW))
+        return
+
+    billable_catalog = methods_info.get("actions_bill") or {}
+    free_catalog = methods_info.get("actions_not_bill") or {}
+    if not isinstance(billable_catalog, dict) or not isinstance(free_catalog, dict):
+        print(color("Не удалось посчитать тариф: неверный формат actions_bill/actions_not_bill.", Color.YELLOW))
+        return
+
+    billable_used: dict[str, int] = {}
+    free_used: dict[str, int] = {}
+    unknown_used: dict[str, int] = {}
+    for method_code, raw_count in methods.items():
+        if method_code == "all":
+            continue
+        count = as_int(raw_count)
+        if count <= 0:
+            continue
+        if method_code in billable_catalog:
+            billable_used[method_code] = count
+        elif method_code in free_catalog:
+            free_used[method_code] = count
+        else:
+            unknown_used[method_code] = count
+
+    quota = default_quota
+    if isinstance(client_info, dict):
+        quota = as_int(client_info.get("Queries")) or default_quota
+    used = sum(billable_used.values())
+    remaining = max(quota - used, 0)
+
+    print(color("\nПрактический расчёт тарификации", Color.BOLD + Color.MAGENTA))
+    print(f"Период: {data.get('from')} — {data.get('to')}")
+    print(f"Лимит тарифицируемых запросов: {quota}")
+    print(f"Тарифицируемых запросов использовано: {used}")
+    print(color(f"Остаток тарифицируемых запросов: {remaining}", Color.BOLD + Color.GREEN))
+
+    if billable_used:
+        print(color("Тарифицируемые методы с вызовами:", Color.BOLD))
+        for method_code, count in sorted(billable_used.items()):
+            print(f"- {method_code}: {count} — {billable_catalog.get(method_code)}")
+    if free_used:
+        print(color("Нетарифицируемые методы с вызовами:", Color.BOLD))
+        for method_code, count in sorted(free_used.items()):
+            print(f"- {method_code}: {count} — {free_catalog.get(method_code)}")
+    if unknown_used:
+        print(color("Методы с неизвестной тарификацией:", Color.BOLD + Color.YELLOW))
+        for method_code, count in sorted(unknown_used.items()):
+            print(f"- {method_code}: {count}")
+
+
+def compact_error(exc: Exception, *, max_length: int = 700) -> str:
+    message = str(exc)
+    if "<html" in message.lower():
+        error_id = re.search(r'ERROR_ID"?\s+content="([^"]+)"|ID-запроса:\s*([^<\s]+)', message)
+        error_id_value = next((item for item in (error_id.groups() if error_id else ()) if item), None)
+        waf_message = "сервер вернул HTML/WAF-страницу вместо JSON"
+        if error_id_value:
+            waf_message = f"{waf_message}, ERROR_ID={error_id_value}"
+        return f"{type(exc).__name__}: {waf_message}"
+    if len(message) > max_length:
+        return f"{type(exc).__name__}: {message[:max_length]}..."
+    return f"{type(exc).__name__}: {message}"
+
+
 def first_result_item(payload: Any) -> dict[str, Any] | None:
     if not isinstance(payload, dict):
         return None
@@ -518,6 +617,170 @@ def saved(state: dict[str, Any], key: str) -> str | None:
     return state.get(key)
 
 
+def as_payload(value: Any) -> Any:
+    if hasattr(value, "model_dump"):
+        return value.model_dump(by_alias=True)
+    return value
+
+
+def response_result_items(response: Any) -> list[dict[str, Any]]:
+    payload = as_payload(response)
+    data = payload.get("data") if isinstance(payload, dict) else None
+    if isinstance(data, dict):
+        result = data.get("result")
+        if isinstance(result, list):
+            return [item for item in result if isinstance(item, dict)]
+    if isinstance(data, list):
+        return [item for item in data if isinstance(item, dict)]
+    return []
+
+
+def pick_value(items: list[dict[str, Any]], *keys: str) -> str | None:
+    candidates: list[str] = []
+    for item in items:
+        for key in keys:
+            value = item.get(key)
+            if value not in (None, "", []):
+                candidates.append(str(value))
+    return random.choice(candidates) if candidates else None
+
+
+def price_value(price: dict[str, Any]) -> float:
+    raw_price = price.get("Price") or price.get("price") or price.get("value") or 1
+    try:
+        return float(str(raw_price).replace(",", "."))
+    except ValueError:
+        return 1.0
+
+
+def active_station_with_price(stations: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]] | None:
+    candidates: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    for station in stations:
+        if station.get("accept_cards") is False:
+            continue
+        if str(station.get("status") or "") == "258":
+            continue
+        prices = station.get("prices")
+        if not isinstance(prices, list):
+            continue
+        for price in prices:
+            if isinstance(price, dict) and pick_value([price], "GoodsCode", "code", "ID"):
+                candidates.append((station, price))
+    return random.choice(candidates) if candidates else None
+
+
+def reference_store(state: dict[str, Any]) -> dict[str, Any]:
+    return state.setdefault("reference_data", {})
+
+
+def reference_value(state: dict[str, Any], key: str) -> str | None:
+    value = reference_store(state).get(key)
+    if value not in (None, "", []):
+        return str(value)
+    return None
+
+
+async def fetch_dictionary_items(
+    client: APIClient,
+    state: dict[str, Any],
+    name: str,
+) -> list[dict[str, Any]]:
+    refs = reference_store(state)
+    cache_key = f"dictionary:{name}"
+    if cache_key not in refs:
+        try:
+            response = await client.dictionaries.get_dictionary(name=name)
+            refs[cache_key] = response_result_items(response)
+            print(color(f"Справочник {name}: загружено {len(refs[cache_key])} записей", Color.DIM))
+        except Exception as exc:
+            refs[cache_key] = []
+            print(color(f"Справочник {name}: не удалось загрузить ({type(exc).__name__}: {exc})", Color.YELLOW))
+    return refs[cache_key]
+
+
+async def ensure_reference_data(
+    client: APIClient,
+    state: dict[str, Any],
+    *,
+    dictionaries: tuple[str, ...] = (),
+    need_azs: bool = False,
+) -> None:
+    refs = reference_store(state)
+    if need_azs and not refs.get("poi_id"):
+        try:
+            response = await client.dictionaries.get_azs_list_v2()
+            stations = response_result_items(response)
+            station_with_price = active_station_with_price(stations)
+            if station_with_price:
+                station, price = station_with_price
+                refs["poi_id"] = pick_value([station], "id", "siebel_id")
+                refs["goods_code"] = pick_value([price], "GoodsCode", "code", "ID")
+                refs["goods_price"] = price_value(price)
+                refs["country"] = refs.get("country") or pick_value([station], "country_code", "countryCode")
+                refs["region"] = refs.get("region") or pick_value([station], "region_code", "regionCode")
+            print(
+                color(
+                    "АЗС: подобраны "
+                    f"poi_id={refs.get('poi_id')}, "
+                    f"goods_code={refs.get('goods_code')}, "
+                    f"goods_price={refs.get('goods_price')}",
+                    Color.DIM,
+                )
+            )
+        except Exception as exc:
+            print(color(f"АЗС: не удалось подобрать значения ({type(exc).__name__}: {exc})", Color.YELLOW))
+
+    for dictionary_name in dictionaries:
+        items = await fetch_dictionary_items(client, state, dictionary_name)
+        if dictionary_name == "Goods":
+            refs["goods_code"] = refs.get("goods_code") or pick_value(items, "code", "id", "value")
+        elif dictionary_name == "ProductType":
+            refs["product_type"] = refs.get("product_type") or pick_value(items, "id", "code", "value")
+        elif dictionary_name == "ProductGroup":
+            refs["product_group"] = refs.get("product_group") or pick_value(items, "id", "code", "value")
+        elif dictionary_name == "Country":
+            refs["country"] = refs.get("country") or pick_value(items, "code", "id", "value")
+        elif dictionary_name == "Region":
+            refs["region"] = refs.get("region") or pick_value(items, "code", "id", "value")
+        elif dictionary_name == "Office":
+            refs["office_id"] = refs.get("office_id") or pick_value(items, "id", "code", "value")
+
+
+def limit_item_example(state: dict[str, Any]) -> str:
+    product_type = reference_value(state, "product_type") or "1-276PF01"
+    card_id = first_card_id(state) or "56745380"
+    return json.dumps(
+        [
+            {
+                "card_id": card_id,
+                "productType": product_type,
+                "amount": {"unit": "LIT", "value": 10},
+                "time": {"type": 3, "number": 1},
+            }
+        ],
+        ensure_ascii=False,
+    )
+
+
+def region_limit_item_example(state: dict[str, Any]) -> str:
+    card_id = first_card_id(state) or "56745380"
+    country = reference_value(state, "country") or "RUS"
+    region = reference_value(state, "region")
+    payload = {"card_id": card_id, "country": country, "limit_type": 1}
+    if region:
+        payload["region"] = region
+    return json.dumps([payload], ensure_ascii=False)
+
+
+def restriction_item_example(state: dict[str, Any]) -> str:
+    product_type = reference_value(state, "product_type") or "1-276PF01"
+    card_id = first_card_id(state) or "56745380"
+    return json.dumps(
+        [{"card_id": card_id, "productType": product_type, "restriction_type": 2}],
+        ensure_ascii=False,
+    )
+
+
 # Метод auth_user.
 # Авторизует пользователя, получает session_id и список доступных договоров.
 # Выводит полный envelope авторизации и сохраняет выбранный contract_id для следующих методов.
@@ -591,9 +854,18 @@ async def check_block_card(client: APIClient, state: dict[str, Any]) -> None:
 # Проверяет возможность покупки по карте в точке продаж.
 # Передаёт card_id, poi_id и goods JSON, выводит envelope проверки покупки.
 async def check_check_purchase(client: APIClient, state: dict[str, Any]) -> None:
+    await ensure_reference_data(client, state, dictionaries=("Goods",), need_azs=True)
     card_id = ask_value("card_id", default=first_card_id(state))
-    poi_id = ask_value("poi_id")
-    goods = ask_json("goods JSON list")
+    poi_id = ask_value("poi_id", default=reference_value(state, "poi_id"))
+    goods_code = reference_value(state, "goods_code") or "1-276PF01"
+    goods_price = float(reference_value(state, "goods_price") or "55.50")
+    goods = ask_json(
+        "goods JSON list",
+        example=json.dumps(
+            [{"code": goods_code, "quantity": 1, "price": goods_price}],
+            ensure_ascii=False,
+        ),
+    )
     payload = {"card_id": card_id, "poi_id": poi_id, "goods": goods}
     result = await run_read(
         "check_purchase",
@@ -660,8 +932,17 @@ async def check_create_template(client: APIClient, state: dict[str, Any]) -> Non
 # Создаёт геоограничение в шаблоне.
 # Передаёт template_id и payload JSON, выводит envelope с ID геоограничения.
 async def check_create_template_georestriction(client: APIClient, state: dict[str, Any]) -> None:
+    await ensure_reference_data(client, state, dictionaries=("Country", "Region"), need_azs=True)
     template_id = ask_value("template_id", default=saved(CURRENT_STATE, "template_id"))
-    payload_data = ask_json("TemplateGeoRestrictionCreateRequest JSON object")
+    country = reference_value(state, "country") or "RUS"
+    region = reference_value(state, "region") or "54"
+    payload_data = ask_json(
+        "TemplateGeoRestrictionCreateRequest JSON object",
+        example=json.dumps(
+            {"country": country, "region": region, "restriction_type": 1},
+            ensure_ascii=False,
+        ),
+    )
     payload = {"template_id": template_id, "payload": payload_data}
     result = await run_mutation(
         "create_template_georestriction",
@@ -680,8 +961,20 @@ async def check_create_template_georestriction(client: APIClient, state: dict[st
 # Создаёт лимит в шаблоне.
 # Передаёт template_id и payload JSON, выводит envelope с ID лимита.
 async def check_create_template_limit(client: APIClient, state: dict[str, Any]) -> None:
+    await ensure_reference_data(client, state, dictionaries=("ProductType", "Goods"))
     template_id = ask_value("template_id", default=saved(CURRENT_STATE, "template_id"))
-    payload_data = ask_json("TemplateLimitCreateRequest JSON object")
+    product_type = reference_value(state, "product_type") or reference_value(state, "goods_code") or "1-276PF01"
+    payload_data = ask_json(
+        "TemplateLimitCreateRequest JSON object",
+        example=json.dumps(
+            {
+                "product_type": product_type,
+                "amount": {"unit": "LIT", "value": 10},
+                "time": {"type": 3, "number": 1},
+            },
+            ensure_ascii=False,
+        ),
+    )
     payload = {"template_id": template_id, "payload": payload_data}
     result = await run_mutation(
         "create_template_limit",
@@ -700,8 +993,16 @@ async def check_create_template_limit(client: APIClient, state: dict[str, Any]) 
 # Создаёт товарное ограничение в шаблоне.
 # Передаёт template_id и payload JSON, выводит envelope с ID ограничения.
 async def check_create_template_restriction(client: APIClient, state: dict[str, Any]) -> None:
+    await ensure_reference_data(client, state, dictionaries=("ProductType", "Goods"))
     template_id = ask_value("template_id", default=saved(CURRENT_STATE, "template_id"))
-    payload_data = ask_json("TemplateRestrictionCreateRequest JSON object")
+    product_type = reference_value(state, "product_type") or reference_value(state, "goods_code") or "1-276PF01"
+    payload_data = ask_json(
+        "TemplateRestrictionCreateRequest JSON object",
+        example=json.dumps(
+            {"product_type": product_type, "restriction_type": 2},
+            ensure_ascii=False,
+        ),
+    )
     payload = {"template_id": template_id, "payload": payload_data}
     result = await run_mutation(
         "create_template_restriction",
@@ -1147,7 +1448,11 @@ async def check_get_contract_data(client: APIClient, state: dict[str, Any]) -> N
 # Получает справочник по имени.
 # Передаёт name, выводит данные справочника.
 async def check_get_dictionary(client: APIClient, _state: dict[str, Any]) -> None:
-    name = ask_value("dictionary name")
+    name = ask_value(
+        "dictionary name",
+        default=random.choice(REFERENCE_DICTIONARIES),
+        example=", ".join(REFERENCE_DICTIONARIES),
+    )
     payload = {"name": name}
     result = await run_read(
         "get_dictionary",
@@ -1186,9 +1491,13 @@ async def check_get_documents(client: APIClient, state: dict[str, Any]) -> None:
 # Рассчитывает финальные цены для карты и точки продаж.
 # Передаёт card_id, poi_id и список goods, выводит envelope цен.
 async def check_get_final_prices(client: APIClient, state: dict[str, Any]) -> None:
+    await ensure_reference_data(client, state, dictionaries=("Goods",), need_azs=True)
     card_id = ask_value("card_id", default=first_card_id(state))
-    poi_id = ask_value("poi_id")
-    goods = ask_csv("goods codes через запятую")
+    poi_id = ask_value("poi_id", default=reference_value(state, "poi_id"))
+    goods = ask_csv(
+        "goods codes через запятую",
+        example=reference_value(state, "goods_code") or "1-276PF01",
+    )
     payload = {"card_id": card_id, "poi_id": poi_id, "goods": goods}
     result = await run_read(
         "get_final_prices",
@@ -1203,7 +1512,8 @@ async def check_get_final_prices(client: APIClient, state: dict[str, Any]) -> No
 # Получает информацию о клиенте и тарифных запросах.
 # Передаёт period при необходимости, выводит envelope client_info.
 async def check_get_info(client: APIClient, _state: dict[str, Any]) -> None:
-    period = ask_value("period, Enter чтобы пропустить", required=False)
+    current_period = date.today().strftime("%Y-%m")
+    period = ask_value("period", default=current_period, required=False)
     payload = {"period": period}
     result = await run_read(
         "get_info",
@@ -1212,6 +1522,7 @@ async def check_get_info(client: APIClient, _state: dict[str, Any]) -> None:
         client.auth.get_info(period=period),
     )
     print_result("get_info", result)
+    print_tariff_usage_summary(result)
 
 
 # Метод get_invites.
@@ -1568,8 +1879,9 @@ async def check_move_to_contract(client: APIClient, state: dict[str, Any]) -> No
 # Создаёт заявку на выпуск пластиковых карт.
 # Передаёт contract_id, count и office_id, выводит envelope заявки.
 async def check_order_cards(client: APIClient, state: dict[str, Any]) -> None:
+    await ensure_reference_data(client, state, dictionaries=("Office",))
     count = int(ask_value("count") or "0")
-    office_id = ask_value("office_id")
+    office_id = ask_value("office_id", default=reference_value(state, "office_id"))
     payload = {"contract_id": contract_id(state), "count": count, "office_id": office_id}
     result = await run_mutation(
         "order_cards",
@@ -1945,7 +2257,8 @@ async def check_set_cards_to_group(client: APIClient, state: dict[str, Any]) -> 
 # Создаёт или изменяет продуктовые лимиты.
 # Передаёт список LimitRequestItem, выводит envelope с ID лимитов.
 async def check_set_limit(client: APIClient, state: dict[str, Any]) -> None:
-    raw_items = ask_json("limits JSON list")
+    await ensure_reference_data(client, state, dictionaries=("ProductType", "Goods"))
+    raw_items = ask_json("limits JSON list", example=limit_item_example(state))
     items = [LimitRequestItem.model_validate(item) for item in raw_items]
     payload = {"contract_id": contract_id(state), "limits": raw_items}
     result = await run_mutation(
@@ -1961,7 +2274,8 @@ async def check_set_limit(client: APIClient, state: dict[str, Any]) -> None:
 # Создаёт или изменяет региональные лимиты.
 # Передаёт список RegionLimitRequestItem, выводит envelope с ID лимитов.
 async def check_set_region_limit(client: APIClient, state: dict[str, Any]) -> None:
-    raw_items = ask_json("region_limits JSON list")
+    await ensure_reference_data(client, state, dictionaries=("Country", "Region"), need_azs=True)
+    raw_items = ask_json("region_limits JSON list", example=region_limit_item_example(state))
     items = [RegionLimitRequestItem.model_validate(item) for item in raw_items]
     payload = {"contract_id": contract_id(state), "region_limits": raw_items}
     result = await run_mutation(
@@ -1980,7 +2294,8 @@ async def check_set_region_limit(client: APIClient, state: dict[str, Any]) -> No
 # Создаёт или изменяет товарные ограничители.
 # Передаёт список RestrictionRequestItem, выводит envelope с ID ограничителей.
 async def check_set_restriction(client: APIClient, state: dict[str, Any]) -> None:
-    raw_items = ask_json("restrictions JSON list")
+    await ensure_reference_data(client, state, dictionaries=("ProductType", "Goods"))
+    raw_items = ask_json("restrictions JSON list", example=restriction_item_example(state))
     items = [RestrictionRequestItem.model_validate(item) for item in raw_items]
     payload = {"contract_id": contract_id(state), "restrictions": raw_items}
     result = await run_mutation(
@@ -2066,9 +2381,10 @@ async def check_update_template_georestriction(client: APIClient, state: dict[st
 # Изменяет лимит шаблона.
 # Передаёт template_id, limit_id и limits JSON, выводит envelope результата.
 async def check_update_template_limit(client: APIClient, state: dict[str, Any]) -> None:
+    await ensure_reference_data(client, state, dictionaries=("ProductType", "Goods"))
     template_id = ask_value("template_id", default=saved(CURRENT_STATE, "template_id"))
     limit_id = ask_value("limit_id", default=saved(CURRENT_STATE, "limit_id"))
-    limits = ask_json("limits JSON list")
+    limits = ask_json("limits JSON list", example=limit_item_example(state))
     use_post = ask_bool("use_post method override", default=True)
     payload = {"template_id": template_id, "limit_id": limit_id, "limits": limits, "use_post": use_post}
     result = await run_mutation(
@@ -2090,9 +2406,17 @@ async def check_update_template_limit(client: APIClient, state: dict[str, Any]) 
 # Изменяет товарное ограничение шаблона.
 # Передаёт template_id, restriction_id и payload JSON, выводит envelope результата.
 async def check_update_template_restriction(client: APIClient, state: dict[str, Any]) -> None:
+    await ensure_reference_data(client, state, dictionaries=("ProductType", "Goods"))
     template_id = ask_value("template_id", default=saved(CURRENT_STATE, "template_id"))
     restriction_id = ask_value("restriction_id", default=saved(CURRENT_STATE, "restriction_id"))
-    payload_data = ask_json("TemplateRestrictionCreateRequest JSON object")
+    product_type = reference_value(state, "product_type") or reference_value(state, "goods_code") or "1-276PF01"
+    payload_data = ask_json(
+        "TemplateRestrictionCreateRequest JSON object",
+        example=json.dumps(
+            {"product_type": product_type, "restriction_type": 2},
+            ensure_ascii=False,
+        ),
+    )
     use_post = ask_bool("use_post method override", default=True)
     payload = {
         "template_id": template_id,
@@ -2249,7 +2573,7 @@ async def main() -> None:
                     print(color(f"\n{method_name}: SKIPPED - {exc}", Color.YELLOW))
                     results.append((method_name, "SKIPPED"))
                 except Exception as exc:
-                    print(color(f"\n{method_name}: ERROR - {type(exc).__name__}: {exc}", Color.RED))
+                    print(color(f"\n{method_name}: ERROR - {compact_error(exc)}", Color.RED))
                     results.append((method_name, "ERROR"))
                 else:
                     results.append((method_name, "OK"))
