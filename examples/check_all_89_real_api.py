@@ -301,10 +301,8 @@ def known_values_text() -> str:
 
 
 def print_request(method_name: str, description: str, payload: dict[str, Any]) -> None:
-    print_header(method_name)
-    print(color("Что делает:", Color.BOLD), description)
-    print(color("Путь клиента:", Color.BOLD), color(find_service_path(method_name), Color.MAGENTA))
-    print(color("Автоданные:", Color.BOLD), color(known_values_text(), Color.DIM))
+    del description
+    print(color(f"\n{method_name}: входные данные готовы", Color.BOLD + Color.BLUE))
     print(color("Будет передано в API:", Color.BOLD))
     print(color(json.dumps(payload, ensure_ascii=False, indent=2, default=str), Color.YELLOW))
 
