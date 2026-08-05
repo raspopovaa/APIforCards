@@ -54,7 +54,7 @@ class TransactionsService(_BaseService):
     async def get_transactions_v1(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         card_id: str | None = None,
         count: int = 20,
         api_version: str | None = None,
@@ -63,7 +63,7 @@ class TransactionsService(_BaseService):
         reverse: bool = False,
     ) -> TransactionsV1Response:
         """Return the latest v1 transactions for a contract and optional card."""
-        cid = require_identifier(contract_id, "contract_id")
+        cid = await self._resolve_contract_id(contract_id)
         validate_positive_count(count)
         params = {"contract_id": cid, "count": count}
         if card_id is not None:
@@ -85,7 +85,7 @@ class TransactionsService(_BaseService):
     async def iter_transactions_v2(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         date_from: str,
         date_to: str,
         page_limit: int = 100,
@@ -114,7 +114,7 @@ class TransactionsService(_BaseService):
     async def get_transactions_v2(
         self,
         *,
-        contract_id: str,
+        contract_id: str | None = None,
         date_from: str,
         date_to: str,
         page_limit: int = 100,
@@ -131,9 +131,9 @@ class TransactionsService(_BaseService):
             последовательно проходя страницы результата.
 
         Пример:
-            ``await client.transactions.get_transactions_v2(contract_id="id", date_from="2026-07-01", date_to="2026-07-31")``
+            ``await client.transactions.get_transactions_v2(date_from="2026-07-01", date_to="2026-07-31")``
         """
-        cid = require_identifier(contract_id, "contract_id")
+        cid = await self._resolve_contract_id(contract_id)
         utils.validate_month_span(date_from, date_to)
         validate_offset_pagination(page_limit, page_offset)
         response = await self._request(

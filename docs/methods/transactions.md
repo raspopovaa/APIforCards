@@ -122,7 +122,7 @@ print(result)
 
 | Параметр | Python-тип | Обязательный | Значение по умолчанию | Описание |
 |---|---|:---:|---|---|
-| `contract_id` | `str` | Да | — | Идентификатор договора |
+| `contract_id` | `str \| None` | Нет | `None` | Идентификатор договора. Если не передан, используется выбранный договор сессии. |
 | `card_id` | `str | None` | Нет | `None` | Идентификатор карты (опционально) |
 | `count` | `int` | Нет | `20` | Количество транзакций (по умолчанию 20) |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
@@ -154,7 +154,6 @@ print(result)
 
 ```python
 result = await client.transactions.get_transactions_v1(
-    contract_id="contract-id",
     count=20,
     reverse=False,
 )
@@ -179,7 +178,7 @@ print(result)
 | `date_from` | `str` | Да | — | Начало периода (YYYY-MM-DD) |
 | `date_to` | `str` | Да | — | Конец периода (YYYY-MM-DD) |
 | `page_limit` | `int` | Нет | `100` | Количество записей на странице |
-| `page_offset` | `int` | Нет | `0` | Смещение страницы Типовой сценарий: Загрузить страницу транзакций за период не более одного месяца, затем при необходимости применить локальную фильтрацию и сортировку. Пример вызова: ```python transactions = await client.transactions.get_transactions_v2( contract_id="contract-id", date_from="2026-01-01", date_to="2026-01-31", page_limit=100, page_offset=0, sort_by="date", reverse=True, ) ``` Пример query-параметров: ```json { "contract_id": "contract-id", "date_from": "2026-01-01", "date_to": "2026-01-31", "page_limit": 100, "page_offset": 0 } ``` |
+| `page_offset` | `int` | Нет | `0` | Смещение страницы Типовой сценарий: Загрузить страницу транзакций за период не более одного месяца, затем при необходимости применить локальную фильтрацию и сортировку. Пример вызова: ```python transactions = await client.transactions.get_transactions_v2( date_from="2026-01-01", date_to="2026-01-31", page_limit=100, page_offset=0, sort_by="date", reverse=True, ) ``` Пример query-параметров после выбора договора: ```json { "contract_id": "<selected-contract-id>", "date_from": "2026-01-01", "date_to": "2026-01-31", "page_limit": 100, "page_offset": 0 } ``` |
 | `api_version` | `str | None` | Нет | `None` | Версия API. Обычно определяется SDK автоматически. |
 | `filter_fn` | `Callable[[<class 'api_client_opti24.models.transactions.TransactionItemV2'>], bool] | None` | Нет | `None` | Параметр публичного метода SDK. |
 | `sort_by` | `str | None` | Нет | `None` | Параметр публичного метода SDK. |
@@ -209,7 +208,6 @@ print(result)
 
 ```python
 result = await client.transactions.get_transactions_v2(
-    contract_id="contract-id",
     date_from="date-from",
     date_to="date-to",
     page_limit=100,

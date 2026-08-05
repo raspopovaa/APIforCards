@@ -28,15 +28,14 @@ auth = await client.auth.auth_user()
 cards = await client.cards.get_cards_v2(page=1, onpage=20)
 reports = await client.reports.get_reports()
 transactions = await client.transactions.get_transactions_v2(
-    contract_id="contract-id",
     date_from="2026-07-01",
     date_to="2026-07-31",
 )
 ```
 
-Пример предполагает единственный договор или ранее известный выбор. При первом
-подключении с несколькими договорами обработайте `ContractSelectionError`, выберите
-ID из `available_contracts` и повторите `auth_user(contract_id=...)` — полный пример
+Пример предполагает выбранный договор. При первом подключении с несколькими
+договорами обработайте `ContractSelectionError`, выберите ID из
+`available_contracts` и повторите `auth_user(contract_id=...)` — полный пример
 приведён в [типовых сценариях](scenarios.md).
 
 Прямых методов вида `client.get_cards_v2()` нет. Каждый метод находится в

@@ -86,3 +86,58 @@ async def test_invalid_service_input_never_reaches_executor(
         await getattr(service, method_name)(**kwargs)
 
     assert executor.calls == []
+
+
+@pytest.mark.asyncio
+async def test_transactions_v2_uses_selected_contract_when_contract_id_omitted() -> None:
+    executor = RecordingRequestExecutor(
+        {
+            "get_transactions_v2": {
+                "status": {"code": 200, "message": "OK"},
+                "data": {"total_count": 0, "result": []},
+            }
+        }
+    )
+    session = SessionManager()
+    session.restore(session_id="session-1", contract_id="selected-contract")
+    service = TransactionsService(
+        executor,
+        session,
+        StubSessionGate(),
+        logging.getLogger("service-validation-test"),
+    )
+
+    await service.get_transactions_v2(
+        date_from="2026-01-01",
+        date_to="2026-01-31",
+    )
+
+    assert executor.calls[0][1]["params"]["contract_id"] == "selected-contract"
+
+
+@pytest.mark.asyncio
+async def test_transactions_v2_explicit_contract_overrides_selected_contract() -> None:
+    executor = RecordingRequestExecutor(
+        {
+            "get_transactions_v2": {
+                "status": {"code": 200, "message": "OK"},
+                "data": {"total_count": 0, "result": []},
+            }
+        }
+    )
+    session = SessionManager()
+    session.restore(session_id="session-1", contract_id="selected-contract")
+    service = TransactionsService(
+        executor,
+        session,
+        StubSessionGate(),
+        logging.getLogger("service-validation-test"),
+    )
+
+    await service.get_transactions_v2(
+        contract_id="explicit-contract",
+        date_from="2026-01-01",
+        date_to="2026-01-31",
+    )
+
+    assert executor.calls[0][1]["params"]["contract_id"] == "explicit-contract"

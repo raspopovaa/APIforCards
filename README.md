@@ -127,7 +127,6 @@ if __name__ == "__main__":
 await client.auth.get_info()
 await client.cards.get_cards_v2(page=1, onpage=20)
 await client.transactions.get_transactions_v2(
-    contract_id="contract-id",
     date_from="2026-07-01",
     date_to="2026-07-31",
 )
