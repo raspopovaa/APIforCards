@@ -669,6 +669,11 @@ def active_station_with_price(stations: list[dict[str, Any]]) -> tuple[dict[str,
     return random.choice(candidates) if candidates else None
 
 
+def store_reference_if_found(refs: dict[str, Any], key: str, value: Any) -> None:
+    if value not in (None, "", []):
+        refs[key] = value
+
+
 def reference_store(state: dict[str, Any]) -> dict[str, Any]:
     return state.setdefault("reference_data", {})
 
@@ -711,22 +716,33 @@ async def ensure_reference_data(
             response = await client.dictionaries.get_azs_list_v2()
             stations = response_result_items(response)
             station_with_price = active_station_with_price(stations)
+            if not station_with_price:
+                response = await client.dictionaries.get_azs_list_v1(page=1, onpage=50)
+                stations = response_result_items(response)
+                station_with_price = active_station_with_price(stations)
             if station_with_price:
                 station, price = station_with_price
-                refs["poi_id"] = pick_value([station], "id", "siebel_id")
-                refs["goods_code"] = pick_value([price], "GoodsCode", "code", "ID")
-                refs["goods_price"] = price_value(price)
+                store_reference_if_found(refs, "poi_id", pick_value([station], "id", "siebel_id"))
+                store_reference_if_found(refs, "goods_code", pick_value([price], "GoodsCode", "code", "ID"))
+                store_reference_if_found(refs, "goods_price", price_value(price))
                 refs["country"] = refs.get("country") or pick_value([station], "country_code", "countryCode")
                 refs["region"] = refs.get("region") or pick_value([station], "region_code", "regionCode")
-            print(
-                color(
-                    "АЗС: подобраны "
-                    f"poi_id={refs.get('poi_id')}, "
-                    f"goods_code={refs.get('goods_code')}, "
-                    f"goods_price={refs.get('goods_price')}",
-                    Color.DIM,
+                print(
+                    color(
+                        "АЗС: подобраны "
+                        f"poi_id={refs.get('poi_id')}, "
+                        f"goods_code={refs.get('goods_code')}, "
+                        f"goods_price={refs.get('goods_price')}",
+                        Color.DIM,
+                    )
                 )
-            )
+            else:
+                print(
+                    color(
+                        "АЗС: не найдено точки с ценами, poi_id нужно ввести вручную",
+                        Color.YELLOW,
+                    )
+                )
         except Exception as exc:
             print(color(f"АЗС: не удалось подобрать значения ({type(exc).__name__}: {exc})", Color.YELLOW))
 
@@ -2457,6 +2473,10 @@ async def check_verify_pin(client: APIClient, state: dict[str, Any]) -> None:
 CHECKS: list[tuple[str, Check]] = [
     ("auth_user", check_auth_user),
     ("get_info", check_get_info),
+    ("get_azs_filters", check_get_azs_filters),
+    ("get_azs_list_v1", check_get_azs_list_v1),
+    ("get_azs_list_v2", check_get_azs_list_v2),
+    ("get_dictionary", check_get_dictionary),
     ("get_cards_v2", check_get_cards_v2),
     ("attach_card", check_attach_card),
     ("attach_contracts", check_attach_contracts),
@@ -2482,9 +2502,6 @@ CHECKS: list[tuple[str, Check]] = [
     ("download_report_file", check_download_report_file),
     ("download_report_file_v1", check_download_report_file_v1),
     ("generate_payment_qr", check_generate_payment_qr),
-    ("get_azs_filters", check_get_azs_filters),
-    ("get_azs_list_v1", check_get_azs_list_v1),
-    ("get_azs_list_v2", check_get_azs_list_v2),
     ("get_card_detail", check_get_card_detail),
     ("get_card_drivers", check_get_card_drivers),
     ("get_card_groups", check_get_card_groups),
@@ -2492,7 +2509,6 @@ CHECKS: list[tuple[str, Check]] = [
     ("get_cards_by_group", check_get_cards_by_group),
     ("get_cards_v1", check_get_cards_v1),
     ("get_contract_data", check_get_contract_data),
-    ("get_dictionary", check_get_dictionary),
     ("get_documents", check_get_documents),
     ("get_final_prices", check_get_final_prices),
     ("get_invites", check_get_invites),
