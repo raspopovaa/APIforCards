@@ -63,6 +63,7 @@ class BaseModel(ResponseModel):
 
 class ResponseStatus(ResponseModel):
     code: int = Field(..., description="Код выполнения API-операции")
+    message: str | None = Field(None, description="Текст статуса API-операции")
 
 
 class APIEnvelope(ResponseModel, Generic[DataT]):

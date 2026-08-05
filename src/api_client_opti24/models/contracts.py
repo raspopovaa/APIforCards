@@ -88,7 +88,7 @@ class ContractResponse(BaseModel):
     """Полный ответ API по договору"""
 
     mpc: bool = Field(..., description="Разрешен ли выпуск виртуальных карт")
-    template_id: str = Field(..., description="ID шаблона виртуальных карт")
+    template_id: str | None = Field(None, description="ID шаблона виртуальных карт")
     status: str = Field(..., description="Статус Way4")
     status_crm: str = Field(..., description="Статус CRM")
     payment_term_id: str | None = Field(None, description="ID справочника условия оплаты")
