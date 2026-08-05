@@ -69,6 +69,7 @@ from pathlib import Path
 from api_client_opti24 import (
     APIClient,
     ConnectionSettings,
+    ContractSelectionError,
     EnvironmentCredentialsProvider,
 )
 
@@ -82,7 +83,15 @@ async def main() -> None:
         settings=settings,
         credentials_provider=credentials,
     ) as client:
-        auth = await client.auth.auth_user()
+        try:
+            auth = await client.auth.auth_user()
+        except ContractSelectionError as exc:
+            print("Доступные договоры:")
+            for contract_id, contract_number in exc.available_contracts:
+                print(contract_id, contract_number)
+            contract_id = input("Введите ID договора: ").strip()
+            auth = await client.auth.auth_user(contract_id=contract_id)
+
         try:
             cards = await client.cards.get_cards_v2(page=1, onpage=5)
             print("Договоров:", len(auth.data.contracts))
@@ -94,6 +103,11 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
+При первом подключении знать `contract_id` не требуется. Единственный договор
+выбирается автоматически. Если договоров несколько, первая авторизация возвращает
+`ContractSelectionError.available_contracts`; после выбора повторите авторизацию с
+`contract_id`. SDK намеренно не выбирает первый договор без подтверждения.
 
 !!! warning "Доступ к стенду"
     Пример выполняет реальные сетевые запросы. Если API принимает запросы только

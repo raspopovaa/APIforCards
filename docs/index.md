@@ -34,6 +34,11 @@ transactions = await client.transactions.get_transactions_v2(
 )
 ```
 
+Пример предполагает единственный договор или ранее известный выбор. При первом
+подключении с несколькими договорами обработайте `ContractSelectionError`, выберите
+ID из `available_contracts` и повторите `auth_user(contract_id=...)` — полный пример
+приведён в [типовых сценариях](scenarios.md).
+
 Прямых методов вида `client.get_cards_v2()` нет. Каждый метод находится в
 своём доменном пространстве: `client.cards`, `client.reports`, `client.users` и
 других.

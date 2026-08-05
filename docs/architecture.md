@@ -79,6 +79,10 @@ jobs = await client.reports.get_report_jobs()
 users = await client.users.get_users()
 ```
 
+Здесь предполагается единственный договор. Если авторизация возвращает несколько
+договоров, вызывающий код явно выбирает один из `ContractSelectionError.available_contracts`
+и повторяет `auth_user(contract_id=...)`.
+
 Каждый доменный метод объявлен непосредственно в конкретном сервисе. В SDK нет
 доменных mixin-классов и прямых методов вида `client.get_cards_v2()`.
 `AuthService` создаётся отдельно в composition root и делегирует работу с

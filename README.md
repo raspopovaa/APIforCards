@@ -79,6 +79,7 @@ from pathlib import Path
 from api_client_opti24 import (
     APIClient,
     ConnectionSettings,
+    ContractSelectionError,
     EnvironmentCredentialsProvider,
 )
 
@@ -92,7 +93,15 @@ async def main() -> None:
         settings=settings,
         credentials_provider=credentials,
     ) as client:
-        auth = await client.auth.auth_user()
+        try:
+            auth = await client.auth.auth_user()
+        except ContractSelectionError as exc:
+            print("Доступные договоры:")
+            for contract_id, contract_number in exc.available_contracts:
+                print(contract_id, contract_number)
+            contract_id = input("Введите ID договора: ").strip()
+            auth = await client.auth.auth_user(contract_id=contract_id)
+
         try:
             cards = await client.cards.get_cards_v2(page=1, onpage=5)
             print("Договоров:", len(auth.data.contracts))
@@ -106,7 +115,9 @@ if __name__ == "__main__":
 ```
 
 Пример выполняет реальные сетевые запросы. Корректные credentials не отменяют
-сетевые и географические ограничения API.
+сетевые и географические ограничения API. Единственный договор выбирается
+автоматически. Если договоров несколько, SDK не выбирает первый без подтверждения:
+пример выводит доступные договоры и повторяет авторизацию с выбранным ID.
 
 ## Использование
 

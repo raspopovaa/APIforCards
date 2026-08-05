@@ -64,9 +64,13 @@ try:
 except ContractSelectionError as exc:
     for contract_id, contract_number in exc.available_contracts:
         print(contract_id, contract_number)
+    selected_contract_id = input("Введите ID договора: ").strip()
+    await client.auth.auth_user(contract_id=selected_contract_id)
 ```
 
 Не передавайте `available_contracts` во внешнюю telemetry без необходимости.
+Первый вызов нужен для обнаружения договоров. При нескольких договорах повторная
+авторизация с выбранным `contract_id` создаёт рабочий контекст сессии.
 
 ## Обработка ошибки API
 

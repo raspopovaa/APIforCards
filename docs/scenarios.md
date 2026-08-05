@@ -7,18 +7,28 @@
 ## Авторизация и получение карт
 
 ```python
-await client.auth.auth_user(contract_number="TEST-001")
+from api_client_opti24 import ContractSelectionError
+
+try:
+    await client.auth.auth_user()
+except ContractSelectionError as exc:
+    for contract_id, contract_number in exc.available_contracts:
+        print(contract_id, contract_number)
+    selected_contract_id = input("Введите ID договора: ").strip()
+    await client.auth.auth_user(contract_id=selected_contract_id)
 
 cards = await client.cards.get_cards_v2(
-    contract_id=client.contract_id,
     status="Active",
     page=1,
     onpage=20,
 )
 ```
 
-Единственный договор выбирается автоматически. При нескольких договорах передайте
-`contract_id` или `contract_number`; SDK не выбирает первый договор по порядку.
+При первом подключении заранее знать договор не нужно. Единственный договор
+выбирается автоматически. При нескольких договорах выберите ID из
+`ContractSelectionError.available_contracts` и повторите авторизацию; SDK не
+выбирает первый договор по порядку. После выбора contract-bound методы используют
+договор из сессии, поэтому повторно передавать `contract_id` не требуется.
 Session ID SDK хранит самостоятельно. Не выводите его в терминал и не передавайте
 в telemetry.
 
