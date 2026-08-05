@@ -1785,6 +1785,9 @@ URL, path-параметры и payload в него не попадают. Вн�
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">jobs</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">get_report_jobs</span><span class="p">()</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">users</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">get_users</span><span class="p">()</span>
 </code></pre></div>
+<p>Здесь предполагается единственный договор. Если авторизация возвращает несколько
+договоров, вызывающий код явно выбирает один из <code>ContractSelectionError.available_contracts</code>
+и повторяет <code>auth_user(contract_id=...)</code>.</p>
 <p>Каждый доменный метод объявлен непосредственно в конкретном сервисе. В SDK нет
 доменных mixin-классов и прямых методов вида <code>client.get_cards_v2()</code>.
 <code>AuthService</code> создаётся отдельно в composition root и делегирует работу с

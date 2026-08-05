@@ -1704,6 +1704,10 @@
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">date_to</span><span class="o">=</span><span class="s2">&quot;2026-07-31&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
 </code></pre></div>
+<p>Пример предполагает единственный договор или ранее известный выбор. При первом
+подключении с несколькими договорами обработайте <code>ContractSelectionError</code>, выберите
+ID из <code>available_contracts</code> и повторите <code>auth_user(contract_id=...)</code> — полный пример
+приведён в <a href="scenarios/">типовых сценариях</a>.</p>
 <p>Прямых методов вида <code>client.get_cards_v2()</code> нет. Каждый метод находится в
 своём доменном пространстве: <code>client.cards</code>, <code>client.reports</code>, <code>client.users</code> и
 других.</p>
